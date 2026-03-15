@@ -1,0 +1,142 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/features/onboarding/presentation/widgets/onboarding_slide.dart';
+import 'package:votera/features/onboarding/presentation/widgets/page_indicator.dart';
+import 'package:votera/shared/widgets/gradient_button.dart';
+
+/// Three-slide onboarding that introduces the app to first-time users.
+/// Auto-advances optional; manual swipe and skip are always available.
+class OnboardingPage extends StatefulWidget {
+  const OnboardingPage({super.key});
+
+  @override
+  State<OnboardingPage> createState() => _OnboardingPageState();
+}
+
+class _OnboardingPageState extends State<OnboardingPage> {
+  final _pageController = PageController();
+  int _currentPage = 0;
+
+  static const _slides = [
+    OnboardingData(
+      icon: Icons.how_to_vote,
+      title: 'Discover Projects',
+      description:
+          'Browse innovative software projects created by university students.',
+    ),
+    OnboardingData(
+      icon: Icons.star_rounded,
+      title: 'Rate & Vote',
+      description:
+          'Vote for your favorite projects and help choose the winners.',
+    ),
+    OnboardingData(
+      icon: Icons.emoji_events,
+      title: 'Celebrate Winners',
+      description:
+          'See trending projects and celebrate the top-voted creations.',
+    ),
+  ];
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _goToAuth() => context.go('/auth');
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildSkipButton(),
+            Expanded(child: _buildPageView()),
+            _buildBottomSection(),
+            const SizedBox(height: AppSpacing.xl),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // -- Section: Skip button --
+  Widget _buildSkipButton() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: TextButton(
+          onPressed: _goToAuth,
+          child: Text(
+            'Skip',
+            style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // -- Section: Swipable slides --
+  Widget _buildPageView() {
+    return PageView.builder(
+      controller: _pageController,
+      itemCount: _slides.length,
+      onPageChanged: (index) => setState(() => _currentPage = index),
+      itemBuilder: (context, index) {
+        return OnboardingSlide(data: _slides[index]);
+      },
+    );
+  }
+
+  // -- Section: Indicator + action button --
+  Widget _buildBottomSection() {
+    final isLastPage = _currentPage == _slides.length - 1;
+
+    return Padding(
+      padding: AppSpacing.pagePadding,
+      child: Column(
+        children: [
+          PageIndicator(
+            count: _slides.length,
+            currentIndex: _currentPage,
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          GradientButton(
+            text: isLastPage ? 'Get Started' : 'Next',
+            onPressed: () {
+              if (isLastPage) {
+                _goToAuth();
+              } else {
+                unawaited(
+                  _pageController.nextPage(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeInOut,
+                  ),
+                );
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Simple data holder for each onboarding slide.
+class OnboardingData {
+  const OnboardingData({
+    required this.icon,
+    required this.title,
+    required this.description,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+}
