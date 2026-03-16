@@ -3,11 +3,16 @@ import 'package:votera/core/design_system/design_system.dart';
 
 /// Horizontal scrollable section showing the top trending projects.
 /// Each card has a gradient overlay with the project name and vote count.
+/// Cards scale up on wider screens for better visual balance.
 class TrendingSection extends StatelessWidget {
   const TrendingSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = AppBreakpoints.isMobile(context);
+    final cardHeight = isMobile ? 180.0 : 220.0;
+    final cardWidth = isMobile ? 260.0 : 300.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -17,13 +22,16 @@ class TrendingSection extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         SizedBox(
-          height: 180,
+          height: cardHeight,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: AppSpacing.pagePadding,
             itemCount: 5,
             separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.md),
-            itemBuilder: (_, index) => _TrendingCard(index: index),
+            itemBuilder: (_, index) => _TrendingCard(
+              index: index,
+              cardWidth: cardWidth,
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -55,9 +63,10 @@ class TrendingSection extends StatelessWidget {
 }
 
 class _TrendingCard extends StatelessWidget {
-  const _TrendingCard({required this.index});
+  const _TrendingCard({required this.index, required this.cardWidth});
 
   final int index;
+  final double cardWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +80,7 @@ class _TrendingCard extends StatelessWidget {
     ];
 
     return Container(
-      width: 260,
+      width: cardWidth,
       decoration: BoxDecoration(
         gradient: AppColors.primaryGradient,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),

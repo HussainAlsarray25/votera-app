@@ -9,6 +9,7 @@ import 'package:votera/shared/widgets/gradient_button.dart';
 
 /// Three-slide onboarding that introduces the app to first-time users.
 /// Auto-advances optional; manual swipe and skip are always available.
+/// On tablet/desktop, renders as a centered card.
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
 
@@ -51,17 +52,41 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildSkipButton(),
-            Expanded(child: _buildPageView()),
-            _buildBottomSection(),
-            const SizedBox(height: AppSpacing.xl),
-          ],
+    final content = Column(
+      children: [
+        _buildSkipButton(),
+        Expanded(child: _buildPageView()),
+        _buildBottomSection(),
+        const SizedBox(height: AppSpacing.xl),
+      ],
+    );
+
+    // On wider screens, show the onboarding as a centered card
+    if (!AppBreakpoints.isMobile(context)) {
+      return Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 560,
+                maxHeight: 700,
+              ),
+              child: Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: content,
+              ),
+            ),
+          ),
         ),
-      ),
+      );
+    }
+
+    return Scaffold(
+      body: SafeArea(child: content),
     );
   }
 

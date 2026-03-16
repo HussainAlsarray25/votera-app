@@ -12,18 +12,21 @@ class UserInfoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: AppSpacing.pagePadding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: AppSpacing.xl),
-              _buildHeader(),
-              const SizedBox(height: AppSpacing.xl),
-              const RoleSelectorSection(),
-              const SizedBox(height: AppSpacing.lg),
-              const UserInfoFormSection(),
-            ],
+        child: CenteredContent(
+          maxWidth: AppBreakpoints.formPanelMax,
+          child: SingleChildScrollView(
+            padding: AppSpacing.pagePadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: AppSpacing.xl),
+                _buildHeader(),
+                const SizedBox(height: AppSpacing.xl),
+                const RoleSelectorSection(),
+                const SizedBox(height: AppSpacing.lg),
+                const UserInfoFormSection(),
+              ],
+            ),
           ),
         ),
       ),

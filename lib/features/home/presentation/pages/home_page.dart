@@ -16,21 +16,25 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            const SliverToBoxAdapter(child: HomeHeaderSection()),
-            const SliverToBoxAdapter(child: SearchBarSection()),
-            const SliverToBoxAdapter(child: TrendingSection()),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: AppSpacing.pagePadding,
-                child: Text('All Projects', style: AppTypography.h3),
+        child: CenteredContent(
+          child: CustomScrollView(
+            slivers: [
+              const SliverToBoxAdapter(child: HomeHeaderSection()),
+              const SliverToBoxAdapter(child: SearchBarSection()),
+              const SliverToBoxAdapter(child: TrendingSection()),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: AppSpacing.pagePadding,
+                  child: Text('All Projects', style: AppTypography.h3),
+                ),
               ),
-            ),
-            const ProjectListSection(),
-            // Bottom padding so the last card isn't hidden by the nav bar
-            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
-          ],
+              const ProjectListSection(),
+              // Bottom padding so the last card isn't hidden by the nav bar
+              const SliverToBoxAdapter(
+                child: SizedBox(height: AppSpacing.xxl),
+              ),
+            ],
+          ),
         ),
       ),
     );

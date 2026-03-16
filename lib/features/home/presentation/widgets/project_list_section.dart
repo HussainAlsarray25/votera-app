@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/shared/widgets/project_card.dart';
 
-/// A sliver list of project cards. Each card is interactive and
-/// navigates to the project detail page on tap.
+/// A sliver list/grid of project cards. Uses a single-column list on
+/// mobile and switches to a multi-column grid on tablet/desktop.
 class ProjectListSection extends StatelessWidget {
   const ProjectListSection({super.key});
 
@@ -11,29 +11,49 @@ class ProjectListSection extends StatelessWidget {
   Widget build(BuildContext context) {
     // Static demo data -- will be replaced by Cubit state
     final projects = List.generate(6, _DemoProject.at);
+    final columns = AppBreakpoints.projectGridColumns(context);
+
+    if (columns > 1) {
+      return SliverPadding(
+        padding: AppSpacing.pagePadding,
+        sliver: SliverGrid(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columns,
+            mainAxisExtent: 300,
+            crossAxisSpacing: AppSpacing.md,
+            mainAxisSpacing: AppSpacing.md,
+          ),
+          delegate: SliverChildBuilderDelegate(
+            (context, index) => _buildCard(projects[index]),
+            childCount: projects.length,
+          ),
+        ),
+      );
+    }
 
     return SliverPadding(
       padding: AppSpacing.pagePadding,
       sliver: SliverList.separated(
         itemCount: projects.length,
         separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-        itemBuilder: (context, index) {
-          final p = projects[index];
-          return ProjectCard(
-            title: p.title,
-            authorName: p.author,
-            imageUrl: p.imageUrl,
-            rating: p.rating,
-            voteCount: p.votes,
-            isVerifiedAuthor: p.isVerified,
-            isTrending: p.isTrending,
-            isWinner: p.isWinner,
-            onTap: () {
-              // Navigate to project details
-            },
-          );
-        },
+        itemBuilder: (context, index) => _buildCard(projects[index]),
       ),
+    );
+  }
+
+  Widget _buildCard(_DemoProject p) {
+    return ProjectCard(
+      title: p.title,
+      authorName: p.author,
+      imageUrl: p.imageUrl,
+      rating: p.rating,
+      voteCount: p.votes,
+      isVerifiedAuthor: p.isVerified,
+      isTrending: p.isTrending,
+      isWinner: p.isWinner,
+      onTap: () {
+        // Navigate to project details
+      },
     );
   }
 }

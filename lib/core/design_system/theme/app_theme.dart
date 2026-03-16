@@ -87,6 +87,16 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),
+      navigationRailTheme: const NavigationRailThemeData(
+        backgroundColor: AppColors.surface,
+        selectedIconTheme: IconThemeData(color: AppColors.primary),
+        unselectedIconTheme: IconThemeData(color: AppColors.textHint),
+        selectedLabelTextStyle: TextStyle(
+          color: AppColors.primary,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelTextStyle: TextStyle(color: AppColors.textHint),
+      ),
     );
   }
 }

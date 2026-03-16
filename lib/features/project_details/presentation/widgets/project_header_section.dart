@@ -3,14 +3,16 @@ import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 
 /// Collapsible app bar with the project image, back button,
-/// and share action.
+/// and share action. Height scales up on wider screens.
 class ProjectHeaderSection extends StatelessWidget {
   const ProjectHeaderSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final expandedHeight = AppBreakpoints.isMobile(context) ? 260.0 : 360.0;
+
     return SliverAppBar(
-      expandedHeight: 260,
+      expandedHeight: expandedHeight,
       pinned: true,
       backgroundColor: AppColors.surface,
       leading: _buildBackButton(context),

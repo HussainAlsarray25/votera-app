@@ -8,37 +8,47 @@ import 'package:votera/shared/widgets/vote_button.dart';
 
 /// Full details screen for a single project.
 /// Shows the image, author info, rating, description, and comments.
+/// On desktop, constrains content width and places the vote button inline.
 class ProjectDetailsPage extends StatelessWidget {
   const ProjectDetailsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isWide = !AppBreakpoints.isMobile(context);
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        slivers: [
-          const ProjectHeaderSection(),
-          SliverToBoxAdapter(child: _buildBody()),
-        ],
+      body: CenteredContent(
+        maxWidth: 900,
+        child: CustomScrollView(
+          slivers: [
+            const ProjectHeaderSection(),
+            SliverToBoxAdapter(child: _buildBody(showInlineVote: isWide)),
+          ],
+        ),
       ),
-      // Floating vote button pinned at the bottom
-      bottomNavigationBar: _buildBottomBar(),
+      // Only show the floating bottom bar on mobile
+      bottomNavigationBar: isWide ? null : _buildBottomBar(),
     );
   }
 
-  Widget _buildBody() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+  Widget _buildBody({required bool showInlineVote}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: AppSpacing.md),
-          ProjectInfoSection(),
-          SizedBox(height: AppSpacing.lg),
-          ProjectRatingSection(),
-          SizedBox(height: AppSpacing.lg),
-          ProjectCommentsSection(),
-          SizedBox(height: 100), // space for bottom bar
+          const SizedBox(height: AppSpacing.md),
+          const ProjectInfoSection(),
+          const SizedBox(height: AppSpacing.lg),
+          const ProjectRatingSection(),
+          if (showInlineVote) ...[
+            const SizedBox(height: AppSpacing.lg),
+            VoteButton(voteCount: 48, onVote: () {}),
+          ],
+          const SizedBox(height: AppSpacing.lg),
+          const ProjectCommentsSection(),
+          const SizedBox(height: 100),
         ],
       ),
     );

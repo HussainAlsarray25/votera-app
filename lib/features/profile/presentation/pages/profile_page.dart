@@ -7,11 +7,19 @@ import 'package:votera/features/profile/presentation/widgets/profile_voted_proje
 
 /// User profile screen showing personal info, voting stats,
 /// and a list of projects the user has voted for.
+/// On tablet/desktop, uses a two-column layout.
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    if (AppBreakpoints.isMobile(context)) {
+      return _buildMobileLayout();
+    }
+    return _buildWideLayout();
+  }
+
+  Widget _buildMobileLayout() {
     return const Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -27,6 +35,47 @@ class ProfilePage extends StatelessWidget {
               ProfileActionsSection(),
               SizedBox(height: AppSpacing.xxl),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWideLayout() {
+    return const Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: CenteredContent(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(AppSpacing.lg),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Left column: header + stats
+                SizedBox(
+                  width: 360,
+                  child: Column(
+                    children: [
+                      ProfileHeaderSection(),
+                      SizedBox(height: AppSpacing.lg),
+                      ProfileStatsSection(),
+                    ],
+                  ),
+                ),
+                SizedBox(width: AppSpacing.lg),
+                // Right column: voted projects + actions
+                Expanded(
+                  child: Column(
+                    children: [
+                      ProfileVotedProjectsSection(),
+                      SizedBox(height: AppSpacing.lg),
+                      ProfileActionsSection(),
+                      SizedBox(height: AppSpacing.xxl),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
