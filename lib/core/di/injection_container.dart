@@ -13,6 +13,7 @@ import 'package:votera/core/router/app_router.dart';
 import 'package:votera/features/authentication/data/services/token_service.dart';
 import 'package:votera/features/authentication/data/services/token_service_auth_provider.dart';
 import 'package:votera/features/authentication/di/auth_injection.dart';
+import 'package:votera/features/exhibitions/di/exhibitions_injection.dart';
 import 'package:votera/features/home/di/home_injection.dart';
 import 'package:votera/features/notification/di/notification_injection.dart';
 import 'package:votera/features/onboarding/di/onboarding_injection.dart';
@@ -84,6 +85,7 @@ void _initFeatures() {
   initNotificationFeature(sl);
   initOnboardingFeature(sl);
   initHomeFeature(sl);
+  initExhibitionsFeature(sl);
 }
 
 Future<void> reset() async {

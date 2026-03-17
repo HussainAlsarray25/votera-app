@@ -5,9 +5,11 @@ import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/core/domain/services/auth_token_provider.dart';
 import 'package:votera/features/authentication/presentation/pages/auth_page.dart';
 import 'package:votera/features/authentication/presentation/pages/user_info_page.dart';
-import 'package:votera/features/home/presentation/pages/home_page.dart';
+import 'package:votera/features/exhibitions/presentation/pages/exhibition_detail_page.dart';
+import 'package:votera/features/exhibitions/presentation/pages/exhibitions_page.dart';
 import 'package:votera/features/notification/presentation/pages/notification_page.dart';
 import 'package:votera/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:votera/features/profile/presentation/pages/comments_page.dart';
 import 'package:votera/features/profile/presentation/pages/profile_page.dart';
 import 'package:votera/features/project_details/presentation/pages/project_details_page.dart';
 
@@ -34,13 +36,24 @@ class AppRouter {
         routes: [
           GoRoute(
             path: '/home',
-            builder: (context, state) => const HomePage(),
+            builder: (context, state) => const ExhibitionsPage(),
           ),
           GoRoute(
             path: '/profile',
             builder: (context, state) => const ProfilePage(),
           ),
         ],
+      ),
+      GoRoute(
+        path: '/exhibition/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return ExhibitionDetailPage(exhibitionId: id);
+        },
+      ),
+      GoRoute(
+        path: '/comments',
+        builder: (context, state) => const CommentsPage(),
       ),
       GoRoute(
         path: '/notifications',

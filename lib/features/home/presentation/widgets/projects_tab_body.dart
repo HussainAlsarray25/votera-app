@@ -3,22 +3,21 @@ import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/home/presentation/demo_data.dart';
 import 'package:votera/features/home/presentation/widgets/category_filter_section.dart';
 import 'package:votera/features/home/presentation/widgets/home_banner_section.dart';
-import 'package:votera/features/home/presentation/widgets/home_header_section.dart';
 import 'package:votera/features/home/presentation/widgets/project_list_section.dart';
 import 'package:votera/features/home/presentation/widgets/search_bar_section.dart';
 import 'package:votera/features/home/presentation/widgets/trending_section.dart';
 
-/// The main screen displaying projects available for voting.
-/// Manages search query and category filter state locally.
-/// Sections are independent widgets that receive data via constructors.
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+/// Reusable body for the Projects tab.
+/// Contains search, banner, trending, category filter, and project list.
+/// Used both in the standalone HomePage and inside ExhibitionDetailPage tabs.
+class ProjectsTabBody extends StatefulWidget {
+  const ProjectsTabBody({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<ProjectsTabBody> createState() => _ProjectsTabBodyState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _ProjectsTabBodyState extends State<ProjectsTabBody> {
   final List<DemoProject> _projects = createDemoProjects();
   String _selectedCategory = 'All Projects';
   String _searchQuery = '';
@@ -52,44 +51,35 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: CenteredContent(
-          child: CustomScrollView(
-            slivers: [
-              const SliverToBoxAdapter(child: HomeHeaderSection()),
-              SliverToBoxAdapter(
-                child: SearchBarSection(
-                  onSearchChanged: (query) {
-                    setState(() => _searchQuery = query);
-                  },
-                ),
-              ),
-              const SliverToBoxAdapter(child: HomeBannerSection()),
-              SliverToBoxAdapter(
-                child: TrendingSection(
-                  projects: _trendingProjects,
-                  onVote: _handleVote,
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: CategoryFilterSection(
-                  selectedCategory: _selectedCategory,
-                  onCategorySelected: (category) {
-                    setState(() => _selectedCategory = category);
-                  },
-                ),
-              ),
-              ProjectListSection(projects: _filteredProjects),
-              // Bottom padding so the last card isn't hidden by the nav bar
-              const SliverToBoxAdapter(
-                child: SizedBox(height: AppSpacing.xxl),
-              ),
-            ],
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: SearchBarSection(
+            onSearchChanged: (query) {
+              setState(() => _searchQuery = query);
+            },
           ),
         ),
-      ),
+        const SliverToBoxAdapter(child: HomeBannerSection()),
+        SliverToBoxAdapter(
+          child: TrendingSection(
+            projects: _trendingProjects,
+            onVote: _handleVote,
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: CategoryFilterSection(
+            selectedCategory: _selectedCategory,
+            onCategorySelected: (category) {
+              setState(() => _selectedCategory = category);
+            },
+          ),
+        ),
+        ProjectListSection(projects: _filteredProjects),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: AppSpacing.xxl),
+        ),
+      ],
     );
   }
 }

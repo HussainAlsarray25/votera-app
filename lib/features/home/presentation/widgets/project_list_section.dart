@@ -1,135 +1,192 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
-import 'package:votera/shared/widgets/project_card.dart';
+import 'package:votera/features/home/presentation/demo_data.dart';
 
-/// A sliver list/grid of project cards. Uses a single-column list on
-/// mobile and switches to a multi-column grid on tablet/desktop.
+/// A sliver list of compact project items. Each item shows an emoji icon,
+/// title, description, category tag, team member avatars, and vote count.
 class ProjectListSection extends StatelessWidget {
-  const ProjectListSection({super.key});
+  const ProjectListSection({required this.projects, super.key});
+
+  final List<DemoProject> projects;
 
   @override
   Widget build(BuildContext context) {
-    // Static demo data -- will be replaced by Cubit state
-    final projects = List.generate(6, _DemoProject.at);
-    final columns = AppBreakpoints.projectGridColumns(context);
-
-    if (columns > 1) {
-      return SliverPadding(
-        padding: AppSpacing.pagePadding,
-        sliver: SliverGrid(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            mainAxisExtent: 300,
-            crossAxisSpacing: AppSpacing.md,
-            mainAxisSpacing: AppSpacing.md,
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) => _buildCard(projects[index]),
-            childCount: projects.length,
-          ),
-        ),
-      );
-    }
-
     return SliverPadding(
-      padding: AppSpacing.pagePadding,
-      sliver: SliverList.separated(
-        itemCount: projects.length,
-        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-        itemBuilder: (context, index) => _buildCard(projects[index]),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _ProjectListItem(project: projects[index]),
+            );
+          },
+          childCount: projects.length,
+        ),
       ),
-    );
-  }
-
-  Widget _buildCard(_DemoProject p) {
-    return ProjectCard(
-      title: p.title,
-      authorName: p.author,
-      imageUrl: p.imageUrl,
-      rating: p.rating,
-      voteCount: p.votes,
-      isVerifiedAuthor: p.isVerified,
-      isTrending: p.isTrending,
-      isWinner: p.isWinner,
-      onTap: () {
-        // Navigate to project details
-      },
     );
   }
 }
 
-/// Placeholder data for UI development. Remove once real data is connected.
-class _DemoProject {
-  const _DemoProject({
-    required this.title,
-    required this.author,
-    required this.imageUrl,
-    required this.rating,
-    required this.votes,
-    this.isVerified = false,
-    this.isTrending = false,
-    this.isWinner = false,
-  });
+class _ProjectListItem extends StatelessWidget {
+  const _ProjectListItem({required this.project});
 
-  factory _DemoProject.at(int index) {
-    const items = [
-      _DemoProject(
-        title: 'Smart Campus Navigator',
-        author: 'Prof. Ahmed Ali',
-        imageUrl: '',
-        rating: 5,
-        votes: 48,
-        isVerified: true,
-        isWinner: true,
+  final DemoProject project;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      _DemoProject(
-        title: 'AI Study Assistant',
-        author: 'Sara Hassan',
-        imageUrl: '',
-        rating: 4,
-        votes: 36,
-        isTrending: true,
+      child: Row(
+        children: [
+          _buildEmojiIcon(),
+          const SizedBox(width: 14),
+          Expanded(child: _buildContent()),
+        ],
       ),
-      _DemoProject(
-        title: 'EcoTrack - Carbon Footprint',
-        author: 'Omar Jamal',
-        imageUrl: '',
-        rating: 4,
-        votes: 29,
-        isTrending: true,
-      ),
-      _DemoProject(
-        title: 'MedAssist Chatbot',
-        author: 'Prof. Noor Kareem',
-        imageUrl: '',
-        rating: 3,
-        votes: 22,
-        isVerified: true,
-      ),
-      _DemoProject(
-        title: 'Virtual Lab Simulator',
-        author: 'Ali Mohammed',
-        imageUrl: '',
-        rating: 3,
-        votes: 18,
-      ),
-      _DemoProject(
-        title: 'CodeShare Platform',
-        author: 'Fatima Zain',
-        imageUrl: '',
-        rating: 4,
-        votes: 15,
-      ),
-    ];
-    return items[index % items.length];
+    );
   }
 
-  final String title;
-  final String author;
-  final String imageUrl;
-  final int rating;
-  final int votes;
-  final bool isVerified;
-  final bool isTrending;
-  final bool isWinner;
+  /// Rounded square with a soft gradient background and the project emoji
+  Widget _buildEmojiIcon() {
+    final bgColors = CategoryStyles.iconBackground(project.category);
+
+    return Container(
+      width: 52,
+      height: 52,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        gradient: LinearGradient(colors: bgColors),
+      ),
+      child: Center(
+        child: Text(project.emoji, style: const TextStyle(fontSize: 24)),
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildTitleRow(),
+        const SizedBox(height: 4),
+        Text(
+          project.description,
+          style: AppTypography.bodySmall,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        _buildFooterRow(),
+      ],
+    );
+  }
+
+  /// Title on the left, category tag on the right
+  Widget _buildTitleRow() {
+    final styles = CategoryStyles.tagStyles(project.category);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          child: Text(
+            project.title,
+            style: AppTypography.labelMedium.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+          decoration: BoxDecoration(
+            color: styles.background,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(
+            project.category,
+            style: TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
+              color: styles.text,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Overlapping member avatars and vote count
+  Widget _buildFooterRow() {
+    return Row(
+      children: [
+        _MemberAvatarStack(members: project.members),
+        const SizedBox(width: 10),
+        const Icon(
+          Icons.favorite_rounded,
+          size: 12,
+          color: AppColors.primary,
+        ),
+        const SizedBox(width: 3),
+        Text(
+          '${project.votes}',
+          style: AppTypography.bodySmall.copyWith(fontSize: 11),
+        ),
+      ],
+    );
+  }
+}
+
+/// Row of overlapping circular member avatars with gradient backgrounds.
+class _MemberAvatarStack extends StatelessWidget {
+  const _MemberAvatarStack({required this.members});
+
+  final List<DemoTeamMember> members;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: members.length * 18.0 + 4,
+      height: 22,
+      child: Stack(
+        children: List.generate(members.length, (i) {
+          return Positioned(
+            left: i * 16.0,
+            child: Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(colors: members[i].colors),
+                border: Border.all(color: Colors.white, width: 2),
+              ),
+              child: Center(
+                child: Text(
+                  members[i].initial,
+                  style: const TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
 }

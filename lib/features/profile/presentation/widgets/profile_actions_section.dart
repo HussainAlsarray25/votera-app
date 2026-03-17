@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 
 /// Settings and account actions at the bottom of the profile page.
@@ -24,9 +25,15 @@ class ProfileActionsSection extends StatelessWidget {
             ),
             const Divider(height: 1, color: AppColors.divider),
             _buildActionTile(
+              icon: Icons.chat_bubble_outline_rounded,
+              label: 'Comments',
+              onTap: () => context.push('/comments'),
+            ),
+            const Divider(height: 1, color: AppColors.divider),
+            _buildActionTile(
               icon: Icons.notifications_outlined,
               label: 'Notifications',
-              onTap: () {},
+              onTap: () => context.push('/notifications'),
             ),
             const Divider(height: 1, color: AppColors.divider),
             _buildActionTile(

@@ -48,7 +48,7 @@ class ShellPage extends StatelessWidget {
         onTap: (index) => _onTap(context, index),
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home_rounded),
             label: 'Home',
           ),
           BottomNavigationBarItem(
