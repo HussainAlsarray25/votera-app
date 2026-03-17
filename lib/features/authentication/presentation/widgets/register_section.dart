@@ -37,9 +37,9 @@ class _RegisterSectionState extends State<RegisterSection> {
       child: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: AppSpacing.xxl),
+            const SizedBox(height: AppSpacing.lg),
             _buildHeader(),
             const SizedBox(height: AppSpacing.xl),
             _buildNameField(),
@@ -60,13 +60,13 @@ class _RegisterSectionState extends State<RegisterSection> {
   // -- Section: Header --
   Widget _buildHeader() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Create Account', style: AppTypography.h1),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'Join the exhibition and start voting',
           style: AppTypography.bodyMedium,
+          textAlign: TextAlign.center,
         ),
       ],
     );
@@ -137,10 +137,10 @@ class _RegisterSectionState extends State<RegisterSection> {
   // -- Section: Switch to login link --
   Widget _buildSwitchLink() {
     return Center(
-      child: GestureDetector(
-        onTap: widget.onSwitchToLogin,
-        child: RichText(
-          text: TextSpan(
+      child: TextButton(
+        onPressed: widget.onSwitchToLogin,
+        child: Text.rich(
+          TextSpan(
             text: 'Already have an account? ',
             style: AppTypography.bodyMedium,
             children: [

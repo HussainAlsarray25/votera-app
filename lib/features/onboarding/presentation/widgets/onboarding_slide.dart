@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/onboarding/presentation/pages/onboarding_page.dart';
 
-/// A single onboarding slide with a large icon, title, and description.
-/// Icon container scales up on tablet/desktop for better visual balance.
+/// A single onboarding slide with a decorative accent line, title,
+/// and description. Minimal and text-focused for a clean aesthetic.
 class OnboardingSlide extends StatelessWidget {
   const OnboardingSlide({required this.data, super.key});
 
@@ -11,17 +11,13 @@ class OnboardingSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = AppBreakpoints.isMobile(context);
-    final containerSize = isMobile ? 120.0 : 160.0;
-    final iconSize = isMobile ? 56.0 : 72.0;
-
     return Padding(
       padding: AppSpacing.pagePadding,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildIcon(containerSize, iconSize),
-          const SizedBox(height: AppSpacing.xl),
+          _buildAccentLine(),
+          const SizedBox(height: AppSpacing.lg),
           _buildTitle(),
           const SizedBox(height: AppSpacing.md),
           _buildDescription(),
@@ -30,22 +26,25 @@ class OnboardingSlide extends StatelessWidget {
     );
   }
 
-  Widget _buildIcon(double containerSize, double iconSize) {
+  // Small gradient bar as a decorative accent above the title
+  Widget _buildAccentLine() {
     return Container(
-      width: containerSize,
-      height: containerSize,
+      width: 48,
+      height: 4,
       decoration: BoxDecoration(
         gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
       ),
-      child: Icon(data.icon, size: iconSize, color: Colors.white),
     );
   }
 
   Widget _buildTitle() {
     return Text(
       data.title,
-      style: AppTypography.h2,
+      style: AppTypography.h1.copyWith(
+        fontSize: 30,
+        letterSpacing: -0.5,
+      ),
       textAlign: TextAlign.center,
     );
   }
@@ -53,7 +52,10 @@ class OnboardingSlide extends StatelessWidget {
   Widget _buildDescription() {
     return Text(
       data.description,
-      style: AppTypography.bodyMedium,
+      style: AppTypography.bodyMedium.copyWith(
+        height: 1.7,
+        color: AppColors.textHint,
+      ),
       textAlign: TextAlign.center,
     );
   }

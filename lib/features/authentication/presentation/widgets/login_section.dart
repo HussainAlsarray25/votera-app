@@ -35,14 +35,15 @@ class _LoginSectionState extends State<LoginSection> {
       child: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: AppSpacing.xxl),
+            const SizedBox(height: AppSpacing.lg),
             _buildHeader(),
             const SizedBox(height: AppSpacing.xl),
             _buildEmailField(),
             const SizedBox(height: AppSpacing.md),
             _buildPasswordField(),
+            _buildForgotPassword(),
             const SizedBox(height: AppSpacing.xl),
             _buildSubmitButton(),
             const SizedBox(height: AppSpacing.lg),
@@ -56,13 +57,13 @@ class _LoginSectionState extends State<LoginSection> {
   // -- Section: Welcome header --
   Widget _buildHeader() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Welcome Back', style: AppTypography.h1),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'Sign in to vote for your favorite projects',
           style: AppTypography.bodyMedium,
+          textAlign: TextAlign.center,
         ),
       ],
     );
@@ -108,6 +109,27 @@ class _LoginSectionState extends State<LoginSection> {
     );
   }
 
+  // -- Section: Forgot password link --
+  Widget _buildForgotPassword() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: TextButton(
+        onPressed: () {
+          // TODO(auth): Navigate to forgot password flow.
+        },
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        ),
+        child: Text(
+          'Forgot Password?',
+          style: AppTypography.bodySmall.copyWith(
+            color: AppColors.primary,
+          ),
+        ),
+      ),
+    );
+  }
+
   // -- Section: Submit button --
   Widget _buildSubmitButton() {
     return GradientButton(
@@ -119,10 +141,10 @@ class _LoginSectionState extends State<LoginSection> {
   // -- Section: Switch to register link --
   Widget _buildSwitchLink() {
     return Center(
-      child: GestureDetector(
-        onTap: widget.onSwitchToRegister,
-        child: RichText(
-          text: TextSpan(
+      child: TextButton(
+        onPressed: widget.onSwitchToRegister,
+        child: Text.rich(
+          TextSpan(
             text: "Don't have an account? ",
             style: AppTypography.bodyMedium,
             children: [

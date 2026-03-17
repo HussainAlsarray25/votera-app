@@ -4,8 +4,8 @@ import 'package:votera/features/authentication/presentation/widgets/login_sectio
 import 'package:votera/features/authentication/presentation/widgets/register_section.dart';
 
 /// The authentication page handles both login and registration.
-/// Users switch between the two via a tab-like toggle at the top.
-/// On desktop, displays a two-panel layout with branding on the left.
+/// Mobile: gradient header with branding, rounded white card for the form.
+/// Desktop: two-panel layout with gradient branding on the left.
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
 
@@ -50,69 +50,142 @@ class _AuthPageState extends State<AuthPage> {
     );
 
     if (AppBreakpoints.isDesktop(context)) {
-      return Scaffold(
-        body: SafeArea(
-          child: Row(
-            children: [
-              // Branding panel
-              Expanded(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: AppColors.primaryGradient,
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.how_to_vote,
-                          size: 80,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        Text(
-                          'Votera',
-                          style: AppTypography.h1.copyWith(
-                            color: Colors.white,
-                            fontSize: 36,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          'Discover, vote, and celebrate\ninnovative projects.',
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: Colors.white70,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Form panel
-              Expanded(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: AppBreakpoints.formPanelMax,
-                    ),
-                    child: SingleChildScrollView(
-                      padding: AppSpacing.pagePadding,
-                      child: formContent,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _buildDesktopLayout(formContent);
     }
 
-    // Mobile / Tablet: centered form
+    return _buildMobileLayout(formContent);
+  }
+
+  // -- Section: Desktop two-panel layout --
+  Widget _buildDesktopLayout(Widget formContent) {
     return Scaffold(
       body: SafeArea(
+        child: Row(
+          children: [
+            Expanded(child: _buildBrandingPanel()),
+            Expanded(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: AppBreakpoints.formPanelMax,
+                  ),
+                  child: SingleChildScrollView(
+                    padding: AppSpacing.pagePadding,
+                    child: formContent,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // -- Section: Desktop branding panel --
+  Widget _buildBrandingPanel() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: AppColors.primaryGradient,
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.how_to_vote,
+              size: 96,
+              color: Colors.white,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'Votera',
+              style: AppTypography.h1.copyWith(
+                color: Colors.white,
+                fontSize: 40,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Discover, vote, and celebrate\ninnovative projects.',
+              style: AppTypography.bodyLarge.copyWith(
+                color: Colors.white70,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // -- Section: Mobile layout with gradient header --
+  Widget _buildMobileLayout(Widget formContent) {
+    return Scaffold(
+      body: Column(
+        children: [
+          _buildGradientHeader(),
+          Expanded(
+            child: _buildFormCard(formContent),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Gradient header with app branding for mobile
+  Widget _buildGradientHeader() {
+    final topPadding = MediaQuery.of(context).padding.top;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: topPadding + AppSpacing.xl,
+        bottom: AppSpacing.xxl,
+      ),
+      decoration: const BoxDecoration(
+        gradient: AppColors.primaryGradient,
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.how_to_vote,
+            size: 56,
+            color: Colors.white,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Votera',
+            style: AppTypography.h1.copyWith(
+              color: Colors.white,
+              fontSize: 32,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Discover, vote, and celebrate',
+            style: AppTypography.bodyMedium.copyWith(
+              color: Colors.white70,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // White card with rounded top corners that overlaps the gradient
+  Widget _buildFormCard(Widget formContent) {
+    return Transform.translate(
+      offset: const Offset(0, -24),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppSpacing.radiusXl),
+          ),
+        ),
         child: CenteredContent(
           maxWidth: AppBreakpoints.formPanelMax,
           child: formContent,
