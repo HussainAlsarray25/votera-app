@@ -58,6 +58,7 @@ class _ExhibitionDetailPageState extends State<ExhibitionDetailPage>
           labelColor: AppColors.textPrimary,
           unselectedLabelColor: AppColors.textHint,
           indicatorColor: AppColors.primary,
+          dividerHeight: 0,
           indicatorWeight: 3,
           labelStyle: const TextStyle(
             fontSize: 14,
