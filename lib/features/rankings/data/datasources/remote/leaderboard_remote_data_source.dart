@@ -1,4 +1,5 @@
 import 'package:votera/core/network/api_client.dart';
+import 'package:votera/features/rankings/data/datasources/remote/leaderboard_endpoints.dart';
 import 'package:votera/features/rankings/data/models/leaderboard_model.dart';
 
 abstract class LeaderboardRemoteDataSource {
@@ -17,7 +18,7 @@ class LeaderboardRemoteDataSourceImpl implements LeaderboardRemoteDataSource {
   @override
   Future<LeaderboardModel> getLeaderboard(String eventId) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/events/$eventId/leaderboard',
+      LeaderboardEndpoints.leaderboard(eventId),
     );
 
     final body = response.data ?? {};
@@ -27,7 +28,7 @@ class LeaderboardRemoteDataSourceImpl implements LeaderboardRemoteDataSource {
   @override
   Future<LeaderboardModel> getFinalResults(String eventId) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/events/$eventId/leaderboard/final',
+      LeaderboardEndpoints.finalResults(eventId),
     );
 
     final body = response.data ?? {};

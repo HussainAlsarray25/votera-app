@@ -1,5 +1,6 @@
 import 'package:votera/core/network/api_client.dart';
 import 'package:votera/core/network/paginated_response.dart';
+import 'package:votera/features/participants/data/datasources/remote/participant_endpoints.dart';
 import 'package:votera/features/participants/data/models/participant_model.dart';
 
 abstract class ApplicationRemoteDataSource {
@@ -36,7 +37,7 @@ class ApplicationRemoteDataSourceImpl implements ApplicationRemoteDataSource {
     required int size,
   }) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/events/$eventId/applications',
+      ParticipantEndpoints.applications(eventId),
       queryParameters: {'page': page, 'size': size},
     );
     return PaginatedResponse.fromJson(
@@ -51,7 +52,7 @@ class ApplicationRemoteDataSourceImpl implements ApplicationRemoteDataSource {
     required String teamId,
   }) async {
     final response = await apiClient.post<Map<String, dynamic>>(
-      '/v1/events/$eventId/applications',
+      ParticipantEndpoints.applications(eventId),
       data: {'team_id': teamId},
     );
     return ApplicationModel.fromJson(response.data!);
@@ -63,7 +64,7 @@ class ApplicationRemoteDataSourceImpl implements ApplicationRemoteDataSource {
     required String teamId,
   }) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/events/$eventId/applications/my',
+      ParticipantEndpoints.myApplication(eventId),
       queryParameters: {'team_id': teamId},
     );
     return ApplicationModel.fromJson(response.data!);

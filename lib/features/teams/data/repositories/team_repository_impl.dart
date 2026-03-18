@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:votera/core/error/error_message_extractor.dart';
 import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/features/teams/data/datasources/remote/team_remote_data_source.dart';
@@ -27,7 +28,7 @@ class TeamRepositoryImpl implements TeamRepository {
       final result = await remote.createTeam(name: name, description: description);
       return Right(result);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -40,7 +41,7 @@ class TeamRepositoryImpl implements TeamRepository {
       final result = await remote.getTeam(teamId);
       return Right(result);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -53,7 +54,7 @@ class TeamRepositoryImpl implements TeamRepository {
       final result = await remote.getMyTeam();
       return Right(result);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -74,7 +75,7 @@ class TeamRepositoryImpl implements TeamRepository {
       );
       return Right(result);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -87,7 +88,7 @@ class TeamRepositoryImpl implements TeamRepository {
       await remote.deleteTeam(teamId);
       return const Right(null);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -103,7 +104,7 @@ class TeamRepositoryImpl implements TeamRepository {
       final result = await remote.inviteMember(teamId: teamId, inviteeId: inviteeId);
       return Right(result);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -116,7 +117,7 @@ class TeamRepositoryImpl implements TeamRepository {
       final result = await remote.getMyInvitations();
       return Right(result);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -132,7 +133,7 @@ class TeamRepositoryImpl implements TeamRepository {
       await remote.respondToInvitation(invitationId: invitationId, accept: accept);
       return const Right(null);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -145,7 +146,7 @@ class TeamRepositoryImpl implements TeamRepository {
       await remote.leaveTeam();
       return const Right(null);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -161,7 +162,7 @@ class TeamRepositoryImpl implements TeamRepository {
       await remote.removeMember(teamId: teamId, memberId: memberId);
       return const Right(null);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -177,7 +178,7 @@ class TeamRepositoryImpl implements TeamRepository {
       await remote.transferLeadership(teamId: teamId, newLeaderId: newLeaderId);
       return const Right(null);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 }

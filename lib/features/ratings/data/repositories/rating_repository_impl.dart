@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:votera/core/error/error_message_extractor.dart';
 import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/features/ratings/data/datasources/remote/rating_remote_data_source.dart';
@@ -30,7 +31,7 @@ class RatingRepositoryImpl implements RatingRepository {
       );
       return Right(result);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -45,7 +46,7 @@ class RatingRepositoryImpl implements RatingRepository {
       final result = await remote.getRatingSummary(projectId);
       return Right(result);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -58,7 +59,7 @@ class RatingRepositoryImpl implements RatingRepository {
       final result = await remote.getMyRating(projectId);
       return Right(result);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 }

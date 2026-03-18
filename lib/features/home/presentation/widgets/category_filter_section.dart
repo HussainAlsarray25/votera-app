@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
-import 'package:votera/features/home/presentation/demo_data.dart';
 
 /// Horizontal scrollable row of category filter chips.
 /// The active chip uses a dark filled style; inactive chips are outlined.
 class CategoryFilterSection extends StatelessWidget {
   const CategoryFilterSection({
+    required this.categories,
     required this.selectedCategory,
     required this.onCategorySelected,
     super.key,
   });
 
+  final List<String> categories;
   final String selectedCategory;
   final ValueChanged<String> onCategorySelected;
 
@@ -21,9 +22,9 @@ class CategoryFilterSection extends StatelessWidget {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-        itemCount: projectCategories.length,
+        itemCount: categories.length,
         itemBuilder: (context, index) {
-          final category = projectCategories[index];
+          final category = categories[index];
           final isActive = selectedCategory == category;
 
           return Padding(

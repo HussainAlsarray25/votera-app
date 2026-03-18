@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:votera/core/error/error_message_extractor.dart';
 import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/features/profile/data/datasources/remote/profile_remote_data_source.dart';
@@ -24,7 +25,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final result = await remote.getUserProfile();
       return Right(UserProfileModel.fromJson(result));
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -41,7 +42,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final result = await remote.updateUserProfile(fullName: fullName);
       return Right(UserProfileModel.fromJson(result));
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 }

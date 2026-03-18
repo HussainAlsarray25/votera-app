@@ -1,4 +1,5 @@
 import 'package:votera/core/network/api_client.dart';
+import 'package:votera/features/voting/data/datasources/remote/voting_endpoints.dart';
 
 abstract class VotingRemoteDataSource {
   // Casts a vote for a project in an event.
@@ -31,7 +32,7 @@ class VotingRemoteDataSourceImpl implements VotingRemoteDataSource {
     required String projectId,
   }) async {
     final response = await apiClient.post<Map<String, dynamic>>(
-      '/v1/events/$eventId/votes',
+      VotingEndpoints.votes(eventId),
       data: {'project_id': projectId},
     );
     return response.data!;
@@ -42,7 +43,7 @@ class VotingRemoteDataSourceImpl implements VotingRemoteDataSource {
     required String eventId,
   }) async {
     final response =
-        await apiClient.get<List<dynamic>>('/v1/events/$eventId/votes/my');
+        await apiClient.get<List<dynamic>>(VotingEndpoints.myVotes(eventId));
     return (response.data ?? []).cast<Map<String, dynamic>>();
   }
 
@@ -51,7 +52,7 @@ class VotingRemoteDataSourceImpl implements VotingRemoteDataSource {
     required String eventId,
   }) async {
     final response = await apiClient
-        .get<Map<String, dynamic>>('/v1/events/$eventId/votes/tally');
+        .get<Map<String, dynamic>>(VotingEndpoints.voteTally(eventId));
     return response.data!;
   }
 
@@ -60,6 +61,6 @@ class VotingRemoteDataSourceImpl implements VotingRemoteDataSource {
     required String eventId,
     required String voteId,
   }) async {
-    await apiClient.delete<void>('/v1/events/$eventId/votes/$voteId');
+    await apiClient.delete<void>(VotingEndpoints.voteById(eventId, voteId));
   }
 }

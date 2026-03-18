@@ -1,4 +1,5 @@
 import 'package:votera/core/network/api_client.dart';
+import 'package:votera/features/authentication/data/datasources/remote/auth_endpoints.dart';
 
 abstract class AuthRemoteDataSource {
   /// POST /auth/login with {identifier, secret}
@@ -52,7 +53,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String secret,
   }) async {
     final response = await apiClient.post<Map<String, dynamic>>(
-      '/auth/login',
+      AuthEndpoints.login,
       data: {'identifier': identifier, 'secret': secret},
     );
     return response.data!;
@@ -66,7 +67,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String displayName,
   }) async {
     final response = await apiClient.post<Map<String, dynamic>>(
-      '/auth/register',
+      AuthEndpoints.register,
       data: {
         'username': username,
         'email': email,
@@ -83,7 +84,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String code,
   }) async {
     final response = await apiClient.post<Map<String, dynamic>>(
-      '/auth/login/verify',
+      AuthEndpoints.verifyLogin,
       data: {'identifier': identifier, 'code': code},
     );
     return response.data!;
@@ -91,7 +92,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> logout() async {
-    await apiClient.post<void>('/auth/logout');
+    await apiClient.post<void>(AuthEndpoints.logout);
   }
 
   @override
@@ -100,7 +101,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String newPassword,
   }) async {
     await apiClient.post<Map<String, dynamic>>(
-      '/auth/password/change',
+      AuthEndpoints.changePassword,
       data: {
         'old_password': oldPassword,
         'new_password': newPassword,
@@ -111,7 +112,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> resetPassword({required String email}) async {
     await apiClient.post<Map<String, dynamic>>(
-      '/auth/password/reset',
+      AuthEndpoints.resetPassword,
       data: {'email': email},
     );
   }
@@ -122,7 +123,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String newPassword,
   }) async {
     await apiClient.post<Map<String, dynamic>>(
-      '/auth/password/reset-confirm',
+      AuthEndpoints.resetPasswordConfirm,
       data: {'token': token, 'new_password': newPassword},
     );
   }

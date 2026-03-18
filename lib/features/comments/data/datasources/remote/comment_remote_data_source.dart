@@ -1,4 +1,5 @@
 import 'package:votera/core/network/api_client.dart';
+import 'package:votera/features/comments/data/datasources/remote/comment_endpoints.dart';
 
 /// Contract for the comments remote data source.
 /// Returns raw JSON maps so the repository can convert them to typed models
@@ -47,7 +48,7 @@ class CommentRemoteDataSourceImpl implements CommentRemoteDataSource {
     required int size,
   }) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/projects/$projectId/comments',
+      CommentEndpoints.comments(projectId),
       queryParameters: {'page': page, 'size': size},
     );
     // Non-identity module: response body is the paginated envelope directly.
@@ -60,7 +61,7 @@ class CommentRemoteDataSourceImpl implements CommentRemoteDataSource {
     required String body,
   }) async {
     final response = await apiClient.post<Map<String, dynamic>>(
-      '/v1/projects/$projectId/comments',
+      CommentEndpoints.comments(projectId),
       data: {'body': body},
     );
     return response.data!;
@@ -73,7 +74,7 @@ class CommentRemoteDataSourceImpl implements CommentRemoteDataSource {
     required String body,
   }) async {
     final response = await apiClient.put<Map<String, dynamic>>(
-      '/v1/projects/$projectId/comments/$commentId',
+      CommentEndpoints.commentById(projectId, commentId),
       data: {'body': body},
     );
     return response.data!;
@@ -85,7 +86,7 @@ class CommentRemoteDataSourceImpl implements CommentRemoteDataSource {
     required String commentId,
   }) async {
     await apiClient.delete<void>(
-      '/v1/projects/$projectId/comments/$commentId',
+      CommentEndpoints.commentById(projectId, commentId),
     );
   }
 }

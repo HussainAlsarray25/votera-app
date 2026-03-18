@@ -1,19 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
-import 'package:votera/features/home/presentation/demo_data.dart';
+import 'package:votera/features/projects/domain/entities/project_entity.dart';
+
+/// Rotating gradient palette for trending card headers.
+const _trendingGradients = [
+  [Color(0xFF0F172A), Color(0xFF1E3A5F)],
+  [Color(0xFFDBEAFE), Color(0xFFC7D2FE)],
+  [Color(0xFFFEF9C3), Color(0xFFFED7AA)],
+  [Color(0xFFFCE7F3), Color(0xFFF5D0FE)],
+  [Color(0xFFF3E8FF), Color(0xFFE9D5FF)],
+];
 
 /// Horizontal scrollable section showing the top trending projects.
-/// Each card has a category-colored header with an emoji, project info,
-/// team avatar, and a toggleable vote button.
+/// Each card has a colored header with project info.
 class TrendingSection extends StatelessWidget {
   const TrendingSection({
     required this.projects,
-    required this.onVote,
+    required this.eventId,
     super.key,
   });
 
-  final List<DemoProject> projects;
-  final ValueChanged<DemoProject> onVote;
+  final List<ProjectEntity> projects;
+  final String eventId;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +32,7 @@ class TrendingSection extends StatelessWidget {
         _buildSectionHeader(),
         const SizedBox(height: AppSpacing.sm),
         SizedBox(
-          height: 260,
+          height: 220,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -35,7 +44,8 @@ class TrendingSection extends StatelessWidget {
                 ),
                 child: _TrendingCard(
                   project: projects[index],
-                  onVote: () => onVote(projects[index]),
+                  index: index,
+                  eventId: eventId,
                 ),
               );
             },
@@ -81,83 +91,78 @@ class TrendingSection extends StatelessWidget {
 }
 
 class _TrendingCard extends StatelessWidget {
-  const _TrendingCard({required this.project, required this.onVote});
+  const _TrendingCard({
+    required this.project,
+    required this.index,
+    required this.eventId,
+  });
 
-  final DemoProject project;
-  final VoidCallback onVote;
+  final ProjectEntity project;
+  final int index;
+  final String eventId;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 220,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildCardImage(),
-          _buildCardInfo(),
-          const Spacer(),
-          _buildCardFooter(),
-        ],
+    return GestureDetector(
+      onTap: () => context.push('/project/$eventId/${project.id}'),
+      child: Container(
+        width: 220,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildCardImage(),
+            _buildCardInfo(),
+          ],
+        ),
       ),
     );
   }
 
-  /// Gradient header with emoji icon and category tag
+  /// Gradient header with letter icon
   Widget _buildCardImage() {
-    final gradientColors = CategoryStyles.cardGradient(project.category);
-    final tagColor = CategoryStyles.tagColor(project.category);
+    final gradientColors =
+        _trendingGradients[index % _trendingGradients.length];
+    final initial =
+        project.title.isNotEmpty ? project.title[0].toUpperCase() : '?';
+    // Use dark text if the background is light
+    final isLightBg =
+        gradientColors.first.computeLuminance() > 0.5;
 
     return Container(
-      height: 130,
+      height: 110,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusLg),
         ),
         gradient: LinearGradient(colors: gradientColors),
       ),
-      child: Stack(
-        children: [
-          Center(
-            child: Text(project.emoji, style: const TextStyle(fontSize: 48)),
+      child: Center(
+        child: Text(
+          initial,
+          style: TextStyle(
+            fontSize: 42,
+            fontWeight: FontWeight.w800,
+            color: isLightBg ? const Color(0xFF4B5563) : Colors.white,
           ),
-          Positioned(
-            top: 10,
-            left: 10,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: tagColor.withValues(alpha: 0.85),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                project.category,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildCardInfo() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 4),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -169,113 +174,17 @@ class _TrendingCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 2),
-          Text(
-            project.description,
-            style: AppTypography.bodySmall.copyWith(height: 1.4),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Team avatar, team name, and vote button
-  Widget _buildCardFooter() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              _TeamAvatar(
-                initial: project.teamInitial,
-                colors: project.teamColors,
-                size: 22,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                project.teamName,
-                style: AppTypography.bodySmall.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          _buildVoteChip(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVoteChip() {
-    return GestureDetector(
-      onTap: onVote,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: project.isVoted
-              ? AppColors.primary
-              : const Color(0xFFE8F0FF),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.favorite_rounded,
-              size: 12,
-              color: project.isVoted ? Colors.white : AppColors.primary,
-            ),
-            const SizedBox(width: 4),
+          if (project.description != null &&
+              project.description!.isNotEmpty) ...[
+            const SizedBox(height: 2),
             Text(
-              '${project.votes}',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: project.isVoted ? Colors.white : AppColors.primary,
-              ),
+              project.description!,
+              style: AppTypography.bodySmall.copyWith(height: 1.4),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Small circular avatar with a gradient background and centered initial.
-class _TeamAvatar extends StatelessWidget {
-  const _TeamAvatar({
-    required this.initial,
-    required this.colors,
-    required this.size,
-  });
-
-  final String initial;
-  final List<Color> colors;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(colors: colors),
-      ),
-      child: Center(
-        child: Text(
-          initial,
-          style: TextStyle(
-            fontSize: size * 0.42,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-        ),
+        ],
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:votera/core/network/api_client.dart';
+import 'package:votera/features/teams/data/datasources/remote/team_endpoints.dart';
 import 'package:votera/features/teams/data/models/invitation_model.dart';
 import 'package:votera/features/teams/data/models/team_model.dart';
 
@@ -26,7 +27,7 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
     final body = <String, dynamic>{'name': name};
     if (description != null) body['description'] = description;
     final response = await apiClient.post<Map<String, dynamic>>(
-      '/v1/teams',
+      TeamEndpoints.teams,
       data: body,
     );
     return TeamModel.fromJson(response.data!);
@@ -35,7 +36,7 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
   @override
   Future<TeamModel> getTeam(String teamId) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/teams/$teamId',
+      TeamEndpoints.teamById(teamId),
     );
     return TeamModel.fromJson(response.data!);
   }
@@ -43,7 +44,7 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
   @override
   Future<TeamModel> getMyTeam() async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/teams/my',
+      TeamEndpoints.myTeam,
     );
     return TeamModel.fromJson(response.data!);
   }
@@ -58,7 +59,7 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
     if (name != null) body['name'] = name;
     if (description != null) body['description'] = description;
     final response = await apiClient.put<Map<String, dynamic>>(
-      '/v1/teams/$teamId',
+      TeamEndpoints.teamById(teamId),
       data: body,
     );
     return TeamModel.fromJson(response.data!);
@@ -66,7 +67,7 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
 
   @override
   Future<void> deleteTeam(String teamId) async {
-    await apiClient.delete<void>('/v1/teams/$teamId');
+    await apiClient.delete<void>(TeamEndpoints.teamById(teamId));
   }
 
   @override
@@ -75,7 +76,7 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
     required String inviteeId,
   }) async {
     final response = await apiClient.post<Map<String, dynamic>>(
-      '/v1/teams/$teamId/invitations',
+      TeamEndpoints.teamInvitations(teamId),
       data: {'invitee_id': inviteeId},
     );
     return InvitationModel.fromJson(response.data!);
@@ -84,7 +85,7 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
   @override
   Future<List<InvitationModel>> getMyInvitations() async {
     final response = await apiClient.get<List<dynamic>>(
-      '/v1/teams/invitations',
+      TeamEndpoints.myInvitations,
     );
     return (response.data ?? [])
         .map((e) => InvitationModel.fromJson(e as Map<String, dynamic>))
@@ -97,14 +98,14 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
     required bool accept,
   }) async {
     await apiClient.put<void>(
-      '/v1/teams/invitations/$invitationId',
+      TeamEndpoints.invitationById(invitationId),
       data: {'accept': accept},
     );
   }
 
   @override
   Future<void> leaveTeam() async {
-    await apiClient.post<void>('/v1/teams/my/leave');
+    await apiClient.post<void>(TeamEndpoints.leaveTeam);
   }
 
   @override
@@ -112,7 +113,7 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
     required String teamId,
     required String memberId,
   }) async {
-    await apiClient.delete<void>('/v1/teams/$teamId/members/$memberId');
+    await apiClient.delete<void>(TeamEndpoints.teamMember(teamId, memberId));
   }
 
   @override
@@ -121,7 +122,7 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
     required String newLeaderId,
   }) async {
     await apiClient.post<void>(
-      '/v1/teams/$teamId/transfer-leadership',
+      TeamEndpoints.transferLeadership(teamId),
       data: {'new_leader_id': newLeaderId},
     );
   }

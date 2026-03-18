@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
 import 'package:votera/features/authentication/presentation/widgets/login_section.dart';
 import 'package:votera/features/authentication/presentation/widgets/register_section.dart';
+import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 
 /// The authentication page handles both login and registration.
 /// Mobile: gradient header with branding, rounded white card for the form.
@@ -49,11 +53,26 @@ class _AuthPageState extends State<AuthPage> {
             ),
     );
 
-    if (AppBreakpoints.isDesktop(context)) {
-      return _buildDesktopLayout(formContent);
-    }
+    final body = BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is AuthAuthenticated) {
+          context.read<ProfileCubit>().loadProfile();
+          context.go('/home');
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      },
+      child: AppBreakpoints.isDesktop(context)
+          ? _buildDesktopLayout(formContent)
+          : _buildMobileLayout(formContent),
+    );
 
-    return _buildMobileLayout(formContent);
+    return body;
   }
 
   // -- Section: Desktop two-panel layout --

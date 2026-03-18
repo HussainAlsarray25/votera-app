@@ -1,4 +1,5 @@
 import 'package:votera/core/network/api_client.dart';
+import 'package:votera/features/ratings/data/datasources/remote/rating_endpoints.dart';
 import 'package:votera/features/ratings/data/models/rating_model.dart';
 import 'package:votera/features/ratings/data/models/rating_summary_model.dart';
 
@@ -27,7 +28,7 @@ class RatingRemoteDataSourceImpl implements RatingRemoteDataSource {
     required int score,
   }) async {
     final response = await apiClient.put<Map<String, dynamic>>(
-      '/v1/projects/$projectId/rating',
+      RatingEndpoints.rating(projectId),
       data: {'score': score},
     );
     return RatingModel.fromJson(response.data!);
@@ -36,7 +37,7 @@ class RatingRemoteDataSourceImpl implements RatingRemoteDataSource {
   @override
   Future<RatingSummaryModel> getRatingSummary(String projectId) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/projects/$projectId/rating',
+      RatingEndpoints.rating(projectId),
     );
     return RatingSummaryModel.fromJson(response.data!);
   }
@@ -44,7 +45,7 @@ class RatingRemoteDataSourceImpl implements RatingRemoteDataSource {
   @override
   Future<RatingModel> getMyRating(String projectId) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/projects/$projectId/rating/my',
+      RatingEndpoints.myRating(projectId),
     );
     return RatingModel.fromJson(response.data!);
   }

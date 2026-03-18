@@ -1,4 +1,5 @@
 import 'package:votera/core/network/api_client.dart';
+import 'package:votera/features/profile/data/datasources/remote/profile_endpoints.dart';
 
 abstract class ProfileRemoteDataSource {
   Future<Map<String, dynamic>> getUserProfile();
@@ -12,7 +13,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>> getUserProfile() async {
-    final response = await apiClient.get<Map<String, dynamic>>('/users/me');
+    final response = await apiClient.get<Map<String, dynamic>>(ProfileEndpoints.me);
     // Identity module wraps response in {success, data}
     final body = response.data!;
     if (body.containsKey('data')) {
@@ -29,7 +30,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     if (fullName != null) data['full_name'] = fullName;
 
     final response = await apiClient.put<Map<String, dynamic>>(
-      '/users/me',
+      ProfileEndpoints.me,
       data: data,
     );
     final body = response.data!;

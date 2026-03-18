@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:votera/core/error/error_message_extractor.dart';
 import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/features/authentication/data/datasources/remote/auth_remote_data_source.dart';
@@ -32,7 +33,7 @@ class AuthRepositoryImpl implements AuthRepository {
       await _saveTokensFromResponse(result);
       return const Right(null);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -56,7 +57,7 @@ class AuthRepositoryImpl implements AuthRepository {
       await _saveTokensFromResponse(result);
       return const Right(null);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -76,7 +77,7 @@ class AuthRepositoryImpl implements AuthRepository {
       await _saveTokensFromResponse(result);
       return const Right(null);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -108,7 +109,7 @@ class AuthRepositoryImpl implements AuthRepository {
       );
       return const Right(null);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -123,7 +124,7 @@ class AuthRepositoryImpl implements AuthRepository {
       await remoteDataSource.resetPassword(email: email);
       return const Right(null);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -142,7 +143,7 @@ class AuthRepositoryImpl implements AuthRepository {
       );
       return const Right(null);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 

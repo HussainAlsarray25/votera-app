@@ -1,4 +1,5 @@
 import 'package:votera/core/network/api_client.dart';
+import 'package:votera/features/categories/data/datasources/remote/category_endpoints.dart';
 
 /// Contract for the remote category data source.
 /// Returning raw maps keeps the data source ignorant of domain types,
@@ -25,7 +26,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
     required int size,
   }) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/categories',
+      CategoryEndpoints.categories,
       queryParameters: {'page': page, 'size': size},
     );
     // The categories endpoint returns the paginated envelope directly,
@@ -36,7 +37,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
   @override
   Future<Map<String, dynamic>> getCategoryById(String id) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/categories/$id',
+      CategoryEndpoints.categoryById(id),
     );
     return response.data!;
   }

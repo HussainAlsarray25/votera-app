@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:votera/core/error/error_message_extractor.dart';
 import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/core/network/paginated_response.dart';
@@ -31,7 +32,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
       final paginated = PaginatedResponse.fromJson(json, CategoryModel.fromJson);
       return Right(paginated);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -44,7 +45,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
       final json = await remoteDataSource.getCategoryById(id);
       return Right(CategoryModel.fromJson(json));
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 }

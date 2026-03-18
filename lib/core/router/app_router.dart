@@ -18,6 +18,7 @@ class AppRouter {
 
   late final GoRouter _router = GoRouter(
     initialLocation: '/',
+    redirect: _authRedirect,
     routes: [
       GoRoute(
         path: '/',
@@ -60,9 +61,14 @@ class AppRouter {
         builder: (context, state) => const NotificationPage(),
       ),
       GoRoute(
-        path: '/project/:id',
+        path: '/project/:eventId/:projectId',
         builder: (context, state) {
-          return const ProjectDetailsPage();
+          final eventId = state.pathParameters['eventId'] ?? '';
+          final projectId = state.pathParameters['projectId'] ?? '';
+          return ProjectDetailsPage(
+            eventId: eventId,
+            projectId: projectId,
+          );
         },
       ),
     ],
@@ -77,8 +83,9 @@ class AppRouter {
 
     final isOnAuthPage = state.matchedLocation == '/auth';
     final isOnOnboarding = state.matchedLocation == '/';
+    final isOnUserInfo = state.matchedLocation == '/user-info';
 
-    if (!isAuthenticated && !isOnAuthPage && !isOnOnboarding) {
+    if (!isAuthenticated && !isOnAuthPage && !isOnOnboarding && !isOnUserInfo) {
       return '/auth';
     }
 

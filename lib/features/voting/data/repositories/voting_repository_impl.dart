@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:votera/core/error/error_message_extractor.dart';
 import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/features/voting/data/datasources/remote/voting_remote_data_source.dart';
@@ -32,7 +33,7 @@ class VotingRepositoryImpl implements VotingRepository {
       );
       return Right(VoteModel.fromJson(result));
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -48,7 +49,7 @@ class VotingRepositoryImpl implements VotingRepository {
       final votes = result.map(VoteModel.fromJson).toList();
       return Right(votes);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -63,7 +64,7 @@ class VotingRepositoryImpl implements VotingRepository {
       final result = await remoteDataSource.getVoteTally(eventId: eventId);
       return Right(TallyModel.fromJson(result));
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -79,7 +80,7 @@ class VotingRepositoryImpl implements VotingRepository {
       await remoteDataSource.retractVote(eventId: eventId, voteId: voteId);
       return const Right(null);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 }

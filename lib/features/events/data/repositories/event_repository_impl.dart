@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:votera/core/error/error_message_extractor.dart';
 import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/core/network/paginated_response.dart';
@@ -37,7 +38,7 @@ class EventRepositoryImpl implements EventRepository {
         PaginatedResponse.fromJson(result, EventModel.fromJson),
       );
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -52,7 +53,7 @@ class EventRepositoryImpl implements EventRepository {
       final result = await remoteDataSource.getEventById(id);
       return Right(EventModel.fromJson(result));
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 }

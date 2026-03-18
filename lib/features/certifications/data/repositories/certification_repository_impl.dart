@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:votera/core/error/error_message_extractor.dart';
 import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/features/certifications/data/datasources/remote/certification_remote_data_source.dart';
@@ -29,7 +30,7 @@ class CertificationRepositoryImpl implements CertificationRepository {
       );
       return Right(result);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -44,7 +45,7 @@ class CertificationRepositoryImpl implements CertificationRepository {
       final result = await remote.getMyCertification(type);
       return Right(result);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 }

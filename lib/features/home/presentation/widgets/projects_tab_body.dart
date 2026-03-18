@@ -1,56 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
-import 'package:votera/features/home/presentation/demo_data.dart';
-import 'package:votera/features/home/presentation/widgets/category_filter_section.dart';
 import 'package:votera/features/home/presentation/widgets/home_banner_section.dart';
 import 'package:votera/features/home/presentation/widgets/project_list_section.dart';
 import 'package:votera/features/home/presentation/widgets/search_bar_section.dart';
 import 'package:votera/features/home/presentation/widgets/trending_section.dart';
+import 'package:votera/features/projects/domain/entities/project_entity.dart';
+import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
 
 /// Reusable body for the Projects tab.
-/// Contains search, banner, trending, category filter, and project list.
-/// Used both in the standalone HomePage and inside ExhibitionDetailPage tabs.
+/// Contains search, banner, trending, and project list.
+/// Loads real project data via ProjectsCubit.
 class ProjectsTabBody extends StatefulWidget {
-  const ProjectsTabBody({super.key});
+  const ProjectsTabBody({required this.eventId, super.key});
+
+  final String eventId;
 
   @override
   State<ProjectsTabBody> createState() => _ProjectsTabBodyState();
 }
 
 class _ProjectsTabBodyState extends State<ProjectsTabBody> {
-  final List<DemoProject> _projects = createDemoProjects();
-  String _selectedCategory = 'All Projects';
   String _searchQuery = '';
 
-  /// Projects filtered by the active category and search query
-  List<DemoProject> get _filteredProjects {
-    return _projects.where((project) {
-      final matchesCategory = _selectedCategory == 'All Projects' ||
-          project.category == _selectedCategory;
-      final matchesSearch = _searchQuery.isEmpty ||
-          project.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          project.teamName.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProjectsCubit>().loadProjects(eventId: widget.eventId);
+  }
+
+  /// Filters the project list by search query (client-side).
+  List<ProjectEntity> _filterProjects(List<ProjectEntity> projects) {
+    if (_searchQuery.isEmpty) return projects;
+    final query = _searchQuery.toLowerCase();
+    return projects.where((project) {
+      return project.title.toLowerCase().contains(query) ||
+          (project.description?.toLowerCase().contains(query) ?? false);
     }).toList();
-  }
-
-  /// Top projects by vote count for the trending section
-  List<DemoProject> get _trendingProjects {
-    final sorted = List<DemoProject>.from(_projects)
-      ..sort((a, b) => b.votes.compareTo(a.votes));
-    return sorted.take(4).toList();
-  }
-
-  void _handleVote(DemoProject project) {
-    setState(() {
-      project
-        ..isVoted = !project.isVoted
-        ..votes += project.isVoted ? 1 : -1;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<ProjectsCubit, ProjectsState>(
+      builder: (context, state) {
+        if (state is ProjectsLoading || state is ProjectsInitial) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state is ProjectsError) {
+          return _buildErrorState(state.message);
+        }
+
+        if (state is ProjectsLoaded) {
+          final filtered = _filterProjects(state.projects);
+          return _buildContent(state.projects, filtered);
+        }
+
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildContent(
+    List<ProjectEntity> allProjects,
+    List<ProjectEntity> filteredProjects,
+  ) {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
@@ -61,25 +75,41 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
           ),
         ),
         const SliverToBoxAdapter(child: HomeBannerSection()),
-        SliverToBoxAdapter(
-          child: TrendingSection(
-            projects: _trendingProjects,
-            onVote: _handleVote,
+        if (allProjects.isNotEmpty)
+          SliverToBoxAdapter(
+            child: TrendingSection(
+              projects: allProjects.take(4).toList(),
+              eventId: widget.eventId,
+            ),
           ),
+        ProjectListSection(
+          projects: filteredProjects,
+          eventId: widget.eventId,
         ),
-        SliverToBoxAdapter(
-          child: CategoryFilterSection(
-            selectedCategory: _selectedCategory,
-            onCategorySelected: (category) {
-              setState(() => _selectedCategory = category);
-            },
-          ),
-        ),
-        ProjectListSection(projects: _filteredProjects),
         const SliverToBoxAdapter(
           child: SizedBox(height: AppSpacing.xxl),
         ),
       ],
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+          const SizedBox(height: AppSpacing.md),
+          Text(message, style: AppTypography.bodyMedium),
+          const SizedBox(height: AppSpacing.md),
+          TextButton(
+            onPressed: () => context
+                .read<ProjectsCubit>()
+                .loadProjects(eventId: widget.eventId),
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:votera/core/error/error_message_extractor.dart';
 import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/core/network/paginated_response.dart';
@@ -37,7 +38,7 @@ class CommentRepositoryImpl implements CommentRepository {
       );
       return Right(paginated);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -56,7 +57,7 @@ class CommentRepositoryImpl implements CommentRepository {
       );
       return Right(CommentModel.fromJson(json));
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -77,7 +78,7 @@ class CommentRepositoryImpl implements CommentRepository {
       );
       return Right(CommentModel.fromJson(json));
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 
@@ -96,7 +97,7 @@ class CommentRepositoryImpl implements CommentRepository {
       );
       return const Right(null);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
 }

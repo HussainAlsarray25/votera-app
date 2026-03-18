@@ -1,4 +1,5 @@
 import 'package:votera/core/network/api_client.dart';
+import 'package:votera/features/certifications/data/datasources/remote/certification_endpoints.dart';
 import 'package:votera/features/certifications/data/models/certification_model.dart';
 import 'package:votera/features/certifications/domain/entities/certification_entity.dart';
 
@@ -25,7 +26,7 @@ class CertificationRemoteDataSourceImpl
     required String documentUrl,
   }) async {
     final response = await apiClient.post<Map<String, dynamic>>(
-      '/v1/certifications',
+      CertificationEndpoints.certifications,
       data: {
         'type': type.name,
         'document_url': documentUrl,
@@ -39,7 +40,7 @@ class CertificationRemoteDataSourceImpl
     CertificationType type,
   ) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/certifications/my',
+      CertificationEndpoints.myCertification,
       queryParameters: {'type': type.name},
     );
     return CertificationModel.fromJson(response.data!);

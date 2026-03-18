@@ -1,16 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/core/di/injection_container.dart';
+import 'package:votera/features/comments/presentation/cubit/comments_cubit.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_comments_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_header_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_info_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_rating_section.dart';
+import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
+import 'package:votera/features/ratings/presentation/cubit/ratings_cubit.dart';
+import 'package:votera/features/voting/presentation/cubit/voting_cubit.dart';
 import 'package:votera/shared/widgets/vote_button.dart';
 
 /// Full details screen for a single project.
 /// Shows the image, author info, rating, description, and comments.
 /// On desktop, constrains content width and places the vote button inline.
 class ProjectDetailsPage extends StatelessWidget {
-  const ProjectDetailsPage({super.key});
+  const ProjectDetailsPage({
+    required this.eventId,
+    required this.projectId,
+    super.key,
+  });
+
+  final String eventId;
+  final String projectId;
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ProjectsCubit>(
+          create: (_) => sl<ProjectsCubit>()
+            ..loadProjectById(eventId: eventId, projectId: projectId),
+        ),
+        BlocProvider<RatingsCubit>(
+          create: (_) => sl<RatingsCubit>()..loadSummary(projectId),
+        ),
+        BlocProvider<CommentsCubit>(
+          create: (_) => sl<CommentsCubit>()
+            ..loadComments(projectId: projectId),
+        ),
+        BlocProvider<VotingCubit>(
+          create: (_) => sl<VotingCubit>()..loadMyVotes(eventId: eventId),
+        ),
+      ],
+      child: _ProjectDetailsView(
+        eventId: eventId,
+        projectId: projectId,
+      ),
+    );
+  }
+}
+
+class _ProjectDetailsView extends StatelessWidget {
+  const _ProjectDetailsView({
+    required this.eventId,
+    required this.projectId,
+  });
+
+  final String eventId;
+  final String projectId;
 
   @override
   Widget build(BuildContext context) {
@@ -20,41 +69,101 @@ class ProjectDetailsPage extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: CenteredContent(
         maxWidth: 900,
-        child: CustomScrollView(
-          slivers: [
-            const ProjectHeaderSection(),
-            SliverToBoxAdapter(child: _buildBody(showInlineVote: isWide)),
-          ],
+        child: BlocBuilder<ProjectsCubit, ProjectsState>(
+          builder: (context, state) {
+            if (state is ProjectsLoading || state is ProjectsInitial) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (state is ProjectsError) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: AppColors.error,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(state.message, style: AppTypography.bodyMedium),
+                    const SizedBox(height: AppSpacing.md),
+                    TextButton(
+                      onPressed: () => context
+                          .read<ProjectsCubit>()
+                          .loadProjectById(
+                            eventId: eventId,
+                            projectId: projectId,
+                          ),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            if (state is ProjectDetailLoaded) {
+              return CustomScrollView(
+                slivers: [
+                  const ProjectHeaderSection(),
+                  SliverToBoxAdapter(
+                    child: _buildBody(
+                      context,
+                      showInlineVote: isWide,
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            return const SizedBox.shrink();
+          },
         ),
       ),
-      // Only show the floating bottom bar on mobile
-      bottomNavigationBar: isWide ? null : _buildBottomBar(),
+      bottomNavigationBar: isWide ? null : _buildBottomBar(context),
     );
   }
 
-  Widget _buildBody({required bool showInlineVote}) {
+  Widget _buildBody(BuildContext context, {required bool showInlineVote}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: AppSpacing.md),
-          const ProjectInfoSection(),
+          ProjectInfoSection(projectId: projectId),
           const SizedBox(height: AppSpacing.lg),
-          const ProjectRatingSection(),
+          ProjectRatingSection(projectId: projectId),
           if (showInlineVote) ...[
             const SizedBox(height: AppSpacing.lg),
-            VoteButton(voteCount: 48, onVote: () {}),
+            _buildVoteButton(context),
           ],
           const SizedBox(height: AppSpacing.lg),
-          const ProjectCommentsSection(),
+          ProjectCommentsSection(projectId: projectId),
           const SizedBox(height: 100),
         ],
       ),
     );
   }
 
-  Widget _buildBottomBar() {
+  Widget _buildVoteButton(BuildContext context) {
+    return BlocBuilder<VotingCubit, VotingState>(
+      builder: (context, state) {
+        final hasVoted = state is VotesLoaded &&
+            state.votes.any((v) => v.projectId == projectId);
+
+        return VoteButton(
+          hasVoted: hasVoted,
+          onVote: () => context.read<VotingCubit>().submitVote(
+                eventId: eventId,
+                projectId: projectId,
+              ),
+        );
+      },
+    );
+  }
+
+  Widget? _buildBottomBar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -68,10 +177,7 @@ class ProjectDetailsPage extends StatelessWidget {
         ],
       ),
       child: SafeArea(
-        child: VoteButton(
-          voteCount: 48,
-          onVote: () {},
-        ),
+        child: _buildVoteButton(context),
       ),
     );
   }

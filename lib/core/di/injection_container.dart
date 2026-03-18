@@ -70,18 +70,20 @@ Future<void> _initExternalDependencies(AppConfig config) async {
           sendTimeout: const Duration(seconds: 30),
         );
 
+      // Logger goes first so it captures both requests and error responses
+      // before the auth interceptor short-circuits on 401.
+      if (config.enableLogging) {
+        dio.interceptors.add(
+          PrettyDioLogger(compact: false),
+        );
+      }
+
       dio.interceptors.add(
         AuthInterceptor(
           dio: dio,
           authTokenProvider: authTokenProvider,
         ),
       );
-
-      if (config.enableLogging) {
-        dio.interceptors.add(
-          PrettyDioLogger(compact: false),
-        );
-      }
       return dio;
     })
     ..registerLazySingleton<ApiClient>(() => DioApiClient(dio: sl<Dio>()))
@@ -89,7 +91,11 @@ Future<void> _initExternalDependencies(AppConfig config) async {
 }
 
 void _initCore() {
-  sl.registerLazySingleton<NetworkInfo>(NetworkInfoImpl.new);
+  sl.registerLazySingleton<NetworkInfo>(
+    () => NetworkInfoImpl(
+      connectivityUrl: AppConfig.instance.connectivityUrl,
+    ),
+  );
 }
 
 void _initFeatures() {

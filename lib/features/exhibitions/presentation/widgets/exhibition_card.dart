@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
-import 'package:votera/features/exhibitions/presentation/demo_data.dart';
+import 'package:votera/features/events/domain/entities/event_entity.dart';
 
-/// Tappable card displaying an exhibition summary.
-/// Shows gradient header with emoji, title, description, date range,
-/// status badge, and participation stats.
+/// Rotating gradient palette for event cards based on list index.
+const _cardGradients = [
+  [Color(0xFF22C55E), Color(0xFF10B981)],
+  [Color(0xFF3B82F6), Color(0xFF6366F1)],
+  [Color(0xFFF59E0B), Color(0xFFEF4444)],
+  [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+  [Color(0xFFEC4899), Color(0xFFEF4444)],
+  [Color(0xFF06B6D4), Color(0xFF3B82F6)],
+];
+
+/// Tappable card displaying an event summary.
+/// Shows gradient header with icon, title, description, date range,
+/// and status badge.
 class ExhibitionCard extends StatelessWidget {
   const ExhibitionCard({
-    required this.exhibition,
+    required this.event,
     required this.onTap,
+    this.index = 0,
     super.key,
   });
 
-  final DemoExhibition exhibition;
+  final EventEntity event;
   final VoidCallback onTap;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +57,10 @@ class ExhibitionCard extends StatelessWidget {
   }
 
   Widget _buildGradientHeader() {
+    final colors = _cardGradients[index % _cardGradients.length];
+    // Use the first letter of the title as a visual identifier
+    final initial = event.title.isNotEmpty ? event.title[0].toUpperCase() : '?';
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -52,14 +68,29 @@ class ExhibitionCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: exhibition.gradientColors,
+          colors: colors,
         ),
       ),
       child: Row(
         children: [
-          Text(
-            exhibition.emoji,
-            style: const TextStyle(fontSize: 36),
+          // Letter avatar instead of emoji
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Text(
+                initial,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -67,20 +98,22 @@ class ExhibitionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  exhibition.name,
+                  event.title,
                   style: AppTypography.h3.copyWith(
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  _formatDateRange(),
-                  style: AppTypography.bodySmall.copyWith(
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontWeight: FontWeight.w500,
+                if (event.startAt != null && event.endAt != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatDateRange(),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: Colors.white.withValues(alpha: 0.85),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -97,7 +130,7 @@ class ExhibitionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            exhibition.description,
+            event.description,
             style: AppTypography.bodyMedium.copyWith(
               color: AppColors.textSecondary,
               height: 1.4,
@@ -108,15 +141,7 @@ class ExhibitionCard extends StatelessWidget {
           const SizedBox(height: 14),
           Row(
             children: [
-              _buildStat(
-                Icons.folder_outlined,
-                '${exhibition.projectCount} projects',
-              ),
-              const SizedBox(width: 20),
-              _buildStat(
-                Icons.people_outline_rounded,
-                '${exhibition.participantCount} participants',
-              ),
+              _buildStat(Icons.event_outlined, _statusLabel()),
               const Spacer(),
               const Icon(
                 Icons.arrow_forward_rounded,
@@ -131,11 +156,7 @@ class ExhibitionCard extends StatelessWidget {
   }
 
   Widget _buildStatusBadge() {
-    final (label, color) = switch (exhibition.status) {
-      ExhibitionStatus.live => ('Live', const Color(0xFF22C55E)),
-      ExhibitionStatus.upcoming => ('Upcoming', const Color(0xFF3B82F6)),
-      ExhibitionStatus.ended => ('Ended', const Color(0xFF9CA3AF)),
-    };
+    final (label, color) = _statusInfo();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -149,7 +170,8 @@ class ExhibitionCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (exhibition.status == ExhibitionStatus.live) ...[
+          if (event.status == EventStatus.open ||
+              event.status == EventStatus.voting) ...[
             Container(
               width: 6,
               height: 6,
@@ -190,9 +212,38 @@ class ExhibitionCard extends StatelessWidget {
     );
   }
 
+  /// Maps EventStatus to a display label and badge color.
+  (String, Color) _statusInfo() {
+    switch (event.status) {
+      case EventStatus.open:
+      case EventStatus.voting:
+        return ('Live', const Color(0xFF22C55E));
+      case EventStatus.draft:
+        return ('Upcoming', const Color(0xFF3B82F6));
+      case EventStatus.closed:
+      case EventStatus.archived:
+        return ('Ended', const Color(0xFF9CA3AF));
+    }
+  }
+
+  String _statusLabel() {
+    switch (event.status) {
+      case EventStatus.open:
+        return 'Open for submissions';
+      case EventStatus.voting:
+        return 'Voting in progress';
+      case EventStatus.draft:
+        return 'Coming soon';
+      case EventStatus.closed:
+        return 'Event closed';
+      case EventStatus.archived:
+        return 'Archived';
+    }
+  }
+
   String _formatDateRange() {
-    final start = _formatDate(exhibition.startDate);
-    final end = _formatDate(exhibition.endDate);
+    final start = _formatDate(event.startAt!);
+    final end = _formatDate(event.endAt!);
     return '$start - $end';
   }
 

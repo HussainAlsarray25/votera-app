@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/features/profile/presentation/widgets/profile_actions_section.dart';
 import 'package:votera/features/profile/presentation/widgets/profile_header_section.dart';
 import 'package:votera/features/profile/presentation/widgets/profile_stats_section.dart';
@@ -7,8 +9,23 @@ import 'package:votera/features/profile/presentation/widgets/profile_stats_secti
 /// User profile screen showing personal info, voting stats,
 /// and account actions.
 /// On tablet/desktop, uses a two-column layout.
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  @override
+  void initState() {
+    super.initState();
+    // Load profile data if not already loaded
+    final profileState = context.read<ProfileCubit>().state;
+    if (profileState is! ProfileLoaded) {
+      context.read<ProfileCubit>().loadProfile();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

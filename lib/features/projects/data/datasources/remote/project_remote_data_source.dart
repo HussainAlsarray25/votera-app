@@ -1,4 +1,5 @@
 import 'package:votera/core/network/api_client.dart';
+import 'package:votera/features/projects/data/datasources/remote/project_endpoints.dart';
 import 'package:votera/features/projects/data/models/project_model.dart';
 import 'package:votera/features/projects/data/models/upload_url_model.dart';
 
@@ -79,7 +80,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     required int size,
   }) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/events/$eventId/projects',
+      ProjectEndpoints.projects(eventId),
       queryParameters: {'page': page, 'size': size},
     );
     return response.data!;
@@ -91,7 +92,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     required String projectId,
   }) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/events/$eventId/projects/$projectId',
+      ProjectEndpoints.projectById(eventId, projectId),
     );
     return ProjectModel.fromJson(response.data!);
   }
@@ -111,7 +112,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     if (demoUrl != null) body['demo_url'] = demoUrl;
 
     final response = await apiClient.post<Map<String, dynamic>>(
-      '/v1/events/$eventId/projects',
+      ProjectEndpoints.projects(eventId),
       data: body,
     );
     return ProjectModel.fromJson(response.data!);
@@ -134,7 +135,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     if (demoUrl != null) body['demo_url'] = demoUrl;
 
     final response = await apiClient.put<Map<String, dynamic>>(
-      '/v1/events/$eventId/projects/$projectId',
+      ProjectEndpoints.projectById(eventId, projectId),
       data: body,
     );
     return ProjectModel.fromJson(response.data!);
@@ -151,7 +152,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     if (fileType != null) body['file_type'] = fileType;
 
     final response = await apiClient.post<Map<String, dynamic>>(
-      '/v1/events/$eventId/projects/$projectId/media/upload-url',
+      ProjectEndpoints.mediaUploadUrl(eventId, projectId),
       data: body,
     );
     return UploadUrlModel.fromJson(response.data!);
@@ -160,7 +161,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
   @override
   Future<ProjectModel> scanProject(String token) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/v1/scan/$token',
+      ProjectEndpoints.scan(token),
     );
     return ProjectModel.fromJson(response.data!);
   }
@@ -172,7 +173,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     required String categoryId,
   }) async {
     await apiClient.post<void>(
-      '/v1/events/$eventId/projects/$projectId/categories/$categoryId',
+      ProjectEndpoints.projectCategory(eventId, projectId, categoryId),
     );
   }
 
@@ -183,7 +184,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     required String categoryId,
   }) async {
     await apiClient.delete<void>(
-      '/v1/events/$eventId/projects/$projectId/categories/$categoryId',
+      ProjectEndpoints.projectCategory(eventId, projectId, categoryId),
     );
   }
 
@@ -193,7 +194,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     required String projectId,
   }) async {
     final response = await apiClient.post<Map<String, dynamic>>(
-      '/v1/events/$eventId/projects/$projectId/submit',
+      ProjectEndpoints.submitProject(eventId, projectId),
     );
     return ProjectModel.fromJson(response.data!);
   }

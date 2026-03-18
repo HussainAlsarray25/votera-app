@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -128,9 +129,14 @@ class _RegisterSectionState extends State<RegisterSection> {
 
   // -- Section: Submit button --
   Widget _buildSubmitButton() {
-    return GradientButton(
-      text: 'Create Account',
-      onPressed: _handleRegister,
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        final isLoading = state is AuthLoading;
+        return GradientButton(
+          text: isLoading ? 'Creating Account...' : 'Create Account',
+          onPressed: isLoading ? null : _handleRegister,
+        );
+      },
     );
   }
 
@@ -158,7 +164,12 @@ class _RegisterSectionState extends State<RegisterSection> {
 
   void _handleRegister() {
     if (_formKey.currentState?.validate() ?? false) {
-      context.go('/user-info');
+      context.read<AuthCubit>().register(
+            username: _emailController.text.trim(),
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+            displayName: _nameController.text.trim(),
+          );
     }
   }
 }

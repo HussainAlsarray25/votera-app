@@ -1,4 +1,5 @@
 import 'package:votera/core/network/api_client.dart';
+import 'package:votera/features/events/data/datasources/remote/event_endpoints.dart';
 import 'package:votera/features/events/domain/entities/event_entity.dart';
 
 abstract class EventRemoteDataSource {
@@ -31,7 +32,7 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
     };
 
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/events',
+      EventEndpoints.events,
       queryParameters: queryParameters,
     );
     return response.data ?? {};
@@ -40,7 +41,7 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
   @override
   Future<Map<String, dynamic>> getEventById(String id) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      '/events/$id',
+      EventEndpoints.eventById(id),
     );
     return response.data ?? {};
   }
