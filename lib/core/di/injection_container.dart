@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:votera/core/config/app_config.dart';
 import 'package:votera/core/domain/services/auth_token_provider.dart';
 import 'package:votera/core/network/api_client.dart';
@@ -13,11 +14,21 @@ import 'package:votera/core/router/app_router.dart';
 import 'package:votera/features/authentication/data/services/token_service.dart';
 import 'package:votera/features/authentication/data/services/token_service_auth_provider.dart';
 import 'package:votera/features/authentication/di/auth_injection.dart';
+import 'package:votera/features/categories/di/categories_injection.dart';
+import 'package:votera/features/certifications/di/certifications_injection.dart';
+import 'package:votera/features/comments/di/comments_injection.dart';
+import 'package:votera/features/events/di/events_injection.dart';
 import 'package:votera/features/exhibitions/di/exhibitions_injection.dart';
 import 'package:votera/features/home/di/home_injection.dart';
 import 'package:votera/features/notification/di/notification_injection.dart';
 import 'package:votera/features/onboarding/di/onboarding_injection.dart';
+import 'package:votera/features/participants/di/participants_injection.dart';
 import 'package:votera/features/profile/di/profile_injection.dart';
+import 'package:votera/features/projects/di/projects_injection.dart';
+import 'package:votera/features/ratings/di/ratings_injection.dart';
+import 'package:votera/features/rankings/di/rankings_injection.dart';
+import 'package:votera/features/teams/di/teams_injection.dart';
+import 'package:votera/features/voting/di/voting_injection.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -59,10 +70,12 @@ Future<void> _initExternalDependencies(AppConfig config) async {
           sendTimeout: const Duration(seconds: 30),
         );
 
-      dio.interceptors.add(AuthInterceptor(
-        dio: dio,
-        authTokenProvider: authTokenProvider,
-      ),);
+      dio.interceptors.add(
+        AuthInterceptor(
+          dio: dio,
+          authTokenProvider: authTokenProvider,
+        ),
+      );
 
       if (config.enableLogging) {
         dio.interceptors.add(
@@ -85,7 +98,17 @@ void _initFeatures() {
   initNotificationFeature(sl);
   initOnboardingFeature(sl);
   initHomeFeature(sl);
+  initCategoriesFeature(sl);
+  initEventsFeature(sl);
   initExhibitionsFeature(sl);
+  initProjectsFeature(sl);
+  initVotingFeature(sl);
+  initCommentsFeature(sl);
+  initParticipantsFeature(sl);
+  initRankingsFeature(sl);
+  initTeamsFeature(sl);
+  initCertificationsFeature(sl);
+  initRatingsFeature(sl);
 }
 
 Future<void> reset() async {

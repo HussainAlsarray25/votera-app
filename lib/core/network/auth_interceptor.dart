@@ -71,12 +71,13 @@ class AuthInterceptor extends Interceptor {
     try {
       final response = await dio.post<Map<String, dynamic>>(
         '/auth/refresh',
-        data: {'refreshToken': refreshToken},
+        data: {'refresh_token': refreshToken},
       );
 
       if (response.statusCode == 200 && response.data != null) {
-        final newAccessToken = response.data!['token']?.toString();
-        final newRefreshToken = response.data!['refreshToken']?.toString();
+        final data = response.data!['data'] as Map<String, dynamic>?;
+        final newAccessToken = data?['access_token']?.toString();
+        final newRefreshToken = data?['refresh_token']?.toString();
 
         if (newAccessToken != null && newRefreshToken != null) {
           await authTokenProvider.saveTokens(

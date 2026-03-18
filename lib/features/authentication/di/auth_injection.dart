@@ -5,9 +5,13 @@ import 'package:votera/features/authentication/data/datasources/remote/auth_remo
 import 'package:votera/features/authentication/data/repositories/auth_repository_impl.dart';
 import 'package:votera/features/authentication/data/services/token_service.dart';
 import 'package:votera/features/authentication/domain/repositories/auth_repository.dart';
+import 'package:votera/features/authentication/domain/usecases/change_password.dart';
+import 'package:votera/features/authentication/domain/usecases/confirm_reset_password.dart';
 import 'package:votera/features/authentication/domain/usecases/login_user.dart';
 import 'package:votera/features/authentication/domain/usecases/logout_user.dart';
 import 'package:votera/features/authentication/domain/usecases/register_user.dart';
+import 'package:votera/features/authentication/domain/usecases/reset_password.dart';
+import 'package:votera/features/authentication/domain/usecases/verify_login.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
 
 void initAuthFeature(GetIt sl) {
@@ -18,6 +22,10 @@ void initAuthFeature(GetIt sl) {
         loginUser: sl<LoginUser>(),
         registerUser: sl<RegisterUser>(),
         logoutUser: sl<LogoutUser>(),
+        verifyLogin: sl<VerifyLogin>(),
+        changePassword: sl<ChangePassword>(),
+        resetPassword: sl<ResetPassword>(),
+        confirmResetPassword: sl<ConfirmResetPassword>(),
       ),
     )
     // Use cases
@@ -30,6 +38,18 @@ void initAuthFeature(GetIt sl) {
     ..registerLazySingleton<LogoutUser>(
       () => LogoutUser(sl<AuthRepository>()),
     )
+    ..registerLazySingleton<VerifyLogin>(
+      () => VerifyLogin(sl<AuthRepository>()),
+    )
+    ..registerLazySingleton<ChangePassword>(
+      () => ChangePassword(sl<AuthRepository>()),
+    )
+    ..registerLazySingleton<ResetPassword>(
+      () => ResetPassword(sl<AuthRepository>()),
+    )
+    ..registerLazySingleton<ConfirmResetPassword>(
+      () => ConfirmResetPassword(sl<AuthRepository>()),
+    )
     // Repositories
     ..registerLazySingleton<AuthRepository>(
       () => AuthRepositoryImpl(
@@ -40,8 +60,6 @@ void initAuthFeature(GetIt sl) {
     )
     // Data sources
     ..registerLazySingleton<AuthRemoteDataSource>(
-      () => AuthRemoteDataSourceImpl(
-        apiClient: sl<ApiClient>(),
-      ),
+      () => AuthRemoteDataSourceImpl(apiClient: sl<ApiClient>()),
     );
 }

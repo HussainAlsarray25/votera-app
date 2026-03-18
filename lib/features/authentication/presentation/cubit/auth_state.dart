@@ -11,14 +11,24 @@ class AuthInitial extends AuthState {}
 
 class AuthLoading extends AuthState {}
 
-class AuthAuthenticated extends AuthState {
-  const AuthAuthenticated({required this.user});
+/// User is authenticated (tokens stored). Profile is fetched separately.
+class AuthAuthenticated extends AuthState {}
 
-  final UserEntity user;
+/// Login returned a pending OTP verification step.
+class AuthOtpRequired extends AuthState {
+  const AuthOtpRequired({required this.identifier});
+
+  final String identifier;
 
   @override
-  List<Object?> get props => [user];
+  List<Object?> get props => [identifier];
 }
+
+class AuthPasswordResetSent extends AuthState {}
+
+class AuthPasswordResetConfirmed extends AuthState {}
+
+class AuthPasswordChanged extends AuthState {}
 
 class AuthError extends AuthState {
   const AuthError({required this.message});

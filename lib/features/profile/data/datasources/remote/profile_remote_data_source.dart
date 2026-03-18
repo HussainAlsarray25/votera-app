@@ -2,11 +2,7 @@ import 'package:votera/core/network/api_client.dart';
 
 abstract class ProfileRemoteDataSource {
   Future<Map<String, dynamic>> getUserProfile();
-  Future<Map<String, dynamic>> updateUserProfile({
-    String? name,
-    String? email,
-    String? phone,
-  });
+  Future<Map<String, dynamic>> updateUserProfile({String? fullName});
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -16,25 +12,30 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>> getUserProfile() async {
-    final response = await apiClient.get<Map<String, dynamic>>('/profile');
-    return response.data!;
+    final response = await apiClient.get<Map<String, dynamic>>('/users/me');
+    // Identity module wraps response in {success, data}
+    final body = response.data!;
+    if (body.containsKey('data')) {
+      return body['data'] as Map<String, dynamic>;
+    }
+    return body;
   }
 
   @override
   Future<Map<String, dynamic>> updateUserProfile({
-    String? name,
-    String? email,
-    String? phone,
+    String? fullName,
   }) async {
     final data = <String, dynamic>{};
-    if (name != null) data['name'] = name;
-    if (email != null) data['email'] = email;
-    if (phone != null) data['phone'] = phone;
+    if (fullName != null) data['full_name'] = fullName;
 
     final response = await apiClient.put<Map<String, dynamic>>(
-      '/profile',
+      '/users/me',
       data: data,
     );
-    return response.data!;
+    final body = response.data!;
+    if (body.containsKey('data')) {
+      return body['data'] as Map<String, dynamic>;
+    }
+    return body;
   }
 }

@@ -30,9 +30,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   @override
   Future<Either<Failure, UserProfile>> updateUserProfile({
-    String? name,
-    String? email,
-    String? phone,
+    String? fullName,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(
@@ -40,11 +38,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       );
     }
     try {
-      final result = await remote.updateUserProfile(
-        name: name,
-        email: email,
-        phone: phone,
-      );
+      final result = await remote.updateUserProfile(fullName: fullName);
       return Right(UserProfileModel.fromJson(result));
     } on Exception catch (e) {
       return Left(ServerFailure(message: e.toString()));

@@ -2,9 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/features/authentication/data/datasources/remote/auth_remote_data_source.dart';
-import 'package:votera/features/authentication/data/models/user_model.dart';
 import 'package:votera/features/authentication/data/services/token_service.dart';
-import 'package:votera/features/authentication/domain/entities/user_entity.dart';
 import 'package:votera/features/authentication/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -19,64 +17,64 @@ class AuthRepositoryImpl implements AuthRepository {
   final TokenService tokenService;
 
   @override
-  Future<Either<Failure, UserEntity>> login({
-    required String email,
-    required String password,
+  Future<Either<Failure, void>> login({
+    required String identifier,
+    required String secret,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
     try {
       final result = await remoteDataSource.login(
-        email: email,
-        password: password,
+        identifier: identifier,
+        secret: secret,
       );
-      final token = result['token'] as String?;
-      final refreshToken = result['refreshToken'] as String?;
-      if (token != null) {
-        await tokenService.saveAccessToken(token);
-      }
-      if (refreshToken != null) {
-        await tokenService.saveRefreshToken(refreshToken);
-      }
-      final user = UserModel.fromJson(
-        result['user'] as Map<String, dynamic>,
-      );
-      return Right(user);
+      await _saveTokensFromResponse(result);
+      return const Right(null);
     } on Exception catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, UserEntity>> register({
-    required String name,
+  Future<Either<Failure, void>> register({
+    required String username,
     required String email,
     required String password,
+    required String displayName,
   }) async {
     if (!await networkInfo.isConnected) {
-      return const Left(
-        NetworkFailure(message: 'No internet connection'),
-      );
+      return const Left(NetworkFailure(message: 'No internet connection'));
     }
     try {
       final result = await remoteDataSource.register(
-        name: name,
+        username: username,
         email: email,
         password: password,
+        displayName: displayName,
       );
-      final token = result['token'] as String?;
-      final refreshToken = result['refreshToken'] as String?;
-      if (token != null) {
-        await tokenService.saveAccessToken(token);
-      }
-      if (refreshToken != null) {
-        await tokenService.saveRefreshToken(refreshToken);
-      }
-      final user = UserModel.fromJson(
-        result['user'] as Map<String, dynamic>,
+      await _saveTokensFromResponse(result);
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> verifyLogin({
+    required String identifier,
+    required String code,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final result = await remoteDataSource.verifyLogin(
+        identifier: identifier,
+        code: code,
       );
-      return Right(user);
+      await _saveTokensFromResponse(result);
+      return const Right(null);
     } on Exception catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
@@ -89,8 +87,76 @@ class AuthRepositoryImpl implements AuthRepository {
       await tokenService.clearTokens();
       return const Right(null);
     } on Exception catch (_) {
+      // Always clear tokens locally even if the server call fails.
       await tokenService.clearTokens();
       return const Right(null);
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      await remoteDataSource.changePassword(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> resetPassword({
+    required String email,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      await remoteDataSource.resetPassword(email: email);
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> confirmResetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      await remoteDataSource.confirmResetPassword(
+        token: token,
+        newPassword: newPassword,
+      );
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  /// Extracts tokens from the identity-module wrapped response
+  /// and persists them locally.
+  Future<void> _saveTokensFromResponse(Map<String, dynamic> response) async {
+    final data = response['data'] as Map<String, dynamic>?;
+    final accessToken = data?['access_token'] as String?;
+    final refreshToken = data?['refresh_token'] as String?;
+    if (accessToken != null) {
+      await tokenService.saveAccessToken(accessToken);
+    }
+    if (refreshToken != null) {
+      await tokenService.saveRefreshToken(refreshToken);
     }
   }
 }

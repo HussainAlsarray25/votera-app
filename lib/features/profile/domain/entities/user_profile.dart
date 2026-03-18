@@ -3,18 +3,27 @@ import 'package:equatable/equatable.dart';
 class UserProfile extends Equatable {
   const UserProfile({
     required this.id,
-    required this.name,
+    required this.fullName,
     required this.email,
-    this.phone,
-    this.avatarUrl,
+    required this.status,
+    this.createdAt,
+    this.updatedAt,
   });
 
   final String id;
-  final String name;
+  final String fullName;
   final String email;
-  final String? phone;
-  final String? avatarUrl;
+  final String status;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   @override
-  List<Object?> get props => [id, name, email, phone, avatarUrl];
+  List<Object?> get props => [
+        id,
+        fullName,
+        email,
+        status,
+        createdAt,
+        updatedAt,
+      ];
 }
