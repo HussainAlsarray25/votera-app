@@ -5,6 +5,8 @@ import 'package:votera/core/design_system/theme/app_theme.dart';
 import 'package:votera/core/di/injection_container.dart' as di;
 import 'package:votera/core/router/app_router.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/features/notification/presentation/cubit/push_notification_cubit.dart';
+import 'package:votera/features/notification/presentation/cubit/unread_count_cubit.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 
 class App extends StatelessWidget {
@@ -15,8 +17,12 @@ class App extends StatelessWidget {
     final appRouter = di.sl<AppRouter>();
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthCubit>(create: (_) => di.sl<AuthCubit>()),
+        BlocProvider.value(value: di.sl<AuthCubit>()),
         BlocProvider<ProfileCubit>(create: (_) => di.sl<ProfileCubit>()),
+        BlocProvider.value(value: di.sl<PushNotificationCubit>()),
+        BlocProvider<UnreadCountCubit>(
+          create: (_) => di.sl<UnreadCountCubit>()..loadUnreadCount(),
+        ),
       ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812),

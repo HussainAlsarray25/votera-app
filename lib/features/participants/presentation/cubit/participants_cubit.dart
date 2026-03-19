@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/network/paginated_response.dart';
 import 'package:votera/features/participants/domain/entities/participant_entity.dart';
+import 'package:votera/features/participants/domain/usecases/get_my_applications.dart';
 import 'package:votera/features/participants/domain/usecases/get_my_participation.dart';
 import 'package:votera/features/participants/domain/usecases/get_participants.dart';
 import 'package:votera/features/participants/domain/usecases/register_for_event.dart';
@@ -15,11 +16,13 @@ class ApplicationsCubit extends Cubit<ApplicationsState> {
     required this.getApplications,
     required this.submitApplication,
     required this.getMyApplication,
+    required this.getMyApplications,
   }) : super(const ApplicationsInitial());
 
   final GetApplications getApplications;
   final SubmitApplication submitApplication;
   final GetMyApplication getMyApplication;
+  final GetMyApplications getMyApplications;
 
   /// Loads the paginated application list for [eventId].
   Future<void> loadApplications({
@@ -64,6 +67,21 @@ class ApplicationsCubit extends Cubit<ApplicationsState> {
     result.fold(
       (failure) => emit(ApplicationsError(message: failure.message)),
       (application) => emit(MyApplicationLoaded(application: application)),
+    );
+  }
+
+  /// Loads the authenticated user's applications across all events.
+  Future<void> loadMyApplications({
+    int page = 1,
+    int size = 20,
+  }) async {
+    emit(const ApplicationsLoading());
+    final result = await getMyApplications(
+      GetMyApplicationsParams(page: page, size: size),
+    );
+    result.fold(
+      (failure) => emit(ApplicationsError(message: failure.message)),
+      (data) => emit(ApplicationsLoaded(applications: data)),
     );
   }
 }

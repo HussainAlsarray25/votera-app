@@ -11,6 +11,7 @@ import 'package:votera/core/network/auth_interceptor.dart';
 import 'package:votera/core/network/dio_api_client.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/core/router/app_router.dart';
+import 'package:votera/core/services/firebase_push_service.dart';
 import 'package:votera/features/authentication/data/services/token_service.dart';
 import 'package:votera/features/authentication/data/services/token_service_auth_provider.dart';
 import 'package:votera/features/authentication/di/auth_injection.dart';
@@ -74,7 +75,7 @@ Future<void> _initExternalDependencies(AppConfig config) async {
       // before the auth interceptor short-circuits on 401.
       if (config.enableLogging) {
         dio.interceptors.add(
-          PrettyDioLogger(compact: false),
+          PrettyDioLogger(compact: false, requestBody: true),
         );
       }
 
@@ -87,7 +88,8 @@ Future<void> _initExternalDependencies(AppConfig config) async {
       return dio;
     })
     ..registerLazySingleton<ApiClient>(() => DioApiClient(dio: sl<Dio>()))
-    ..registerLazySingleton<AppRouter>(AppRouter.new);
+    ..registerLazySingleton<AppRouter>(AppRouter.new)
+    ..registerLazySingleton<FirebasePushService>(FirebasePushService.new);
 }
 
 void _initCore() {

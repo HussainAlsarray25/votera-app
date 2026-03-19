@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/features/voting/domain/entities/tally_entity.dart';
 import 'package:votera/features/voting/domain/entities/vote_entity.dart';
 import 'package:votera/features/voting/domain/usecases/cast_vote.dart';
+import 'package:votera/features/voting/domain/usecases/get_event_votes.dart';
 import 'package:votera/features/voting/domain/usecases/get_my_votes.dart';
 import 'package:votera/features/voting/domain/usecases/get_vote_tally.dart';
 import 'package:votera/features/voting/domain/usecases/retract_vote.dart';
@@ -17,12 +18,14 @@ class VotingCubit extends Cubit<VotingState> {
     required this.getMyVotes,
     required this.getVoteTally,
     required this.retractVote,
+    required this.getEventVotes,
   }) : super(const VotingInitial());
 
   final CastVote castVote;
   final GetMyVotes getMyVotes;
   final GetVoteTally getVoteTally;
   final RetractVote retractVote;
+  final GetEventVotes getEventVotes;
 
   Future<void> loadMyVotes({required String eventId}) async {
     emit(const VotingLoading());
@@ -67,6 +70,17 @@ class VotingCubit extends Cubit<VotingState> {
     result.fold(
       (failure) => emit(VotingError(message: failure.message)),
       (_) => emit(const VoteRetracted()),
+    );
+  }
+
+  Future<void> loadEventVotes({required String eventId}) async {
+    emit(const VotingLoading());
+    final result = await getEventVotes(
+      GetEventVotesParams(eventId: eventId),
+    );
+    result.fold(
+      (failure) => emit(VotingError(message: failure.message)),
+      (votes) => emit(VotesLoaded(votes: votes)),
     );
   }
 }

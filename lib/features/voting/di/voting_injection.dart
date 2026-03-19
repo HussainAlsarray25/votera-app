@@ -5,6 +5,7 @@ import 'package:votera/features/voting/data/datasources/remote/voting_remote_dat
 import 'package:votera/features/voting/data/repositories/voting_repository_impl.dart';
 import 'package:votera/features/voting/domain/repositories/voting_repository.dart';
 import 'package:votera/features/voting/domain/usecases/cast_vote.dart';
+import 'package:votera/features/voting/domain/usecases/get_event_votes.dart';
 import 'package:votera/features/voting/domain/usecases/get_my_votes.dart';
 import 'package:votera/features/voting/domain/usecases/get_vote_tally.dart';
 import 'package:votera/features/voting/domain/usecases/retract_vote.dart';
@@ -19,6 +20,7 @@ void initVotingFeature(GetIt sl) {
         getMyVotes: sl<GetMyVotes>(),
         getVoteTally: sl<GetVoteTally>(),
         retractVote: sl<RetractVote>(),
+        getEventVotes: sl<GetEventVotes>(),
       ),
     )
     // Use cases
@@ -33,6 +35,9 @@ void initVotingFeature(GetIt sl) {
     )
     ..registerLazySingleton<RetractVote>(
       () => RetractVote(sl<VotingRepository>()),
+    )
+    ..registerLazySingleton<GetEventVotes>(
+      () => GetEventVotes(sl<VotingRepository>()),
     )
     // Repositories
     ..registerLazySingleton<VotingRepository>(

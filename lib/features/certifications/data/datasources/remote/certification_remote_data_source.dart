@@ -1,6 +1,7 @@
 import 'package:votera/core/network/api_client.dart';
 import 'package:votera/features/certifications/data/datasources/remote/certification_endpoints.dart';
 import 'package:votera/features/certifications/data/models/certification_model.dart';
+import 'package:votera/features/certifications/data/models/certification_upload_url_model.dart';
 import 'package:votera/features/certifications/domain/entities/certification_entity.dart';
 
 abstract class CertificationRemoteDataSource {
@@ -12,6 +13,13 @@ abstract class CertificationRemoteDataSource {
 
   /// GET /v1/certifications/my?type={type}
   Future<CertificationModel> getMyCertification(CertificationType type);
+
+  /// POST /v1/certifications/upload-url
+  Future<CertificationUploadUrlModel> getUploadUrl({
+    required String type,
+    required String fileName,
+    required String contentType,
+  });
 }
 
 class CertificationRemoteDataSourceImpl
@@ -44,5 +52,22 @@ class CertificationRemoteDataSourceImpl
       queryParameters: {'type': type.name},
     );
     return CertificationModel.fromJson(response.data!);
+  }
+
+  @override
+  Future<CertificationUploadUrlModel> getUploadUrl({
+    required String type,
+    required String fileName,
+    required String contentType,
+  }) async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      CertificationEndpoints.uploadUrl,
+      data: {
+        'type': type,
+        'file_name': fileName,
+        'content_type': contentType,
+      },
+    );
+    return CertificationUploadUrlModel.fromJson(response.data!);
   }
 }

@@ -11,7 +11,9 @@ import 'package:votera/features/teams/domain/usecases/get_team.dart';
 import 'package:votera/features/teams/domain/usecases/invite_member.dart';
 import 'package:votera/features/teams/domain/usecases/leave_team.dart';
 import 'package:votera/features/teams/domain/usecases/remove_member.dart';
+import 'package:votera/features/teams/domain/usecases/cancel_invitation.dart';
 import 'package:votera/features/teams/domain/usecases/respond_to_invitation.dart';
+import 'package:votera/features/teams/domain/usecases/search_teams.dart';
 import 'package:votera/features/teams/domain/usecases/transfer_leadership.dart';
 import 'package:votera/features/teams/domain/usecases/update_team.dart';
 
@@ -31,6 +33,8 @@ class TeamsCubit extends Cubit<TeamsState> {
     required this.leaveTeam,
     required this.removeMember,
     required this.transferLeadership,
+    required this.searchTeams,
+    required this.cancelInvitation,
   }) : super(const TeamsInitial());
 
   final CreateTeam createTeam;
@@ -44,6 +48,8 @@ class TeamsCubit extends Cubit<TeamsState> {
   final LeaveTeam leaveTeam;
   final RemoveMember removeMember;
   final TransferLeadership transferLeadership;
+  final SearchTeams searchTeams;
+  final CancelInvitation cancelInvitation;
 
   Future<void> create({required String name, String? description}) async {
     emit(const TeamsLoading());
@@ -165,6 +171,26 @@ class TeamsCubit extends Cubit<TeamsState> {
     emit(const TeamsLoading());
     final result = await transferLeadership(
       TransferLeadershipParams(teamId: teamId, newLeaderId: newLeaderId),
+    );
+    result.fold(
+      (failure) => emit(TeamsError(message: failure.message)),
+      (_) => emit(const TeamsActionSuccess()),
+    );
+  }
+
+  Future<void> search({required String query}) async {
+    emit(const TeamsLoading());
+    final result = await searchTeams(SearchTeamsParams(query: query));
+    result.fold(
+      (failure) => emit(TeamsError(message: failure.message)),
+      (teams) => emit(TeamsSearchResults(teams: teams)),
+    );
+  }
+
+  Future<void> revokeInvitation({required String invitationId}) async {
+    emit(const TeamsLoading());
+    final result = await cancelInvitation(
+      CancelInvitationParams(invitationId: invitationId),
     );
     result.fold(
       (failure) => emit(TeamsError(message: failure.message)),

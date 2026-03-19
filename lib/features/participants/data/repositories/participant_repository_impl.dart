@@ -74,4 +74,20 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
       return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
+
+  @override
+  Future<Either<Failure, PaginatedResponse<ApplicationEntity>>> getMyApplications({
+    required int page,
+    required int size,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final result = await remote.getMyApplications(page: page, size: size);
+      return Right(result);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
 }

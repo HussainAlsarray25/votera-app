@@ -4,6 +4,7 @@ import 'package:votera/core/network/network_info.dart';
 import 'package:votera/features/participants/data/datasources/remote/participant_remote_data_source.dart';
 import 'package:votera/features/participants/data/repositories/participant_repository_impl.dart';
 import 'package:votera/features/participants/domain/repositories/participant_repository.dart';
+import 'package:votera/features/participants/domain/usecases/get_my_applications.dart';
 import 'package:votera/features/participants/domain/usecases/get_my_participation.dart';
 import 'package:votera/features/participants/domain/usecases/get_participants.dart';
 import 'package:votera/features/participants/domain/usecases/register_for_event.dart';
@@ -19,6 +20,7 @@ void initParticipantsFeature(GetIt sl) {
         getApplications: sl<GetApplications>(),
         submitApplication: sl<SubmitApplication>(),
         getMyApplication: sl<GetMyApplication>(),
+        getMyApplications: sl<GetMyApplications>(),
       ),
     )
     // Use cases
@@ -30,6 +32,9 @@ void initParticipantsFeature(GetIt sl) {
     )
     ..registerLazySingleton<GetMyApplication>(
       () => GetMyApplication(sl<ApplicationRepository>()),
+    )
+    ..registerLazySingleton<GetMyApplications>(
+      () => GetMyApplications(sl<ApplicationRepository>()),
     )
     // Repositories
     ..registerLazySingleton<ApplicationRepository>(

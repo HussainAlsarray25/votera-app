@@ -1,0 +1,6662 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "Identity and authorization service for the Votera platform.",
+    "title": "Votera API",
+    "contact": {},
+    "version": "1.0"
+  },
+  "paths": {
+    "/v1/applications/my": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "applications"
+        ],
+        "summary": "List all registrations for the current user (across all events)",
+        "parameters": [
+          {
+            "description": "Page",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Size",
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_event_applications_dto_v1.ListApplicationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/login": {
+      "post": {
+        "description": "Authenticate user via Email (return tokens) or Phone (send OTP)",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login user (Client/Admin)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.LoginRequest"
+              }
+            }
+          },
+          "description": "Login credentials",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.AuthResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/login/verify": {
+      "post": {
+        "description": "Verify OTP and login user",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Verify login (Client/Admin)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.VerifyLoginRequest"
+              }
+            }
+          },
+          "description": "Verify login request",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.AuthResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/logout": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Logout user and invalidate tokens",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Logout user (Client/Admin)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/password/change": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Change the authenticated user's password",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Change password (Client/Admin)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.ChangePasswordRequest"
+              }
+            }
+          },
+          "description": "Password change data",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/password/change/{id}": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Change a specific user's password (admin function)",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Change user password (bypass old password check) (Admin)",
+        "parameters": [
+          {
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.AdminChangePasswordRequest"
+              }
+            }
+          },
+          "description": "New password",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/password/reset": {
+      "post": {
+        "description": "Initiate password reset by sending a reset email",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Reset password (Client/Admin)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.ResetPasswordRequest"
+              }
+            }
+          },
+          "description": "Password reset request",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/password/reset-confirm": {
+      "post": {
+        "description": "Complete password reset using the token sent via email",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Confirm password reset (Client/Admin)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.ResetPasswordConfirmRequest"
+              }
+            }
+          },
+          "description": "Password reset confirmation",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/refresh": {
+      "post": {
+        "description": "Get a new access token using refresh token",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Refresh access token (Client/Admin)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.RefreshTokenRequest"
+              }
+            }
+          },
+          "description": "Refresh token (optional if in cookie)"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.AuthResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/register": {
+      "post": {
+        "description": "Register a new user with username, email, password, and display name",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Register a new user (Client)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.RegisterRequest"
+              }
+            }
+          },
+          "description": "User registration details",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.AuthResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/sessions": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Retrieve paginated active sessions for the authenticated user with filtering options",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Get active sessions (Admin)",
+        "parameters": [
+          {
+            "description": "Page number (min: 1)",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page size (min: 1, max: 100)",
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Filter by customer status",
+            "name": "is_customer",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Search in device_id, user_agent, or ip_address",
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/votera_app_api_pkg_response.PaginatedDataSwagger"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "items": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.SessionResponse"
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/sessions/{id}": {
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Revoke a specific active session",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Revoke session (Admin)",
+        "parameters": [
+          {
+            "description": "Session ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/categories": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "List categories",
+        "parameters": [
+          {
+            "description": "Page",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Size",
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_categories_dto_v1.ListCategoriesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "categories"
+        ],
+        "summary": "Create a category",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_categories_dto_v1.CreateCategoryRequest"
+              }
+            }
+          },
+          "description": "Category data",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_categories_dto_v1.CategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/categories/{id}": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "Get a category",
+        "parameters": [
+          {
+            "description": "Category ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_categories_dto_v1.CategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "categories"
+        ],
+        "summary": "Update a category",
+        "parameters": [
+          {
+            "description": "Category ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_categories_dto_v1.UpdateCategoryRequest"
+              }
+            }
+          },
+          "description": "Category data",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_categories_dto_v1.CategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "categories"
+        ],
+        "summary": "Delete a category",
+        "parameters": [
+          {
+            "description": "Category ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/certifications": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "certifications"
+        ],
+        "summary": "List pending certification requests (admin only)",
+        "parameters": [
+          {
+            "description": "Page",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Size",
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_certifications_dto_v1.ListCertificationsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "certifications"
+        ],
+        "summary": "Submit a certification request",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_certifications_dto_v1.SubmitCertificationRequest"
+              }
+            }
+          },
+          "description": "Request data",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_certifications_dto_v1.CertificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/certifications/my": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "certifications"
+        ],
+        "summary": "Get own certification request",
+        "parameters": [
+          {
+            "description": "Certification type (participant|supervisor)",
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_certifications_dto_v1.CertificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/certifications/upload-url": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "certifications"
+        ],
+        "summary": "Get a presigned URL to upload a certification document",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_certifications_dto_v1.CertDocumentUploadRequest"
+              }
+            }
+          },
+          "description": "Upload request",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_certifications_dto_v1.CertDocumentUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/certifications/{id}/review": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "certifications"
+        ],
+        "summary": "Approve or reject a certification request (admin only)",
+        "parameters": [
+          {
+            "description": "Request ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_certifications_dto_v1.ReviewCertificationRequest"
+              }
+            }
+          },
+          "description": "Review data",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_certifications_dto_v1.CertificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events": {
+      "get": {
+        "tags": [
+          "events"
+        ],
+        "summary": "List events",
+        "parameters": [
+          {
+            "description": "Filter by status (draft|open|voting|closed|archived)",
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by organizer UUID",
+            "name": "organizer_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter events starting after this time (RFC3339)",
+            "name": "start_after",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter events starting before this time (RFC3339)",
+            "name": "start_before",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page number",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page size",
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_events_dto_v1.ListEventsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Create event",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_events_dto_v1.CreateEventRequest"
+              }
+            }
+          },
+          "description": "Event data",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_events_dto_v1.EventResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/applications": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "applications"
+        ],
+        "summary": "List all registrations for an event (organizer only)",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by status (pending|approved|rejected)",
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Size",
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_event_applications_dto_v1.ListApplicationsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "applications"
+        ],
+        "summary": "Register a team for an event",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_event_applications_dto_v1.SubmitApplicationRequest"
+              }
+            }
+          },
+          "description": "Registration data",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_event_applications_dto_v1.ApplicationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/applications/my": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "applications"
+        ],
+        "summary": "Get team's registration for an event",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Team ID",
+            "name": "team_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_event_applications_dto_v1.ApplicationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/leaderboard": {
+      "get": {
+        "tags": [
+          "leaderboard"
+        ],
+        "summary": "Get live leaderboard for event",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_leaderboard_dto_v1.LeaderboardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/leaderboard/final": {
+      "get": {
+        "tags": [
+          "leaderboard"
+        ],
+        "summary": "Get final results for event",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_leaderboard_dto_v1.FinalResultsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/leaderboard/publish": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "leaderboard"
+        ],
+        "summary": "Publish final results for event (organizer only)",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_leaderboard_dto_v1.FinalResultsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/projects": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "List projects for event",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by title (partial match)",
+            "name": "title",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by status (draft|submitted)",
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Size",
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.ListProjectsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "summary": "Submit project",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.SubmitProjectRequest"
+              }
+            }
+          },
+          "description": "Project data",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.ProjectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/projects/submissions": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "summary": "List submitted projects awaiting organizer review",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Size",
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.ListProjectsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/projects/{id}": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Get project by ID",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Project ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.ProjectResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "summary": "Update project",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Project ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.UpdateProjectRequest"
+              }
+            }
+          },
+          "description": "Project data",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.ProjectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/projects/{id}/cancel": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "summary": "Cancel a submitted project back to draft",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Project ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.ProjectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/projects/{id}/categories/{category_id}": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "summary": "Add a category to a project",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Project ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Category ID",
+            "name": "category_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "summary": "Remove a category from a project",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Project ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Category ID",
+            "name": "category_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/projects/{id}/media/upload-url": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "summary": "Get presigned upload URL for project media",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Project ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.UploadURLRequest"
+              }
+            }
+          },
+          "description": "Upload request",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.UploadURLResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/projects/{id}/media/{media_id}": {
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "summary": "Delete a media file from a draft project",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Project ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Media ID",
+            "name": "media_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/projects/{id}/review": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "summary": "Accept or reject a submitted project (organizer only)",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Project ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.ReviewProjectRequest"
+              }
+            }
+          },
+          "description": "Review data",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.ProjectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/projects/{id}/submit": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "summary": "Finalize (submit) a draft project",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Project ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.ProjectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/votes": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "voting"
+        ],
+        "summary": "List votes for event",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Size",
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/votera_app_api_internal_modules_voting_dto_v1.VoteResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "voting"
+        ],
+        "summary": "Cast a vote",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_voting_dto_v1.CastVoteRequest"
+              }
+            }
+          },
+          "description": "Vote data",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_voting_dto_v1.VoteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/votes/my": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "voting"
+        ],
+        "summary": "Get my votes for event",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/votera_app_api_internal_modules_voting_dto_v1.VoteResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/votes/tally": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "voting"
+        ],
+        "summary": "Get vote tally for event",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_voting_dto_v1.TallyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/votes/{id}": {
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "voting"
+        ],
+        "summary": "Retract a vote",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Vote ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/events/{id}": {
+      "get": {
+        "tags": [
+          "events"
+        ],
+        "summary": "Get event by ID",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_events_dto_v1.EventResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Update event",
+        "parameters": [
+          {
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_events_dto_v1.UpdateEventRequest"
+              }
+            }
+          },
+          "description": "Event data",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_events_dto_v1.EventResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/notifications": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ],
+        "summary": "List notifications for the current user",
+        "parameters": [
+          {
+            "description": "Page number",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "description": "Items per page",
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "description": "Only unread items",
+            "name": "unread_only",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/notifications/read-all": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Mark all notifications as read",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/notifications/tokens": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Register a device token for push notifications",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_notifications_dto_v1.RegisterTokenRequest"
+              }
+            }
+          },
+          "description": "Token data",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/notifications/tokens/{token}": {
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Remove a device token",
+        "parameters": [
+          {
+            "description": "FCM device token",
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/notifications/unread-count": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Get unread notification count",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/notifications/{id}/read": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Mark a notification as read",
+        "parameters": [
+          {
+            "description": "Notification ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/permissions": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Retrieve a list of all system permissions",
+        "tags": [
+          "Permissions"
+        ],
+        "summary": "List all permissions (Admin)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.PermissionResponse"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/projects/{project_id}/comments": {
+      "get": {
+        "tags": [
+          "ratings"
+        ],
+        "summary": "List comments for a project",
+        "parameters": [
+          {
+            "description": "Project ID",
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Size",
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_ratings_dto_v1.ListCommentsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "ratings"
+        ],
+        "summary": "Add a comment (with optional rating) to a project",
+        "parameters": [
+          {
+            "description": "Project ID",
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_ratings_dto_v1.AddCommentRequest"
+              }
+            }
+          },
+          "description": "Comment data",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_ratings_dto_v1.CommentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/projects/{project_id}/comments/{id}": {
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "ratings"
+        ],
+        "summary": "Delete own comment from a project",
+        "parameters": [
+          {
+            "description": "Project ID",
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comment ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/projects/{project_id}/rating": {
+      "get": {
+        "tags": [
+          "ratings"
+        ],
+        "summary": "Get rating summary for a project",
+        "parameters": [
+          {
+            "description": "Project ID",
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_ratings_dto_v1.RatingSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "ratings"
+        ],
+        "summary": "Submit or update a project rating",
+        "parameters": [
+          {
+            "description": "Project ID",
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_ratings_dto_v1.RateRequest"
+              }
+            }
+          },
+          "description": "Rating data",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_ratings_dto_v1.RatingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/projects/{project_id}/rating/my": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "ratings"
+        ],
+        "summary": "Get the current user's rating for a project",
+        "parameters": [
+          {
+            "description": "Project ID",
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_ratings_dto_v1.RatingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/roles": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Retrieve a list of all system roles",
+        "tags": [
+          "Roles"
+        ],
+        "summary": "List all roles (Admin)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.RoleResponse"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Create a new system role with permissions",
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Create role (Admin)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.CreateRoleRequest"
+              }
+            }
+          },
+          "description": "Role creation data",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.RoleResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/roles/{id}": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Retrieve detailed information about a specific role",
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Get role by ID (Admin)",
+        "parameters": [
+          {
+            "description": "Role ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.RoleResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Delete a system role",
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Delete role (Admin)",
+        "parameters": [
+          {
+            "description": "Role ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Partially update role information and/or permissions (only provided fields)",
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Partially update role (Admin)",
+        "parameters": [
+          {
+            "description": "Role ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.UpdateRoleRequest"
+              }
+            }
+          },
+          "description": "Role partial update data",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.RoleResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/roles/{id}/permissions": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Assign one or more permissions to a role",
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Assign permissions to role (Admin)",
+        "parameters": [
+          {
+            "description": "Role ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.AssignPermissionsRequest"
+              }
+            }
+          },
+          "description": "Permissions to assign",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Remove one or more permissions from a role",
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Remove permissions from role (Admin)",
+        "parameters": [
+          {
+            "description": "Role ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.AssignPermissionsRequest"
+              }
+            }
+          },
+          "description": "Permissions to remove",
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/scan/{token}": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Look up a project by QR barcode token",
+        "parameters": [
+          {
+            "description": "Barcode token",
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.ProjectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/teams": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "summary": "List teams (optionally filter by name)",
+        "parameters": [
+          {
+            "description": "Name substring filter",
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.TeamResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "summary": "Create a team",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.CreateTeamRequest"
+              }
+            }
+          },
+          "description": "Team data",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.TeamResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/teams/invitations": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "summary": "List pending invitations for the current user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.InvitationResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/teams/invitations/{id}": {
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "summary": "Accept or decline an invitation",
+        "parameters": [
+          {
+            "description": "Invitation ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.RespondInviteRequest"
+              }
+            }
+          },
+          "description": "Response",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Returned on accept; null on decline",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.TeamResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/teams/my": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "summary": "Get current user's team",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.TeamResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/teams/my/leave": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "summary": "Leave the current team",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/teams/{id}": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "summary": "Get a team by ID",
+        "parameters": [
+          {
+            "description": "Team ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.TeamResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "summary": "Update team info (leader only)",
+        "parameters": [
+          {
+            "description": "Team ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.UpdateTeamRequest"
+              }
+            }
+          },
+          "description": "Update data",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.TeamResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "summary": "Disband a team (leader only)",
+        "parameters": [
+          {
+            "description": "Team ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/teams/{id}/invitations": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "summary": "Invite a user to the team (leader only)",
+        "parameters": [
+          {
+            "description": "Team ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.InviteRequest"
+              }
+            }
+          },
+          "description": "Invite data",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.InvitationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/teams/{id}/invitations/{inv_id}": {
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "summary": "Cancel a pending invitation (leader only)",
+        "parameters": [
+          {
+            "description": "Team ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Invitation ID",
+            "name": "inv_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/teams/{id}/members/{member_id}": {
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "summary": "Remove a member from the team (leader only)",
+        "parameters": [
+          {
+            "description": "Team ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Member user ID",
+            "name": "member_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/teams/{id}/transfer-leadership": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "teams"
+        ],
+        "summary": "Transfer team leadership (leader only)",
+        "parameters": [
+          {
+            "description": "Team ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.TransferLeaderRequest"
+              }
+            }
+          },
+          "description": "New leader",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.TeamResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Retrieve a paginated list of users",
+        "tags": [
+          "Users"
+        ],
+        "summary": "List all users (Admin)",
+        "parameters": [
+          {
+            "description": "Page number",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "description": "Page size",
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "description": "Filter by status",
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "suspended",
+                "deleted"
+              ]
+            }
+          },
+          {
+            "description": "Search term",
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by is_customer",
+            "name": "is_customer",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/votera_app_api_pkg_response.PaginatedDataSwagger"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "items": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.UserResponse"
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Create a new user account with optional network identifiers",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create user (Admin)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.CreateUserRequest"
+              }
+            }
+          },
+          "description": "User creation data",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.GetUserResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/me": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get the authenticated user's profile with roles",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get current user profile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.GetUserProfileResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Update the authenticated user's profile information",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update current user profile (Client/Admin)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.UpdateUserProfileRequest"
+              }
+            }
+          },
+          "description": "Profile update data",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.GetUserProfileResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/{id}": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Retrieve detailed information about a specific user",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get user by ID (Admin)",
+        "parameters": [
+          {
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.GetUserResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Update user information",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update user (Admin)",
+        "parameters": [
+          {
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.UpdateUserRequest"
+              }
+            }
+          },
+          "description": "User update data",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.GetUserResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Soft delete a user account",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Delete user (Admin)",
+        "parameters": [
+          {
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Partially update user status or active state",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Partially update user (Admin)",
+        "parameters": [
+          {
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.PatchUserRequest"
+              }
+            }
+          },
+          "description": "Partial user update data",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.GetUserResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/{id}/permanently": {
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Permanently delete a user account and all related data",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Permanently delete user (Admin)",
+        "parameters": [
+          {
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/{id}/permissions": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "List permissions directly assigned to a user",
+        "tags": [
+          "Users"
+        ],
+        "summary": "List user permissions (Admin)",
+        "parameters": [
+          {
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.PermissionResponse"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Assign one or more permissions directly to a user",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Assign permissions to user (Admin)",
+        "parameters": [
+          {
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.AssignUserPermissionsRequest"
+              }
+            }
+          },
+          "description": "Permissions to assign",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Remove one or more direct permissions from a user",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Remove permissions from user (Admin)",
+        "parameters": [
+          {
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.RemoveUserPermissionsRequest"
+              }
+            }
+          },
+          "description": "Permissions to remove",
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/{id}/roles": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Assign one or more roles to a user",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Assign roles to user (Admin)",
+        "parameters": [
+          {
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.AssignRolesRequest"
+              }
+            }
+          },
+          "description": "Roles to assign",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Remove one or more roles from a user",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Remove roles from user (Admin)",
+        "parameters": [
+          {
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.RemoveRolesRequest"
+              }
+            }
+          },
+          "description": "Roles to remove",
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "votera_app_api_internal_modules_categories_dto_v1.CategoryResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_categories_dto_v1.CreateCategoryRequest": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 2
+          }
+        }
+      },
+      "votera_app_api_internal_modules_categories_dto_v1.ListCategoriesResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_categories_dto_v1.CategoryResponse"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_categories_dto_v1.UpdateCategoryRequest": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 2
+          }
+        }
+      },
+      "votera_app_api_internal_modules_certifications_domain.CertificationStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "rejected"
+        ],
+        "x-enum-varnames": [
+          "CertificationStatusPending",
+          "CertificationStatusApproved",
+          "CertificationStatusRejected"
+        ]
+      },
+      "votera_app_api_internal_modules_certifications_domain.CertificationType": {
+        "type": "string",
+        "enum": [
+          "participant",
+          "supervisor"
+        ],
+        "x-enum-varnames": [
+          "CertificationTypeParticipant",
+          "CertificationTypeSupervisor"
+        ]
+      },
+      "votera_app_api_internal_modules_certifications_dto_v1.CertDocumentUploadRequest": {
+        "type": "object",
+        "required": [
+          "file_name"
+        ],
+        "properties": {
+          "file_name": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_certifications_dto_v1.CertDocumentUploadResponse": {
+        "type": "object",
+        "properties": {
+          "public_url": {
+            "type": "string"
+          },
+          "upload_url": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_certifications_dto_v1.CertificationResponse": {
+        "type": "object",
+        "properties": {
+          "document_url": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "rejection_note": {
+            "type": "string"
+          },
+          "reviewed_at": {
+            "type": "string"
+          },
+          "reviewed_by": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/votera_app_api_internal_modules_certifications_domain.CertificationStatus"
+          },
+          "submitted_at": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/votera_app_api_internal_modules_certifications_domain.CertificationType"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_certifications_dto_v1.ListCertificationsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_certifications_dto_v1.CertificationResponse"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_certifications_dto_v1.ReviewCertificationRequest": {
+        "type": "object",
+        "properties": {
+          "approve": {
+            "type": "boolean"
+          },
+          "rejection_note": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_certifications_dto_v1.SubmitCertificationRequest": {
+        "type": "object",
+        "required": [
+          "document_url",
+          "type"
+        ],
+        "properties": {
+          "document_url": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/votera_app_api_internal_modules_certifications_domain.CertificationType"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_event_applications_domain.ApplicationStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "rejected"
+        ],
+        "x-enum-varnames": [
+          "ApplicationStatusPending",
+          "ApplicationStatusApproved",
+          "ApplicationStatusRejected"
+        ]
+      },
+      "votera_app_api_internal_modules_event_applications_dto_v1.ApplicationResponse": {
+        "type": "object",
+        "properties": {
+          "applied_at": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/votera_app_api_internal_modules_event_applications_domain.ApplicationStatus"
+          },
+          "team_id": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_event_applications_dto_v1.ListApplicationsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_event_applications_dto_v1.ApplicationResponse"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_event_applications_dto_v1.SubmitApplicationRequest": {
+        "type": "object",
+        "required": [
+          "team_id"
+        ],
+        "properties": {
+          "team_id": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_events_domain.EventStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "open",
+          "voting",
+          "closed",
+          "archived"
+        ],
+        "x-enum-varnames": [
+          "EventStatusDraft",
+          "EventStatusOpen",
+          "EventStatusVoting",
+          "EventStatusClosed",
+          "EventStatusArchived"
+        ]
+      },
+      "votera_app_api_internal_modules_events_dto_v1.CreateEventRequest": {
+        "type": "object",
+        "required": [
+          "end_at",
+          "start_at",
+          "title"
+        ],
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "end_at": {
+            "type": "string"
+          },
+          "max_community_votes": {
+            "type": "integer"
+          },
+          "max_supervisor_votes": {
+            "type": "integer"
+          },
+          "max_team_size": {
+            "type": "integer"
+          },
+          "min_team_size": {
+            "type": "integer"
+          },
+          "start_at": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 3
+          },
+          "voting_end": {
+            "type": "string"
+          },
+          "voting_start": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_events_dto_v1.EventResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "end_at": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "max_community_votes": {
+            "type": "integer"
+          },
+          "max_supervisor_votes": {
+            "type": "integer"
+          },
+          "max_team_size": {
+            "type": "integer"
+          },
+          "min_team_size": {
+            "type": "integer"
+          },
+          "organizer_id": {
+            "type": "string"
+          },
+          "start_at": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/votera_app_api_internal_modules_events_domain.EventStatus"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "voting_end": {
+            "type": "string"
+          },
+          "voting_start": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_events_dto_v1.ListEventsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_events_dto_v1.EventResponse"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_events_dto_v1.UpdateEventRequest": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "end_at": {
+            "type": "string"
+          },
+          "max_community_votes": {
+            "type": "integer"
+          },
+          "max_supervisor_votes": {
+            "type": "integer"
+          },
+          "max_team_size": {
+            "type": "integer"
+          },
+          "min_team_size": {
+            "type": "integer"
+          },
+          "start_at": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "voting_end": {
+            "type": "string"
+          },
+          "voting_start": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.AdminChangePasswordRequest": {
+        "type": "object",
+        "required": [
+          "new_password"
+        ],
+        "properties": {
+          "new_password": {
+            "type": "string",
+            "minLength": 6
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.AssignPermissionsRequest": {
+        "type": "object",
+        "required": [
+          "permission_ids"
+        ],
+        "properties": {
+          "permission_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.AssignRolesRequest": {
+        "type": "object",
+        "required": [
+          "role_ids"
+        ],
+        "properties": {
+          "role_ids": {
+            "type": "array",
+            "maxItems": 50,
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.AssignUserPermissionsRequest": {
+        "type": "object",
+        "required": [
+          "permissions"
+        ],
+        "properties": {
+          "permissions": {
+            "type": "array",
+            "maxItems": 50,
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.AuthResponse": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "refresh_token": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.ChangePasswordRequest": {
+        "type": "object",
+        "required": [
+          "new_password",
+          "old_password"
+        ],
+        "properties": {
+          "new_password": {
+            "type": "string",
+            "minLength": 6
+          },
+          "old_password": {
+            "type": "string",
+            "minLength": 6
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.CreateRoleRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "permission_ids"
+        ],
+        "properties": {
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 2
+          },
+          "permission_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.CreateUserRequest": {
+        "type": "object",
+        "required": [
+          "full_name"
+        ],
+        "properties": {
+          "email": {
+            "description": "Optional if NetworkIdentifier is present",
+            "type": "string",
+            "maxLength": 255
+          },
+          "full_name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "network_identifier": {
+            "description": "IMSI or Phone to lookup in OCS",
+            "type": "string",
+            "maxLength": 30,
+            "minLength": 5
+          },
+          "password": {
+            "description": "Optional for network-only users, required if email",
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8
+          },
+          "role_ids": {
+            "description": "Optional: assign specific roles; defaults to visitor if empty",
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.GetUserProfileResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "roles": {
+            "description": "IsActive removed",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.RoleResponse"
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.GetUserResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "direct_permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.PermissionResponse"
+            }
+          },
+          "email": {
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "roles": {
+            "description": "IsActive removed",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.RoleResponse"
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.LoginRequest": {
+        "type": "object",
+        "required": [
+          "identifier"
+        ],
+        "properties": {
+          "identifier": {
+            "description": "Email or Phone Number",
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 3
+          },
+          "secret": {
+            "description": "Password (required for email)",
+            "type": "string",
+            "maxLength": 255
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.PatchUserRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "suspended",
+              "deleted"
+            ]
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.PermissionResponse": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.RefreshTokenRequest": {
+        "type": "object",
+        "required": [
+          "refresh_token"
+        ],
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 10
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.RegisterRequest": {
+        "type": "object",
+        "required": [
+          "display_name",
+          "email",
+          "password",
+          "username"
+        ],
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8
+          },
+          "username": {
+            "type": "string",
+            "maxLength": 30,
+            "minLength": 3
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.RemoveRolesRequest": {
+        "type": "object",
+        "required": [
+          "role_ids"
+        ],
+        "properties": {
+          "role_ids": {
+            "type": "array",
+            "maxItems": 50,
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.RemoveUserPermissionsRequest": {
+        "type": "object",
+        "required": [
+          "permissions"
+        ],
+        "properties": {
+          "permissions": {
+            "type": "array",
+            "maxItems": 50,
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.ResetPasswordConfirmRequest": {
+        "type": "object",
+        "required": [
+          "new_password",
+          "token"
+        ],
+        "properties": {
+          "new_password": {
+            "type": "string",
+            "minLength": 6
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.ResetPasswordRequest": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.RoleResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "is_system": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.PermissionResponse"
+            }
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.SessionResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "device_id": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "ip_address": {
+            "type": "string"
+          },
+          "is_current": {
+            "type": "boolean"
+          },
+          "user_agent": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.UpdateRoleRequest": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 2
+          },
+          "permission_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.UpdateUserProfileRequest": {
+        "type": "object",
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.UpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "role_ids": {
+            "description": "IsActive removed",
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "suspended",
+              "deleted"
+            ]
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.UserResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "direct_permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.PermissionResponse"
+            }
+          },
+          "email": {
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.RoleResponse"
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_identity_dto_v1.VerifyLoginRequest": {
+        "type": "object",
+        "required": [
+          "code",
+          "identifier"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "identifier": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 3
+          }
+        }
+      },
+      "votera_app_api_internal_modules_leaderboard_domain.LeaderboardEntry": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "rank": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "vote_count": {
+            "type": "integer"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_leaderboard_dto_v1.FinalResultsResponse": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_leaderboard_domain.LeaderboardEntry"
+            }
+          },
+          "event_id": {
+            "type": "string"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "results_published_at": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_leaderboard_dto_v1.LeaderboardResponse": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_leaderboard_domain.LeaderboardEntry"
+            }
+          },
+          "event_id": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_notifications_dto_v1.RegisterTokenRequest": {
+        "type": "object",
+        "required": [
+          "platform",
+          "token"
+        ],
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": [
+              "ios",
+              "android",
+              "web"
+            ]
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_projects_domain.ProjectStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "submitted",
+          "accepted",
+          "rejected"
+        ],
+        "x-enum-varnames": [
+          "ProjectStatusDraft",
+          "ProjectStatusSubmitted",
+          "ProjectStatusAccepted",
+          "ProjectStatusRejected"
+        ]
+      },
+      "votera_app_api_internal_modules_projects_dto_v1.ListProjectsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.ProjectResponse"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_projects_dto_v1.ProjectMediaResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "file_key": {
+            "type": "string"
+          },
+          "file_type": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "project_id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_projects_dto_v1.ProjectResponse": {
+        "type": "object",
+        "properties": {
+          "barcode_token": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "demo_url": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_dto_v1.ProjectMediaResponse"
+            }
+          },
+          "poster_url": {
+            "type": "string"
+          },
+          "presentation_url": {
+            "type": "string"
+          },
+          "repo_url": {
+            "type": "string"
+          },
+          "review_note": {
+            "type": "string"
+          },
+          "reviewed_at": {
+            "type": "string"
+          },
+          "reviewed_by": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/votera_app_api_internal_modules_projects_domain.ProjectStatus"
+          },
+          "team_id": {
+            "type": "string"
+          },
+          "tech_stack": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_projects_dto_v1.ReviewProjectRequest": {
+        "type": "object",
+        "properties": {
+          "approve": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_projects_dto_v1.SubmitProjectRequest": {
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "demo_url": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "poster_url": {
+            "type": "string"
+          },
+          "presentation_url": {
+            "type": "string"
+          },
+          "repo_url": {
+            "type": "string"
+          },
+          "tech_stack": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 3
+          }
+        }
+      },
+      "votera_app_api_internal_modules_projects_dto_v1.UpdateProjectRequest": {
+        "type": "object",
+        "properties": {
+          "demo_url": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "poster_url": {
+            "type": "string"
+          },
+          "presentation_url": {
+            "type": "string"
+          },
+          "repo_url": {
+            "type": "string"
+          },
+          "tech_stack": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_projects_dto_v1.UploadURLRequest": {
+        "type": "object",
+        "required": [
+          "file_name"
+        ],
+        "properties": {
+          "file_name": {
+            "type": "string"
+          },
+          "file_type": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_projects_dto_v1.UploadURLResponse": {
+        "type": "object",
+        "properties": {
+          "public_url": {
+            "type": "string"
+          },
+          "upload_url": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_ratings_dto_v1.AddCommentRequest": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "description": "optional 1-5",
+            "type": "integer"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_ratings_dto_v1.CommentResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "project_id": {
+            "type": "string"
+          },
+          "score": {
+            "type": "integer"
+          },
+          "text": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_ratings_dto_v1.ListCommentsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_ratings_dto_v1.CommentResponse"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_ratings_dto_v1.RateRequest": {
+        "type": "object",
+        "required": [
+          "score"
+        ],
+        "properties": {
+          "score": {
+            "type": "integer",
+            "maximum": 5,
+            "minimum": 1
+          }
+        }
+      },
+      "votera_app_api_internal_modules_ratings_dto_v1.RatingResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "project_id": {
+            "type": "string"
+          },
+          "score": {
+            "type": "integer"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_ratings_dto_v1.RatingSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "average_score": {
+            "type": "number"
+          },
+          "project_id": {
+            "type": "string"
+          },
+          "total_ratings": {
+            "type": "integer"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_teams_domain.InvitationStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "accepted",
+          "declined"
+        ],
+        "x-enum-varnames": [
+          "InvitationStatusPending",
+          "InvitationStatusAccepted",
+          "InvitationStatusDeclined"
+        ]
+      },
+      "votera_app_api_internal_modules_teams_dto_v1.CreateTeamRequest": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 2
+          }
+        }
+      },
+      "votera_app_api_internal_modules_teams_dto_v1.InvitationResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "invited_by": {
+            "type": "string"
+          },
+          "invitee_id": {
+            "type": "string"
+          },
+          "responded_at": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_domain.InvitationStatus"
+          },
+          "team_id": {
+            "type": "string"
+          },
+          "team_name": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_teams_dto_v1.InviteRequest": {
+        "type": "object",
+        "properties": {
+          "invitee_email": {
+            "type": "string"
+          },
+          "invitee_id": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_teams_dto_v1.MemberResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "joined_at": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_teams_dto_v1.RespondInviteRequest": {
+        "type": "object",
+        "properties": {
+          "accept": {
+            "type": "boolean"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_teams_dto_v1.TeamResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "leader_id": {
+            "type": "string"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_teams_dto_v1.MemberResponse"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_teams_dto_v1.TransferLeaderRequest": {
+        "type": "object",
+        "required": [
+          "new_leader_id"
+        ],
+        "properties": {
+          "new_leader_id": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_teams_dto_v1.UpdateTeamRequest": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_voting_domain.ProjectTally": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "vote_count": {
+            "type": "integer"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_voting_domain.VoteTrack": {
+        "type": "string",
+        "enum": [
+          "supervisor",
+          "community"
+        ],
+        "x-enum-varnames": [
+          "VoteTrackSupervisor",
+          "VoteTrackCommunity"
+        ]
+      },
+      "votera_app_api_internal_modules_voting_dto_v1.CastVoteRequest": {
+        "type": "object",
+        "required": [
+          "project_id"
+        ],
+        "properties": {
+          "project_id": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_voting_dto_v1.TallyResponse": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "string"
+          },
+          "tally": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/votera_app_api_internal_modules_voting_domain.ProjectTally"
+            }
+          }
+        }
+      },
+      "votera_app_api_internal_modules_voting_dto_v1.VoteResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "project_id": {
+            "type": "string"
+          },
+          "track": {
+            "$ref": "#/components/schemas/votera_app_api_internal_modules_voting_domain.VoteTrack"
+          },
+          "voter_id": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_pkg_response.ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "example": "NOT_FOUND"
+              },
+              "message": {
+                "type": "string",
+                "example": "resource not found"
+              }
+            }
+          },
+          "success": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "votera_app_api_pkg_response.Meta": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "pages": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "votera_app_api_pkg_response.PaginatedDataSwagger": {
+        "type": "object",
+        "properties": {
+          "items": {},
+          "meta": {
+            "$ref": "#/components/schemas/votera_app_api_pkg_response.Meta"
+          }
+        }
+      },
+      "votera_app_api_pkg_response.SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "data": {},
+          "message": {
+            "type": "string",
+            "example": "ok"
+          },
+          "success": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      }
+    }
+  }
+}

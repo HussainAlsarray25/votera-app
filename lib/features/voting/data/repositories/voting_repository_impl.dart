@@ -83,4 +83,20 @@ class VotingRepositoryImpl implements VotingRepository {
       return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
+
+  @override
+  Future<Either<Failure, List<VoteEntity>>> getEventVotes({
+    required String eventId,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final result = await remoteDataSource.getEventVotes(eventId: eventId);
+      final votes = result.map(VoteModel.fromJson).toList();
+      return Right(votes);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
 }

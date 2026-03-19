@@ -69,6 +69,11 @@ class ProjectCategoryUpdated extends ProjectsState {
   const ProjectCategoryUpdated();
 }
 
+/// Emitted after a media attachment is deleted from a project.
+class ProjectMediaDeleted extends ProjectsState {
+  const ProjectMediaDeleted();
+}
+
 class ProjectsError extends ProjectsState {
   const ProjectsError({required this.message});
 

@@ -45,4 +45,12 @@ abstract class TeamRepository {
     required String teamId,
     required String newLeaderId,
   });
+
+  Future<Either<Failure, List<TeamEntity>>> searchTeams({
+    required String query,
+  });
+
+  Future<Either<Failure, void>> cancelInvitation({
+    required String invitationId,
+  });
 }

@@ -210,4 +210,44 @@ class ProjectRepositoryImpl implements ProjectRepository {
       return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
+
+  @override
+  Future<Either<Failure, ProjectEntity>> cancelProject({
+    required String eventId,
+    required String projectId,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final project = await remoteDataSource.cancelProject(
+        eventId: eventId,
+        projectId: projectId,
+      );
+      return Right(project);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteProjectMedia({
+    required String eventId,
+    required String projectId,
+    required String mediaId,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      await remoteDataSource.deleteProjectMedia(
+        eventId: eventId,
+        projectId: projectId,
+        mediaId: mediaId,
+      );
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
 }

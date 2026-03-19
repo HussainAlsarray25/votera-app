@@ -21,4 +21,8 @@ abstract class VotingRepository {
     required String eventId,
     required String voteId,
   });
+
+  Future<Either<Failure, List<VoteEntity>>> getEventVotes({
+    required String eventId,
+  });
 }

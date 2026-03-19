@@ -27,4 +27,10 @@ abstract class ApplicationRepository {
     required String eventId,
     required String teamId,
   });
+
+  /// Returns the authenticated user's applications across all events.
+  Future<Either<Failure, PaginatedResponse<ApplicationEntity>>> getMyApplications({
+    required int page,
+    required int size,
+  });
 }

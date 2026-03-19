@@ -46,6 +46,10 @@ class AppRouter {
         ],
       ),
       GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationPage(),
+      ),
+      GoRoute(
         path: '/exhibition/:id',
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
@@ -55,10 +59,6 @@ class AppRouter {
       GoRoute(
         path: '/comments',
         builder: (context, state) => const CommentsPage(),
-      ),
-      GoRoute(
-        path: '/notifications',
-        builder: (context, state) => const NotificationPage(),
       ),
       GoRoute(
         path: '/project/:eventId/:projectId',

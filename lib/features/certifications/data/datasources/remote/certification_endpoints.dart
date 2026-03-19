@@ -5,4 +5,5 @@ class CertificationEndpoints {
 
   static const String certifications = 'certifications';
   static const String myCertification = 'certifications/my';
+  static const String uploadUrl = 'certifications/upload-url';
 }

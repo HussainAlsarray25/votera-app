@@ -22,4 +22,14 @@ class ProjectEndpoints {
 
   static String submitProject(String eventId, String projectId) =>
       'events/$eventId/projects/$projectId/submit';
+
+  static String cancelProject(String eventId, String projectId) =>
+      'events/$eventId/projects/$projectId/cancel';
+
+  static String projectMedia(
+    String eventId,
+    String projectId,
+    String mediaId,
+  ) =>
+      'events/$eventId/projects/$projectId/media/$mediaId';
 }

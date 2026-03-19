@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 import 'package:votera/features/projects/domain/entities/upload_url_entity.dart';
 import 'package:votera/features/projects/domain/usecases/add_project_category.dart';
+import 'package:votera/features/projects/domain/usecases/cancel_project.dart';
+import 'package:votera/features/projects/domain/usecases/delete_project_media.dart';
 import 'package:votera/features/projects/domain/usecases/finalize_project.dart';
 import 'package:votera/features/projects/domain/usecases/get_project_by_id.dart';
 import 'package:votera/features/projects/domain/usecases/get_projects.dart';
@@ -27,6 +29,8 @@ class ProjectsCubit extends Cubit<ProjectsState> {
     required this.addProjectCategory,
     required this.removeProjectCategory,
     required this.finalizeProject,
+    required this.cancelProject,
+    required this.deleteProjectMedia,
   }) : super(const ProjectsInitial());
 
   final GetProjects getProjects;
@@ -38,6 +42,8 @@ class ProjectsCubit extends Cubit<ProjectsState> {
   final AddProjectCategory addProjectCategory;
   final RemoveProjectCategory removeProjectCategory;
   final FinalizeProject finalizeProject;
+  final CancelProject cancelProject;
+  final DeleteProjectMedia deleteProjectMedia;
 
   Future<void> loadProjects({
     required String eventId,
@@ -205,6 +211,41 @@ class ProjectsCubit extends Cubit<ProjectsState> {
     result.fold(
       (failure) => emit(ProjectsError(message: failure.message)),
       (project) => emit(ProjectSaved(project: project)),
+    );
+  }
+
+  /// Cancels a submitted project.
+  Future<void> cancel({
+    required String eventId,
+    required String projectId,
+  }) async {
+    emit(const ProjectsLoading());
+    final result = await cancelProject(
+      CancelProjectParams(eventId: eventId, projectId: projectId),
+    );
+    result.fold(
+      (failure) => emit(ProjectsError(message: failure.message)),
+      (project) => emit(ProjectSaved(project: project)),
+    );
+  }
+
+  /// Deletes a media attachment from a project.
+  Future<void> removeMedia({
+    required String eventId,
+    required String projectId,
+    required String mediaId,
+  }) async {
+    emit(const ProjectsLoading());
+    final result = await deleteProjectMedia(
+      DeleteProjectMediaParams(
+        eventId: eventId,
+        projectId: projectId,
+        mediaId: mediaId,
+      ),
+    );
+    result.fold(
+      (failure) => emit(ProjectsError(message: failure.message)),
+      (_) => emit(const ProjectMediaDeleted()),
     );
   }
 }

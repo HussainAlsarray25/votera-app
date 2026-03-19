@@ -67,4 +67,17 @@ abstract class ProjectRepository {
     required String eventId,
     required String projectId,
   });
+
+  /// Cancels a submitted project.
+  Future<Either<Failure, ProjectEntity>> cancelProject({
+    required String eventId,
+    required String projectId,
+  });
+
+  /// Deletes a media attachment from a project.
+  Future<Either<Failure, void>> deleteProjectMedia({
+    required String eventId,
+    required String projectId,
+    required String mediaId,
+  });
 }

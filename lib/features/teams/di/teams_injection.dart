@@ -4,6 +4,7 @@ import 'package:votera/core/network/network_info.dart';
 import 'package:votera/features/teams/data/datasources/remote/team_remote_data_source.dart';
 import 'package:votera/features/teams/data/repositories/team_repository_impl.dart';
 import 'package:votera/features/teams/domain/repositories/team_repository.dart';
+import 'package:votera/features/teams/domain/usecases/cancel_invitation.dart';
 import 'package:votera/features/teams/domain/usecases/create_team.dart';
 import 'package:votera/features/teams/domain/usecases/delete_team.dart';
 import 'package:votera/features/teams/domain/usecases/get_my_invitations.dart';
@@ -13,6 +14,7 @@ import 'package:votera/features/teams/domain/usecases/invite_member.dart';
 import 'package:votera/features/teams/domain/usecases/leave_team.dart';
 import 'package:votera/features/teams/domain/usecases/remove_member.dart';
 import 'package:votera/features/teams/domain/usecases/respond_to_invitation.dart';
+import 'package:votera/features/teams/domain/usecases/search_teams.dart';
 import 'package:votera/features/teams/domain/usecases/transfer_leadership.dart';
 import 'package:votera/features/teams/domain/usecases/update_team.dart';
 import 'package:votera/features/teams/presentation/cubit/teams_cubit.dart';
@@ -34,6 +36,8 @@ void initTeamsFeature(GetIt sl) {
         leaveTeam: sl<LeaveTeam>(),
         removeMember: sl<RemoveMember>(),
         transferLeadership: sl<TransferLeadership>(),
+        searchTeams: sl<SearchTeams>(),
+        cancelInvitation: sl<CancelInvitation>(),
       ),
     )
     // Use cases
@@ -69,6 +73,12 @@ void initTeamsFeature(GetIt sl) {
     )
     ..registerLazySingleton<TransferLeadership>(
       () => TransferLeadership(sl<TeamRepository>()),
+    )
+    ..registerLazySingleton<SearchTeams>(
+      () => SearchTeams(sl<TeamRepository>()),
+    )
+    ..registerLazySingleton<CancelInvitation>(
+      () => CancelInvitation(sl<TeamRepository>()),
     )
     // Repositories
     ..registerLazySingleton<TeamRepository>(

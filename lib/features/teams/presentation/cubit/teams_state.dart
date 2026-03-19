@@ -42,6 +42,16 @@ class InvitationsLoaded extends TeamsState {
   List<Object?> get props => [invitations];
 }
 
+/// Emitted when a team search returns results.
+class TeamsSearchResults extends TeamsState {
+  const TeamsSearchResults({required this.teams});
+
+  final List<TeamEntity> teams;
+
+  @override
+  List<Object?> get props => [teams];
+}
+
 /// Emitted after a successful void action (delete, leave, remove, respond, transfer).
 class TeamsActionSuccess extends TeamsState {
   const TeamsActionSuccess();

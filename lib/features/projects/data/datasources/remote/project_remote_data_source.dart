@@ -66,6 +66,19 @@ abstract class ProjectRemoteDataSource {
     required String eventId,
     required String projectId,
   });
+
+  /// POST /v1/events/{event_id}/projects/{id}/cancel
+  Future<ProjectModel> cancelProject({
+    required String eventId,
+    required String projectId,
+  });
+
+  /// DELETE /v1/events/{event_id}/projects/{id}/media/{media_id}
+  Future<void> deleteProjectMedia({
+    required String eventId,
+    required String projectId,
+    required String mediaId,
+  });
 }
 
 class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
@@ -197,5 +210,27 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
       ProjectEndpoints.submitProject(eventId, projectId),
     );
     return ProjectModel.fromJson(response.data!);
+  }
+
+  @override
+  Future<ProjectModel> cancelProject({
+    required String eventId,
+    required String projectId,
+  }) async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      ProjectEndpoints.cancelProject(eventId, projectId),
+    );
+    return ProjectModel.fromJson(response.data!);
+  }
+
+  @override
+  Future<void> deleteProjectMedia({
+    required String eventId,
+    required String projectId,
+    required String mediaId,
+  }) async {
+    await apiClient.delete<void>(
+      ProjectEndpoints.projectMedia(eventId, projectId, mediaId),
+    );
   }
 }

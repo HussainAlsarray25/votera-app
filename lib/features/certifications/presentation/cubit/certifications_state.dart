@@ -24,6 +24,15 @@ class CertificationLoaded extends CertificationsState {
   List<Object?> get props => [certification];
 }
 
+class CertificationUploadUrlLoaded extends CertificationsState {
+  const CertificationUploadUrlLoaded({required this.uploadUrl});
+
+  final CertificationUploadUrlEntity uploadUrl;
+
+  @override
+  List<Object?> get props => [uploadUrl];
+}
+
 class CertificationsError extends CertificationsState {
   const CertificationsError({required this.message});
 

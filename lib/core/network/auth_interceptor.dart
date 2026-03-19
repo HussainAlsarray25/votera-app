@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:votera/core/domain/services/auth_token_provider.dart';
-import 'package:votera/features/authentication/data/datasources/remote/auth_endpoints.dart';
 
 class AuthInterceptor extends Interceptor {
   AuthInterceptor({
@@ -33,7 +32,7 @@ class AuthInterceptor extends Interceptor {
     ErrorInterceptorHandler handler,
   ) async {
     if (err.response?.statusCode == 401 &&
-        !_isRefreshRequest(err.requestOptions)) {
+        !_isAuthRequest(err.requestOptions)) {
       final currentRefreshToken = await authTokenProvider.getRefreshToken();
       final didRefresh = await _refreshToken();
 
@@ -60,8 +59,8 @@ class AuthInterceptor extends Interceptor {
     handler.next(err);
   }
 
-  bool _isRefreshRequest(RequestOptions options) {
-    return options.path.contains(AuthEndpoints.refresh);
+  bool _isAuthRequest(RequestOptions options) {
+    return options.path.contains('auth/');
   }
 
   Future<bool> _refreshToken() async {
@@ -72,7 +71,7 @@ class AuthInterceptor extends Interceptor {
       // Uses the same Dio instance so the base URL is prepended,
       // resulting in: {baseUrl}/auth/refresh
       final response = await dio.post<Map<String, dynamic>>(
-        AuthEndpoints.refresh,
+        'auth/refresh',
         data: {'refresh_token': refreshToken},
       );
 

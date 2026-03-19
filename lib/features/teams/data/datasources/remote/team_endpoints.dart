@@ -21,4 +21,9 @@ class TeamEndpoints {
 
   static String transferLeadership(String teamId) =>
       'teams/$teamId/transfer-leadership';
+
+  static const String searchTeams = 'teams/search';
+
+  static String cancelInvitation(String invitationId) =>
+      'teams/invitations/$invitationId/cancel';
 }

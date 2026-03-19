@@ -23,6 +23,12 @@ abstract class ApplicationRemoteDataSource {
     required String eventId,
     required String teamId,
   });
+
+  /// GET /v1/applications/my?page={page}&size={size}
+  Future<PaginatedResponse<ApplicationModel>> getMyApplications({
+    required int page,
+    required int size,
+  });
 }
 
 class ApplicationRemoteDataSourceImpl implements ApplicationRemoteDataSource {
@@ -68,5 +74,20 @@ class ApplicationRemoteDataSourceImpl implements ApplicationRemoteDataSource {
       queryParameters: {'team_id': teamId},
     );
     return ApplicationModel.fromJson(response.data!);
+  }
+
+  @override
+  Future<PaginatedResponse<ApplicationModel>> getMyApplications({
+    required int page,
+    required int size,
+  }) async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      ParticipantEndpoints.myApplications,
+      queryParameters: {'page': page, 'size': size},
+    );
+    return PaginatedResponse.fromJson(
+      response.data!,
+      ApplicationModel.fromJson,
+    );
   }
 }

@@ -15,6 +15,12 @@ abstract class TeamRemoteDataSource {
   Future<void> leaveTeam();
   Future<void> removeMember({required String teamId, required String memberId});
   Future<void> transferLeadership({required String teamId, required String newLeaderId});
+
+  /// GET /v1/teams/search?q={query}
+  Future<List<TeamModel>> searchTeams({required String query});
+
+  /// POST /v1/teams/invitations/{id}/cancel
+  Future<void> cancelInvitation({required String invitationId});
 }
 
 class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
@@ -124,6 +130,24 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
     await apiClient.post<void>(
       TeamEndpoints.transferLeadership(teamId),
       data: {'new_leader_id': newLeaderId},
+    );
+  }
+
+  @override
+  Future<List<TeamModel>> searchTeams({required String query}) async {
+    final response = await apiClient.get<List<dynamic>>(
+      TeamEndpoints.searchTeams,
+      queryParameters: {'q': query},
+    );
+    return (response.data ?? [])
+        .map((e) => TeamModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<void> cancelInvitation({required String invitationId}) async {
+    await apiClient.post<void>(
+      TeamEndpoints.cancelInvitation(invitationId),
     );
   }
 }

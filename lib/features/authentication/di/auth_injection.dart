@@ -17,7 +17,7 @@ import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dar
 void initAuthFeature(GetIt sl) {
   sl
     // Cubits
-    ..registerFactory<AuthCubit>(
+    ..registerLazySingleton<AuthCubit>(
       () => AuthCubit(
         loginUser: sl<LoginUser>(),
         registerUser: sl<RegisterUser>(),

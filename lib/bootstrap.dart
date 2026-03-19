@@ -2,10 +2,14 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:votera/core/di/injection_container.dart' as di;
+import 'package:votera/core/services/firebase_push_service.dart';
+import 'package:votera/features/notification/presentation/cubit/push_notification_cubit.dart';
+import 'package:votera/firebase_options.dart';
 
 class AppBlocObserver extends BlocObserver {
   const AppBlocObserver();
@@ -39,9 +43,24 @@ Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
       await _setupErrorHandling();
       await _setupSystemPreferences();
 
+      // Initialize Firebase before DI so services can use it.
+      // Use existing app on hot restart to avoid duplicate-app error.
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+      }
+
       Bloc.observer = const AppBlocObserver();
 
       await di.init();
+
+      // Initialize push service after DI is ready.
+      await di.sl<FirebasePushService>().initialize();
+
+      // Eagerly create PushNotificationCubit so it starts listening
+      // to auth state changes immediately.
+      di.sl<PushNotificationCubit>();
 
       runApp(await builder());
     },

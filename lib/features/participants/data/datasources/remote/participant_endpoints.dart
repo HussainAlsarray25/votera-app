@@ -8,4 +8,6 @@ class ParticipantEndpoints {
 
   static String myApplication(String eventId) =>
       'events/$eventId/applications/my';
+
+  static const String myApplications = 'applications/my';
 }
