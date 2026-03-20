@@ -19,6 +19,9 @@ class UnreadCountCubit extends Cubit<UnreadCountState> {
     );
   }
 
+  /// Resets to zero. Called on logout to clear stale session data.
+  void reset() => emit(const UnreadCountState(count: 0));
+
   /// Optimistic decrement when a single notification is marked as read.
   void decrement() {
     if (state.count > 0) {

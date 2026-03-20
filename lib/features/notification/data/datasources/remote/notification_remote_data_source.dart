@@ -20,8 +20,11 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
 
   @override
   Future<List<Map<String, dynamic>>> getNotifications() async {
-    final response = await apiClient.get<List<dynamic>>(NotificationEndpoints.notifications);
-    return (response.data ?? []).cast<Map<String, dynamic>>();
+    final response = await apiClient.get<Map<String, dynamic>>(
+      NotificationEndpoints.notifications,
+    );
+    final data = response.data?['data'] as List<dynamic>? ?? [];
+    return data.cast<Map<String, dynamic>>();
   }
 
   /// POST /v1/notifications/{id}/read

@@ -5,6 +5,8 @@ import 'package:votera/core/di/injection_container.dart' as di;
 import 'package:votera/features/notification/presentation/cubit/notification_cubit.dart';
 import 'package:votera/features/notification/presentation/cubit/unread_count_cubit.dart';
 import 'package:votera/features/notification/presentation/widgets/notification_list_tile.dart';
+import 'package:votera/shared/widgets/app_loading_indicator.dart';
+import 'package:votera/shared/widgets/empty_state.dart';
 
 class NotificationPage extends StatelessWidget {
   const NotificationPage({super.key});
@@ -49,7 +51,7 @@ class _NotificationView extends StatelessWidget {
       body: BlocBuilder<NotificationCubit, NotificationState>(
         builder: (context, state) {
           if (state is NotificationLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: AppLoadingIndicator());
           }
           if (state is NotificationError) {
             return Center(
@@ -78,38 +80,41 @@ class _NotificationView extends StatelessWidget {
             );
           }
           if (state is NotificationLoaded) {
-            if (state.notifications.isEmpty) {
-              return Center(
-                child: Text(
-                  'No notifications yet',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.textHint,
-                      ),
-                ),
-              );
-            }
             return RefreshIndicator(
               onRefresh: () async {
                 await context.read<NotificationCubit>().loadNotifications();
               },
-              child: ListView.separated(
-                itemCount: state.notifications.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final notification = state.notifications[index];
-                  return NotificationListTile(
-                    notification: notification,
-                    onTap: () {
-                      if (!notification.isRead) {
-                        context
-                            .read<NotificationCubit>()
-                            .markNotificationAsRead(notification.id);
-                        context.read<UnreadCountCubit>().decrement();
-                      }
-                    },
-                  );
-                },
-              ),
+              child: state.notifications.isEmpty
+                  ? ListView(
+                      children: const [
+                        SizedBox(height: 120),
+                        EmptyState(
+                          icon: Icons.notifications_none_rounded,
+                          title: 'No notifications yet',
+                          subtitle:
+                              'When you receive updates about events, votes, or results, they will appear here.',
+                        ),
+                      ],
+                    )
+                  : ListView.separated(
+                      itemCount: state.notifications.length,
+                      separatorBuilder: (_, __) =>
+                          const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final notification = state.notifications[index];
+                        return NotificationListTile(
+                          notification: notification,
+                          onTap: () {
+                            if (!notification.isRead) {
+                              context
+                                  .read<NotificationCubit>()
+                                  .markNotificationAsRead(notification.id);
+                              context.read<UnreadCountCubit>().decrement();
+                            }
+                          },
+                        );
+                      },
+                    ),
             );
           }
           return const SizedBox.shrink();

@@ -32,8 +32,6 @@ class ProfileHeaderSection extends StatelessWidget {
                 subtitle: subtitle,
                 isLoading: isLoading,
               ),
-              const SizedBox(height: 16),
-              _buildEditButton(),
             ],
           );
         },
@@ -139,22 +137,4 @@ class ProfileHeaderSection extends StatelessWidget {
     );
   }
 
-  Widget _buildEditButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: () {},
-        icon: const Icon(Icons.edit_outlined, size: 18),
-        label: const Text('Edit Profile'),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.textPrimary,
-          side: const BorderSide(color: AppColors.border),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-        ),
-      ),
-    );
-  }
 }

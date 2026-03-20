@@ -5,6 +5,7 @@ import 'package:votera/features/rankings/domain/entities/leaderboard_entry_entit
 import 'package:votera/features/rankings/presentation/cubit/rankings_cubit.dart';
 import 'package:votera/features/rankings/presentation/widgets/rankings_list_item.dart';
 import 'package:votera/features/rankings/presentation/widgets/rankings_podium_section.dart';
+import 'package:votera/shared/widgets/app_loading_indicator.dart';
 
 /// Reusable body content for the Rankings display.
 /// Shows podium for top 3 and a scrollable list for the rest.
@@ -30,7 +31,7 @@ class _RankingsBodyState extends State<RankingsBody> {
     return BlocBuilder<RankingsCubit, RankingsState>(
       builder: (context, state) {
         if (state is RankingsLoading || state is RankingsInitial) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: AppLoadingIndicator());
         }
 
         if (state is RankingsError) {

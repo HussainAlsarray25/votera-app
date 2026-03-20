@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/categories/domain/entities/category_entity.dart';
 import 'package:votera/features/categories/presentation/cubit/categories_cubit.dart';
+import 'package:votera/shared/widgets/app_loading_indicator.dart';
 
 /// Rotating color palette for category cards.
 const _categoryGradients = [
@@ -72,7 +73,7 @@ class _CategoriesBodyState extends State<CategoriesBody> {
     return BlocBuilder<CategoriesCubit, CategoriesState>(
       builder: (context, state) {
         if (state is CategoriesLoading || state is CategoriesInitial) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: AppLoadingIndicator());
         }
 
         if (state is CategoriesError) {

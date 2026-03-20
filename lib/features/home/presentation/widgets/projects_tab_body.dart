@@ -7,6 +7,7 @@ import 'package:votera/features/home/presentation/widgets/search_bar_section.dar
 import 'package:votera/features/home/presentation/widgets/trending_section.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
+import 'package:votera/shared/widgets/app_loading_indicator.dart';
 
 /// Reusable body for the Projects tab.
 /// Contains search, banner, trending, and project list.
@@ -44,7 +45,7 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
     return BlocBuilder<ProjectsCubit, ProjectsState>(
       builder: (context, state) {
         if (state is ProjectsLoading || state is ProjectsInitial) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: AppLoadingIndicator());
         }
 
         if (state is ProjectsError) {

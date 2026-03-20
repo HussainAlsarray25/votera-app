@@ -34,21 +34,9 @@ class ProfileActionsSection extends StatelessWidget {
           child: Column(
             children: [
               _buildActionTile(
-                icon: Icons.person_outline,
-                label: 'Edit Profile',
-                onTap: () {},
-              ),
-              const Divider(height: 1, color: AppColors.divider),
-              _buildActionTile(
                 icon: Icons.chat_bubble_outline_rounded,
                 label: 'Comments',
                 onTap: () => context.push('/comments'),
-              ),
-              const Divider(height: 1, color: AppColors.divider),
-              _buildActionTile(
-                icon: Icons.notifications_outlined,
-                label: 'Notifications',
-                onTap: () => context.push('/notifications'),
               ),
               const Divider(height: 1, color: AppColors.divider),
               _buildActionTile(

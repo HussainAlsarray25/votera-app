@@ -26,6 +26,10 @@ class ProfileCubit extends Cubit<ProfileState> {
     );
   }
 
+  /// Resets the profile state to initial. Called on logout
+  /// so stale data is not shown to the next user.
+  void reset() => emit(ProfileInitial());
+
   Future<void> updateProfile({String? fullName}) async {
     emit(ProfileLoading());
     final result = await updateUserProfile(

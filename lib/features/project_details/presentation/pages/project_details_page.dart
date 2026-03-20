@@ -8,6 +8,7 @@ import 'package:votera/features/project_details/presentation/widgets/project_hea
 import 'package:votera/features/project_details/presentation/widgets/project_info_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_rating_section.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
+import 'package:votera/shared/widgets/app_loading_indicator.dart';
 import 'package:votera/features/ratings/presentation/cubit/ratings_cubit.dart';
 import 'package:votera/features/voting/presentation/cubit/voting_cubit.dart';
 import 'package:votera/shared/widgets/vote_button.dart';
@@ -72,7 +73,7 @@ class _ProjectDetailsView extends StatelessWidget {
         child: BlocBuilder<ProjectsCubit, ProjectsState>(
           builder: (context, state) {
             if (state is ProjectsLoading || state is ProjectsInitial) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: AppLoadingIndicator());
             }
 
             if (state is ProjectsError) {

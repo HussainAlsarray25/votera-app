@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:votera/core/domain/services/auth_token_provider.dart';
 import 'package:votera/core/usecases/usecase.dart';
 import 'package:votera/features/authentication/domain/usecases/change_password.dart';
 import 'package:votera/features/authentication/domain/usecases/confirm_reset_password.dart';
@@ -14,6 +15,7 @@ part 'auth_state.dart';
 /// Manages authentication state: login, registration, OTP, and logout.
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit({
+    required this.authTokenProvider,
     required this.loginUser,
     required this.registerUser,
     required this.logoutUser,
@@ -23,6 +25,7 @@ class AuthCubit extends Cubit<AuthState> {
     required this.confirmResetPassword,
   }) : super(AuthInitial());
 
+  final AuthTokenProvider authTokenProvider;
   final LoginUser loginUser;
   final RegisterUser registerUser;
   final LogoutUser logoutUser;
@@ -30,6 +33,14 @@ class AuthCubit extends Cubit<AuthState> {
   final ChangePassword changePassword;
   final ResetPassword resetPassword;
   final ConfirmResetPassword confirmResetPassword;
+
+  /// Checks for saved tokens and restores authenticated state on app startup.
+  Future<void> checkAuthStatus() async {
+    final isAuthenticated = await authTokenProvider.isAuthenticated();
+    if (isAuthenticated) {
+      emit(AuthAuthenticated());
+    }
+  }
 
   Future<void> login({
     required String identifier,

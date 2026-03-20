@@ -12,6 +12,7 @@ import 'package:votera/features/onboarding/presentation/pages/onboarding_page.da
 import 'package:votera/features/profile/presentation/pages/comments_page.dart';
 import 'package:votera/features/profile/presentation/pages/profile_page.dart';
 import 'package:votera/features/project_details/presentation/pages/project_details_page.dart';
+import 'package:votera/features/splash/presentation/pages/splash_page.dart';
 
 class AppRouter {
   GoRouter get router => _router;
@@ -22,6 +23,10 @@ class AppRouter {
     routes: [
       GoRoute(
         path: '/',
+        builder: (context, state) => const SplashPage(),
+      ),
+      GoRoute(
+        path: '/onboarding',
         builder: (context, state) => const OnboardingPage(),
       ),
       GoRoute(
@@ -78,16 +83,16 @@ class AppRouter {
     BuildContext context,
     GoRouterState state,
   ) async {
+    final location = state.matchedLocation;
+
+    // Allow splash, onboarding, auth, and user-info without authentication.
+    const publicRoutes = {'/', '/onboarding', '/auth', '/user-info'};
+    if (publicRoutes.contains(location)) return null;
+
     final authProvider = sl<AuthTokenProvider>();
     final isAuthenticated = await authProvider.isAuthenticated();
 
-    final isOnAuthPage = state.matchedLocation == '/auth';
-    final isOnOnboarding = state.matchedLocation == '/';
-    final isOnUserInfo = state.matchedLocation == '/user-info';
-
-    if (!isAuthenticated && !isOnAuthPage && !isOnOnboarding && !isOnUserInfo) {
-      return '/auth';
-    }
+    if (!isAuthenticated) return '/auth';
 
     return null;
   }

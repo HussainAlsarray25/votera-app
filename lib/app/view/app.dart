@@ -18,39 +18,68 @@ class App extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(value: di.sl<AuthCubit>()),
-        BlocProvider<ProfileCubit>(create: (_) => di.sl<ProfileCubit>()),
+        BlocProvider<ProfileCubit>(
+          create: (_) => di.sl<ProfileCubit>(),
+        ),
         BlocProvider.value(value: di.sl<PushNotificationCubit>()),
         BlocProvider<UnreadCountCubit>(
           create: (_) => di.sl<UnreadCountCubit>()..loadUnreadCount(),
         ),
       ],
-      child: ScreenUtilInit(
-        designSize: const Size(375, 812),
-        minTextAdapt: true,
-        splitScreenMode: true,
-        useInheritedMediaQuery: true,
-        builder: (context, child) {
-          return MaterialApp.router(
-            title: 'Votera',
-            theme: AppTheme.lightTheme,
-            debugShowCheckedModeBanner: false,
-            routerConfig: appRouter.router,
-            builder: (context, child) {
-              return MediaQuery(
-                data: MediaQuery.of(context).copyWith(
-                  textScaler: TextScaler.linear(
-                    MediaQuery.of(context)
-                        .textScaler
-                        .scale(1)
-                        .clamp(0.8, 1.2),
+      child: _AuthStateListener(
+        child: ScreenUtilInit(
+          designSize: const Size(375, 812),
+          minTextAdapt: true,
+          splitScreenMode: true,
+          useInheritedMediaQuery: true,
+          builder: (context, child) {
+            return MaterialApp.router(
+              title: 'Votera',
+              theme: AppTheme.lightTheme,
+              debugShowCheckedModeBanner: false,
+              routerConfig: appRouter.router,
+              builder: (context, child) {
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.linear(
+                      MediaQuery.of(context)
+                          .textScaler
+                          .scale(1)
+                          .clamp(0.8, 1.2),
+                    ),
                   ),
-                ),
-                child: child ?? const SizedBox.shrink(),
-              );
-            },
-          );
-        },
+                  child: child ?? const SizedBox.shrink(),
+                );
+              },
+            );
+          },
+        ),
       ),
+    );
+  }
+}
+
+/// Listens to auth state changes and manages session data.
+/// On login: loads fresh profile and unread notification count.
+/// On logout: resets all user-scoped cubits so stale data is cleared.
+class _AuthStateListener extends StatelessWidget {
+  const _AuthStateListener({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is AuthAuthenticated) {
+          context.read<ProfileCubit>().loadProfile();
+          context.read<UnreadCountCubit>().loadUnreadCount();
+        } else if (state is AuthInitial) {
+          context.read<ProfileCubit>().reset();
+          context.read<UnreadCountCubit>().reset();
+        }
+      },
+      child: child,
     );
   }
 }

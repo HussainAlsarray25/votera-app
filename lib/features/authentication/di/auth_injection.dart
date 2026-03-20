@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:votera/core/domain/services/auth_token_provider.dart';
 import 'package:votera/core/network/api_client.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/features/authentication/data/datasources/remote/auth_remote_data_source.dart';
@@ -19,6 +20,7 @@ void initAuthFeature(GetIt sl) {
     // Cubits
     ..registerLazySingleton<AuthCubit>(
       () => AuthCubit(
+        authTokenProvider: sl<AuthTokenProvider>(),
         loginUser: sl<LoginUser>(),
         registerUser: sl<RegisterUser>(),
         logoutUser: sl<LogoutUser>(),

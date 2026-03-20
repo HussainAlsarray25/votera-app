@@ -34,6 +34,8 @@ class AppBlocObserver extends BlocObserver {
 }
 
 Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
+
+
   await runZonedGuarded(
     () async {
       BindingBase.debugZoneErrorsAreFatal = false;

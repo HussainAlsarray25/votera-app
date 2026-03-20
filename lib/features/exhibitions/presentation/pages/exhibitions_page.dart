@@ -6,6 +6,8 @@ import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/features/events/presentation/cubit/events_cubit.dart';
 import 'package:votera/features/exhibitions/presentation/widgets/exhibition_card.dart';
+import 'package:votera/shared/widgets/app_loading_indicator.dart';
+import 'package:votera/shared/widgets/empty_state.dart';
 
 /// Main home page showing a list of exhibitions/events.
 /// Loads real event data from the API via EventsCubit.
@@ -20,14 +22,24 @@ class ExhibitionsPage extends StatelessWidget {
         backgroundColor: AppColors.background,
         body: SafeArea(
           child: CenteredContent(
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(child: _buildHeader(context)),
-                const _EventsListSliver(),
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: AppSpacing.xxl),
-                ),
-              ],
+            child: BlocBuilder<EventsCubit, EventsState>(
+              buildWhen: (_, current) => current is EventsLoaded,
+              builder: (context, _) {
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    await context.read<EventsCubit>().loadEvents();
+                  },
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverToBoxAdapter(child: _buildHeader(context)),
+                      const _EventsListSliver(),
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: AppSpacing.xxl),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -78,7 +90,7 @@ class _EventsListSliver extends StatelessWidget {
             child: Center(
               child: Padding(
                 padding: EdgeInsets.only(top: 80),
-                child: CircularProgressIndicator(),
+                child: AppLoadingIndicator(),
               ),
             ),
           );
@@ -93,11 +105,14 @@ class _EventsListSliver extends StatelessWidget {
         if (state is EventsLoaded) {
           final events = state.response.items;
           if (events.isEmpty) {
-            return const SliverToBoxAdapter(
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.only(top: 80),
-                  child: Text('No events found'),
+            return SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 80),
+                child: EmptyState(
+                  icon: Icons.event_outlined,
+                  title: 'No events yet',
+                  subtitle:
+                      'There are no exhibitions or events available right now. Check back later for updates.',
                 ),
               ),
             );
