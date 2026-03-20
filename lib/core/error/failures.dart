@@ -34,3 +34,12 @@ class ValidationFailure extends Failure {
 class AuthFailure extends Failure {
   const AuthFailure({required super.message});
 }
+
+class LocationFailure extends Failure {
+  const LocationFailure({required super.message, this.isDeniedForever = false});
+
+  final bool isDeniedForever;
+
+  @override
+  List<Object> get props => [message, isDeniedForever];
+}
