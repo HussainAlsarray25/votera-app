@@ -6,6 +6,7 @@ import 'package:votera/features/rankings/presentation/cubit/rankings_cubit.dart'
 import 'package:votera/features/rankings/presentation/widgets/rankings_list_item.dart';
 import 'package:votera/features/rankings/presentation/widgets/rankings_podium_section.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
+import 'package:votera/shared/widgets/empty_state.dart';
 
 /// Reusable body content for the Rankings display.
 /// Shows podium for top 3 and a scrollable list for the rest.
@@ -26,6 +27,12 @@ class _RankingsBodyState extends State<RankingsBody> {
     context.read<RankingsCubit>().loadLeaderboard(widget.eventId);
   }
 
+  Future<void> _refresh() async {
+    await context
+        .read<RankingsCubit>()
+        .loadLeaderboard(widget.eventId);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<RankingsCubit, RankingsState>(
@@ -41,9 +48,25 @@ class _RankingsBodyState extends State<RankingsBody> {
         if (state is RankingsLoaded) {
           final entries = state.leaderboard.entries;
           if (entries.isEmpty) {
-            return const Center(child: Text('No rankings available yet'));
+            return RefreshIndicator(
+              onRefresh: _refresh,
+              child: ListView(
+                children: const [
+                  SizedBox(height: 80),
+                  EmptyState(
+                    icon: Icons.leaderboard_outlined,
+                    title: 'No rankings yet',
+                    subtitle:
+                        'Rankings will appear once voting begins.',
+                  ),
+                ],
+              ),
+            );
           }
-          return _buildRankings(entries);
+          return RefreshIndicator(
+            onRefresh: _refresh,
+            child: _buildRankings(entries),
+          );
         }
 
         return const SizedBox.shrink();

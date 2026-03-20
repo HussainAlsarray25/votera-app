@@ -4,6 +4,7 @@ import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/categories/domain/entities/category_entity.dart';
 import 'package:votera/features/categories/presentation/cubit/categories_cubit.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
+import 'package:votera/shared/widgets/empty_state.dart';
 
 /// Rotating color palette for category cards.
 const _categoryGradients = [
@@ -69,6 +70,12 @@ class _CategoriesBodyState extends State<CategoriesBody> {
     );
   }
 
+  Future<void> _refresh() async {
+    await context
+        .read<CategoriesCubit>()
+        .loadCategories(page: 1, size: 50);
+  }
+
   Widget _buildContent() {
     return BlocBuilder<CategoriesCubit, CategoriesState>(
       builder: (context, state) {
@@ -83,9 +90,25 @@ class _CategoriesBodyState extends State<CategoriesBody> {
         if (state is CategoriesLoaded) {
           final categories = state.response.items;
           if (categories.isEmpty) {
-            return const Center(child: Text('No categories found'));
+            return RefreshIndicator(
+              onRefresh: _refresh,
+              child: ListView(
+                children: const [
+                  SizedBox(height: 80),
+                  EmptyState(
+                    icon: Icons.category_outlined,
+                    title: 'No categories yet',
+                    subtitle:
+                        'There are no categories available for this event.',
+                  ),
+                ],
+              ),
+            );
           }
-          return _buildGrid(categories);
+          return RefreshIndicator(
+            onRefresh: _refresh,
+            child: _buildGrid(categories),
+          );
         }
 
         return const SizedBox.shrink();

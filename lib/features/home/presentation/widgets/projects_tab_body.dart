@@ -8,6 +8,7 @@ import 'package:votera/features/home/presentation/widgets/trending_section.dart'
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
+import 'package:votera/shared/widgets/empty_state.dart';
 
 /// Reusable body for the Projects tab.
 /// Contains search, banner, trending, and project list.
@@ -40,6 +41,12 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
     }).toList();
   }
 
+  Future<void> _refresh() async {
+    await context
+        .read<ProjectsCubit>()
+        .loadProjects(eventId: widget.eventId);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ProjectsCubit, ProjectsState>(
@@ -66,8 +73,10 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
     List<ProjectEntity> allProjects,
     List<ProjectEntity> filteredProjects,
   ) {
-    return CustomScrollView(
-      slivers: [
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: CustomScrollView(
+        slivers: [
         SliverToBoxAdapter(
           child: SearchBarSection(
             onSearchChanged: (query) {
@@ -76,21 +85,34 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
           ),
         ),
         const SliverToBoxAdapter(child: HomeBannerSection()),
-        if (allProjects.isNotEmpty)
+        if (allProjects.isNotEmpty) ...[
           SliverToBoxAdapter(
             child: TrendingSection(
               projects: allProjects.take(4).toList(),
               eventId: widget.eventId,
             ),
           ),
-        ProjectListSection(
-          projects: filteredProjects,
-          eventId: widget.eventId,
-        ),
+          ProjectListSection(
+            projects: filteredProjects,
+            eventId: widget.eventId,
+          ),
+        ] else
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(top: 40),
+              child: EmptyState(
+                icon: Icons.folder_outlined,
+                title: 'No projects yet',
+                subtitle:
+                    'There are no projects submitted for this event yet.',
+              ),
+            ),
+          ),
         const SliverToBoxAdapter(
           child: SizedBox(height: AppSpacing.xxl),
         ),
-      ],
+        ],
+      ),
     );
   }
 

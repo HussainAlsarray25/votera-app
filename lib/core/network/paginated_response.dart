@@ -11,18 +11,26 @@ class PaginatedResponse<T> extends Equatable {
   });
 
   /// Parse from JSON using the provided item factory.
+  /// Automatically unwraps the API envelope when the paginated payload
+  /// is nested under a top-level `data` key
+  /// (e.g. `{success, message, data: {items, page, size, total}}`).
   factory PaginatedResponse.fromJson(
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromJsonT,
   ) {
-    final rawItems = json['items'] as List<dynamic>? ?? [];
+    final hasEnvelope = json.containsKey('data') &&
+        json['data'] is Map<String, dynamic>;
+    final payload =
+        hasEnvelope ? json['data'] as Map<String, dynamic> : json;
+
+    final rawItems = payload['items'] as List<dynamic>? ?? [];
     return PaginatedResponse(
       items: rawItems
           .map((e) => fromJsonT(e as Map<String, dynamic>))
           .toList(),
-      page: json['page'] as int? ?? 1,
-      size: json['size'] as int? ?? rawItems.length,
-      total: json['total'] as int? ?? rawItems.length,
+      page: payload['page'] as int? ?? 1,
+      size: payload['size'] as int? ?? rawItems.length,
+      total: payload['total'] as int? ?? rawItems.length,
     );
   }
 
