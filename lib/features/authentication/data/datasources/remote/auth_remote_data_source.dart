@@ -9,12 +9,11 @@ abstract class AuthRemoteDataSource {
     required String secret,
   });
 
-  /// POST /auth/register with {username, email, password, display_name}
+  /// POST /auth/register with {full_name, identifier, password}
   Future<Map<String, dynamic>> register({
-    required String username,
-    required String email,
+    required String fullName,
+    required String identifier,
     required String password,
-    required String displayName,
   });
 
   /// POST /auth/login/verify with {identifier, code}
@@ -61,18 +60,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>> register({
-    required String username,
-    required String email,
+    required String fullName,
+    required String identifier,
     required String password,
-    required String displayName,
   }) async {
     final response = await apiClient.post<Map<String, dynamic>>(
       AuthEndpoints.register,
       data: {
-        'username': username,
-        'email': email,
+        'full_name': fullName,
+        'identifier': identifier,
         'password': password,
-        'display_name': displayName,
       },
     );
     return response.data!;
