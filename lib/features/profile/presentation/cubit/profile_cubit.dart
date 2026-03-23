@@ -62,6 +62,14 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(ProfileInitial());
   }
 
+  /// Clears the cache and fetches fresh profile data from the backend.
+  /// Use this after a role change (e.g. account verification) so the stale
+  /// cached role is not served in the two-phase load.
+  Future<void> forceRefresh() async {
+    await clearProfileCache(NoParams());
+    await loadProfile();
+  }
+
   Future<void> updateProfile({String? fullName}) async {
     emit(ProfileLoading());
     final result = await updateUserProfile(

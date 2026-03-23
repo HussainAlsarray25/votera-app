@@ -36,19 +36,24 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildMobileLayout() {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              ProfileHeaderSection(),
-              SizedBox(height: AppSpacing.lg),
-              ProfileStatsSection(),
-              SizedBox(height: AppSpacing.lg),
-              ProfileActionsSection(),
-              SizedBox(height: AppSpacing.xxl),
-            ],
+        child: RefreshIndicator(
+          onRefresh: () => context.read<ProfileCubit>().forceRefresh(),
+          color: AppColors.primary,
+          child: const SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                ProfileHeaderSection(),
+                SizedBox(height: AppSpacing.lg),
+                ProfileStatsSection(),
+                SizedBox(height: AppSpacing.lg),
+                ProfileActionsSection(),
+                SizedBox(height: AppSpacing.xxl),
+              ],
+            ),
           ),
         ),
       ),
@@ -56,37 +61,42 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildWideLayout() {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: CenteredContent(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(AppSpacing.lg),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Left column: header + stats
-                SizedBox(
-                  width: 360,
-                  child: Column(
-                    children: [
-                      ProfileHeaderSection(),
-                      SizedBox(height: AppSpacing.lg),
-                      ProfileStatsSection(),
-                    ],
+          child: RefreshIndicator(
+            onRefresh: () => context.read<ProfileCubit>().forceRefresh(),
+            color: AppColors.primary,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: const Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Left column: header + stats
+                  SizedBox(
+                    width: 360,
+                    child: Column(
+                      children: [
+                        ProfileHeaderSection(),
+                        SizedBox(height: AppSpacing.lg),
+                        ProfileStatsSection(),
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(width: AppSpacing.lg),
-                // Right column: actions
-                Expanded(
-                  child: Column(
-                    children: [
-                      ProfileActionsSection(),
-                      SizedBox(height: AppSpacing.xxl),
-                    ],
+                  SizedBox(width: AppSpacing.lg),
+                  // Right column: actions
+                  Expanded(
+                    child: Column(
+                      children: [
+                        ProfileActionsSection(),
+                        SizedBox(height: AppSpacing.xxl),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

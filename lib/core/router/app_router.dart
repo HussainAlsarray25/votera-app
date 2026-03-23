@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/app/view/shell_page.dart';
 import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/core/domain/services/auth_token_provider.dart';
 import 'package:votera/features/authentication/presentation/pages/auth_page.dart';
+import 'package:votera/features/authentication/presentation/pages/forgot_password_page.dart';
+import 'package:votera/features/authentication/presentation/pages/otp_verification_page.dart';
 import 'package:votera/features/authentication/presentation/pages/user_info_page.dart';
+import 'package:votera/features/participant_forms/presentation/cubit/forms_cubit.dart';
+import 'package:votera/features/participant_forms/presentation/pages/email_verification_page.dart';
+import 'package:votera/features/participant_forms/presentation/pages/uid_submission_page.dart';
+import 'package:votera/features/participant_forms/presentation/pages/verify_account_page.dart';
 import 'package:votera/features/exhibitions/presentation/pages/exhibition_detail_page.dart';
 import 'package:votera/features/exhibitions/presentation/pages/exhibitions_page.dart';
 import 'package:votera/features/notification/presentation/pages/notification_page.dart';
@@ -38,6 +45,38 @@ class AppRouter {
       GoRoute(
         path: '/user-info',
         builder: (context, state) => const UserInfoPage(),
+      ),
+      GoRoute(
+        path: '/otp',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return OtpVerificationPage(
+            identifier: extra['identifier'] as String,
+            isRegistration: extra['isRegistration'] as bool,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordPage(),
+      ),
+      GoRoute(
+        path: '/verify-account',
+        builder: (context, state) => const VerifyAccountPage(),
+      ),
+      GoRoute(
+        path: '/verify-account/email',
+        builder: (context, state) => BlocProvider(
+          create: (_) => sl<FormsCubit>(),
+          child: const EmailVerificationPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/verify-account/uid',
+        builder: (context, state) => BlocProvider(
+          create: (_) => sl<FormsCubit>()..loadMyUidRequests(),
+          child: const UidSubmissionPage(),
+        ),
       ),
       ShellRoute(
         builder: (context, state, child) => ShellPage(child: child),
@@ -98,8 +137,8 @@ class AppRouter {
   ) async {
     final location = state.matchedLocation;
 
-    // Allow splash, onboarding, auth, and user-info without authentication.
-    const publicRoutes = {'/', '/onboarding', '/auth', '/user-info'};
+    // Allow splash, onboarding, auth, user-info, otp, and forgot-password without authentication.
+    const publicRoutes = {'/', '/onboarding', '/auth', '/user-info', '/otp', '/forgot-password'};
     if (publicRoutes.contains(location)) return null;
 
     final authProvider = sl<AuthTokenProvider>();

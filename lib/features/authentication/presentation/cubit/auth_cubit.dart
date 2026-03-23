@@ -13,6 +13,7 @@ import 'package:votera/features/authentication/domain/usecases/register_user.dar
 import 'package:votera/features/authentication/domain/usecases/request_telegram_link.dart';
 import 'package:votera/features/authentication/domain/usecases/reset_password.dart';
 import 'package:votera/features/authentication/domain/usecases/verify_login.dart';
+import 'package:votera/features/authentication/domain/usecases/verify_registration.dart';
 
 part 'auth_state.dart';
 
@@ -24,6 +25,7 @@ class AuthCubit extends Cubit<AuthState> {
     required this.registerUser,
     required this.logoutUser,
     required this.verifyLogin,
+    required this.verifyRegistration,
     required this.changePassword,
     required this.resetPassword,
     required this.confirmResetPassword,
@@ -36,6 +38,7 @@ class AuthCubit extends Cubit<AuthState> {
   final RegisterUser registerUser;
   final LogoutUser logoutUser;
   final VerifyLogin verifyLogin;
+  final VerifyRegistration verifyRegistration;
   final ChangePassword changePassword;
   final ResetPassword resetPassword;
   final ConfirmResetPassword confirmResetPassword;
@@ -88,7 +91,8 @@ class AuthCubit extends Cubit<AuthState> {
     );
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
-      (_) => emit(AuthAuthenticated()),
+      // Registration returns 202 with no tokens — OTP verification is required.
+      (_) => emit(AuthRegistrationOtpRequired(identifier: identifier)),
     );
   }
 
@@ -102,7 +106,21 @@ class AuthCubit extends Cubit<AuthState> {
     );
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
-      (_) => emit(AuthAuthenticated()),
+      (_) => emit(const AuthAuthenticated()),
+    );
+  }
+
+  Future<void> verifyRegistrationOtp({
+    required String identifier,
+    required String code,
+  }) async {
+    emit(AuthLoading());
+    final result = await verifyRegistration(
+      VerifyRegistrationParams(identifier: identifier, code: code),
+    );
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (_) => emit(const AuthAuthenticated()),
     );
   }
 

@@ -48,10 +48,31 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
     try {
-      final result = await remoteDataSource.register(
+      // The API returns 202 Accepted with no tokens — OTP verification is required
+      // before tokens are issued. Do not attempt to save tokens here.
+      await remoteDataSource.register(
         fullName: fullName,
         identifier: identifier,
         password: password,
+      );
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> verifyRegistration({
+    required String identifier,
+    required String code,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final result = await remoteDataSource.verifyRegistration(
+        identifier: identifier,
+        code: code,
       );
       await _saveTokensFromResponse(result);
       return const Right(null);

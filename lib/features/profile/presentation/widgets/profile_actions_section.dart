@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 
 /// Settings and account actions at the bottom of the profile page.
 class ProfileActionsSection extends StatelessWidget {
@@ -31,27 +32,41 @@ class ProfileActionsSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
             boxShadow: AppShadows.card,
           ),
-          child: Column(
-            children: [
-              _buildActionTile(
-                icon: Icons.chat_bubble_outline_rounded,
-                label: 'Comments',
-                onTap: () => context.push('/comments'),
-              ),
-              const Divider(height: 1, color: AppColors.divider),
-              _buildActionTile(
-                icon: Icons.help_outline,
-                label: 'Help & Support',
-                onTap: () {},
-              ),
-              const Divider(height: 1, color: AppColors.divider),
-              _buildActionTile(
-                icon: Icons.logout,
-                label: 'Sign Out',
-                isDestructive: true,
-                onTap: () => context.read<AuthCubit>().logout(),
-              ),
-            ],
+          child: BlocBuilder<ProfileCubit, ProfileState>(
+            builder: (context, profileState) {
+              final isVisitor = profileState is ProfileLoaded &&
+                  profileState.profile.hasRole('visitor');
+              return Column(
+                children: [
+                  if (isVisitor) ...[
+                    _buildActionTile(
+                      icon: Icons.verified_user_outlined,
+                      label: 'Verify Account',
+                      onTap: () => context.push('/verify-account'),
+                    ),
+                    const Divider(height: 1, color: AppColors.divider),
+                  ],
+                  _buildActionTile(
+                    icon: Icons.chat_bubble_outline_rounded,
+                    label: 'Comments',
+                    onTap: () => context.push('/comments'),
+                  ),
+                  const Divider(height: 1, color: AppColors.divider),
+                  _buildActionTile(
+                    icon: Icons.help_outline,
+                    label: 'Help & Support',
+                    onTap: () {},
+                  ),
+                  const Divider(height: 1, color: AppColors.divider),
+                  _buildActionTile(
+                    icon: Icons.logout,
+                    label: 'Sign Out',
+                    isDestructive: true,
+                    onTap: () => context.read<AuthCubit>().logout(),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),

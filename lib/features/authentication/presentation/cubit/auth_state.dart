@@ -34,6 +34,16 @@ class AuthOtpRequired extends AuthState {
   List<Object?> get props => [identifier];
 }
 
+/// Registration accepted (202); user must verify OTP before tokens are issued.
+class AuthRegistrationOtpRequired extends AuthState {
+  const AuthRegistrationOtpRequired({required this.identifier});
+
+  final String identifier;
+
+  @override
+  List<Object?> get props => [identifier];
+}
+
 /// Link has been obtained from the backend. The widget should open Telegram
 /// via url_launcher and then the cubit will poll until authentication completes.
 class AuthTelegramAwaitingUser extends AuthState {

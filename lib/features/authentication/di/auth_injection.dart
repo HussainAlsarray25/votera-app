@@ -15,6 +15,7 @@ import 'package:votera/features/authentication/domain/usecases/register_user.dar
 import 'package:votera/features/authentication/domain/usecases/request_telegram_link.dart';
 import 'package:votera/features/authentication/domain/usecases/reset_password.dart';
 import 'package:votera/features/authentication/domain/usecases/verify_login.dart';
+import 'package:votera/features/authentication/domain/usecases/verify_registration.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
 
 void initAuthFeature(GetIt sl) {
@@ -27,6 +28,7 @@ void initAuthFeature(GetIt sl) {
         registerUser: sl<RegisterUser>(),
         logoutUser: sl<LogoutUser>(),
         verifyLogin: sl<VerifyLogin>(),
+        verifyRegistration: sl<VerifyRegistration>(),
         changePassword: sl<ChangePassword>(),
         resetPassword: sl<ResetPassword>(),
         confirmResetPassword: sl<ConfirmResetPassword>(),
@@ -46,6 +48,9 @@ void initAuthFeature(GetIt sl) {
     )
     ..registerLazySingleton<VerifyLogin>(
       () => VerifyLogin(sl<AuthRepository>()),
+    )
+    ..registerLazySingleton<VerifyRegistration>(
+      () => VerifyRegistration(sl<AuthRepository>()),
     )
     ..registerLazySingleton<ChangePassword>(
       () => ChangePassword(sl<AuthRepository>()),

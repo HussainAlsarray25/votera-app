@@ -8,7 +8,7 @@ import 'package:votera/features/authentication/presentation/widgets/register_sec
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 
 /// The authentication page handles both login and registration.
-/// Mobile: gradient header with branding, rounded white card for the form.
+/// Mobile: plain scaffold with the form filling the screen.
 /// Desktop: two-panel layout with gradient branding on the left.
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -58,6 +58,16 @@ class _AuthPageState extends State<AuthPage> {
         if (state is AuthAuthenticated) {
           context.read<ProfileCubit>().loadProfile();
           context.go('/home');
+        } else if (state is AuthOtpRequired) {
+          context.go('/otp', extra: {
+            'identifier': state.identifier,
+            'isRegistration': false,
+          });
+        } else if (state is AuthRegistrationOtpRequired) {
+          context.go('/otp', extra: {
+            'identifier': state.identifier,
+            'isRegistration': true,
+          });
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -139,72 +149,10 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
-  // -- Section: Mobile layout with gradient header --
+  // -- Section: Mobile layout --
   Widget _buildMobileLayout(Widget formContent) {
     return Scaffold(
-      body: Column(
-        children: [
-          _buildGradientHeader(),
-          Expanded(
-            child: _buildFormCard(formContent),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Gradient header with app branding for mobile
-  Widget _buildGradientHeader() {
-    final topPadding = MediaQuery.of(context).padding.top;
-
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(
-        top: topPadding + AppSpacing.xl,
-        bottom: AppSpacing.xxl,
-      ),
-      decoration: const BoxDecoration(
-        gradient: AppColors.primaryGradient,
-      ),
-      child: Column(
-        children: [
-          const Icon(
-            Icons.how_to_vote,
-            size: 56,
-            color: Colors.white,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            'Votera',
-            style: AppTypography.h1.copyWith(
-              color: Colors.white,
-              fontSize: 32,
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Discover, vote, and celebrate',
-            style: AppTypography.bodyMedium.copyWith(
-              color: Colors.white70,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // White card with rounded top corners that overlaps the gradient
-  Widget _buildFormCard(Widget formContent) {
-    return Transform.translate(
-      offset: const Offset(0, -24),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSpacing.radiusXl),
-          ),
-        ),
+      body: SafeArea(
         child: CenteredContent(
           maxWidth: AppBreakpoints.formPanelMax,
           child: formContent,

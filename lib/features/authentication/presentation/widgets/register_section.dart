@@ -41,9 +41,10 @@ class _RegisterSectionState extends State<RegisterSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.xxl),
+            const SizedBox(height: AppSpacing.xxl),
             _buildHeader(),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.xxl),
             _buildNameField(),
             const SizedBox(height: AppSpacing.md),
             _buildIdentifierField(),

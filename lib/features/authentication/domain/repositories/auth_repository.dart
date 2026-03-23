@@ -14,6 +14,11 @@ abstract class AuthRepository {
     required String password,
   });
 
+  Future<Either<Failure, void>> verifyRegistration({
+    required String identifier,
+    required String code,
+  });
+
   Future<Either<Failure, void>> verifyLogin({
     required String identifier,
     required String code,

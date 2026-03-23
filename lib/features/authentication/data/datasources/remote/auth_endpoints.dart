@@ -5,6 +5,7 @@ class AuthEndpoints {
 
   static const String login = 'auth/login';
   static const String register = 'auth/register';
+  static const String registerVerify = 'auth/register/verify';
   static const String verifyLogin = 'auth/login/verify';
   static const String logout = 'auth/logout';
   static const String changePassword = 'auth/password/change';

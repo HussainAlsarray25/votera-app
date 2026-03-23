@@ -16,6 +16,13 @@ abstract class AuthRemoteDataSource {
     required String password,
   });
 
+  /// POST /auth/register/verify with {identifier, code}
+  /// Returns the wrapped response with access_token / refresh_token on success.
+  Future<Map<String, dynamic>> verifyRegistration({
+    required String identifier,
+    required String code,
+  });
+
   /// POST /auth/login/verify with {identifier, code}
   Future<Map<String, dynamic>> verifyLogin({
     required String identifier,
@@ -79,6 +86,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'identifier': identifier,
         'password': password,
       },
+    );
+    return response.data!;
+  }
+
+  @override
+  Future<Map<String, dynamic>> verifyRegistration({
+    required String identifier,
+    required String code,
+  }) async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      AuthEndpoints.registerVerify,
+      data: {'identifier': identifier, 'code': code},
     );
     return response.data!;
   }
