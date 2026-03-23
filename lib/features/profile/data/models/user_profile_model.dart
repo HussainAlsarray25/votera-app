@@ -33,6 +33,7 @@ class UserProfileModel extends UserProfile {
     required super.fullName,
     required super.roles,
     required super.identifiers,
+    super.avatarUrl,
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
@@ -43,6 +44,7 @@ class UserProfileModel extends UserProfile {
       identifiers: (json['identifiers'] as List? ?? [])
           .map((e) => ProfileIdentifierModel.fromJson(e as Map<String, dynamic>))
           .toList(),
+      avatarUrl: json['profile_picture_url'] as String?,
     );
   }
 
@@ -59,6 +61,7 @@ class UserProfileModel extends UserProfile {
                 isVerified: e.isVerified,
               ).toJson())
           .toList(),
+      'profile_picture_url': avatarUrl,
     };
   }
 }

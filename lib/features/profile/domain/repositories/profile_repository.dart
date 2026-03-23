@@ -7,6 +7,7 @@ abstract class ProfileRepository {
   Future<Either<Failure, UserProfile>> updateUserProfile({
     String? fullName,
   });
+  Future<Either<Failure, String>> uploadAvatar(String filePath);
   Future<UserProfile?> getCachedProfile();
   Future<void> clearCache();
 }

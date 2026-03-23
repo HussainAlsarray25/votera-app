@@ -10,6 +10,7 @@ import 'package:votera/features/profile/domain/usecases/clear_profile_cache.dart
 import 'package:votera/features/profile/domain/usecases/get_cached_profile.dart';
 import 'package:votera/features/profile/domain/usecases/get_user_profile.dart';
 import 'package:votera/features/profile/domain/usecases/update_user_profile.dart';
+import 'package:votera/features/profile/domain/usecases/upload_avatar.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 
 void initProfileFeature(GetIt sl) {
@@ -21,6 +22,7 @@ void initProfileFeature(GetIt sl) {
         updateUserProfile: sl<UpdateUserProfile>(),
         getCachedProfile: sl<GetCachedProfile>(),
         clearProfileCache: sl<ClearProfileCache>(),
+        uploadAvatarUseCase: sl<UploadAvatar>(),
       ),
     )
     // Use cases
@@ -35,6 +37,9 @@ void initProfileFeature(GetIt sl) {
     )
     ..registerLazySingleton<ClearProfileCache>(
       () => ClearProfileCache(sl<ProfileRepository>()),
+    )
+    ..registerLazySingleton<UploadAvatar>(
+      () => UploadAvatar(sl<ProfileRepository>()),
     )
     // Repositories
     ..registerLazySingleton<ProfileRepository>(

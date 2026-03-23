@@ -24,12 +24,15 @@ class UserProfile extends Equatable {
     required this.fullName,
     required this.roles,
     required this.identifiers,
+    this.avatarUrl,
   });
 
   final String id;
   final String fullName;
   final List<String> roles;
   final List<ProfileIdentifier> identifiers;
+  /// Remote URL of the user's profile picture, or null if not set.
+  final String? avatarUrl;
 
   /// Extracts the primary email from the identifiers list.
   String? get email =>
@@ -45,5 +48,5 @@ class UserProfile extends Equatable {
   bool get isVisitorOnly => roles.every((r) => r == 'visitor');
 
   @override
-  List<Object?> get props => [id, fullName, roles, identifiers];
+  List<Object?> get props => [id, fullName, roles, identifiers, avatarUrl];
 }

@@ -30,6 +30,7 @@ class SharedPrefsProfileLocalDataSource implements ProfileLocalDataSource {
       fullName: profile.fullName,
       roles: profile.roles,
       identifiers: profile.identifiers,
+      avatarUrl: profile.avatarUrl,
     );
     await prefs.setString(
       AppConstants.cachedProfileKey,

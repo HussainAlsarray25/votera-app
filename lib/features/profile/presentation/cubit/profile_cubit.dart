@@ -6,6 +6,7 @@ import 'package:votera/features/profile/domain/usecases/clear_profile_cache.dart
 import 'package:votera/features/profile/domain/usecases/get_cached_profile.dart';
 import 'package:votera/features/profile/domain/usecases/get_user_profile.dart';
 import 'package:votera/features/profile/domain/usecases/update_user_profile.dart';
+import 'package:votera/features/profile/domain/usecases/upload_avatar.dart';
 
 part 'profile_state.dart';
 
@@ -20,12 +21,14 @@ class ProfileCubit extends Cubit<ProfileState> {
     required this.updateUserProfile,
     required this.getCachedProfile,
     required this.clearProfileCache,
+    required this.uploadAvatarUseCase,
   }) : super(ProfileInitial());
 
   final GetUserProfile getUserProfile;
   final UpdateUserProfile updateUserProfile;
   final GetCachedProfile getCachedProfile;
   final ClearProfileCache clearProfileCache;
+  final UploadAvatar uploadAvatarUseCase;
 
   Future<void> loadProfile() async {
     // Phase 1: serve from cache so the UI reacts instantly on launch.
@@ -79,5 +82,32 @@ class ProfileCubit extends Cubit<ProfileState> {
       (failure) => emit(ProfileError(message: failure.message)),
       (profile) => emit(ProfileLoaded(profile: profile)),
     );
+  }
+
+  /// Uploads [filePath] as the new profile picture.
+  /// Emits [ProfileAvatarUploading] while uploading, then [ProfileLoaded]
+  /// with the refreshed profile on success, or [ProfileError] on failure.
+  Future<void> uploadAvatar(String filePath) async {
+    final currentProfile = _currentProfile;
+    if (currentProfile != null) {
+      emit(ProfileAvatarUploading(profile: currentProfile));
+    }
+
+    final result = await uploadAvatarUseCase(UploadAvatarParams(filePath: filePath));
+    result.fold(
+      (failure) => emit(ProfileError(message: failure.message)),
+      (_) async {
+        // Reload profile so the new avatarUrl is reflected.
+        await loadProfile();
+      },
+    );
+  }
+
+  /// Returns the current [UserProfile] regardless of which loaded state we are in.
+  UserProfile? get _currentProfile {
+    final s = state;
+    if (s is ProfileLoaded) return s.profile;
+    if (s is ProfileAvatarUploading) return s.profile;
+    return null;
   }
 }
