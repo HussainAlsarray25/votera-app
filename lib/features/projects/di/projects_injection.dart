@@ -8,6 +8,7 @@ import 'package:votera/features/projects/domain/usecases/add_project_category.da
 import 'package:votera/features/projects/domain/usecases/cancel_project.dart';
 import 'package:votera/features/projects/domain/usecases/delete_project_media.dart';
 import 'package:votera/features/projects/domain/usecases/finalize_project.dart';
+import 'package:votera/features/projects/domain/usecases/get_my_project.dart';
 import 'package:votera/features/projects/domain/usecases/get_project_by_id.dart';
 import 'package:votera/features/projects/domain/usecases/get_projects.dart';
 import 'package:votera/features/projects/domain/usecases/get_upload_url.dart';
@@ -24,6 +25,7 @@ void initProjectsFeature(GetIt sl) {
       () => ProjectsCubit(
         getProjects: sl<GetProjects>(),
         getProjectById: sl<GetProjectById>(),
+        getMyProject: sl<GetMyProject>(),
         submitProject: sl<SubmitProject>(),
         updateProject: sl<UpdateProject>(),
         getUploadUrl: sl<GetUploadUrl>(),
@@ -41,6 +43,9 @@ void initProjectsFeature(GetIt sl) {
     )
     ..registerLazySingleton<GetProjectById>(
       () => GetProjectById(sl<ProjectRepository>()),
+    )
+    ..registerLazySingleton<GetMyProject>(
+      () => GetMyProject(sl<ProjectRepository>()),
     )
     ..registerLazySingleton<SubmitProject>(
       () => SubmitProject(sl<ProjectRepository>()),

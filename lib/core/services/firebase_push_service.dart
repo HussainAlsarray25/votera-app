@@ -88,6 +88,31 @@ class FirebasePushService {
     }
   }
 
+  /// Shows an immediate local notification. Used for in-app events such as
+  /// Telegram login completion where the user may be in another app.
+  Future<void> showLocalNotification({
+    required String title,
+    required String body,
+    int id = 0,
+  }) async {
+    if (kIsWeb || _localNotifications == null) return;
+
+    await _localNotifications!.show(
+      id,
+      title,
+      body,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'votera_notifications',
+          'Votera Notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+    );
+  }
+
   Future<void> _setupLocalNotifications() async {
     _localNotifications = FlutterLocalNotificationsPlugin();
 

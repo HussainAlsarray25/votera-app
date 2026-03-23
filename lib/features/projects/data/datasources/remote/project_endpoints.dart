@@ -26,6 +26,10 @@ class ProjectEndpoints {
   static String cancelProject(String eventId, String projectId) =>
       'events/$eventId/projects/$projectId/cancel';
 
+  // GET /v1/events/{event_id}/projects/my — returns the authenticated user's
+  // own project submission for the event.
+  static String myProject(String eventId) => 'events/$eventId/projects/my';
+
   static String projectMedia(
     String eventId,
     String projectId,

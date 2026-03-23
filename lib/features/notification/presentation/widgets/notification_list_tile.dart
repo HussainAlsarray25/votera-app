@@ -19,58 +19,109 @@ class NotificationListTile extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       child: Container(
-        color: isUnread ? AppColors.primary.withValues(alpha: 0.05) : null,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.md,
         ),
+        decoration: BoxDecoration(
+          color: isUnread
+              ? AppColors.primary.withValues(alpha: 0.06)
+              : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          border: Border.all(
+            color: isUnread
+                ? AppColors.primary.withValues(alpha: 0.15)
+                : AppColors.border,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Unread dot indicator
-            Padding(
-              padding: const EdgeInsets.only(top: 6, right: AppSpacing.sm),
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isUnread ? AppColors.primary : Colors.transparent,
+            // Icon container
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: isUnread
+                    ? AppColors.primary.withValues(alpha: 0.12)
+                    : AppColors.surface,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isUnread
+                      ? AppColors.primary.withValues(alpha: 0.2)
+                      : AppColors.border,
                 ),
               ),
+              child: Icon(
+                Icons.notifications_outlined,
+                size: 20,
+                color: isUnread ? AppColors.primary : AppColors.textHint,
+              ),
             ),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    notification.title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight:
-                              isUnread ? FontWeight.w600 : FontWeight.normal,
-                          color: AppColors.textPrimary,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          notification.title,
+                          style: AppTypography.labelMedium.copyWith(
+                            fontWeight: isUnread
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    notification.body,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    _formatTime(notification.createdAt),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        _formatTime(notification.createdAt),
+                        style: AppTypography.caption.copyWith(
                           color: AppColors.textHint,
                         ),
+                      ),
+                    ],
                   ),
+                  if (notification.body.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      notification.body,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ],
               ),
             ),
+            // Unread dot
+            if (isUnread)
+              Padding(
+                padding: const EdgeInsets.only(top: 6, left: AppSpacing.xs),
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
           ],
         ),
       ),

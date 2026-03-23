@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:votera/core/error/failures.dart';
+import 'package:votera/features/authentication/domain/entities/telegram_auth.dart';
 
 abstract class AuthRepository {
   Future<Either<Failure, void>> login({
@@ -8,10 +9,9 @@ abstract class AuthRepository {
   });
 
   Future<Either<Failure, void>> register({
-    required String username,
-    required String email,
+    required String fullName,
+    required String identifier,
     required String password,
-    required String displayName,
   });
 
   Future<Either<Failure, void>> verifyLogin({
@@ -34,4 +34,8 @@ abstract class AuthRepository {
     required String token,
     required String newPassword,
   });
+
+  Future<Either<Failure, TelegramLinkData>> requestTelegramLink();
+
+  Future<Either<Failure, TelegramAuthStatus>> getTelegramStatus(String token);
 }

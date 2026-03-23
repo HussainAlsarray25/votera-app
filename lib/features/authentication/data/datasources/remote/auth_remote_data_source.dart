@@ -39,6 +39,14 @@ abstract class AuthRemoteDataSource {
     required String token,
     required String newPassword,
   });
+
+  /// POST /auth/telegram/request-link
+  /// Returns the wrapped response: {success, data: {token, link}}
+  Future<Map<String, dynamic>> requestTelegramLink();
+
+  /// GET /auth/telegram/status?token={uuid}
+  /// Returns the wrapped response: {success, data: {status, access_token, refresh_token}}
+  Future<Map<String, dynamic>> getTelegramStatus(String token);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -123,5 +131,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       AuthEndpoints.resetPasswordConfirm,
       data: {'token': token, 'new_password': newPassword},
     );
+  }
+
+  @override
+  Future<Map<String, dynamic>> requestTelegramLink() async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      AuthEndpoints.telegramRequestLink,
+    );
+    return response.data!;
+  }
+
+  @override
+  Future<Map<String, dynamic>> getTelegramStatus(String token) async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      AuthEndpoints.telegramStatus,
+      queryParameters: {'token': token},
+    );
+    return response.data!;
   }
 }

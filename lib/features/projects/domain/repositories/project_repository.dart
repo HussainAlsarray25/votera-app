@@ -25,6 +25,7 @@ abstract class ProjectRepository {
     String? description,
     String? repoUrl,
     String? demoUrl,
+    String? techStack,
   });
 
   /// Updates an existing project's details.
@@ -35,6 +36,7 @@ abstract class ProjectRepository {
     String? description,
     String? repoUrl,
     String? demoUrl,
+    String? techStack,
   });
 
   /// Requests a pre-signed upload URL for attaching media to a project.
@@ -79,5 +81,11 @@ abstract class ProjectRepository {
     required String eventId,
     required String projectId,
     required String mediaId,
+  });
+
+  /// Fetches the authenticated user's own project for the given event.
+  /// Returns a [NotFoundFailure] when the user has no project in this event.
+  Future<Either<Failure, ProjectEntity>> getMyProject({
+    required String eventId,
   });
 }

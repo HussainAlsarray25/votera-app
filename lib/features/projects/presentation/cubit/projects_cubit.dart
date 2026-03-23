@@ -1,11 +1,13 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:votera/core/error/failures.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 import 'package:votera/features/projects/domain/entities/upload_url_entity.dart';
 import 'package:votera/features/projects/domain/usecases/add_project_category.dart';
 import 'package:votera/features/projects/domain/usecases/cancel_project.dart';
 import 'package:votera/features/projects/domain/usecases/delete_project_media.dart';
 import 'package:votera/features/projects/domain/usecases/finalize_project.dart';
+import 'package:votera/features/projects/domain/usecases/get_my_project.dart';
 import 'package:votera/features/projects/domain/usecases/get_project_by_id.dart';
 import 'package:votera/features/projects/domain/usecases/get_projects.dart';
 import 'package:votera/features/projects/domain/usecases/get_upload_url.dart';
@@ -22,6 +24,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
   ProjectsCubit({
     required this.getProjects,
     required this.getProjectById,
+    required this.getMyProject,
     required this.submitProject,
     required this.updateProject,
     required this.getUploadUrl,
@@ -35,6 +38,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
 
   final GetProjects getProjects;
   final GetProjectById getProjectById;
+  final GetMyProject getMyProject;
   final SubmitProject submitProject;
   final UpdateProject updateProject;
   final GetUploadUrl getUploadUrl;
@@ -80,12 +84,33 @@ class ProjectsCubit extends Cubit<ProjectsState> {
     );
   }
 
+  /// Fetches the current user's project for the given event.
+  /// Emits [MyProjectNotFound] when the user has no project (404 response).
+  Future<void> loadMyProject({required String eventId}) async {
+    emit(const ProjectsLoading());
+    final result = await getMyProject(GetMyProjectParams(eventId: eventId));
+    result.fold(
+      (failure) {
+        // A 404 means the user simply has not submitted a project yet.
+        // Treat it as a "no project" state rather than an error.
+        final is404 = failure is ServerFailure && failure.statusCode == 404;
+        if (is404) {
+          emit(const MyProjectNotFound());
+        } else {
+          emit(ProjectsError(message: failure.message));
+        }
+      },
+      (project) => emit(MyProjectLoaded(project: project)),
+    );
+  }
+
   Future<void> createProject({
     required String eventId,
     required String title,
     String? description,
     String? repoUrl,
     String? demoUrl,
+    String? techStack,
   }) async {
     emit(const ProjectsLoading());
     final result = await submitProject(
@@ -95,10 +120,13 @@ class ProjectsCubit extends Cubit<ProjectsState> {
         description: description,
         repoUrl: repoUrl,
         demoUrl: demoUrl,
+        techStack: techStack,
       ),
     );
     result.fold(
-      (failure) => emit(ProjectsError(message: failure.message)),
+      // Creation rejected by the backend — preserve the form so the user
+      // can see the error and correct their input.
+      (failure) => emit(ProjectActionFailed(message: failure.message)),
       (project) => emit(ProjectSaved(project: project)),
     );
   }
@@ -110,6 +138,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
     String? description,
     String? repoUrl,
     String? demoUrl,
+    String? techStack,
   }) async {
     emit(const ProjectsLoading());
     final result = await updateProject(
@@ -120,10 +149,11 @@ class ProjectsCubit extends Cubit<ProjectsState> {
         description: description,
         repoUrl: repoUrl,
         demoUrl: demoUrl,
+        techStack: techStack,
       ),
     );
     result.fold(
-      (failure) => emit(ProjectsError(message: failure.message)),
+      (failure) => emit(ProjectActionFailed(message: failure.message)),
       (project) => emit(ProjectSaved(project: project)),
     );
   }
@@ -209,7 +239,9 @@ class ProjectsCubit extends Cubit<ProjectsState> {
       FinalizeProjectParams(eventId: eventId, projectId: projectId),
     );
     result.fold(
-      (failure) => emit(ProjectsError(message: failure.message)),
+      // Finalize rejected (e.g. already submitted) — project still exists,
+      // so preserve the project view and surface the error as a snackbar.
+      (failure) => emit(ProjectActionFailed(message: failure.message)),
       (project) => emit(ProjectSaved(project: project)),
     );
   }
@@ -224,7 +256,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
       CancelProjectParams(eventId: eventId, projectId: projectId),
     );
     result.fold(
-      (failure) => emit(ProjectsError(message: failure.message)),
+      (failure) => emit(ProjectActionFailed(message: failure.message)),
       (project) => emit(ProjectSaved(project: project)),
     );
   }

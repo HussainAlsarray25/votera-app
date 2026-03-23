@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:votera/core/error/error_message_extractor.dart';
 import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/network/network_info.dart';
@@ -69,6 +70,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
     String? description,
     String? repoUrl,
     String? demoUrl,
+    String? techStack,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
@@ -80,6 +82,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
         description: description,
         repoUrl: repoUrl,
         demoUrl: demoUrl,
+        techStack: techStack,
       );
       return Right(project);
     } on Exception catch (e) {
@@ -95,6 +98,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
     String? description,
     String? repoUrl,
     String? demoUrl,
+    String? techStack,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
@@ -107,6 +111,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
         description: description,
         repoUrl: repoUrl,
         demoUrl: demoUrl,
+        techStack: techStack,
       );
       return Right(project);
     } on Exception catch (e) {
@@ -246,6 +251,28 @@ class ProjectRepositoryImpl implements ProjectRepository {
         mediaId: mediaId,
       );
       return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ProjectEntity>> getMyProject({
+    required String eventId,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final project = await remoteDataSource.getMyProject(eventId: eventId);
+      return Right(project);
+    } on DioException catch (e) {
+      // Preserve the HTTP status code so callers (e.g. the cubit) can
+      // distinguish a 404 "no project yet" from a real server error.
+      return Left(ServerFailure(
+        message: extractErrorMessage(e),
+        statusCode: e.response?.statusCode,
+      ));
     } on Exception catch (e) {
       return Left(ServerFailure(message: extractErrorMessage(e)));
     }

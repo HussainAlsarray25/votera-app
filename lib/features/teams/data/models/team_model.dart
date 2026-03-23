@@ -13,20 +13,24 @@ class TeamModel extends TeamEntity {
   });
 
   factory TeamModel.fromJson(Map<String, dynamic> json) {
-    final rawMembers = json['members'] as List<dynamic>? ?? [];
+    // Unwrap the API envelope { success, message, data: {...} } when present.
+    final payload =
+        json['data'] is Map<String, dynamic> ? json['data'] as Map<String, dynamic> : json;
+
+    final rawMembers = payload['members'] as List<dynamic>? ?? [];
     return TeamModel(
-      id: json['id']?.toString() ?? '',
-      name: json['name'] as String? ?? '',
-      description: json['description'] as String?,
-      leaderId: json['leader_id']?.toString() ?? '',
+      id: payload['id']?.toString() ?? '',
+      name: payload['name'] as String? ?? '',
+      description: payload['description'] as String?,
+      leaderId: payload['leader_id']?.toString() ?? '',
       members: rawMembers
           .map((e) => TeamMemberModel.fromJson(e as Map<String, dynamic>))
           .toList(),
-      createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'].toString())
+      createdAt: payload['created_at'] != null
+          ? DateTime.tryParse(payload['created_at'].toString())
           : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.tryParse(json['updated_at'].toString())
+      updatedAt: payload['updated_at'] != null
+          ? DateTime.tryParse(payload['updated_at'].toString())
           : null,
     );
   }

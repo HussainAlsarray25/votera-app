@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 
 /// Splash screen shown at app launch.
 /// Checks for saved auth tokens and navigates to the appropriate screen.
@@ -43,9 +44,13 @@ class _SplashPageState extends State<SplashPage>
     if (!mounted) return;
 
     if (authCubit.state is AuthAuthenticated) {
-      context.go('/home');
+      // Load the profile so role-based navigation is ready before home renders.
+      if (mounted) {
+        await context.read<ProfileCubit>().loadProfile();
+      }
+      if (mounted) context.go('/home');
     } else {
-      context.go('/onboarding');
+      if (mounted) context.go('/onboarding');
     }
   }
 

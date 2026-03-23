@@ -4,6 +4,7 @@ import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/features/authentication/data/datasources/remote/auth_remote_data_source.dart';
 import 'package:votera/features/authentication/data/services/token_service.dart';
+import 'package:votera/features/authentication/domain/entities/telegram_auth.dart';
 import 'package:votera/features/authentication/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -39,20 +40,18 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, void>> register({
-    required String username,
-    required String email,
+    required String fullName,
+    required String identifier,
     required String password,
-    required String displayName,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
     try {
       final result = await remoteDataSource.register(
-        username: username,
-        email: email,
+        fullName: fullName,
+        identifier: identifier,
         password: password,
-        displayName: displayName,
       );
       await _saveTokensFromResponse(result);
       return const Right(null);
@@ -142,6 +141,47 @@ class AuthRepositoryImpl implements AuthRepository {
         newPassword: newPassword,
       );
       return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, TelegramLinkData>> requestTelegramLink() async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final result = await remoteDataSource.requestTelegramLink();
+      final data = result['data'] as Map<String, dynamic>;
+      return Right(TelegramLinkData(
+        token: data['token'] as String,
+        link: data['link'] as String,
+      ));
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, TelegramAuthStatus>> getTelegramStatus(
+      String token) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final result = await remoteDataSource.getTelegramStatus(token);
+      final data = result['data'] as Map<String, dynamic>;
+      final status = data['status'] as String? ?? 'pending';
+      if (status == 'success') {
+        // Persist tokens — same helper used by regular login.
+        await _saveTokensFromResponse(result);
+        return const Right(TelegramAuthStatus(isComplete: true));
+      }
+      if (status == 'expired') {
+        return const Right(TelegramAuthStatus(isComplete: false, isExpired: true));
+      }
+      return const Right(TelegramAuthStatus(isComplete: false));
     } on Exception catch (e) {
       return Left(ServerFailure(message: extractErrorMessage(e)));
     }

@@ -57,6 +57,19 @@ class TeamsActionSuccess extends TeamsState {
   const TeamsActionSuccess();
 }
 
+/// Emitted when a mutation action (leave, remove, transfer, etc.) fails.
+/// Unlike [TeamsError], this does NOT mean the team is gone — the cubit
+/// preserves the loaded state and the UI should show an inline error message
+/// (e.g. a snackbar) without wiping the team view.
+class TeamsActionFailed extends TeamsState {
+  const TeamsActionFailed({required this.message});
+
+  final String message;
+
+  @override
+  List<Object?> get props => [message];
+}
+
 class TeamsError extends TeamsState {
   const TeamsError({required this.message});
 

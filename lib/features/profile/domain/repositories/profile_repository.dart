@@ -7,4 +7,6 @@ abstract class ProfileRepository {
   Future<Either<Failure, UserProfile>> updateUserProfile({
     String? fullName,
   });
+  Future<UserProfile?> getCachedProfile();
+  Future<void> clearCache();
 }

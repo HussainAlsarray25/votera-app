@@ -16,30 +16,38 @@ class ProjectModel extends ProjectEntity {
     super.description,
     super.repoUrl,
     super.demoUrl,
+    super.techStack,
     super.barcodeToken,
   });
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
-    final rawMedia = json['media'] as List<dynamic>? ?? [];
+    // Unwrap the API envelope { success, message, data: {...} } when present.
+    // Single-object endpoints return the envelope directly; list endpoints
+    // (via PaginatedResponse) pass the inner item already unwrapped.
+    final payload =
+        json['data'] is Map<String, dynamic> ? json['data'] as Map<String, dynamic> : json;
+
+    final rawMedia = payload['media'] as List<dynamic>? ?? [];
 
     return ProjectModel(
-      id: json['id']?.toString() ?? '',
-      eventId: json['event_id']?.toString() ?? '',
-      teamId: json['team_id']?.toString() ?? '',
-      title: json['title'] as String? ?? '',
-      description: json['description'] as String?,
-      repoUrl: json['repo_url'] as String?,
-      demoUrl: json['demo_url'] as String?,
-      barcodeToken: json['barcode_token'] as String?,
-      status: projectStatusFromString(json['status'] as String?),
+      id: payload['id']?.toString() ?? '',
+      eventId: payload['event_id']?.toString() ?? '',
+      teamId: payload['team_id']?.toString() ?? '',
+      title: payload['title'] as String? ?? '',
+      description: payload['description'] as String?,
+      repoUrl: payload['repo_url'] as String?,
+      demoUrl: payload['demo_url'] as String?,
+      techStack: payload['tech_stack'] as String?,
+      barcodeToken: payload['barcode_token'] as String?,
+      status: projectStatusFromString(payload['status'] as String?),
       media: rawMedia
           .map((e) => ProjectMediaModel.fromJson(e as Map<String, dynamic>))
           .toList(),
-      createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'].toString())
+      createdAt: payload['created_at'] != null
+          ? DateTime.tryParse(payload['created_at'].toString())
           : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.tryParse(json['updated_at'].toString())
+      updatedAt: payload['updated_at'] != null
+          ? DateTime.tryParse(payload['updated_at'].toString())
           : null,
     );
   }

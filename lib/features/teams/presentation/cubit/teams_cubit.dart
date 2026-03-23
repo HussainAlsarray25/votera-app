@@ -90,7 +90,9 @@ class TeamsCubit extends Cubit<TeamsState> {
       UpdateTeamParams(teamId: teamId, name: name, description: description),
     );
     result.fold(
-      (failure) => emit(TeamsError(message: failure.message)),
+      // Update failed — team is still there, so use TeamsActionFailed
+      // to avoid wiping the loaded team from the UI.
+      (failure) => emit(TeamsActionFailed(message: failure.message)),
       (team) => emit(TeamLoaded(team: team)),
     );
   }
@@ -99,7 +101,7 @@ class TeamsCubit extends Cubit<TeamsState> {
     emit(const TeamsLoading());
     final result = await deleteTeam(DeleteTeamParams(teamId: teamId));
     result.fold(
-      (failure) => emit(TeamsError(message: failure.message)),
+      (failure) => emit(TeamsActionFailed(message: failure.message)),
       (_) => emit(const TeamsActionSuccess()),
     );
   }
@@ -113,7 +115,7 @@ class TeamsCubit extends Cubit<TeamsState> {
       InviteMemberParams(teamId: teamId, inviteeId: inviteeId),
     );
     result.fold(
-      (failure) => emit(TeamsError(message: failure.message)),
+      (failure) => emit(TeamsActionFailed(message: failure.message)),
       (invitation) => emit(InvitationSent(invitation: invitation)),
     );
   }
@@ -136,7 +138,7 @@ class TeamsCubit extends Cubit<TeamsState> {
       RespondToInvitationParams(invitationId: invitationId, accept: accept),
     );
     result.fold(
-      (failure) => emit(TeamsError(message: failure.message)),
+      (failure) => emit(TeamsActionFailed(message: failure.message)),
       (_) => emit(const TeamsActionSuccess()),
     );
   }
@@ -145,7 +147,9 @@ class TeamsCubit extends Cubit<TeamsState> {
     emit(const TeamsLoading());
     final result = await leaveTeam(NoParams());
     result.fold(
-      (failure) => emit(TeamsError(message: failure.message)),
+      // The backend rejected the leave (e.g. leader must transfer first).
+      // Team still exists — preserve the loaded view, surface the error.
+      (failure) => emit(TeamsActionFailed(message: failure.message)),
       (_) => emit(const TeamsActionSuccess()),
     );
   }
@@ -159,7 +163,7 @@ class TeamsCubit extends Cubit<TeamsState> {
       RemoveMemberParams(teamId: teamId, memberId: memberId),
     );
     result.fold(
-      (failure) => emit(TeamsError(message: failure.message)),
+      (failure) => emit(TeamsActionFailed(message: failure.message)),
       (_) => emit(const TeamsActionSuccess()),
     );
   }
@@ -173,7 +177,7 @@ class TeamsCubit extends Cubit<TeamsState> {
       TransferLeadershipParams(teamId: teamId, newLeaderId: newLeaderId),
     );
     result.fold(
-      (failure) => emit(TeamsError(message: failure.message)),
+      (failure) => emit(TeamsActionFailed(message: failure.message)),
       (_) => emit(const TeamsActionSuccess()),
     );
   }
@@ -193,7 +197,7 @@ class TeamsCubit extends Cubit<TeamsState> {
       CancelInvitationParams(invitationId: invitationId),
     );
     result.fold(
-      (failure) => emit(TeamsError(message: failure.message)),
+      (failure) => emit(TeamsActionFailed(message: failure.message)),
       (_) => emit(const TeamsActionSuccess()),
     );
   }

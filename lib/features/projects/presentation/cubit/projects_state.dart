@@ -74,6 +74,34 @@ class ProjectMediaDeleted extends ProjectsState {
   const ProjectMediaDeleted();
 }
 
+/// Emitted when the current user's own project for an event has been loaded.
+class MyProjectLoaded extends ProjectsState {
+  const MyProjectLoaded({required this.project});
+
+  final ProjectEntity project;
+
+  @override
+  List<Object?> get props => [project];
+}
+
+/// Emitted when the current user has no project in the event (404).
+class MyProjectNotFound extends ProjectsState {
+  const MyProjectNotFound();
+}
+
+/// Emitted when a mutation action (create, edit, finalize, cancel) is rejected
+/// by the backend. Unlike [ProjectsError], this does NOT mean the data is gone.
+/// The current view (form or project card) is preserved and the UI shows a
+/// snackbar with the server's error message.
+class ProjectActionFailed extends ProjectsState {
+  const ProjectActionFailed({required this.message});
+
+  final String message;
+
+  @override
+  List<Object?> get props => [message];
+}
+
 class ProjectsError extends ProjectsState {
   const ProjectsError({required this.message});
 

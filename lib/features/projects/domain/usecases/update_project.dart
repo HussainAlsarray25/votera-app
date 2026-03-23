@@ -19,6 +19,7 @@ class UpdateProject extends UseCase<ProjectEntity, UpdateProjectParams> {
       description: params.description,
       repoUrl: params.repoUrl,
       demoUrl: params.demoUrl,
+      techStack: params.techStack,
     );
   }
 }
@@ -31,6 +32,7 @@ class UpdateProjectParams extends Equatable {
     this.description,
     this.repoUrl,
     this.demoUrl,
+    this.techStack,
   });
 
   final String eventId;
@@ -41,7 +43,8 @@ class UpdateProjectParams extends Equatable {
   final String? description;
   final String? repoUrl;
   final String? demoUrl;
+  final String? techStack;
 
   @override
-  List<Object?> get props => [eventId, projectId, title, description, repoUrl, demoUrl];
+  List<Object?> get props => [eventId, projectId, title, description, repoUrl, demoUrl, techStack];
 }

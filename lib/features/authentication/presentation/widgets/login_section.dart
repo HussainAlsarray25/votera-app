@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/features/authentication/presentation/widgets/telegram_login_button.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -47,6 +48,8 @@ class _LoginSectionState extends State<LoginSection> {
             _buildForgotPassword(),
             const SizedBox(height: AppSpacing.xl),
             _buildSubmitButton(),
+            const SizedBox(height: AppSpacing.md),
+            const TelegramLoginButton(),
             const SizedBox(height: AppSpacing.lg),
             _buildSwitchLink(),
           ],

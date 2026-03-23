@@ -5,6 +5,8 @@ import 'package:votera/features/projects/domain/entities/project_media_entity.da
 enum ProjectStatus {
   draft,
   submitted,
+  accepted,
+  rejected,
 }
 
 /// Converts a raw string from the API into a [ProjectStatus] value.
@@ -13,6 +15,10 @@ ProjectStatus projectStatusFromString(String? value) {
   switch (value) {
     case 'submitted':
       return ProjectStatus.submitted;
+    case 'accepted':
+      return ProjectStatus.accepted;
+    case 'rejected':
+      return ProjectStatus.rejected;
     case 'draft':
     default:
       return ProjectStatus.draft;
@@ -33,6 +39,7 @@ class ProjectEntity extends Equatable {
     this.description,
     this.repoUrl,
     this.demoUrl,
+    this.techStack,
     this.barcodeToken,
   });
 
@@ -49,6 +56,9 @@ class ProjectEntity extends Equatable {
 
   /// Link to a live demo or deployed version.
   final String? demoUrl;
+
+  /// Technologies and frameworks used in the project (free-form string).
+  final String? techStack;
 
   final ProjectStatus status;
 
@@ -70,6 +80,7 @@ class ProjectEntity extends Equatable {
         description,
         repoUrl,
         demoUrl,
+        techStack,
         status,
         media,
         barcodeToken,

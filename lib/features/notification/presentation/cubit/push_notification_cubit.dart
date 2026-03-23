@@ -32,9 +32,16 @@ class PushNotificationCubit extends Cubit<PushNotificationState> {
   String? _currentToken;
 
   /// Called when the auth state changes. Registers token on login,
-  /// unregisters on logout.
+  /// unregisters on logout. For Telegram logins, also fires a local
+  /// notification so the user knows to return to the app.
   Future<void> _onAuthStateChanged(dynamic authState) async {
     if (authState is AuthAuthenticated) {
+      if (authState.fromTelegram) {
+        await pushService.showLocalNotification(
+          title: 'Login successful',
+          body: 'Tap to return to Votera.',
+        );
+      }
       await _registerToken();
     } else if (authState is AuthInitial) {
       await _unregisterToken();

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:votera/core/domain/services/auth_token_provider.dart';
 
@@ -9,6 +11,12 @@ class AuthInterceptor extends Interceptor {
 
   final Dio dio;
   final AuthTokenProvider authTokenProvider;
+
+  // Prevents multiple concurrent refresh calls when several requests
+  // receive 401 at the same time. Only the first caller does the actual
+  // refresh; the rest await the same Completer.
+  bool _isRefreshing = false;
+  Completer<bool>? _refreshCompleter;
 
   @override
   Future<void> onRequest(
@@ -64,33 +72,45 @@ class AuthInterceptor extends Interceptor {
   }
 
   Future<bool> _refreshToken() async {
-    final refreshToken = await authTokenProvider.getRefreshToken();
-    if (refreshToken == null || refreshToken.isEmpty) return false;
+    // Queue behind any ongoing refresh rather than firing a second one.
+    if (_isRefreshing) {
+      return _refreshCompleter!.future;
+    }
 
+    _isRefreshing = true;
+    _refreshCompleter = Completer<bool>();
+
+    var success = false;
     try {
-      // Uses the same Dio instance so the base URL is prepended,
-      // resulting in: {baseUrl}/auth/refresh
-      final response = await dio.post<Map<String, dynamic>>(
-        'auth/refresh',
-        data: {'refresh_token': refreshToken},
-      );
+      final refreshToken = await authTokenProvider.getRefreshToken();
+      if (refreshToken != null && refreshToken.isNotEmpty) {
+        final response = await dio.post<Map<String, dynamic>>(
+          'auth/refresh',
+          data: {'refresh_token': refreshToken},
+        );
 
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data!['data'] as Map<String, dynamic>?;
-        final newAccessToken = data?['access_token']?.toString();
-        final newRefreshToken = data?['refresh_token']?.toString();
+        if (response.statusCode == 200 && response.data != null) {
+          final data = response.data!['data'] as Map<String, dynamic>?;
+          final newAccessToken = data?['access_token']?.toString();
+          final newRefreshToken = data?['refresh_token']?.toString();
 
-        if (newAccessToken != null && newRefreshToken != null) {
-          await authTokenProvider.saveTokens(
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-          );
-          return true;
+          if (newAccessToken != null && newRefreshToken != null) {
+            await authTokenProvider.saveTokens(
+              accessToken: newAccessToken,
+              refreshToken: newRefreshToken,
+            );
+            success = true;
+          }
         }
       }
-      return false;
     } on DioException {
-      return false;
+      success = false;
+    } finally {
+      _isRefreshing = false;
+      _refreshCompleter!.complete(success);
+      _refreshCompleter = null;
     }
+
+    return success;
   }
 }

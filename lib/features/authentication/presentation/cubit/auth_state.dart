@@ -12,7 +12,17 @@ class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
 
 /// User is authenticated (tokens stored). Profile is fetched separately.
-class AuthAuthenticated extends AuthState {}
+/// [fromTelegram] is true when authentication completed via the Telegram bot
+/// polling flow, used to trigger a local notification while the app is in the
+/// background.
+class AuthAuthenticated extends AuthState {
+  const AuthAuthenticated({this.fromTelegram = false});
+
+  final bool fromTelegram;
+
+  @override
+  List<Object?> get props => [fromTelegram];
+}
 
 /// Login returned a pending OTP verification step.
 class AuthOtpRequired extends AuthState {
@@ -22,6 +32,18 @@ class AuthOtpRequired extends AuthState {
 
   @override
   List<Object?> get props => [identifier];
+}
+
+/// Link has been obtained from the backend. The widget should open Telegram
+/// via url_launcher and then the cubit will poll until authentication completes.
+class AuthTelegramAwaitingUser extends AuthState {
+  const AuthTelegramAwaitingUser({required this.link, required this.token});
+
+  final String link;
+  final String token;
+
+  @override
+  List<Object?> get props => [link, token];
 }
 
 class AuthPasswordResetSent extends AuthState {}

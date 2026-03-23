@@ -11,4 +11,6 @@ class AuthEndpoints {
   static const String resetPassword = 'auth/password/reset';
   static const String resetPasswordConfirm = 'auth/password/reset-confirm';
   static const String refresh = 'auth/refresh';
+  static const String telegramRequestLink = 'auth/telegram/request-link';
+  static const String telegramStatus = 'auth/telegram/status';
 }

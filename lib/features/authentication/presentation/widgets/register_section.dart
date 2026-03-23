@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/features/authentication/presentation/widgets/telegram_login_button.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -19,14 +20,14 @@ class RegisterSection extends StatefulWidget {
 class _RegisterSectionState extends State<RegisterSection> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
+  final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
     _nameController.dispose();
-    _emailController.dispose();
+    _identifierController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -45,11 +46,13 @@ class _RegisterSectionState extends State<RegisterSection> {
             const SizedBox(height: AppSpacing.xl),
             _buildNameField(),
             const SizedBox(height: AppSpacing.md),
-            _buildEmailField(),
+            _buildIdentifierField(),
             const SizedBox(height: AppSpacing.md),
             _buildPasswordField(),
             const SizedBox(height: AppSpacing.xl),
             _buildSubmitButton(),
+            const SizedBox(height: AppSpacing.md),
+            const TelegramLoginButton(),
             const SizedBox(height: AppSpacing.lg),
             _buildSwitchLink(),
           ],
@@ -87,17 +90,15 @@ class _RegisterSectionState extends State<RegisterSection> {
     );
   }
 
-  // -- Section: Email input --
-  Widget _buildEmailField() {
+  // -- Section: Identifier input --
+  Widget _buildIdentifierField() {
     return AppTextField(
-      label: 'Email',
-      controller: _emailController,
-      hint: 'Enter your email',
-      prefixIcon: Icons.email_outlined,
-      keyboardType: TextInputType.emailAddress,
+      label: 'Identifier',
+      controller: _identifierController,
+      hint: 'Enter your email or username',
+      prefixIcon: Icons.alternate_email_outlined,
       validator: (value) {
-        if (value == null || value.isEmpty) return 'Email is required';
-        if (!value.contains('@')) return 'Enter a valid email';
+        if (value == null || value.isEmpty) return 'Identifier is required';
         return null;
       },
     );
@@ -165,10 +166,9 @@ class _RegisterSectionState extends State<RegisterSection> {
   void _handleRegister() {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthCubit>().register(
-            username: _emailController.text.trim(),
-            email: _emailController.text.trim(),
+            fullName: _nameController.text.trim(),
+            identifier: _identifierController.text.trim(),
             password: _passwordController.text,
-            displayName: _nameController.text.trim(),
           );
     }
   }

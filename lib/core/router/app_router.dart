@@ -13,6 +13,8 @@ import 'package:votera/features/profile/presentation/pages/comments_page.dart';
 import 'package:votera/features/profile/presentation/pages/profile_page.dart';
 import 'package:votera/features/project_details/presentation/pages/project_details_page.dart';
 import 'package:votera/features/splash/presentation/pages/splash_page.dart';
+import 'package:votera/features/teams/presentation/pages/team_detail_page.dart';
+import 'package:votera/features/teams/presentation/pages/teams_page.dart';
 
 class AppRouter {
   GoRouter get router => _router;
@@ -45,6 +47,10 @@ class AppRouter {
             builder: (context, state) => const ExhibitionsPage(),
           ),
           GoRoute(
+            path: '/teams',
+            builder: (context, state) => const TeamsPage(),
+          ),
+          GoRoute(
             path: '/profile',
             builder: (context, state) => const ProfilePage(),
           ),
@@ -53,6 +59,13 @@ class AppRouter {
       GoRoute(
         path: '/notifications',
         builder: (context, state) => const NotificationPage(),
+      ),
+      GoRoute(
+        path: '/teams/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return TeamDetailPage(teamId: id);
+        },
       ),
       GoRoute(
         path: '/exhibition/:id',

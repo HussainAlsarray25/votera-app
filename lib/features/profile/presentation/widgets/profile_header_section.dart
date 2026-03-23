@@ -18,8 +18,8 @@ class ProfileHeaderSection extends StatelessWidget {
           final name = state is ProfileLoaded
               ? state.profile.fullName
               : null;
-          final subtitle = state is ProfileLoaded
-              ? state.profile.status
+          final subtitle = state is ProfileLoaded && state.profile.roles.isNotEmpty
+              ? state.profile.roles.first
               : null;
           final isLoading = state is ProfileLoading;
 

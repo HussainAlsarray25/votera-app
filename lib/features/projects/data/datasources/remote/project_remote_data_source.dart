@@ -24,6 +24,7 @@ abstract class ProjectRemoteDataSource {
     String? description,
     String? repoUrl,
     String? demoUrl,
+    String? techStack,
   });
 
   /// PUT /v1/events/{event_id}/projects/{id}
@@ -34,6 +35,7 @@ abstract class ProjectRemoteDataSource {
     String? description,
     String? repoUrl,
     String? demoUrl,
+    String? techStack,
   });
 
   /// POST /v1/events/{event_id}/projects/{id}/media/upload-url
@@ -79,6 +81,9 @@ abstract class ProjectRemoteDataSource {
     required String projectId,
     required String mediaId,
   });
+
+  /// GET /v1/events/{event_id}/projects/my
+  Future<ProjectModel> getMyProject({required String eventId});
 }
 
 class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
@@ -117,12 +122,14 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     String? description,
     String? repoUrl,
     String? demoUrl,
+    String? techStack,
   }) async {
     // Only include optional fields when provided — the API ignores null keys.
     final body = <String, dynamic>{'title': title};
     if (description != null) body['description'] = description;
     if (repoUrl != null) body['repo_url'] = repoUrl;
     if (demoUrl != null) body['demo_url'] = demoUrl;
+    if (techStack != null) body['tech_stack'] = techStack;
 
     final response = await apiClient.post<Map<String, dynamic>>(
       ProjectEndpoints.projects(eventId),
@@ -139,6 +146,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     String? description,
     String? repoUrl,
     String? demoUrl,
+    String? techStack,
   }) async {
     // Only include fields that are explicitly being changed.
     final body = <String, dynamic>{};
@@ -146,6 +154,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     if (description != null) body['description'] = description;
     if (repoUrl != null) body['repo_url'] = repoUrl;
     if (demoUrl != null) body['demo_url'] = demoUrl;
+    if (techStack != null) body['tech_stack'] = techStack;
 
     final response = await apiClient.put<Map<String, dynamic>>(
       ProjectEndpoints.projectById(eventId, projectId),
@@ -232,5 +241,13 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     await apiClient.delete<void>(
       ProjectEndpoints.projectMedia(eventId, projectId, mediaId),
     );
+  }
+
+  @override
+  Future<ProjectModel> getMyProject({required String eventId}) async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      ProjectEndpoints.myProject(eventId),
+    );
+    return ProjectModel.fromJson(response.data!);
   }
 }
