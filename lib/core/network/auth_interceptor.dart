@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:votera/core/domain/services/auth_token_provider.dart';
 
@@ -9,6 +11,12 @@ class AuthInterceptor extends Interceptor {
 
   final Dio dio;
   final AuthTokenProvider authTokenProvider;
+
+  // Prevents multiple concurrent refresh calls when several requests
+  // receive 401 at the same time. Only the first caller does the actual
+  // refresh; the rest await the same Completer.
+  bool _isRefreshing = false;
+  Completer<bool>? _refreshCompleter;
 
   @override
   Future<void> onRequest(
@@ -32,7 +40,7 @@ class AuthInterceptor extends Interceptor {
     ErrorInterceptorHandler handler,
   ) async {
     if (err.response?.statusCode == 401 &&
-        !_isRefreshRequest(err.requestOptions)) {
+        !_isAuthRequest(err.requestOptions)) {
       final currentRefreshToken = await authTokenProvider.getRefreshToken();
       final didRefresh = await _refreshToken();
 
@@ -59,36 +67,50 @@ class AuthInterceptor extends Interceptor {
     handler.next(err);
   }
 
-  bool _isRefreshRequest(RequestOptions options) {
-    return options.path.contains('/auth/refresh') ||
-        options.path.contains('/refresh-token');
+  bool _isAuthRequest(RequestOptions options) {
+    return options.path.contains('auth/');
   }
 
   Future<bool> _refreshToken() async {
-    final refreshToken = await authTokenProvider.getRefreshToken();
-    if (refreshToken == null || refreshToken.isEmpty) return false;
+    // Queue behind any ongoing refresh rather than firing a second one.
+    if (_isRefreshing) {
+      return _refreshCompleter!.future;
+    }
 
+    _isRefreshing = true;
+    _refreshCompleter = Completer<bool>();
+
+    var success = false;
     try {
-      final response = await dio.post<Map<String, dynamic>>(
-        '/auth/refresh',
-        data: {'refreshToken': refreshToken},
-      );
+      final refreshToken = await authTokenProvider.getRefreshToken();
+      if (refreshToken != null && refreshToken.isNotEmpty) {
+        final response = await dio.post<Map<String, dynamic>>(
+          'auth/refresh',
+          data: {'refresh_token': refreshToken},
+        );
 
-      if (response.statusCode == 200 && response.data != null) {
-        final newAccessToken = response.data!['token']?.toString();
-        final newRefreshToken = response.data!['refreshToken']?.toString();
+        if (response.statusCode == 200 && response.data != null) {
+          final data = response.data!['data'] as Map<String, dynamic>?;
+          final newAccessToken = data?['access_token']?.toString();
+          final newRefreshToken = data?['refresh_token']?.toString();
 
-        if (newAccessToken != null && newRefreshToken != null) {
-          await authTokenProvider.saveTokens(
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-          );
-          return true;
+          if (newAccessToken != null && newRefreshToken != null) {
+            await authTokenProvider.saveTokens(
+              accessToken: newAccessToken,
+              refreshToken: newRefreshToken,
+            );
+            success = true;
+          }
         }
       }
-      return false;
     } on DioException {
-      return false;
+      success = false;
+    } finally {
+      _isRefreshing = false;
+      _refreshCompleter!.complete(success);
+      _refreshCompleter = null;
     }
+
+    return success;
   }
 }

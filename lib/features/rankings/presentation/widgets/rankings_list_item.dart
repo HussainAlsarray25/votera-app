@@ -1,24 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
-import 'package:votera/features/home/presentation/demo_data.dart';
+import 'package:votera/features/rankings/domain/entities/leaderboard_entry_entity.dart';
 
-/// A single ranked project row showing rank number, avatar, name, team,
+/// A single ranked project row showing rank number, avatar, name,
 /// vote count, and a chevron indicator.
 class RankingsListItem extends StatelessWidget {
-  const RankingsListItem({
-    required this.project,
-    required this.rank,
-    super.key,
-  });
+  const RankingsListItem({required this.entry, super.key});
 
-  final DemoProject project;
-  final int rank;
+  final LeaderboardEntryEntity entry;
 
   @override
   Widget build(BuildContext context) {
-    final gradientColors =
-        CategoryStyles.podiumGradient(project.category);
-
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -37,7 +29,7 @@ class RankingsListItem extends StatelessWidget {
         children: [
           _buildRankNumber(),
           const SizedBox(width: 12),
-          _buildAvatar(gradientColors),
+          _buildAvatar(),
           const SizedBox(width: 14),
           Expanded(child: _buildInfo()),
           _buildVoteCount(),
@@ -56,7 +48,7 @@ class RankingsListItem extends StatelessWidget {
     return SizedBox(
       width: 28,
       child: Text(
-        '$rank',
+        '${entry.rank}',
         style: AppTypography.labelLarge.copyWith(
           fontWeight: FontWeight.w800,
           color: AppColors.textHint,
@@ -65,39 +57,40 @@ class RankingsListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar(List<Color> colors) {
+  Widget _buildAvatar() {
+    final initial =
+        entry.title.isNotEmpty ? entry.title[0].toUpperCase() : '?';
+
     return Container(
       width: 44,
       height: 44,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(colors: colors),
+        gradient: LinearGradient(
+          colors: [Color(0xFF93C5FD), Color(0xFF3B82F6)],
+        ),
       ),
       child: Center(
-        child: Text(project.emoji, style: const TextStyle(fontSize: 20)),
+        child: Text(
+          initial,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildInfo() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          project.title,
-          style: AppTypography.labelMedium.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          'By ${project.teamName}',
-          style: AppTypography.bodySmall.copyWith(
-            color: AppColors.textHint,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
+    return Text(
+      entry.title,
+      style: AppTypography.labelMedium.copyWith(
+        fontWeight: FontWeight.w700,
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     );
   }
 
@@ -106,7 +99,7 @@ class RankingsListItem extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(
-          '${project.votes}',
+          '${entry.voteCount}',
           style: AppTypography.labelLarge.copyWith(
             fontWeight: FontWeight.w800,
           ),

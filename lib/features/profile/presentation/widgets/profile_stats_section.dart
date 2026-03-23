@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
 
-/// Displays a row of stat cards: votes cast, projects rated, and rank.
+/// Displays a row of stat cards: votes cast, projects rated, and comments.
+/// Shows placeholder values until a stats endpoint is available.
 class ProfileStatsSection extends StatelessWidget {
   const ProfileStatsSection({super.key});
 
@@ -13,16 +14,21 @@ class ProfileStatsSection extends StatelessWidget {
         children: [
           _buildStatCard(
             'Votes Cast',
-            '12',
+            '\u2014',
             Icons.how_to_vote,
             AppColors.primary,
           ),
           const SizedBox(width: AppSpacing.sm),
-          _buildStatCard('Rated', '8', Icons.star, AppColors.accent),
+          _buildStatCard(
+            'Rated',
+            '\u2014',
+            Icons.star,
+            AppColors.accent,
+          ),
           const SizedBox(width: AppSpacing.sm),
           _buildStatCard(
             'Comments',
-            '5',
+            '\u2014',
             Icons.chat_bubble,
             AppColors.secondary,
           ),

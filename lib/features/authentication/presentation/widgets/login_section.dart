@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/features/authentication/presentation/widgets/telegram_login_button.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -37,15 +40,17 @@ class _LoginSectionState extends State<LoginSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.xxl),
             _buildHeader(),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.xxl),
             _buildEmailField(),
             const SizedBox(height: AppSpacing.md),
             _buildPasswordField(),
             _buildForgotPassword(),
             const SizedBox(height: AppSpacing.xl),
             _buildSubmitButton(),
+            const SizedBox(height: AppSpacing.md),
+            const TelegramLoginButton(),
             const SizedBox(height: AppSpacing.lg),
             _buildSwitchLink(),
           ],
@@ -114,9 +119,7 @@ class _LoginSectionState extends State<LoginSection> {
     return Align(
       alignment: Alignment.centerRight,
       child: TextButton(
-        onPressed: () {
-          // TODO(auth): Navigate to forgot password flow.
-        },
+        onPressed: () => context.go('/forgot-password'),
         style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
         ),
@@ -132,9 +135,14 @@ class _LoginSectionState extends State<LoginSection> {
 
   // -- Section: Submit button --
   Widget _buildSubmitButton() {
-    return GradientButton(
-      text: 'Sign In',
-      onPressed: _handleLogin,
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        final isLoading = state is AuthLoading;
+        return GradientButton(
+          text: isLoading ? 'Signing In...' : 'Sign In',
+          onPressed: isLoading ? null : _handleLogin,
+        );
+      },
     );
   }
 
@@ -162,7 +170,10 @@ class _LoginSectionState extends State<LoginSection> {
 
   void _handleLogin() {
     if (_formKey.currentState?.validate() ?? false) {
-      context.go('/home');
+      context.read<AuthCubit>().login(
+            identifier: _emailController.text.trim(),
+            secret: _passwordController.text,
+          );
     }
   }
 }

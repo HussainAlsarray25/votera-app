@@ -1,23 +1,39 @@
 import 'package:get_it/get_it.dart';
+import 'package:votera/core/domain/services/auth_token_provider.dart';
 import 'package:votera/core/network/api_client.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/features/authentication/data/datasources/remote/auth_remote_data_source.dart';
 import 'package:votera/features/authentication/data/repositories/auth_repository_impl.dart';
 import 'package:votera/features/authentication/data/services/token_service.dart';
 import 'package:votera/features/authentication/domain/repositories/auth_repository.dart';
+import 'package:votera/features/authentication/domain/usecases/change_password.dart';
+import 'package:votera/features/authentication/domain/usecases/confirm_reset_password.dart';
+import 'package:votera/features/authentication/domain/usecases/get_telegram_status.dart';
 import 'package:votera/features/authentication/domain/usecases/login_user.dart';
 import 'package:votera/features/authentication/domain/usecases/logout_user.dart';
 import 'package:votera/features/authentication/domain/usecases/register_user.dart';
+import 'package:votera/features/authentication/domain/usecases/request_telegram_link.dart';
+import 'package:votera/features/authentication/domain/usecases/reset_password.dart';
+import 'package:votera/features/authentication/domain/usecases/verify_login.dart';
+import 'package:votera/features/authentication/domain/usecases/verify_registration.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
 
 void initAuthFeature(GetIt sl) {
   sl
     // Cubits
-    ..registerFactory<AuthCubit>(
+    ..registerLazySingleton<AuthCubit>(
       () => AuthCubit(
+        authTokenProvider: sl<AuthTokenProvider>(),
         loginUser: sl<LoginUser>(),
         registerUser: sl<RegisterUser>(),
         logoutUser: sl<LogoutUser>(),
+        verifyLogin: sl<VerifyLogin>(),
+        verifyRegistration: sl<VerifyRegistration>(),
+        changePassword: sl<ChangePassword>(),
+        resetPassword: sl<ResetPassword>(),
+        confirmResetPassword: sl<ConfirmResetPassword>(),
+        requestTelegramLink: sl<RequestTelegramLink>(),
+        getTelegramStatus: sl<GetTelegramStatus>(),
       ),
     )
     // Use cases
@@ -30,6 +46,27 @@ void initAuthFeature(GetIt sl) {
     ..registerLazySingleton<LogoutUser>(
       () => LogoutUser(sl<AuthRepository>()),
     )
+    ..registerLazySingleton<VerifyLogin>(
+      () => VerifyLogin(sl<AuthRepository>()),
+    )
+    ..registerLazySingleton<VerifyRegistration>(
+      () => VerifyRegistration(sl<AuthRepository>()),
+    )
+    ..registerLazySingleton<ChangePassword>(
+      () => ChangePassword(sl<AuthRepository>()),
+    )
+    ..registerLazySingleton<ResetPassword>(
+      () => ResetPassword(sl<AuthRepository>()),
+    )
+    ..registerLazySingleton<ConfirmResetPassword>(
+      () => ConfirmResetPassword(sl<AuthRepository>()),
+    )
+    ..registerLazySingleton<RequestTelegramLink>(
+      () => RequestTelegramLink(sl<AuthRepository>()),
+    )
+    ..registerLazySingleton<GetTelegramStatus>(
+      () => GetTelegramStatus(sl<AuthRepository>()),
+    )
     // Repositories
     ..registerLazySingleton<AuthRepository>(
       () => AuthRepositoryImpl(
@@ -40,8 +77,6 @@ void initAuthFeature(GetIt sl) {
     )
     // Data sources
     ..registerLazySingleton<AuthRemoteDataSource>(
-      () => AuthRemoteDataSourceImpl(
-        apiClient: sl<ApiClient>(),
-      ),
+      () => AuthRemoteDataSourceImpl(apiClient: sl<ApiClient>()),
     );
 }

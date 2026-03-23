@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/features/profile/presentation/widgets/profile_actions_section.dart';
 import 'package:votera/features/profile/presentation/widgets/profile_header_section.dart';
 import 'package:votera/features/profile/presentation/widgets/profile_stats_section.dart';
@@ -7,8 +9,23 @@ import 'package:votera/features/profile/presentation/widgets/profile_stats_secti
 /// User profile screen showing personal info, voting stats,
 /// and account actions.
 /// On tablet/desktop, uses a two-column layout.
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  @override
+  void initState() {
+    super.initState();
+    // Load profile data if not already loaded
+    final profileState = context.read<ProfileCubit>().state;
+    if (profileState is! ProfileLoaded) {
+      context.read<ProfileCubit>().loadProfile();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,19 +36,24 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildMobileLayout() {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              ProfileHeaderSection(),
-              SizedBox(height: AppSpacing.lg),
-              ProfileStatsSection(),
-              SizedBox(height: AppSpacing.lg),
-              ProfileActionsSection(),
-              SizedBox(height: AppSpacing.xxl),
-            ],
+        child: RefreshIndicator(
+          onRefresh: () => context.read<ProfileCubit>().forceRefresh(),
+          color: AppColors.primary,
+          child: const SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                ProfileHeaderSection(),
+                SizedBox(height: AppSpacing.lg),
+                ProfileStatsSection(),
+                SizedBox(height: AppSpacing.lg),
+                ProfileActionsSection(),
+                SizedBox(height: AppSpacing.xxl),
+              ],
+            ),
           ),
         ),
       ),
@@ -39,37 +61,42 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildWideLayout() {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: CenteredContent(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(AppSpacing.lg),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Left column: header + stats
-                SizedBox(
-                  width: 360,
-                  child: Column(
-                    children: [
-                      ProfileHeaderSection(),
-                      SizedBox(height: AppSpacing.lg),
-                      ProfileStatsSection(),
-                    ],
+          child: RefreshIndicator(
+            onRefresh: () => context.read<ProfileCubit>().forceRefresh(),
+            color: AppColors.primary,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: const Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Left column: header + stats
+                  SizedBox(
+                    width: 360,
+                    child: Column(
+                      children: [
+                        ProfileHeaderSection(),
+                        SizedBox(height: AppSpacing.lg),
+                        ProfileStatsSection(),
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(width: AppSpacing.lg),
-                // Right column: actions
-                Expanded(
-                  child: Column(
-                    children: [
-                      ProfileActionsSection(),
-                      SizedBox(height: AppSpacing.xxl),
-                    ],
+                  SizedBox(width: AppSpacing.lg),
+                  // Right column: actions
+                  Expanded(
+                    child: Column(
+                      children: [
+                        ProfileActionsSection(),
+                        SizedBox(height: AppSpacing.xxl),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

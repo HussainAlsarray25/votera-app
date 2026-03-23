@@ -1,46 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:votera/app/view/shell_page.dart';
 import 'package:votera/core/design_system/design_system.dart';
-import 'package:votera/features/exhibitions/presentation/demo_data.dart';
+import 'package:votera/core/di/injection_container.dart';
+import 'package:votera/features/events/presentation/cubit/events_cubit.dart';
 import 'package:votera/features/exhibitions/presentation/widgets/exhibition_card.dart';
+import 'package:votera/shared/widgets/app_loading_indicator.dart';
+import 'package:votera/shared/widgets/empty_state.dart';
 
 /// Main home page showing a list of exhibitions/events.
-/// Replaces the old project-centric home page in the bottom nav shell.
+/// Loads real event data from the API via EventsCubit.
 class ExhibitionsPage extends StatelessWidget {
   const ExhibitionsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final exhibitions = createDemoExhibitions();
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: CenteredContent(
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(child: _buildHeader(context)),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final exhibition = exhibitions[index];
-                      return ExhibitionCard(
-                        exhibition: exhibition,
-                        onTap: () =>
-                            context.push('/exhibition/${exhibition.id}'),
-                      );
-                    },
-                    childCount: exhibitions.length,
+    return BlocProvider<EventsCubit>(
+      create: (_) => sl<EventsCubit>()..loadEvents(),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: CenteredContent(
+            child: BlocBuilder<EventsCubit, EventsState>(
+              buildWhen: (_, current) => current is EventsLoaded,
+              builder: (context, _) {
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    await context.read<EventsCubit>().loadEvents();
+                  },
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverToBoxAdapter(child: _buildHeader(context)),
+                      const _EventsListSliver(),
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: AppSpacing.xxl),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              // Bottom padding so the last card is not hidden by the nav bar
-              const SliverToBoxAdapter(
-                child: SizedBox(height: AppSpacing.xxl),
-              ),
-            ],
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -70,27 +70,89 @@ class ExhibitionsPage extends StatelessWidget {
               ),
             ],
           ),
-          GestureDetector(
-            onTap: () => context.push('/notifications'),
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.notifications_none_rounded,
-                color: AppColors.textPrimary,
+          const NotificationIconButton(),
+        ],
+      ),
+    );
+  }
+}
+
+/// Separate widget to access the EventsCubit provided above.
+class _EventsListSliver extends StatelessWidget {
+  const _EventsListSliver();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<EventsCubit, EventsState>(
+      builder: (context, state) {
+        if (state is EventsLoading || state is EventsInitial) {
+          return const SliverToBoxAdapter(
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.only(top: 80),
+                child: AppLoadingIndicator(),
               ),
             ),
+          );
+        }
+
+        if (state is EventsError) {
+          return SliverToBoxAdapter(
+            child: _buildErrorState(context, state.message),
+          );
+        }
+
+        if (state is EventsLoaded) {
+          final events = state.response.items;
+          if (events.isEmpty) {
+            return SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 80),
+                child: EmptyState(
+                  icon: Icons.event_outlined,
+                  title: 'No events yet',
+                  subtitle:
+                      'There are no exhibitions or events available right now. Check back later for updates.',
+                ),
+              ),
+            );
+          }
+
+          return SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final event = events[index];
+                  return ExhibitionCard(
+                    event: event,
+                    index: index,
+                    onTap: () => context.push('/exhibition/${event.id}'),
+                  );
+                },
+                childCount: events.length,
+              ),
+            ),
+          );
+        }
+
+        return const SliverToBoxAdapter(child: SizedBox.shrink());
+      },
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context, String message) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 80),
+      child: Column(
+        children: [
+          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+          const SizedBox(height: AppSpacing.md),
+          Text(message, style: AppTypography.bodyMedium),
+          const SizedBox(height: AppSpacing.md),
+          TextButton(
+            onPressed: () => context.read<EventsCubit>().loadEvents(),
+            child: const Text('Retry'),
           ),
         ],
       ),

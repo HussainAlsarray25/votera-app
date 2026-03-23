@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
-import 'package:votera/features/home/presentation/demo_data.dart';
+import 'package:votera/features/projects/domain/entities/project_entity.dart';
 
-/// A sliver list of compact project items. Each item shows an emoji icon,
-/// title, description, category tag, team member avatars, and vote count.
+/// A sliver list of compact project items. Each item shows a letter icon,
+/// title, and description.
 class ProjectListSection extends StatelessWidget {
-  const ProjectListSection({required this.projects, super.key});
+  const ProjectListSection({
+    required this.projects,
+    required this.eventId,
+    super.key,
+  });
 
-  final List<DemoProject> projects;
+  final List<ProjectEntity> projects;
+  final String eventId;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +24,10 @@ class ProjectListSection extends StatelessWidget {
           (context, index) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: _ProjectListItem(project: projects[index]),
+              child: _ProjectListItem(
+                project: projects[index],
+                eventId: eventId,
+              ),
             );
           },
           childCount: projects.length,
@@ -28,39 +37,64 @@ class ProjectListSection extends StatelessWidget {
   }
 }
 
-class _ProjectListItem extends StatelessWidget {
-  const _ProjectListItem({required this.project});
+/// Rotating icon background colors for project list items.
+const _iconGradients = [
+  [Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
+  [Color(0xFFEDE9FE), Color(0xFFDDD6FE)],
+  [Color(0xFFDBEAFE), Color(0xFFBFDBFE)],
+  [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+  [Color(0xFFFEF3C7), Color(0xFFFDE68A)],
+  [Color(0xFFF3E8FF), Color(0xFFE9D5FF)],
+];
 
-  final DemoProject project;
+class _ProjectListItem extends StatelessWidget {
+  const _ProjectListItem({
+    required this.project,
+    required this.eventId,
+  });
+
+  final ProjectEntity project;
+  final String eventId;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _buildEmojiIcon(),
-          const SizedBox(width: 14),
-          Expanded(child: _buildContent()),
-        ],
+    return GestureDetector(
+      onTap: () => context.push('/project/$eventId/${project.id}'),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            _buildIcon(),
+            const SizedBox(width: 14),
+            Expanded(child: _buildContent()),
+            const Icon(
+              Icons.chevron_right_rounded,
+              size: 20,
+              color: AppColors.textHint,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  /// Rounded square with a soft gradient background and the project emoji
-  Widget _buildEmojiIcon() {
-    final bgColors = CategoryStyles.iconBackground(project.category);
+  /// Rounded square with a soft gradient background and the first letter
+  Widget _buildIcon() {
+    final initial =
+        project.title.isNotEmpty ? project.title[0].toUpperCase() : '?';
+    final bgColors =
+        _iconGradients[project.title.hashCode.abs() % _iconGradients.length];
 
     return Container(
       width: 52,
@@ -70,7 +104,14 @@ class _ProjectListItem extends StatelessWidget {
         gradient: LinearGradient(colors: bgColors),
       ),
       child: Center(
-        child: Text(project.emoji, style: const TextStyle(fontSize: 24)),
+        child: Text(
+          initial,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF4B5563),
+          ),
+        ),
       ),
     );
   }
@@ -79,114 +120,23 @@ class _ProjectListItem extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildTitleRow(),
-        const SizedBox(height: 4),
         Text(
-          project.description,
-          style: AppTypography.bodySmall,
-          maxLines: 1,
+          project.title,
+          style: AppTypography.labelMedium.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: AppSpacing.sm),
-        _buildFooterRow(),
-      ],
-    );
-  }
-
-  /// Title on the left, category tag on the right
-  Widget _buildTitleRow() {
-    final styles = CategoryStyles.tagStyles(project.category);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Flexible(
-          child: Text(
-            project.title,
-            style: AppTypography.labelMedium.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+        if (project.description != null && project.description!.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            project.description!,
+            style: AppTypography.bodySmall,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-          decoration: BoxDecoration(
-            color: styles.background,
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
-            project.category,
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-              color: styles.text,
-            ),
-          ),
-        ),
+        ],
       ],
-    );
-  }
-
-  /// Overlapping member avatars and vote count
-  Widget _buildFooterRow() {
-    return Row(
-      children: [
-        _MemberAvatarStack(members: project.members),
-        const SizedBox(width: 10),
-        const Icon(
-          Icons.favorite_rounded,
-          size: 12,
-          color: AppColors.primary,
-        ),
-        const SizedBox(width: 3),
-        Text(
-          '${project.votes}',
-          style: AppTypography.bodySmall.copyWith(fontSize: 11),
-        ),
-      ],
-    );
-  }
-}
-
-/// Row of overlapping circular member avatars with gradient backgrounds.
-class _MemberAvatarStack extends StatelessWidget {
-  const _MemberAvatarStack({required this.members});
-
-  final List<DemoTeamMember> members;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: members.length * 18.0 + 4,
-      height: 22,
-      child: Stack(
-        children: List.generate(members.length, (i) {
-          return Positioned(
-            left: i * 16.0,
-            child: Container(
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(colors: members[i].colors),
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: Center(
-                child: Text(
-                  members[i].initial,
-                  style: const TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }),
-      ),
     );
   }
 }

@@ -3,23 +3,26 @@ import 'package:votera/features/authentication/domain/entities/user_entity.dart'
 class UserModel extends UserEntity {
   const UserModel({
     required super.id,
-    required super.name,
+    required super.fullName,
     required super.email,
+    required super.status,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      email: json['email'] as String,
+      id: json['id']?.toString() ?? '',
+      fullName: json['full_name'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      status: json['status'] as String? ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
+      'full_name': fullName,
       'email': email,
+      'status': status,
     };
   }
 }

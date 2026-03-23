@@ -1,30 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
-import 'package:votera/shared/widgets/verified_badge.dart';
+import 'package:votera/features/projects/domain/entities/project_entity.dart';
+import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
 
-/// Displays the project title, author, category, and description.
+/// Displays the project title, status, and description.
+/// Reads from the ProjectsCubit state provided by the parent page.
 class ProjectInfoSection extends StatelessWidget {
-  const ProjectInfoSection({super.key});
+  const ProjectInfoSection({required this.projectId, super.key});
+
+  final String projectId;
 
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<ProjectsCubit, ProjectsState>(
+      builder: (context, state) {
+        if (state is ProjectDetailLoaded) {
+          return _buildContent(state.project);
+        }
+        // Loading/error states are handled by the parent page
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildContent(ProjectEntity project) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildTitleAndCategory(),
-        const SizedBox(height: AppSpacing.md),
-        _buildAuthorRow(),
+        _buildTitleAndStatus(project),
         const SizedBox(height: AppSpacing.lg),
-        _buildDescription(),
+        _buildDescription(project),
       ],
     );
   }
 
-  Widget _buildTitleAndCategory() {
+  Widget _buildTitleAndStatus(ProjectEntity project) {
+    final statusLabel = project.status == ProjectStatus.submitted
+        ? 'Submitted'
+        : 'Draft';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Category tag
+        // Status tag
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
@@ -32,7 +51,7 @@ class ProjectInfoSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           ),
           child: Text(
-            'Mobile App',
+            statusLabel,
             style: AppTypography.caption.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.w600,
@@ -40,53 +59,24 @@ class ProjectInfoSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        Text('Smart Campus Navigator', style: AppTypography.h2),
+        Text(project.title, style: AppTypography.h2),
       ],
     );
   }
 
-  Widget _buildAuthorRow() {
-    return Row(
-      children: [
-        // Author avatar
-        CircleAvatar(
-          radius: 20,
-          backgroundColor: AppColors.primaryLight,
-          child: Text(
-            'A',
-            style: AppTypography.labelLarge.copyWith(color: AppColors.primary),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text('Prof. Ahmed Ali', style: AppTypography.labelMedium),
-                const SizedBox(width: 4),
-                const VerifiedBadge(),
-              ],
-            ),
-            Text('Computer Science Dept.', style: AppTypography.bodySmall),
-          ],
-        ),
-      ],
-    );
-  }
+  Widget _buildDescription(ProjectEntity project) {
+    if (project.description == null || project.description!.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-  Widget _buildDescription() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('About this Project', style: AppTypography.labelLarge),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'An innovative mobile application that helps students and visitors '
-          'navigate the university campus using augmented reality and '
-          'real-time indoor positioning. Features include classroom finder, '
-          'event schedules, and accessibility routes.',
-          style: AppTypography.bodyMedium.copyWith(height: 1.7,),
+          project.description!,
+          style: AppTypography.bodyMedium.copyWith(height: 1.7),
         ),
       ],
     );

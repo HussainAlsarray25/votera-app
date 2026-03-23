@@ -12,21 +12,15 @@ class UpdateUserProfile extends UseCase<UserProfile, UpdateProfileParams> {
 
   @override
   Future<Either<Failure, UserProfile>> call(UpdateProfileParams params) {
-    return repository.updateUserProfile(
-      name: params.name,
-      email: params.email,
-      phone: params.phone,
-    );
+    return repository.updateUserProfile(fullName: params.fullName);
   }
 }
 
 class UpdateProfileParams extends Equatable {
-  const UpdateProfileParams({this.name, this.email, this.phone});
+  const UpdateProfileParams({this.fullName});
 
-  final String? name;
-  final String? email;
-  final String? phone;
+  final String? fullName;
 
   @override
-  List<Object?> get props => [name, email, phone];
+  List<Object?> get props => [fullName];
 }

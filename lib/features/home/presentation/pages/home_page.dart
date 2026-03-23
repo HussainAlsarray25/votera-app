@@ -1,54 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
-import 'package:votera/features/home/presentation/demo_data.dart';
-import 'package:votera/features/home/presentation/widgets/category_filter_section.dart';
-import 'package:votera/features/home/presentation/widgets/home_banner_section.dart';
-import 'package:votera/features/home/presentation/widgets/home_header_section.dart';
-import 'package:votera/features/home/presentation/widgets/project_list_section.dart';
-import 'package:votera/features/home/presentation/widgets/search_bar_section.dart';
-import 'package:votera/features/home/presentation/widgets/trending_section.dart';
 
-/// The main screen displaying projects available for voting.
-/// Manages search query and category filter state locally.
-/// Sections are independent widgets that receive data via constructors.
-class HomePage extends StatefulWidget {
+/// Legacy standalone home page.
+/// Not currently used in the routing -- the app now uses ExhibitionsPage
+/// at /home and ExhibitionDetailPage for project browsing.
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  final List<DemoProject> _projects = createDemoProjects();
-  String _selectedCategory = 'All Projects';
-  String _searchQuery = '';
-
-  /// Projects filtered by the active category and search query
-  List<DemoProject> get _filteredProjects {
-    return _projects.where((project) {
-      final matchesCategory = _selectedCategory == 'All Projects' ||
-          project.category == _selectedCategory;
-      final matchesSearch = _searchQuery.isEmpty ||
-          project.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          project.teamName.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    }).toList();
-  }
-
-  /// Top projects by vote count for the trending section
-  List<DemoProject> get _trendingProjects {
-    final sorted = List<DemoProject>.from(_projects)
-      ..sort((a, b) => b.votes.compareTo(a.votes));
-    return sorted.take(4).toList();
-  }
-
-  void _handleVote(DemoProject project) {
-    setState(() {
-      project
-        ..isVoted = !project.isVoted
-        ..votes += project.isVoted ? 1 : -1;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,37 +13,11 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: CenteredContent(
-          child: CustomScrollView(
-            slivers: [
-              const SliverToBoxAdapter(child: HomeHeaderSection()),
-              SliverToBoxAdapter(
-                child: SearchBarSection(
-                  onSearchChanged: (query) {
-                    setState(() => _searchQuery = query);
-                  },
-                ),
-              ),
-              const SliverToBoxAdapter(child: HomeBannerSection()),
-              SliverToBoxAdapter(
-                child: TrendingSection(
-                  projects: _trendingProjects,
-                  onVote: _handleVote,
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: CategoryFilterSection(
-                  selectedCategory: _selectedCategory,
-                  onCategorySelected: (category) {
-                    setState(() => _selectedCategory = category);
-                  },
-                ),
-              ),
-              ProjectListSection(projects: _filteredProjects),
-              // Bottom padding so the last card isn't hidden by the nav bar
-              const SliverToBoxAdapter(
-                child: SizedBox(height: AppSpacing.xxl),
-              ),
-            ],
+          child: Center(
+            child: Text(
+              'Projects are now shown inside exhibition details.',
+              style: AppTypography.bodyMedium,
+            ),
           ),
         ),
       ),
