@@ -6,12 +6,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:votera/core/config/app_config.dart';
 import 'package:votera/core/domain/services/auth_token_provider.dart';
+import 'package:votera/core/domain/services/location_service.dart';
 import 'package:votera/core/network/api_client.dart';
 import 'package:votera/core/network/auth_interceptor.dart';
 import 'package:votera/core/network/dio_api_client.dart';
 import 'package:votera/core/network/network_info.dart';
 import 'package:votera/core/router/app_router.dart';
 import 'package:votera/core/services/firebase_push_service.dart';
+import 'package:votera/core/services/location_service_impl.dart';
 import 'package:votera/features/authentication/data/services/token_service.dart';
 import 'package:votera/features/authentication/data/services/token_service_auth_provider.dart';
 import 'package:votera/features/authentication/di/auth_injection.dart';
@@ -94,11 +96,13 @@ Future<void> _initExternalDependencies(AppConfig config) async {
 }
 
 void _initCore() {
-  sl.registerLazySingleton<NetworkInfo>(
-    () => NetworkInfoImpl(
-      connectivityUrl: AppConfig.instance.connectivityUrl,
-    ),
-  );
+  sl
+    ..registerLazySingleton<NetworkInfo>(
+      () => NetworkInfoImpl(
+        connectivityUrl: AppConfig.instance.connectivityUrl,
+      ),
+    )
+    ..registerLazySingleton<LocationService>(LocationServiceImpl.new);
 }
 
 void _initFeatures() {

@@ -22,6 +22,9 @@ abstract class VotingRemoteDataSource {
 
   // Retrieves all votes for a given event.
   Future<List<Map<String, dynamic>>> getEventVotes({required String eventId});
+
+  // Retrieves the voting area polygon for a given event.
+  Future<Map<String, dynamic>> getVotingArea({required String eventId});
 }
 
 class VotingRemoteDataSourceImpl implements VotingRemoteDataSource {
@@ -74,5 +77,14 @@ class VotingRemoteDataSourceImpl implements VotingRemoteDataSource {
     final response =
         await apiClient.get<List<dynamic>>(VotingEndpoints.votes(eventId));
     return (response.data ?? []).cast<Map<String, dynamic>>();
+  }
+
+  @override
+  Future<Map<String, dynamic>> getVotingArea({
+    required String eventId,
+  }) async {
+    final response = await apiClient
+        .get<Map<String, dynamic>>(VotingEndpoints.votingArea(eventId));
+    return response.data!;
   }
 }
