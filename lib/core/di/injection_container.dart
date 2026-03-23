@@ -32,6 +32,7 @@ import 'package:votera/features/ratings/di/ratings_injection.dart';
 import 'package:votera/features/rankings/di/rankings_injection.dart';
 import 'package:votera/features/participant_forms/di/forms_injection.dart';
 import 'package:votera/features/teams/di/teams_injection.dart';
+import 'package:votera/features/settings/di/settings_injection.dart';
 import 'package:votera/features/voting/di/voting_injection.dart';
 
 final GetIt sl = GetIt.instance;
@@ -123,6 +124,7 @@ void _initFeatures() {
   initCertificationsFeature(sl);
   initRatingsFeature(sl);
   initFormsFeature(sl);
+  initSettingsFeature(sl);
 }
 
 Future<void> reset() async {

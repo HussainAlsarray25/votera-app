@@ -63,8 +63,8 @@ class _VoteButtonState extends State<VoteButton>
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
               gradient:
-                  widget.hasVoted ? null : AppColors.primaryGradient,
-              color: widget.hasVoted ? AppColors.success : null,
+                  widget.hasVoted ? null : context.colors.primaryGradient,
+              color: widget.hasVoted ? context.colors.success : null,
               borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
               boxShadow: AppShadows.button,
             ),
@@ -81,7 +81,9 @@ class _VoteButtonState extends State<VoteButton>
                 const SizedBox(width: 8),
                 Text(
                   widget.hasVoted ? 'Voted' : 'Vote',
-                  style: AppTypography.button,
+                  style: AppTypography.button.copyWith(
+                    color: context.colors.textOnPrimary,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Container(

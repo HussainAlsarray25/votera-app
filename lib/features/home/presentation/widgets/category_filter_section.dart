@@ -29,14 +29,14 @@ class CategoryFilterSection extends StatelessWidget {
 
           return Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
-            child: _buildChip(category, isActive: isActive),
+            child: _buildChip(context, category, isActive: isActive),
           );
         },
       ),
     );
   }
 
-  Widget _buildChip(String category, {required bool isActive}) {
+  Widget _buildChip(BuildContext context, String category, {required bool isActive}) {
     const activeColor = Color(0xFF1A1D2E);
 
     return GestureDetector(
@@ -45,10 +45,10 @@ class CategoryFilterSection extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? activeColor : AppColors.surface,
+          color: isActive ? activeColor : context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
           border: Border.all(
-            color: isActive ? activeColor : AppColors.border,
+            color: isActive ? activeColor : context.colors.border,
             width: 1.5,
           ),
           boxShadow: isActive
@@ -66,7 +66,7 @@ class CategoryFilterSection extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: isActive ? Colors.white : AppColors.textSecondary,
+            color: isActive ? Colors.white : context.colors.textSecondary,
           ),
         ),
       ),

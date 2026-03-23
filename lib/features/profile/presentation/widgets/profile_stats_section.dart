@@ -13,24 +13,27 @@ class ProfileStatsSection extends StatelessWidget {
       child: Row(
         children: [
           _buildStatCard(
+            context,
             'Votes Cast',
             '\u2014',
             Icons.how_to_vote,
-            AppColors.primary,
+            context.colors.primary,
           ),
           const SizedBox(width: AppSpacing.sm),
           _buildStatCard(
+            context,
             'Rated',
             '\u2014',
             Icons.star,
-            AppColors.accent,
+            context.colors.accent,
           ),
           const SizedBox(width: AppSpacing.sm),
           _buildStatCard(
+            context,
             'Comments',
             '\u2014',
             Icons.chat_bubble,
-            AppColors.secondary,
+            context.colors.secondary,
           ),
         ],
       ),
@@ -38,6 +41,7 @@ class ProfileStatsSection extends StatelessWidget {
   }
 
   Widget _buildStatCard(
+    BuildContext context,
     String label,
     String value,
     IconData icon,
@@ -47,7 +51,7 @@ class ProfileStatsSection extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           boxShadow: AppShadows.card,
         ),
@@ -59,7 +63,9 @@ class ProfileStatsSection extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
-              style: AppTypography.caption,
+              style: AppTypography.caption.copyWith(
+                color: context.colors.textHint,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

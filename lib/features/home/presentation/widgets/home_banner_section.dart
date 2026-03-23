@@ -12,10 +12,10 @@ class HomeBannerSection extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.08),
+          color: context.colors.primary.withValues(alpha: 0.08),
         ),
         boxShadow: [
           BoxShadow(
@@ -29,7 +29,7 @@ class HomeBannerSection extends StatelessWidget {
         children: [
           _buildEmojiBox(),
           const SizedBox(width: 14),
-          Expanded(child: _buildText()),
+          Expanded(child: _buildText(context)),
         ],
       ),
     );
@@ -51,26 +51,30 @@ class HomeBannerSection extends StatelessWidget {
     );
   }
 
-  Widget _buildText() {
+  Widget _buildText(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Hey there!',
           style: AppTypography.labelMedium.copyWith(
+            color: context.colors.textPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: 3),
         RichText(
           text: TextSpan(
-            style: AppTypography.bodySmall.copyWith(height: 1.4),
+            style: AppTypography.bodySmall.copyWith(
+              color: context.colors.textSecondary,
+              height: 1.4,
+            ),
             children: [
               const TextSpan(text: 'The '),
               TextSpan(
                 text: 'Spring Hackathon',
                 style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.primary,
+                  color: context.colors.primary,
                   fontWeight: FontWeight.w700,
                   height: 1.4,
                 ),

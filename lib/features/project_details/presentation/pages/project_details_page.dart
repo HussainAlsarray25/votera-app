@@ -70,7 +70,7 @@ class _ProjectDetailsView extends StatelessWidget {
     final isWide = !AppBreakpoints.isMobile(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: CenteredContent(
         maxWidth: 900,
         child: BlocListener<VotingCubit, VotingState>(
@@ -86,13 +86,13 @@ class _ProjectDetailsView extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.error_outline,
                         size: 48,
-                        color: AppColors.error,
+                        color: context.colors.error,
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      Text(state.message, style: AppTypography.bodyMedium),
+                      Text(state.message, style: AppTypography.bodyMedium.copyWith(color: context.colors.textPrimary)),
                       const SizedBox(height: AppSpacing.md),
                       TextButton(
                         onPressed: () => context
@@ -218,7 +218,7 @@ class _ProjectDetailsView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),

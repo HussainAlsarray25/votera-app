@@ -8,7 +8,7 @@ class GradientButton extends StatelessWidget {
     required this.text,
     required this.onPressed,
     this.isLoading = false,
-    this.gradient = AppColors.primaryGradient,
+    this.gradient,
     this.height = 52,
     super.key,
   });
@@ -16,17 +16,20 @@ class GradientButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
   final bool isLoading;
-  final LinearGradient gradient;
+  final LinearGradient? gradient;
   final double height;
 
   @override
   Widget build(BuildContext context) {
+    // Fall back to the theme's primary gradient if no custom gradient is provided.
+    final effectiveGradient = gradient ?? context.colors.primaryGradient;
+
     return Container(
       width: double.infinity,
       height: height,
       decoration: BoxDecoration(
-        gradient: onPressed != null ? gradient : null,
-        color: onPressed == null ? AppColors.border : null,
+        gradient: onPressed != null ? effectiveGradient : null,
+        color: onPressed == null ? context.colors.border : null,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         boxShadow: onPressed != null ? AppShadows.button : null,
       ),
@@ -37,17 +40,22 @@ class GradientButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           child: Center(
             child: isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     height: 24,
                     width: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.textOnPrimary,
-                    ),
+                        context.colors.textOnPrimary,
+                      ),
                     ),
                   )
-                : Text(text, style: AppTypography.button),
+                : Text(
+                    text,
+                    style: AppTypography.button.copyWith(
+                      color: context.colors.textOnPrimary,
+                    ),
+                  ),
           ),
         ),
       ),

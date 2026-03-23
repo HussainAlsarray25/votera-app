@@ -94,9 +94,9 @@ class _PodiumItem extends StatelessWidget {
           const SizedBox(height: 4),
           _buildAvatar(crownColor, borderColor, gradientColors),
           const SizedBox(height: 10),
-          _buildTitle(),
+          _buildTitle(context),
           const SizedBox(height: 2),
-          _buildVotes(),
+          _buildVotes(context),
         ],
       ),
     );
@@ -192,7 +192,7 @@ class _PodiumItem extends StatelessWidget {
     );
   }
 
-  Widget _buildTitle() {
+  Widget _buildTitle(BuildContext context) {
     final label = entry!.title.length > 14
         ? '${entry!.title.substring(0, 12)}...'
         : entry!.title;
@@ -201,7 +201,7 @@ class _PodiumItem extends StatelessWidget {
       label,
       style: AppTypography.bodySmall.copyWith(
         fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
+        color: context.colors.textPrimary,
       ),
       textAlign: TextAlign.center,
       maxLines: 1,
@@ -209,13 +209,13 @@ class _PodiumItem extends StatelessWidget {
     );
   }
 
-  Widget _buildVotes() {
+  Widget _buildVotes(BuildContext context) {
     return Text(
       '${entry!.voteCount} Votes',
       style: TextStyle(
         fontSize: 12,
         fontWeight: rank == 1 ? FontWeight.w700 : FontWeight.w500,
-        color: rank == 1 ? AppColors.primary : AppColors.textSecondary,
+        color: rank == 1 ? context.colors.primary : context.colors.textSecondary,
       ),
     );
   }

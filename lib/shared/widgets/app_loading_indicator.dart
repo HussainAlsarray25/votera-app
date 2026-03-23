@@ -57,14 +57,14 @@ class _AppLoadingIndicatorState extends State<AppLoadingIndicator>
               return CustomPaint(
                 painter: _OrbitPainter(
                   progress: _controller.value,
-                  primaryColor: AppColors.primary,
-                  secondaryColor: AppColors.secondary,
+                  primaryColor: context.colors.primary,
+                  secondaryColor: context.colors.secondary,
                 ),
                 child: child,
               );
             },
             child: Center(
-              child: _buildLogo(),
+              child: _buildLogo(context),
             ),
           ),
         ),
@@ -73,7 +73,7 @@ class _AppLoadingIndicatorState extends State<AppLoadingIndicator>
           Text(
             widget.message!,
             style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textHint,
+              color: context.colors.textHint,
             ),
           ),
         ],
@@ -81,11 +81,11 @@ class _AppLoadingIndicatorState extends State<AppLoadingIndicator>
     );
   }
 
-  Widget _buildLogo() {
+  Widget _buildLogo(BuildContext context) {
     final logoSize = widget.size * 0.35;
     return ShaderMask(
       shaderCallback: (bounds) {
-        return AppColors.primaryGradient.createShader(bounds);
+        return context.colors.primaryGradient.createShader(bounds);
       },
       child: Text(
         'V',

@@ -53,9 +53,9 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
     if (_formKey.currentState?.validate() ?? false) {
       if (_documentUrl == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please upload your university ID document.'),
-            backgroundColor: AppColors.warning,
+          SnackBar(
+            content: const Text('Please upload your university ID document.'),
+            backgroundColor: context.colors.warning,
           ),
         );
         return;
@@ -76,10 +76,15 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: BackButton(color: AppColors.textPrimary),
-        title: Text('University ID Card', style: AppTypography.labelLarge),
+        leading: BackButton(color: context.colors.textPrimary),
+        title: Text(
+          'University ID Card',
+          style: AppTypography.labelLarge.copyWith(
+            color: context.colors.textPrimary,
+          ),
+        ),
       ),
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: BlocListener<FormsCubit, FormsState>(
         listener: (context, state) {
           if (state is FormsDocumentUploaded) {
@@ -89,9 +94,9 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
             });
           } else if (state is FormsUidSubmitted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Request submitted — pending review.'),
-                backgroundColor: AppColors.success,
+              SnackBar(
+                content: const Text('Request submitted — pending review.'),
+                backgroundColor: context.colors.success,
               ),
             );
             // Reload the requests list.
@@ -106,7 +111,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.error,
+                backgroundColor: context.colors.error,
               ),
             );
           }
@@ -118,9 +123,9 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: AppSpacing.md),
-                _buildRequestsList(),
+                _buildRequestsList(context),
                 const SizedBox(height: AppSpacing.xl),
-                _buildSubmitForm(),
+                _buildSubmitForm(context),
                 const SizedBox(height: AppSpacing.xxl),
               ],
             ),
@@ -131,7 +136,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
   }
 
   // -- Section: Existing requests --
-  Widget _buildRequestsList() {
+  Widget _buildRequestsList(BuildContext context) {
     return BlocBuilder<FormsCubit, FormsState>(
       buildWhen: (_, state) =>
           state is FormsUidRequestsLoaded || state is FormsLoading,
@@ -145,29 +150,36 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('My Requests', style: AppTypography.labelLarge),
+            Text(
+              'My Requests',
+              style: AppTypography.labelLarge.copyWith(
+                color: context.colors.textPrimary,
+              ),
+            ),
             const SizedBox(height: AppSpacing.md),
-            ...state.requests.map(_buildRequestCard),
+            ...state.requests.map(
+              (r) => _buildRequestCard(context, r),
+            ),
             const SizedBox(height: AppSpacing.md),
-            const Divider(color: AppColors.divider),
+            Divider(color: context.colors.divider),
           ],
         );
       },
     );
   }
 
-  Widget _buildRequestCard(ParticipantRequest request) {
+  Widget _buildRequestCard(BuildContext context, ParticipantRequest request) {
     final (chipColor, chipLabel) = switch (request.status) {
-      'approved' => (AppColors.success, 'Approved'),
-      'rejected' => (AppColors.error, 'Rejected'),
-      _ => (AppColors.warning, 'Pending'),
+      'approved' => (context.colors.success, 'Approved'),
+      'rejected' => (context.colors.error, 'Rejected'),
+      _ => (context.colors.warning, 'Pending'),
     };
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         boxShadow: AppShadows.card,
       ),
@@ -177,7 +189,12 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
           Row(
             children: [
               Expanded(
-                child: Text(request.fullName, style: AppTypography.labelMedium),
+                child: Text(
+                  request.fullName,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: context.colors.textPrimary,
+                  ),
+                ),
               ),
               Container(
                 padding:
@@ -199,13 +216,17 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
           const SizedBox(height: 4),
           Text(
             '${request.department} • ${request.stage}',
-            style: AppTypography.bodySmall,
+            style: AppTypography.bodySmall.copyWith(
+              color: context.colors.textSecondary,
+            ),
           ),
           if (request.isRejected && request.reviewNote != null) ...[
             const SizedBox(height: 6),
             Text(
               'Note: ${request.reviewNote}',
-              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+              style: AppTypography.bodySmall.copyWith(
+                color: context.colors.error,
+              ),
             ),
           ],
         ],
@@ -214,15 +235,22 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
   }
 
   // -- Section: Submission form --
-  Widget _buildSubmitForm() {
+  Widget _buildSubmitForm(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Submit New Request', style: AppTypography.labelLarge),
+        Text(
+          'Submit New Request',
+          style: AppTypography.labelLarge.copyWith(
+            color: context.colors.textPrimary,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
         Text(
           'Fill in your details and upload a clear photo of your university ID card.',
-          style: AppTypography.bodySmall,
+          style: AppTypography.bodySmall.copyWith(
+            color: context.colors.textSecondary,
+          ),
         ),
         const SizedBox(height: AppSpacing.lg),
         Form(
@@ -268,7 +296,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
                     (v == null || v.isEmpty) ? 'Stage is required' : null,
               ),
               const SizedBox(height: AppSpacing.md),
-              _buildDocumentField(),
+              _buildDocumentField(context),
             ],
           ),
         ),
@@ -286,7 +314,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
     );
   }
 
-  Widget _buildDocumentField() {
+  Widget _buildDocumentField(BuildContext context) {
     return InkWell(
       onTap: _pickAndUploadDocument,
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -296,9 +324,9 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
           vertical: AppSpacing.md,
         ),
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.colors.border),
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          color: AppColors.surface,
+          color: context.colors.surface,
         ),
         child: Row(
           children: [
@@ -306,7 +334,9 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
               _documentUrl != null
                   ? Icons.check_circle_outline
                   : Icons.upload_file_outlined,
-              color: _documentUrl != null ? AppColors.success : AppColors.textHint,
+              color: _documentUrl != null
+                  ? context.colors.success
+                  : context.colors.textHint,
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
@@ -314,8 +344,8 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
                 _documentFileName ?? 'Tap to upload ID document',
                 style: AppTypography.bodyMedium.copyWith(
                   color: _documentUrl != null
-                      ? AppColors.textPrimary
-                      : AppColors.textHint,
+                      ? context.colors.textPrimary
+                      : context.colors.textHint,
                 ),
               ),
             ),

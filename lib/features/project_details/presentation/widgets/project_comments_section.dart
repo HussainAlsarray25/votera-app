@@ -3,11 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/comments/domain/entities/comment_entity.dart';
 import 'package:votera/features/comments/presentation/cubit/comments_cubit.dart';
-import 'package:votera/shared/widgets/animated_star_rating.dart';
 
-/// Displays a list of user comments and an input section to add a new one.
-/// Each comment carries a 1–5 star score alongside text.
-/// Reads from and dispatches to [CommentsCubit].
+/// Displays a list of user comments and an input field to add a new one.
+/// Reads from and dispatches to CommentsCubit.
 class ProjectCommentsSection extends StatefulWidget {
   const ProjectCommentsSection({required this.projectId, super.key});
 
@@ -21,9 +19,6 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
   final _commentController = TextEditingController();
   final _comments = <CommentEntity>[];
 
-  // The star score the user has picked before submitting (defaults to 0 = none selected)
-  int _selectedScore = 0;
-
   @override
   void dispose() {
     _commentController.dispose();
@@ -32,16 +27,13 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
 
   void _handleSend() {
     final text = _commentController.text.trim();
-    if (text.isEmpty || _selectedScore == 0) return;
+    if (text.isEmpty) return;
 
     context.read<CommentsCubit>().addComment(
           projectId: widget.projectId,
-          text: text,
-          score: _selectedScore,
+          body: text,
         );
-
     _commentController.clear();
-    setState(() => _selectedScore = 0);
   }
 
   @override
@@ -55,136 +47,117 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
               ..addAll(state.comments);
           });
         } else if (state is CommentPosted) {
+          // Prepend the new comment to the list
           setState(() => _comments.insert(0, state.comment));
         }
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildHeader(),
+          const SizedBox(height: AppSpacing.md),
           _buildCommentInput(),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
           _buildCommentsList(),
         ],
       ),
     );
   }
 
-  // -- Section: comment input with score picker --
-  Widget _buildCommentInput() {
-    final canSubmit =
-        _selectedScore > 0 && _commentController.text.trim().isNotEmpty;
+  // -- Section: Comments header with count --
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        Text(
+          'Comments',
+          style: AppTypography.labelLarge.copyWith(
+            color: context.colors.textPrimary,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: context.colors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+          ),
+          child: Text(
+            '${_comments.length}',
+            style: AppTypography.caption.copyWith(
+              color: context.colors.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
+  // -- Section: New comment input --
+  Widget _buildCommentInput() {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.border),
-        boxShadow: AppShadows.card,
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: context.colors.border),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Row(
         children: [
-          // Star score picker
-          Text(
-            'How would you rate it?',
-            style: AppTypography.labelMedium.copyWith(
-              color: AppColors.textSecondary,
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: context.colors.primaryLight,
+            child: Icon(
+              Icons.person,
+              size: 16,
+              color: context.colors.primary,
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          AnimatedStarRating(
-            rating: _selectedScore,
-            size: 48,
-            onRatingChanged: (score) => setState(() => _selectedScore = score),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          // Text field
-          TextField(
-            controller: _commentController,
-            maxLines: 3,
-            minLines: 2,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              hintText: 'Write your comment...',
-              hintStyle: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textHint,
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: TextField(
+              controller: _commentController,
+              decoration: const InputDecoration(
+                hintText: 'Add a comment...',
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+                isDense: true,
               ),
-              filled: true,
-              fillColor: AppColors.background,
-              contentPadding: const EdgeInsets.all(AppSpacing.md),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide:
-                    const BorderSide(color: AppColors.primary, width: 1.5),
-              ),
+              onSubmitted: (_) => _handleSend(),
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
-          // Submit button — full width
-          SizedBox(
-            width: double.infinity,
-            child: AnimatedOpacity(
-              opacity: canSubmit ? 1.0 : 0.4,
-              duration: const Duration(milliseconds: 200),
-              child: FilledButton.icon(
-                onPressed: canSubmit ? _handleSend : null,
-                icon: const Icon(Icons.send_rounded, size: 16),
-                label: const Text('Post Comment'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: AppSpacing.sm + 2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusMd),
-                  ),
-                ),
-              ),
-            ),
+          IconButton(
+            icon: Icon(Icons.send, color: context.colors.primary, size: 20),
+            onPressed: _handleSend,
           ),
         ],
       ),
     );
   }
 
-  // -- Section: scrollable list or empty/loading state --
+  // -- Section: Comments list --
   Widget _buildCommentsList() {
     if (_comments.isEmpty) {
       return BlocBuilder<CommentsCubit, CommentsState>(
         builder: (context, state) {
           if (state is CommentsLoading) {
             return const Padding(
-              padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
-              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+              child: Center(
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
             );
           }
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
             child: Center(
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.chat_bubble_outline_rounded,
-                    size: 40,
-                    color: AppColors.textHint,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'No feedback yet. Be the first!',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
+              child: Text(
+                'No comments yet. Be the first!',
+                style: AppTypography.bodySmall.copyWith(
+                  color: context.colors.textSecondary,
+                ),
               ),
             ),
           );
@@ -192,23 +165,8 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
       );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.border),
-        boxShadow: AppShadows.card,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      child: Column(
-        children: [
-          for (int i = 0; i < _comments.length; i++) ...[
-            _buildCommentItem(_comments[i]),
-            if (i < _comments.length - 1)
-              const Divider(height: 1, color: AppColors.divider),
-          ],
-        ],
-      ),
+    return Column(
+      children: _comments.map(_buildCommentItem).toList(),
     );
   }
 
@@ -221,17 +179,17 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
         : '';
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            radius: 25,
-            backgroundColor: AppColors.primaryLight,
+            radius: 18,
+            backgroundColor: context.colors.secondaryLight,
             child: Text(
               initial,
               style: AppTypography.labelMedium.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
+                color: context.colors.secondary,
               ),
             ),
           ),
@@ -240,32 +198,29 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Author name
-                Text(
-                  comment.authorId,
-                  style: AppTypography.labelMedium,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                if (comment.score != null && comment.score! > 0)
-                  AnimatedStarRating(
-                    rating: comment.score!,
-                    size: 14,
-                    isInteractive: false,
-                  ),
-                if (timeAgo.isNotEmpty)
-                  Text(
-                    timeAgo,
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textHint,
+                Row(
+                  children: [
+                    Text(
+                      comment.authorId,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: context.colors.textPrimary,
+                      ),
                     ),
-                  ),
+                    const Spacer(),
+                    if (timeAgo.isNotEmpty)
+                      Text(
+                        timeAgo,
+                        style: AppTypography.caption.copyWith(
+                          color: context.colors.textSecondary,
+                        ),
+                      ),
+                  ],
+                ),
                 const SizedBox(height: 4),
                 Text(
-                  comment.text,
+                  comment.body,
                   style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.5,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],

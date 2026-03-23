@@ -190,9 +190,15 @@ class _MyProjectViewState extends State<_MyProjectView> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+            Icon(Icons.error_outline, size: 48, color: context.colors.error),
             const SizedBox(height: AppSpacing.md),
-            Text(message, style: AppTypography.bodyMedium, textAlign: TextAlign.center),
+            Text(
+              message,
+              style: AppTypography.bodyMedium.copyWith(
+                color: context.colors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: AppSpacing.md),
             TextButton(onPressed: onRetry, child: const Text('Retry')),
           ],
@@ -237,20 +243,24 @@ class _NoTeamPrompt extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const _CircleIcon(
+                  _CircleIcon(
                     icon: Icons.group_add_outlined,
-                    color: AppColors.secondary,
+                    color: context.colors.secondary,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     'You need a team first',
-                    style: AppTypography.h3.copyWith(fontWeight: FontWeight.w700),
+                    style: AppTypography.h3.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: context.colors.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     'Create or join a team before you can submit a project to this event.',
-                    style: AppTypography.bodyMedium
-                        .copyWith(color: AppColors.textSecondary),
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: context.colors.textSecondary,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppSpacing.xl),
@@ -348,13 +358,17 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
             children: [
               Text(
                 'Submit Your Project',
-                style: AppTypography.h3.copyWith(fontWeight: FontWeight.w700),
+                style: AppTypography.h3.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.textPrimary,
+                ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 'Fill in the details below to register your project for this event.',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: context.colors.textSecondary,
+                ),
               ),
               const SizedBox(height: AppSpacing.lg),
               AppTextField(
@@ -504,8 +518,8 @@ class _ProjectActionsRow extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: isLoading ? null : () => _confirmCancel(ctx),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.error,
-                  side: const BorderSide(color: AppColors.error),
+                  foregroundColor: ctx.colors.error,
+                  side: BorderSide(color: ctx.colors.error),
                 ),
                 icon: const Icon(Icons.cancel_outlined, size: 18),
                 label: const Text('Cancel Submission'),
@@ -550,7 +564,7 @@ class _ProjectActionsRow extends StatelessWidget {
             onPressed: () => Navigator.of(dialogCtx).pop(true),
             child: Text(
               'Submit',
-              style: TextStyle(color: AppColors.primary),
+              style: TextStyle(color: context.colors.primary),
             ),
           ),
         ],
@@ -582,7 +596,7 @@ class _ProjectActionsRow extends StatelessWidget {
             onPressed: () => Navigator.of(dialogCtx).pop(true),
             child: Text(
               'Cancel submission',
-              style: TextStyle(color: AppColors.error),
+              style: TextStyle(color: context.colors.error),
             ),
           ),
         ],
@@ -608,22 +622,22 @@ class _StatusBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final (color, icon, label) = switch (status) {
       ProjectStatus.draft => (
-          AppColors.warning,
+          context.colors.warning,
           Icons.edit_note_outlined,
           'Draft — not yet submitted for review',
         ),
       ProjectStatus.submitted => (
-          AppColors.info,
+          context.colors.info,
           Icons.hourglass_top_outlined,
           'Submitted — awaiting organizer review',
         ),
       ProjectStatus.accepted => (
-          AppColors.success,
+          context.colors.success,
           Icons.check_circle_outline,
           'Accepted — your project was approved',
         ),
       ProjectStatus.rejected => (
-          AppColors.error,
+          context.colors.error,
           Icons.cancel_outlined,
           'Rejected — check organizer feedback',
         ),
@@ -674,9 +688,9 @@ class _ProjectDetailsCard extends StatelessWidget {
     return Container(
       padding: AppSpacing.cardPadding,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -688,7 +702,10 @@ class _ProjectDetailsCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   project.title,
-                  style: AppTypography.h3.copyWith(fontWeight: FontWeight.w700),
+                  style: AppTypography.h3.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.textPrimary,
+                  ),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -704,8 +721,9 @@ class _ProjectDetailsCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               project.description!,
-              style: AppTypography.bodyMedium
-                  .copyWith(color: AppColors.textSecondary),
+              style: AppTypography.bodyMedium.copyWith(
+                color: context.colors.textSecondary,
+              ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
@@ -716,17 +734,18 @@ class _ProjectDetailsCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.layers_outlined,
                   size: 14,
-                  color: AppColors.textHint,
+                  color: context.colors.textHint,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
                     project.techStack!,
-                    style: AppTypography.bodySmall
-                        .copyWith(color: AppColors.textSecondary),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: context.colors.textSecondary,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -736,14 +755,15 @@ class _ProjectDetailsCard extends StatelessWidget {
           ],
 
           const SizedBox(height: AppSpacing.md),
-          const Divider(color: AppColors.border),
+          Divider(color: context.colors.border),
           const SizedBox(height: AppSpacing.sm),
 
-          _buildLinks(),
+          _buildLinks(context),
 
           if (project.createdAt != null) ...[
             const SizedBox(height: AppSpacing.sm),
             _buildMeta(
+              context: context,
               icon: Icons.calendar_today_outlined,
               label: 'Created',
               value: _formatDate(project.createdAt!),
@@ -754,14 +774,14 @@ class _ProjectDetailsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLinks() {
+  Widget _buildLinks(BuildContext context) {
     final hasRepo = project.repoUrl != null && project.repoUrl!.isNotEmpty;
     final hasDemo = project.demoUrl != null && project.demoUrl!.isNotEmpty;
 
     if (!hasRepo && !hasDemo) {
       return Text(
         'No links added yet',
-        style: AppTypography.bodySmall.copyWith(color: AppColors.textHint),
+        style: AppTypography.bodySmall.copyWith(color: context.colors.textHint),
       );
     }
 
@@ -784,22 +804,23 @@ class _ProjectDetailsCard extends StatelessWidget {
   }
 
   Widget _buildMeta({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
   }) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: AppColors.textHint),
+        Icon(icon, size: 14, color: context.colors.textHint),
         const SizedBox(width: AppSpacing.xs),
         Text(
           '$label: ',
-          style: AppTypography.caption.copyWith(color: AppColors.textHint),
+          style: AppTypography.caption.copyWith(color: context.colors.textHint),
         ),
         Text(
           value,
           style: AppTypography.caption.copyWith(
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -897,9 +918,9 @@ class _EditProjectSheetState extends State<_EditProjectSheet> {
         AppSpacing.md,
         AppSpacing.md + bottomInset,
       ),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),
         ),
       ),
@@ -917,17 +938,24 @@ class _EditProjectSheetState extends State<_EditProjectSheet> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: AppSpacing.lg),
                   decoration: BoxDecoration(
-                    color: AppColors.border,
+                    color: context.colors.border,
                     borderRadius:
                         BorderRadius.circular(AppSpacing.radiusFull),
                   ),
                 ),
               ),
-              Text('Edit Project', style: AppTypography.h3),
+              Text(
+                'Edit Project',
+                style: AppTypography.h3.copyWith(
+                  color: context.colors.textPrimary,
+                ),
+              ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 'Update your project details below.',
-                style: AppTypography.bodyMedium,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: context.colors.textSecondary,
+                ),
               ),
               const SizedBox(height: AppSpacing.lg),
               AppTextField(
@@ -985,7 +1013,7 @@ class _EditProjectSheetState extends State<_EditProjectSheet> {
                   child: Text(
                     'Cancel',
                     style: AppTypography.labelMedium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: context.colors.textSecondary,
                     ),
                   ),
                 ),
@@ -1006,7 +1034,7 @@ class _EditProjectSheetState extends State<_EditProjectSheet> {
 class _CircleIcon extends StatelessWidget {
   const _CircleIcon({
     required this.icon,
-    this.color = AppColors.primary,
+    required this.color,
   });
 
   final IconData icon;
@@ -1041,19 +1069,21 @@ class _LinkChip extends StatelessWidget {
         vertical: AppSpacing.xs + 2,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
+        color: context.colors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: context.colors.primary.withValues(alpha: 0.2),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: AppColors.primary),
+          Icon(icon, size: 14, color: context.colors.primary),
           const SizedBox(width: AppSpacing.xs),
           Text(
             label,
             style: AppTypography.caption.copyWith(
-              color: AppColors.primary,
+              color: context.colors.primary,
               fontWeight: FontWeight.w600,
             ),
           ),

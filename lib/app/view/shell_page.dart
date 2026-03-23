@@ -42,6 +42,13 @@ const _profileItem = _NavItem(
   selectedIcon: Icons.person,
 );
 
+const _settingsItem = _NavItem(
+  route: '/settings',
+  label: 'Settings',
+  icon: Icons.settings_outlined,
+  selectedIcon: Icons.settings,
+);
+
 class ShellPage extends StatelessWidget {
   const ShellPage({required this.child, super.key});
 
@@ -63,6 +70,7 @@ class ShellPage extends StatelessWidget {
           _homeItem,
           if (canViewTeams) _teamsItem,
           _profileItem,
+          _settingsItem,
         ];
 
         final selectedIndex = _resolveIndex(context, items);

@@ -13,10 +13,15 @@ class VerifyAccountPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: BackButton(color: AppColors.textPrimary),
-        title: Text('Verify Account', style: AppTypography.labelLarge),
+        leading: BackButton(color: context.colors.textPrimary),
+        title: Text(
+          'Verify Account',
+          style: AppTypography.labelLarge.copyWith(
+            color: context.colors.textPrimary,
+          ),
+        ),
       ),
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: CenteredContent(
           child: Padding(
@@ -25,7 +30,7 @@ class VerifyAccountPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: AppSpacing.lg),
-                _buildHeader(),
+                _buildHeader(context),
                 const SizedBox(height: AppSpacing.xxl),
                 _buildMethodCard(
                   context: context,
@@ -34,7 +39,7 @@ class VerifyAccountPage extends StatelessWidget {
                   subtitle: 'Verify with your university email address.\n'
                       'You will receive a 6-digit OTP instantly.',
                   badge: 'Instant',
-                  badgeColor: AppColors.success,
+                  badgeColor: context.colors.success,
                   onTap: () => context.push('/verify-account/email'),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -45,7 +50,7 @@ class VerifyAccountPage extends StatelessWidget {
                   subtitle: 'Upload a photo of your university ID card.\n'
                       'An admin will review your request.',
                   badge: 'Requires Review',
-                  badgeColor: AppColors.warning,
+                  badgeColor: context.colors.warning,
                   onTap: () => context.push('/verify-account/uid'),
                 ),
               ],
@@ -56,18 +61,22 @@ class VerifyAccountPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Column(
       children: [
         Text(
           'Choose Verification Method',
-          style: AppTypography.h1,
+          style: AppTypography.h1.copyWith(
+            color: context.colors.textPrimary,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'Verifying your account unlocks full access to all features.',
-          style: AppTypography.bodyMedium,
+          style: AppTypography.bodyMedium.copyWith(
+            color: context.colors.textSecondary,
+          ),
           textAlign: TextAlign.center,
         ),
       ],
@@ -89,7 +98,7 @@ class VerifyAccountPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           boxShadow: AppShadows.card,
         ),
@@ -99,10 +108,10 @@ class VerifyAccountPage extends StatelessWidget {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: context.colors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
-              child: Icon(icon, color: AppColors.primary, size: 28),
+              child: Icon(icon, color: context.colors.primary, size: 28),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -114,7 +123,9 @@ class VerifyAccountPage extends StatelessWidget {
                       Flexible(
                         child: Text(
                           title,
-                          style: AppTypography.labelLarge,
+                          style: AppTypography.labelLarge.copyWith(
+                            color: context.colors.textPrimary,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -137,11 +148,16 @@ class VerifyAccountPage extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(subtitle, style: AppTypography.bodySmall),
+                  Text(
+                    subtitle,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: context.colors.textSecondary,
+                    ),
+                  ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: AppColors.textHint),
+            Icon(Icons.chevron_right, color: context.colors.textHint),
           ],
         ),
       ),

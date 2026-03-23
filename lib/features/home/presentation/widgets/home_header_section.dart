@@ -14,20 +14,21 @@ class HomeHeaderSection extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTitle(),
+          _buildTitle(context),
           _buildNotificationButton(context),
         ],
       ),
     );
   }
 
-  Widget _buildTitle() {
+  Widget _buildTitle(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Votera',
           style: AppTypography.h1.copyWith(
+            color: context.colors.textPrimary,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
           ),
@@ -36,7 +37,7 @@ class HomeHeaderSection extends StatelessWidget {
         Text(
           'Vote for top projects',
           style: AppTypography.bodySmall.copyWith(
-            color: AppColors.textHint,
+            color: context.colors.textHint,
           ),
         ),
       ],
@@ -51,10 +52,10 @@ class HomeHeaderSection extends StatelessWidget {
         height: 42,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: AppColors.primaryGradient,
+          gradient: context.colors.primaryGradient,
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.3),
+              color: context.colors.primary.withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),

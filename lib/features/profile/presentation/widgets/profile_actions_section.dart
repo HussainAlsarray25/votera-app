@@ -19,7 +19,7 @@ class ProfileActionsSection extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: context.colors.error,
             ),
           );
         }
@@ -28,7 +28,7 @@ class ProfileActionsSection extends StatelessWidget {
         padding: AppSpacing.pagePadding,
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.colors.surface,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
             boxShadow: AppShadows.card,
           ),
@@ -40,25 +40,29 @@ class ProfileActionsSection extends StatelessWidget {
                 children: [
                   if (isVisitor) ...[
                     _buildActionTile(
+                      context: context,
                       icon: Icons.verified_user_outlined,
                       label: 'Verify Account',
                       onTap: () => context.push('/verify-account'),
                     ),
-                    const Divider(height: 1, color: AppColors.divider),
+                    Divider(height: 1, color: context.colors.divider),
                   ],
                   _buildActionTile(
+                    context: context,
                     icon: Icons.chat_bubble_outline_rounded,
                     label: 'Comments',
                     onTap: () => context.push('/comments'),
                   ),
-                  const Divider(height: 1, color: AppColors.divider),
+                  Divider(height: 1, color: context.colors.divider),
                   _buildActionTile(
+                    context: context,
                     icon: Icons.help_outline,
                     label: 'Help & Support',
                     onTap: () {},
                   ),
-                  const Divider(height: 1, color: AppColors.divider),
+                  Divider(height: 1, color: context.colors.divider),
                   _buildActionTile(
+                    context: context,
                     icon: Icons.logout,
                     label: 'Sign Out',
                     isDestructive: true,
@@ -74,12 +78,13 @@ class ProfileActionsSection extends StatelessWidget {
   }
 
   Widget _buildActionTile({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
-    final color = isDestructive ? AppColors.error : AppColors.textPrimary;
+    final color = isDestructive ? context.colors.error : context.colors.textPrimary;
 
     return ListTile(
       leading: Icon(icon, color: color, size: 22),
@@ -89,7 +94,7 @@ class ProfileActionsSection extends StatelessWidget {
       ),
       trailing: Icon(
         Icons.chevron_right,
-        color: isDestructive ? AppColors.error : AppColors.textHint,
+        color: isDestructive ? context.colors.error : context.colors.textHint,
       ),
       onTap: onTap,
       shape: RoundedRectangleBorder(

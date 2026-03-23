@@ -63,11 +63,16 @@ class _LoginSectionState extends State<LoginSection> {
   Widget _buildHeader() {
     return Column(
       children: [
-        Text('Welcome Back', style: AppTypography.h1),
+        Text(
+          'Welcome Back',
+          style: AppTypography.h1.copyWith(color: context.colors.textPrimary),
+        ),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'Sign in to vote for your favorite projects',
-          style: AppTypography.bodyMedium,
+          style: AppTypography.bodyMedium.copyWith(
+            color: context.colors.textSecondary,
+          ),
           textAlign: TextAlign.center,
         ),
       ],
@@ -101,7 +106,7 @@ class _LoginSectionState extends State<LoginSection> {
       suffixIcon: IconButton(
         icon: Icon(
           _obscurePassword ? Icons.visibility_off : Icons.visibility,
-          color: AppColors.textHint,
+          color: context.colors.textHint,
           size: 20,
         ),
         onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
@@ -126,7 +131,7 @@ class _LoginSectionState extends State<LoginSection> {
         child: Text(
           'Forgot Password?',
           style: AppTypography.bodySmall.copyWith(
-            color: AppColors.primary,
+            color: context.colors.primary,
           ),
         ),
       ),
@@ -159,7 +164,7 @@ class _LoginSectionState extends State<LoginSection> {
               TextSpan(
                 text: 'Sign Up',
                 style: AppTypography.labelMedium
-                    .copyWith(color: AppColors.primary),
+                    .copyWith(color: context.colors.primary),
               ),
             ],
           ),

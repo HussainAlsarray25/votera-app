@@ -14,19 +14,19 @@ class SearchBarSection extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, AppSpacing.md, 20, AppSpacing.md),
       child: Row(
         children: [
-          Expanded(child: _buildSearchField()),
+          Expanded(child: _buildSearchField(context)),
           const SizedBox(width: 10),
-          _buildFilterButton(),
+          _buildFilterButton(context),
         ],
       ),
     );
   }
 
-  Widget _buildSearchField() {
+  Widget _buildSearchField(BuildContext context) {
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -56,16 +56,16 @@ class SearchBarSection extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterButton() {
+  Widget _buildFilterButton(BuildContext context) {
     return Container(
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: context.colors.primary,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.35),
+            color: context.colors.primary.withValues(alpha: 0.35),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),

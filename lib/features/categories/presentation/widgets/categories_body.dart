@@ -42,15 +42,15 @@ class _CategoriesBodyState extends State<CategoriesBody> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(),
+          _buildHeader(context),
           const SizedBox(height: AppSpacing.lg),
-          Expanded(child: _buildContent()),
+          Expanded(child: _buildContent(context)),
         ],
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -59,12 +59,15 @@ class _CategoriesBodyState extends State<CategoriesBody> {
           style: AppTypography.h1.copyWith(
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
+            color: context.colors.textPrimary,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           'Browse projects by category',
-          style: AppTypography.bodyMedium,
+          style: AppTypography.bodyMedium.copyWith(
+            color: context.colors.textSecondary,
+          ),
         ),
       ],
     );
@@ -76,7 +79,7 @@ class _CategoriesBodyState extends State<CategoriesBody> {
         .loadCategories(page: 1, size: 50);
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     return BlocBuilder<CategoriesCubit, CategoriesState>(
       builder: (context, state) {
         if (state is CategoriesLoading || state is CategoriesInitial) {
@@ -84,7 +87,7 @@ class _CategoriesBodyState extends State<CategoriesBody> {
         }
 
         if (state is CategoriesError) {
-          return _buildErrorState(state.message);
+          return _buildErrorState(context, state.message);
         }
 
         if (state is CategoriesLoaded) {
@@ -134,14 +137,19 @@ class _CategoriesBodyState extends State<CategoriesBody> {
     );
   }
 
-  Widget _buildErrorState(String message) {
+  Widget _buildErrorState(BuildContext context, String message) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+          Icon(Icons.error_outline, size: 48, color: context.colors.error),
           const SizedBox(height: AppSpacing.md),
-          Text(message, style: AppTypography.bodyMedium),
+          Text(
+            message,
+            style: AppTypography.bodyMedium.copyWith(
+              color: context.colors.textSecondary,
+            ),
+          ),
           const SizedBox(height: AppSpacing.md),
           TextButton(
             onPressed: () => context
@@ -168,7 +176,7 @@ class _CategoryCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -189,6 +197,7 @@ class _CategoryCard extends StatelessWidget {
               category.name,
               style: AppTypography.labelMedium.copyWith(
                 fontWeight: FontWeight.w700,
+                color: context.colors.textPrimary,
               ),
               textAlign: TextAlign.center,
               maxLines: 1,
@@ -201,7 +210,9 @@ class _CategoryCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 category.description,
-                style: AppTypography.bodySmall,
+                style: AppTypography.bodySmall.copyWith(
+                  color: context.colors.textSecondary,
+                ),
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

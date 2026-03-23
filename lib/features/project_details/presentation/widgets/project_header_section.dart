@@ -210,18 +210,11 @@ class _HeaderIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
 
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.black26,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Icon(icon, color: Colors.white, size: 18),
-        ),
+  Widget _buildImage() {
+    return const ColoredBox(
+      color: AppColors.border,
+      child: Center(
+        child: Icon(Icons.code, size: 64, color: AppColors.textHint),
       ),
     );
   }

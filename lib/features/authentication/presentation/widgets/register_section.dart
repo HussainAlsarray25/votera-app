@@ -66,11 +66,16 @@ class _RegisterSectionState extends State<RegisterSection> {
   Widget _buildHeader() {
     return Column(
       children: [
-        Text('Create Account', style: AppTypography.h1),
+        Text(
+          'Create Account',
+          style: AppTypography.h1.copyWith(color: context.colors.textPrimary),
+        ),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'Join the exhibition and start voting',
-          style: AppTypography.bodyMedium,
+          style: AppTypography.bodyMedium.copyWith(
+            color: context.colors.textSecondary,
+          ),
           textAlign: TextAlign.center,
         ),
       ],
@@ -116,7 +121,7 @@ class _RegisterSectionState extends State<RegisterSection> {
       suffixIcon: IconButton(
         icon: Icon(
           _obscurePassword ? Icons.visibility_off : Icons.visibility,
-          color: AppColors.textHint,
+          color: context.colors.textHint,
           size: 20,
         ),
         onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
@@ -155,7 +160,7 @@ class _RegisterSectionState extends State<RegisterSection> {
               TextSpan(
                 text: 'Sign In',
                 style: AppTypography.labelMedium
-                    .copyWith(color: AppColors.primary),
+                    .copyWith(color: context.colors.primary),
               ),
             ],
           ),

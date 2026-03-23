@@ -40,8 +40,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: BackButton(color: AppColors.textPrimary),
-        title: Text('Forgot Password', style: AppTypography.labelLarge),
+        leading: BackButton(color: context.colors.textPrimary),
+        title: Text(
+          'Forgot Password',
+          style: AppTypography.labelLarge.copyWith(
+            color: context.colors.textPrimary,
+          ),
+        ),
       ),
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
@@ -51,7 +56,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.error,
+                backgroundColor: context.colors.error,
               ),
             );
           }
@@ -90,13 +95,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       children: [
         Text(
           'Reset Your Password',
-          style: AppTypography.h1,
+          style: AppTypography.h1.copyWith(color: context.colors.textPrimary),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'Enter your email and we will send you a link to reset your password.',
-          style: AppTypography.bodyMedium,
+          style: AppTypography.bodyMedium.copyWith(
+            color: context.colors.textSecondary,
+          ),
           textAlign: TextAlign.center,
         ),
       ],
@@ -138,21 +145,23 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: AppSpacing.xxl),
-        const Icon(
+        Icon(
           Icons.mark_email_read_outlined,
           size: 72,
-          color: AppColors.primary,
+          color: context.colors.primary,
         ),
         const SizedBox(height: AppSpacing.xl),
         Text(
           'Check Your Email',
-          style: AppTypography.h1,
+          style: AppTypography.h1.copyWith(color: context.colors.textPrimary),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'We sent a password reset link to\n${_emailController.text.trim()}',
-          style: AppTypography.bodyMedium,
+          style: AppTypography.bodyMedium.copyWith(
+            color: context.colors.textSecondary,
+          ),
           textAlign: TextAlign.center,
         ),
       ],
