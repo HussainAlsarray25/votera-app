@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "WebFetch(domain:supabase.com)",
+      "Bash(grep -v \"//.*AppColors\")"
     ]
   }
 }

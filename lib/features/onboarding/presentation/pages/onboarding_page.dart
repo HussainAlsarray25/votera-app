@@ -23,19 +23,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   static const _slides = [
     OnboardingData(
-      icon: Icons.how_to_vote,
       title: 'Discover Projects',
       description:
           'Browse innovative software projects created by university students.',
     ),
     OnboardingData(
-      icon: Icons.star_rounded,
       title: 'Rate & Vote',
       description:
           'Vote for your favorite projects and help choose the winners.',
     ),
     OnboardingData(
-      icon: Icons.emoji_events,
       title: 'Celebrate Winners',
       description:
           'See trending projects and celebrate the top-voted creations.',
@@ -90,7 +87,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
-  // -- Section: Skip button --
+  // -- Section: Skip button (subtle, secondary style) --
   Widget _buildSkipButton() {
     return Align(
       alignment: Alignment.centerRight,
@@ -100,7 +97,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
           onPressed: _goToAuth,
           child: Text(
             'Skip',
-            style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
+            style: AppTypography.bodySmall.copyWith(
+              color: context.colors.textHint,
+            ),
           ),
         ),
       ),
@@ -156,12 +155,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
 /// Simple data holder for each onboarding slide.
 class OnboardingData {
   const OnboardingData({
-    required this.icon,
     required this.title,
     required this.description,
   });
 
-  final IconData icon;
   final String title;
   final String description;
 }

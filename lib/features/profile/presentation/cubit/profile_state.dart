@@ -20,6 +20,17 @@ class ProfileLoaded extends ProfileState {
   List<Object?> get props => [profile];
 }
 
+class ProfileAvatarUploading extends ProfileState {
+  const ProfileAvatarUploading({required this.profile});
+
+  /// The last known profile — allows the UI to keep showing data while the
+  /// upload is in progress.
+  final UserProfile profile;
+
+  @override
+  List<Object?> get props => [profile];
+}
+
 class ProfileError extends ProfileState {
   const ProfileError({required this.message});
 

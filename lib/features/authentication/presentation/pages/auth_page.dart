@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
 import 'package:votera/features/authentication/presentation/widgets/login_section.dart';
 import 'package:votera/features/authentication/presentation/widgets/register_section.dart';
+import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 
 /// The authentication page handles both login and registration.
-/// Users switch between the two via a tab-like toggle at the top.
-/// On desktop, displays a two-panel layout with branding on the left.
+/// Mobile: plain scaffold with the form filling the screen.
+/// Desktop: two-panel layout with gradient branding on the left.
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
 
@@ -49,68 +53,104 @@ class _AuthPageState extends State<AuthPage> {
             ),
     );
 
-    if (AppBreakpoints.isDesktop(context)) {
-      return Scaffold(
-        body: SafeArea(
-          child: Row(
-            children: [
-              // Branding panel
-              Expanded(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: AppColors.primaryGradient,
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.how_to_vote,
-                          size: 80,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        Text(
-                          'Votera',
-                          style: AppTypography.h1.copyWith(
-                            color: Colors.white,
-                            fontSize: 36,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          'Discover, vote, and celebrate\ninnovative projects.',
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: Colors.white70,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Form panel
-              Expanded(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: AppBreakpoints.formPanelMax,
-                    ),
-                    child: SingleChildScrollView(
-                      padding: AppSpacing.pagePadding,
-                      child: formContent,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+    final body = BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is AuthAuthenticated) {
+          context.read<ProfileCubit>().loadProfile();
+          context.go('/home');
+        } else if (state is AuthOtpRequired) {
+          context.go('/otp', extra: {
+            'identifier': state.identifier,
+            'isRegistration': false,
+          });
+        } else if (state is AuthRegistrationOtpRequired) {
+          context.go('/otp', extra: {
+            'identifier': state.identifier,
+            'isRegistration': true,
+          });
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: context.colors.error,
+            ),
+          );
+        }
+      },
+      child: AppBreakpoints.isDesktop(context)
+          ? _buildDesktopLayout(formContent)
+          : _buildMobileLayout(formContent),
+    );
 
-    // Mobile / Tablet: centered form
+    return body;
+  }
+
+  // -- Section: Desktop two-panel layout --
+  Widget _buildDesktopLayout(Widget formContent) {
+    return Scaffold(
+      body: SafeArea(
+        child: Row(
+          children: [
+            Expanded(child: _buildBrandingPanel()),
+            Expanded(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: AppBreakpoints.formPanelMax,
+                  ),
+                  child: SingleChildScrollView(
+                    padding: AppSpacing.pagePadding,
+                    child: formContent,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // -- Section: Desktop branding panel --
+  Widget _buildBrandingPanel() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: context.colors.primaryGradient,
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.how_to_vote,
+              size: 96,
+              color: Colors.white,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'Votera',
+              style: AppTypography.h1.copyWith(
+                color: Colors.white,
+                fontSize: 40,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Discover, vote, and celebrate\ninnovative projects.',
+              style: AppTypography.bodyLarge.copyWith(
+                color: Colors.white70,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // -- Section: Mobile layout --
+  Widget _buildMobileLayout(Widget formContent) {
     return Scaffold(
       body: SafeArea(
         child: CenteredContent(

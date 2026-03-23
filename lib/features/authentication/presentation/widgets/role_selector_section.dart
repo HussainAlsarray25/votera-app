@@ -24,7 +24,12 @@ class _RoleSelectorSectionState extends State<RoleSelectorSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Your Role', style: AppTypography.labelLarge),
+        Text(
+          'Your Role',
+          style: AppTypography.labelLarge.copyWith(
+            color: context.colors.textPrimary,
+          ),
+        ),
         const SizedBox(height: AppSpacing.md),
         Row(
           children: List.generate(_roles.length, (index) {
@@ -54,11 +59,11 @@ class _RoleSelectorSectionState extends State<RoleSelectorSection> {
         padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.08)
-              : AppColors.surface,
+              ? context.colors.primary.withValues(alpha: 0.08)
+              : context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
+            color: isSelected ? context.colors.primary : context.colors.border,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -67,13 +72,17 @@ class _RoleSelectorSectionState extends State<RoleSelectorSection> {
             Icon(
               role.icon,
               size: 32,
-              color: isSelected ? AppColors.primary : AppColors.textHint,
+              color: isSelected
+                  ? context.colors.primary
+                  : context.colors.textHint,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               role.label,
               style: AppTypography.labelMedium.copyWith(
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                color: isSelected
+                    ? context.colors.primary
+                    : context.colors.textSecondary,
               ),
             ),
           ],

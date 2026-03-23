@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/features/authentication/presentation/widgets/telegram_login_button.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -35,16 +38,19 @@ class _LoginSectionState extends State<LoginSection> {
       child: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: AppSpacing.xxl),
             _buildHeader(),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.xxl),
             _buildEmailField(),
             const SizedBox(height: AppSpacing.md),
             _buildPasswordField(),
+            _buildForgotPassword(),
             const SizedBox(height: AppSpacing.xl),
             _buildSubmitButton(),
+            const SizedBox(height: AppSpacing.md),
+            const TelegramLoginButton(),
             const SizedBox(height: AppSpacing.lg),
             _buildSwitchLink(),
           ],
@@ -56,13 +62,18 @@ class _LoginSectionState extends State<LoginSection> {
   // -- Section: Welcome header --
   Widget _buildHeader() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Welcome Back', style: AppTypography.h1),
+        Text(
+          'Welcome Back',
+          style: AppTypography.h1.copyWith(color: context.colors.textPrimary),
+        ),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'Sign in to vote for your favorite projects',
-          style: AppTypography.bodyMedium,
+          style: AppTypography.bodyMedium.copyWith(
+            color: context.colors.textSecondary,
+          ),
+          textAlign: TextAlign.center,
         ),
       ],
     );
@@ -95,7 +106,7 @@ class _LoginSectionState extends State<LoginSection> {
       suffixIcon: IconButton(
         icon: Icon(
           _obscurePassword ? Icons.visibility_off : Icons.visibility,
-          color: AppColors.textHint,
+          color: context.colors.textHint,
           size: 20,
         ),
         onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
@@ -108,28 +119,52 @@ class _LoginSectionState extends State<LoginSection> {
     );
   }
 
+  // -- Section: Forgot password link --
+  Widget _buildForgotPassword() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: TextButton(
+        onPressed: () => context.go('/forgot-password'),
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        ),
+        child: Text(
+          'Forgot Password?',
+          style: AppTypography.bodySmall.copyWith(
+            color: context.colors.primary,
+          ),
+        ),
+      ),
+    );
+  }
+
   // -- Section: Submit button --
   Widget _buildSubmitButton() {
-    return GradientButton(
-      text: 'Sign In',
-      onPressed: _handleLogin,
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        final isLoading = state is AuthLoading;
+        return GradientButton(
+          text: isLoading ? 'Signing In...' : 'Sign In',
+          onPressed: isLoading ? null : _handleLogin,
+        );
+      },
     );
   }
 
   // -- Section: Switch to register link --
   Widget _buildSwitchLink() {
     return Center(
-      child: GestureDetector(
-        onTap: widget.onSwitchToRegister,
-        child: RichText(
-          text: TextSpan(
+      child: TextButton(
+        onPressed: widget.onSwitchToRegister,
+        child: Text.rich(
+          TextSpan(
             text: "Don't have an account? ",
             style: AppTypography.bodyMedium,
             children: [
               TextSpan(
                 text: 'Sign Up',
                 style: AppTypography.labelMedium
-                    .copyWith(color: AppColors.primary),
+                    .copyWith(color: context.colors.primary),
               ),
             ],
           ),
@@ -140,7 +175,10 @@ class _LoginSectionState extends State<LoginSection> {
 
   void _handleLogin() {
     if (_formKey.currentState?.validate() ?? false) {
-      context.go('/home');
+      context.read<AuthCubit>().login(
+            identifier: _emailController.text.trim(),
+            secret: _passwordController.text,
+          );
     }
   }
 }

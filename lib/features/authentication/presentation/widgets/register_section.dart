@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/features/authentication/presentation/widgets/telegram_login_button.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -18,14 +20,14 @@ class RegisterSection extends StatefulWidget {
 class _RegisterSectionState extends State<RegisterSection> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
+  final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
     _nameController.dispose();
-    _emailController.dispose();
+    _identifierController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -37,18 +39,21 @@ class _RegisterSectionState extends State<RegisterSection> {
       child: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: AppSpacing.xxl),
+            const SizedBox(height: AppSpacing.xxl),
             _buildHeader(),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.xxl),
             _buildNameField(),
             const SizedBox(height: AppSpacing.md),
-            _buildEmailField(),
+            _buildIdentifierField(),
             const SizedBox(height: AppSpacing.md),
             _buildPasswordField(),
             const SizedBox(height: AppSpacing.xl),
             _buildSubmitButton(),
+            const SizedBox(height: AppSpacing.md),
+            const TelegramLoginButton(),
             const SizedBox(height: AppSpacing.lg),
             _buildSwitchLink(),
           ],
@@ -60,13 +65,18 @@ class _RegisterSectionState extends State<RegisterSection> {
   // -- Section: Header --
   Widget _buildHeader() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Create Account', style: AppTypography.h1),
+        Text(
+          'Create Account',
+          style: AppTypography.h1.copyWith(color: context.colors.textPrimary),
+        ),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'Join the exhibition and start voting',
-          style: AppTypography.bodyMedium,
+          style: AppTypography.bodyMedium.copyWith(
+            color: context.colors.textSecondary,
+          ),
+          textAlign: TextAlign.center,
         ),
       ],
     );
@@ -86,17 +96,15 @@ class _RegisterSectionState extends State<RegisterSection> {
     );
   }
 
-  // -- Section: Email input --
-  Widget _buildEmailField() {
+  // -- Section: Identifier input --
+  Widget _buildIdentifierField() {
     return AppTextField(
-      label: 'Email',
-      controller: _emailController,
-      hint: 'Enter your email',
-      prefixIcon: Icons.email_outlined,
-      keyboardType: TextInputType.emailAddress,
+      label: 'Identifier',
+      controller: _identifierController,
+      hint: 'Enter your email or username',
+      prefixIcon: Icons.alternate_email_outlined,
       validator: (value) {
-        if (value == null || value.isEmpty) return 'Email is required';
-        if (!value.contains('@')) return 'Enter a valid email';
+        if (value == null || value.isEmpty) return 'Identifier is required';
         return null;
       },
     );
@@ -113,7 +121,7 @@ class _RegisterSectionState extends State<RegisterSection> {
       suffixIcon: IconButton(
         icon: Icon(
           _obscurePassword ? Icons.visibility_off : Icons.visibility,
-          color: AppColors.textHint,
+          color: context.colors.textHint,
           size: 20,
         ),
         onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
@@ -128,26 +136,31 @@ class _RegisterSectionState extends State<RegisterSection> {
 
   // -- Section: Submit button --
   Widget _buildSubmitButton() {
-    return GradientButton(
-      text: 'Create Account',
-      onPressed: _handleRegister,
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        final isLoading = state is AuthLoading;
+        return GradientButton(
+          text: isLoading ? 'Creating Account...' : 'Create Account',
+          onPressed: isLoading ? null : _handleRegister,
+        );
+      },
     );
   }
 
   // -- Section: Switch to login link --
   Widget _buildSwitchLink() {
     return Center(
-      child: GestureDetector(
-        onTap: widget.onSwitchToLogin,
-        child: RichText(
-          text: TextSpan(
+      child: TextButton(
+        onPressed: widget.onSwitchToLogin,
+        child: Text.rich(
+          TextSpan(
             text: 'Already have an account? ',
             style: AppTypography.bodyMedium,
             children: [
               TextSpan(
                 text: 'Sign In',
                 style: AppTypography.labelMedium
-                    .copyWith(color: AppColors.primary),
+                    .copyWith(color: context.colors.primary),
               ),
             ],
           ),
@@ -158,7 +171,11 @@ class _RegisterSectionState extends State<RegisterSection> {
 
   void _handleRegister() {
     if (_formKey.currentState?.validate() ?? false) {
-      context.go('/user-info');
+      context.read<AuthCubit>().register(
+            fullName: _nameController.text.trim(),
+            identifier: _identifierController.text.trim(),
+            password: _passwordController.text,
+          );
     }
   }
 }

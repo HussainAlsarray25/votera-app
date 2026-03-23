@@ -12,7 +12,7 @@ class VerifiedBadge extends StatelessWidget {
     return Icon(
       Icons.verified,
       size: size,
-      color: AppColors.accent,
+      color: context.colors.accent,
     );
   }
 }

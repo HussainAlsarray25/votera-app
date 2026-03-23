@@ -1,75 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
 
-/// A search bar with filter chips for narrowing project results.
+/// Search input with an adjacent filter button.
+/// Calls [onSearchChanged] on every keystroke for live filtering.
 class SearchBarSection extends StatelessWidget {
-  const SearchBarSection({super.key});
+  const SearchBarSection({required this.onSearchChanged, super.key});
+
+  final ValueChanged<String> onSearchChanged;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Column(
+      padding: const EdgeInsets.fromLTRB(20, AppSpacing.md, 20, AppSpacing.md),
+      child: Row(
         children: [
-          _buildSearchField(),
-          const SizedBox(height: AppSpacing.md),
-          _buildFilterChips(),
+          Expanded(child: _buildSearchField(context)),
+          const SizedBox(width: 10),
+          _buildFilterButton(context),
         ],
       ),
     );
   }
 
-  Widget _buildSearchField() {
-    return TextField(
-      decoration: InputDecoration(
-        hintText: 'Search projects...',
-        prefixIcon:
-            const Icon(Icons.search, color: AppColors.textHint, size: 20),
-        suffixIcon: Container(
-          margin: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+  Widget _buildSearchField(BuildContext context) {
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          child: const Icon(Icons.tune, color: Colors.white, size: 18),
+        ],
+      ),
+      child: TextField(
+        onChanged: onSearchChanged,
+        decoration: InputDecoration(
+          hintText: 'Search projects or teams...',
+          hintStyle: TextStyle(
+            color: Colors.grey.shade400,
+            fontSize: 14,
+          ),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            color: Colors.grey.shade400,
+            size: 20,
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
         ),
       ),
     );
   }
 
-  Widget _buildFilterChips() {
-    final filters = ['All', 'Mobile', 'Web', 'AI', 'IoT', 'Games'];
-
-    return SizedBox(
-      height: 36,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
-        itemBuilder: (context, index) {
-          final isSelected = index == 0;
-
-          return ChoiceChip(
-            label: Text(filters[index]),
-            selected: isSelected,
-            selectedColor: AppColors.primary,
-            backgroundColor: AppColors.surface,
-            labelStyle: TextStyle(
-              color: isSelected ? Colors.white : AppColors.textSecondary,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-              side: BorderSide(
-                color: isSelected ? AppColors.primary : AppColors.border,
-              ),
-            ),
-            showCheckmark: false,
-            onSelected: (_) {},
-          );
-        },
+  Widget _buildFilterButton(BuildContext context) {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: context.colors.primary,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: context.colors.primary.withValues(alpha: 0.35),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
+      child: const Icon(Icons.tune_rounded, color: Colors.white, size: 20),
     );
   }
 }

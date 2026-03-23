@@ -66,7 +66,7 @@ class _ProjectCardState extends State<ProjectCard>
         builder: (context, child) {
           return Container(
             decoration: BoxDecoration(
-              color: AppColors.cardBackground,
+              color: context.colors.cardBackground,
               borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
               boxShadow: widget.isWinner
                   ? AppShadows.goldenGlow
@@ -75,7 +75,7 @@ class _ProjectCardState extends State<ProjectCard>
                       : AppShadows.card),
               // Golden border for the winner
               border: widget.isWinner
-                  ? Border.all(color: AppColors.accent, width: 2)
+                  ? Border.all(color: context.colors.accent, width: 2)
                   : null,
             ),
             child: child,
@@ -92,13 +92,13 @@ class _ProjectCardState extends State<ProjectCard>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildImage(),
+                  _buildImage(context),
                   const SizedBox(height: AppSpacing.md),
-                  _buildTitleRow(),
+                  _buildTitleRow(context),
                   const SizedBox(height: AppSpacing.xs),
-                  _buildAuthorRow(),
+                  _buildAuthorRow(context),
                   const SizedBox(height: AppSpacing.sm),
-                  _buildFooter(),
+                  _buildFooter(context),
                 ],
               ),
             ),
@@ -109,7 +109,7 @@ class _ProjectCardState extends State<ProjectCard>
   }
 
   // -- Section: Project thumbnail with optional badges --
-  Widget _buildImage() {
+  Widget _buildImage(BuildContext context) {
     return Stack(
       children: [
         ClipRRect(
@@ -117,30 +117,34 @@ class _ProjectCardState extends State<ProjectCard>
           child: Container(
             height: 160,
             width: double.infinity,
-            color: AppColors.border,
+            color: context.colors.border,
             child: Image.network(
               widget.imageUrl,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const Center(
-                child: Icon(Icons.code, size: 48, color: AppColors.textHint),
+              errorBuilder: (_, __, ___) => Center(
+                child: Icon(
+                  Icons.code,
+                  size: 48,
+                  color: context.colors.textHint,
+                ),
               ),
             ),
           ),
         ),
-        if (widget.isTrending) _buildTrendingBadge(),
+        if (widget.isTrending) _buildTrendingBadge(context),
         if (widget.isWinner) _buildWinnerBadge(),
       ],
     );
   }
 
-  Widget _buildTrendingBadge() {
+  Widget _buildTrendingBadge(BuildContext context) {
     return Positioned(
       top: 8,
       left: 8,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: AppColors.error,
+          color: context.colors.error,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
         ),
         child: const Row(
@@ -169,7 +173,7 @@ class _ProjectCardState extends State<ProjectCard>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          gradient: AppColors.goldGradient,
+          gradient: AppColorScheme.goldGradient,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
         ),
         child: const Row(
@@ -192,20 +196,27 @@ class _ProjectCardState extends State<ProjectCard>
   }
 
   // -- Section: Title --
-  Widget _buildTitleRow() {
+  Widget _buildTitleRow(BuildContext context) {
     return Text(
       widget.title,
-      style: AppTypography.labelLarge,
+      style: AppTypography.labelLarge.copyWith(
+        color: context.colors.textPrimary,
+      ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
   }
 
   // -- Section: Author with optional verified badge --
-  Widget _buildAuthorRow() {
+  Widget _buildAuthorRow(BuildContext context) {
     return Row(
       children: [
-        Text(widget.authorName, style: AppTypography.bodySmall),
+        Text(
+          widget.authorName,
+          style: AppTypography.bodySmall.copyWith(
+            color: context.colors.textSecondary,
+          ),
+        ),
         if (widget.isVerifiedAuthor) ...[
           const SizedBox(width: 4),
           const VerifiedBadge(size: 14),
@@ -215,7 +226,7 @@ class _ProjectCardState extends State<ProjectCard>
   }
 
   // -- Section: Rating and vote count --
-  Widget _buildFooter() {
+  Widget _buildFooter(BuildContext context) {
     return Row(
       children: [
         AnimatedStarRating(
@@ -224,15 +235,15 @@ class _ProjectCardState extends State<ProjectCard>
           isInteractive: false,
         ),
         const Spacer(),
-        const Icon(
+        Icon(
           Icons.how_to_vote_outlined,
           size: 16,
-          color: AppColors.primary,
+          color: context.colors.primary,
         ),
         const SizedBox(width: 4),
         Text(
           '${widget.voteCount} votes',
-          style: AppTypography.caption.copyWith(color: AppColors.primary),
+          style: AppTypography.caption.copyWith(color: context.colors.primary),
         ),
       ],
     );

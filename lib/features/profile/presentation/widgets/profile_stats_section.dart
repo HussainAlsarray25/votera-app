@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
 
-/// Displays a row of stat cards: votes cast, projects rated, and rank.
+/// Displays a row of stat cards: votes cast, projects rated, and comments.
+/// Shows placeholder values until a stats endpoint is available.
 class ProfileStatsSection extends StatelessWidget {
   const ProfileStatsSection({super.key});
 
@@ -12,19 +13,27 @@ class ProfileStatsSection extends StatelessWidget {
       child: Row(
         children: [
           _buildStatCard(
+            context,
             'Votes Cast',
-            '12',
+            '\u2014',
             Icons.how_to_vote,
-            AppColors.primary,
+            context.colors.primary,
           ),
           const SizedBox(width: AppSpacing.sm),
-          _buildStatCard('Rated', '8', Icons.star, AppColors.accent),
+          _buildStatCard(
+            context,
+            'Rated',
+            '\u2014',
+            Icons.star,
+            context.colors.accent,
+          ),
           const SizedBox(width: AppSpacing.sm),
           _buildStatCard(
+            context,
             'Comments',
-            '5',
+            '\u2014',
             Icons.chat_bubble,
-            AppColors.secondary,
+            context.colors.secondary,
           ),
         ],
       ),
@@ -32,6 +41,7 @@ class ProfileStatsSection extends StatelessWidget {
   }
 
   Widget _buildStatCard(
+    BuildContext context,
     String label,
     String value,
     IconData icon,
@@ -41,7 +51,7 @@ class ProfileStatsSection extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           boxShadow: AppShadows.card,
         ),
@@ -53,7 +63,9 @@ class ProfileStatsSection extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
-              style: AppTypography.caption,
+              style: AppTypography.caption.copyWith(
+                color: context.colors.textHint,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

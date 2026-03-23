@@ -1,74 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:votera/core/design_system/tokens/app_colors.dart';
+import 'package:votera/core/design_system/tokens/app_color_scheme.dart';
 import 'package:votera/core/design_system/tokens/app_spacing.dart';
 
-/// Builds the Material 3 theme from our design tokens.
-/// All theme-level overrides are centralized here.
+/// Builds Material 3 ThemeData for both light and dark modes.
+///
+/// Colors come from AppColorScheme, embedded as a ThemeExtension.
+/// All component overrides are centralized here.
 class AppTheme {
   AppTheme._();
 
-  static ThemeData get lightTheme {
+  static ThemeData get darkTheme => _build(AppColorScheme.dark, Brightness.dark);
+
+  static ThemeData get lightTheme => _build(AppColorScheme.light, Brightness.light);
+
+  static ThemeData _build(AppColorScheme colors, Brightness brightness) {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
-      colorScheme: const ColorScheme(
-        brightness: Brightness.light,
-        primary: AppColors.primary,
-        secondary: AppColors.secondary,
-        tertiary: AppColors.accent,
-        surface: AppColors.surface,
-        error: AppColors.error,
-        onPrimary: AppColors.textOnPrimary,
-        onSecondary: AppColors.textOnPrimary,
-        onSurface: AppColors.textPrimary,
-        onError: AppColors.textOnPrimary,
+      brightness: brightness,
+      extensions: [colors],
+      colorScheme: ColorScheme(
+        brightness: brightness,
+        primary: colors.primary,
+        secondary: colors.secondary,
+        tertiary: colors.accent,
+        surface: colors.surface,
+        error: colors.error,
+        onPrimary: colors.textOnPrimary,
+        onSecondary: colors.textOnPrimary,
+        onSurface: colors.textPrimary,
+        onError: colors.textOnPrimary,
       ),
-      scaffoldBackgroundColor: AppColors.background,
-      textTheme: GoogleFonts.poppinsTextTheme(),
-      appBarTheme: const AppBarTheme(
+      scaffoldBackgroundColor: colors.background,
+      textTheme: GoogleFonts.interTextTheme(
+        // Seed the textTheme with the correct base brightness so Material's
+        // default text colors start from the right contrast side.
+        ThemeData(brightness: brightness).textTheme,
+      ),
+      appBarTheme: AppBarTheme(
         elevation: 0,
         centerTitle: true,
-        backgroundColor: AppColors.surface,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: colors.surface,
+        foregroundColor: colors.textPrimary,
         surfaceTintColor: Colors.transparent,
       ),
       cardTheme: CardThemeData(
         elevation: 0,
-        color: AppColors.cardBackground,
+        color: colors.cardBackground,
         shape: RoundedRectangleBorder(
+          side: BorderSide(color: colors.border),
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: colors.surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.md,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: colors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: colors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: BorderSide(color: colors.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.error),
+          borderSide: BorderSide(color: colors.error),
         ),
-        hintStyle: const TextStyle(color: AppColors.textHint),
+        hintStyle: TextStyle(color: colors.textHint),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.textOnPrimary,
+          backgroundColor: colors.primary,
+          foregroundColor: colors.textOnPrimary,
           minimumSize: const Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -80,22 +92,22 @@ class AppTheme {
           ),
         ),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.surface,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textHint,
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: colors.surface,
+        selectedItemColor: colors.primary,
+        unselectedItemColor: colors.textHint,
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),
-      navigationRailTheme: const NavigationRailThemeData(
-        backgroundColor: AppColors.surface,
-        selectedIconTheme: IconThemeData(color: AppColors.primary),
-        unselectedIconTheme: IconThemeData(color: AppColors.textHint),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: colors.surface,
+        selectedIconTheme: IconThemeData(color: colors.primary),
+        unselectedIconTheme: IconThemeData(color: colors.textHint),
         selectedLabelTextStyle: TextStyle(
-          color: AppColors.primary,
+          color: colors.primary,
           fontWeight: FontWeight.w600,
         ),
-        unselectedLabelTextStyle: TextStyle(color: AppColors.textHint),
+        unselectedLabelTextStyle: TextStyle(color: colors.textHint),
       ),
     );
   }

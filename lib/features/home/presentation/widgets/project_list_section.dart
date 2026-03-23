@@ -1,135 +1,145 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
-import 'package:votera/shared/widgets/project_card.dart';
+import 'package:votera/features/projects/domain/entities/project_entity.dart';
 
-/// A sliver list/grid of project cards. Uses a single-column list on
-/// mobile and switches to a multi-column grid on tablet/desktop.
+/// A sliver list of compact project items. Each item shows a letter icon,
+/// title, and description.
 class ProjectListSection extends StatelessWidget {
-  const ProjectListSection({super.key});
+  const ProjectListSection({
+    required this.projects,
+    required this.eventId,
+    super.key,
+  });
+
+  final List<ProjectEntity> projects;
+  final String eventId;
 
   @override
   Widget build(BuildContext context) {
-    // Static demo data -- will be replaced by Cubit state
-    final projects = List.generate(6, _DemoProject.at);
-    final columns = AppBreakpoints.projectGridColumns(context);
-
-    if (columns > 1) {
-      return SliverPadding(
-        padding: AppSpacing.pagePadding,
-        sliver: SliverGrid(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            mainAxisExtent: 300,
-            crossAxisSpacing: AppSpacing.md,
-            mainAxisSpacing: AppSpacing.md,
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) => _buildCard(projects[index]),
-            childCount: projects.length,
-          ),
-        ),
-      );
-    }
-
     return SliverPadding(
-      padding: AppSpacing.pagePadding,
-      sliver: SliverList.separated(
-        itemCount: projects.length,
-        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-        itemBuilder: (context, index) => _buildCard(projects[index]),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _ProjectListItem(
+                project: projects[index],
+                eventId: eventId,
+              ),
+            );
+          },
+          childCount: projects.length,
+        ),
       ),
-    );
-  }
-
-  Widget _buildCard(_DemoProject p) {
-    return ProjectCard(
-      title: p.title,
-      authorName: p.author,
-      imageUrl: p.imageUrl,
-      rating: p.rating,
-      voteCount: p.votes,
-      isVerifiedAuthor: p.isVerified,
-      isTrending: p.isTrending,
-      isWinner: p.isWinner,
-      onTap: () {
-        // Navigate to project details
-      },
     );
   }
 }
 
-/// Placeholder data for UI development. Remove once real data is connected.
-class _DemoProject {
-  const _DemoProject({
-    required this.title,
-    required this.author,
-    required this.imageUrl,
-    required this.rating,
-    required this.votes,
-    this.isVerified = false,
-    this.isTrending = false,
-    this.isWinner = false,
+/// Rotating icon background colors for project list items.
+const _iconGradients = [
+  [Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
+  [Color(0xFFEDE9FE), Color(0xFFDDD6FE)],
+  [Color(0xFFDBEAFE), Color(0xFFBFDBFE)],
+  [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+  [Color(0xFFFEF3C7), Color(0xFFFDE68A)],
+  [Color(0xFFF3E8FF), Color(0xFFE9D5FF)],
+];
+
+class _ProjectListItem extends StatelessWidget {
+  const _ProjectListItem({
+    required this.project,
+    required this.eventId,
   });
 
-  factory _DemoProject.at(int index) {
-    const items = [
-      _DemoProject(
-        title: 'Smart Campus Navigator',
-        author: 'Prof. Ahmed Ali',
-        imageUrl: '',
-        rating: 5,
-        votes: 48,
-        isVerified: true,
-        isWinner: true,
+  final ProjectEntity project;
+  final String eventId;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push('/project/$eventId/${project.id}'),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            _buildIcon(),
+            const SizedBox(width: 14),
+            Expanded(child: _buildContent(context)),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 20,
+              color: context.colors.textHint,
+            ),
+          ],
+        ),
       ),
-      _DemoProject(
-        title: 'AI Study Assistant',
-        author: 'Sara Hassan',
-        imageUrl: '',
-        rating: 4,
-        votes: 36,
-        isTrending: true,
-      ),
-      _DemoProject(
-        title: 'EcoTrack - Carbon Footprint',
-        author: 'Omar Jamal',
-        imageUrl: '',
-        rating: 4,
-        votes: 29,
-        isTrending: true,
-      ),
-      _DemoProject(
-        title: 'MedAssist Chatbot',
-        author: 'Prof. Noor Kareem',
-        imageUrl: '',
-        rating: 3,
-        votes: 22,
-        isVerified: true,
-      ),
-      _DemoProject(
-        title: 'Virtual Lab Simulator',
-        author: 'Ali Mohammed',
-        imageUrl: '',
-        rating: 3,
-        votes: 18,
-      ),
-      _DemoProject(
-        title: 'CodeShare Platform',
-        author: 'Fatima Zain',
-        imageUrl: '',
-        rating: 4,
-        votes: 15,
-      ),
-    ];
-    return items[index % items.length];
+    );
   }
 
-  final String title;
-  final String author;
-  final String imageUrl;
-  final int rating;
-  final int votes;
-  final bool isVerified;
-  final bool isTrending;
-  final bool isWinner;
+  /// Rounded square with a soft gradient background and the first letter
+  Widget _buildIcon() {
+    final initial =
+        project.title.isNotEmpty ? project.title[0].toUpperCase() : '?';
+    final bgColors =
+        _iconGradients[project.title.hashCode.abs() % _iconGradients.length];
+
+    return Container(
+      width: 52,
+      height: 52,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        gradient: LinearGradient(colors: bgColors),
+      ),
+      child: Center(
+        child: Text(
+          initial,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF4B5563),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          project.title,
+          style: AppTypography.labelMedium.copyWith(
+            color: context.colors.textPrimary,
+            fontWeight: FontWeight.w700,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+        if (project.description != null && project.description!.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            project.description!,
+            style: AppTypography.bodySmall.copyWith(
+              color: context.colors.textSecondary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ],
+    );
+  }
 }

@@ -12,7 +12,10 @@ class ProfileVotedProjectsSection extends StatelessWidget {
       children: [
         Padding(
           padding: AppSpacing.pagePadding,
-          child: Text('Your Votes', style: AppTypography.h3),
+          child: Text(
+            'Your Votes',
+            style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         SizedBox(
@@ -22,20 +25,20 @@ class ProfileVotedProjectsSection extends StatelessWidget {
             padding: AppSpacing.pagePadding,
             itemCount: 4,
             separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
-            itemBuilder: (_, index) => _buildVotedCard(index),
+            itemBuilder: (context, index) => _buildVotedCard(context, index),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildVotedCard(int index) {
+  Widget _buildVotedCard(BuildContext context, int index) {
     final names = ['Smart Campus', 'AI Tutor', 'EcoTrack', 'MedAssist'];
     final colors = [
-      AppColors.primary,
-      AppColors.secondary,
-      AppColors.success,
-      AppColors.accent,
+      context.colors.primary,
+      context.colors.secondary,
+      context.colors.success,
+      context.colors.accent,
     ];
 
     return Container(
@@ -58,7 +61,12 @@ class ProfileVotedProjectsSection extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          Text('Voted', style: AppTypography.caption),
+          Text(
+            'Voted',
+            style: AppTypography.caption.copyWith(
+              color: context.colors.textHint,
+            ),
+          ),
         ],
       ),
     );

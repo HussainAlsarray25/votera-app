@@ -6,11 +6,17 @@ abstract class Failure extends Equatable {
   final String message;
 
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [message];
 }
 
 class ServerFailure extends Failure {
-  const ServerFailure({required super.message});
+  const ServerFailure({required super.message, this.statusCode});
+
+  /// The HTTP status code returned by the server, if available.
+  final int? statusCode;
+
+  @override
+  List<Object?> get props => [message, statusCode];
 }
 
 class NetworkFailure extends Failure {
@@ -27,4 +33,13 @@ class ValidationFailure extends Failure {
 
 class AuthFailure extends Failure {
   const AuthFailure({required super.message});
+}
+
+class LocationFailure extends Failure {
+  const LocationFailure({required super.message, this.isDeniedForever = false});
+
+  final bool isDeniedForever;
+
+  @override
+  List<Object> get props => [message, isDeniedForever];
 }
