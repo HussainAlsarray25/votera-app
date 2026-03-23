@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// An animated vote button that scales on press and changes
 /// appearance when the user has already voted.
@@ -80,7 +81,9 @@ class _VoteButtonState extends State<VoteButton>
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  widget.hasVoted ? 'Voted' : 'Vote',
+                  widget.hasVoted
+                      ? AppLocalizations.of(context)!.voted
+                      : AppLocalizations.of(context)!.vote,
                   style: AppTypography.button.copyWith(
                     color: context.colors.textOnPrimary,
                   ),

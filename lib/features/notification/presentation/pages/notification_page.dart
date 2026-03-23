@@ -6,6 +6,7 @@ import 'package:votera/features/notification/domain/entities/notification_entity
 import 'package:votera/features/notification/presentation/cubit/notification_cubit.dart';
 import 'package:votera/features/notification/presentation/cubit/unread_count_cubit.dart';
 import 'package:votera/features/notification/presentation/widgets/notification_list_tile.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
 
 class NotificationPage extends StatelessWidget {
@@ -25,6 +26,7 @@ class _NotificationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: context.colors.background,
       appBar: AppBar(
@@ -32,7 +34,7 @@ class _NotificationView extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          'Notifications',
+          l10n.notifications,
           style: AppTypography.h3.copyWith(
             fontWeight: FontWeight.w700,
             color: context.colors.textPrimary,
@@ -53,7 +55,7 @@ class _NotificationView extends StatelessWidget {
                   context.read<UnreadCountCubit>().clear();
                 },
                 child: Text(
-                  'Mark all read',
+                  l10n.markAllRead,
                   style: AppTypography.labelMedium.copyWith(
                     color: context.colors.primary,
                   ),
@@ -94,7 +96,7 @@ class _NotificationView extends StatelessWidget {
                       TextButton(
                         onPressed: () =>
                             context.read<NotificationCubit>().loadNotifications(),
-                        child: const Text('Retry'),
+                        child: Text(AppLocalizations.of(context)!.retry),
                       ),
                     ],
                   ),
@@ -144,7 +146,7 @@ class _NotificationView extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  'No notifications yet',
+                  AppLocalizations.of(context)!.noNotificationsYet,
                   style: AppTypography.h3.copyWith(
                     fontWeight: FontWeight.w700,
                     color: context.colors.textPrimary,
@@ -152,7 +154,7 @@ class _NotificationView extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  'Updates about events, votes, and results will appear here.',
+                  AppLocalizations.of(context)!.noNotificationsDesc,
                   style: AppTypography.bodyMedium.copyWith(
                     color: context.colors.textSecondary,
                   ),
@@ -195,19 +197,19 @@ class _NotificationView extends StatelessWidget {
       ),
       children: [
         if (todayItems.isNotEmpty) ...[
-          _SectionHeader(label: 'Today'),
+          _SectionHeader(label: AppLocalizations.of(context)!.today),
           const SizedBox(height: AppSpacing.sm),
           ..._buildTiles(context, todayItems),
           const SizedBox(height: AppSpacing.lg),
         ],
         if (yesterdayItems.isNotEmpty) ...[
-          _SectionHeader(label: 'Yesterday'),
+          _SectionHeader(label: AppLocalizations.of(context)!.yesterday),
           const SizedBox(height: AppSpacing.sm),
           ..._buildTiles(context, yesterdayItems),
           const SizedBox(height: AppSpacing.lg),
         ],
         if (earlierItems.isNotEmpty) ...[
-          _SectionHeader(label: 'Earlier'),
+          _SectionHeader(label: AppLocalizations.of(context)!.earlier),
           const SizedBox(height: AppSpacing.sm),
           ..._buildTiles(context, earlierItems),
         ],

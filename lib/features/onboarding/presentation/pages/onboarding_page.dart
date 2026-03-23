@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/onboarding/presentation/widgets/onboarding_slide.dart';
 import 'package:votera/features/onboarding/presentation/widgets/page_indicator.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
 /// Three-slide onboarding that introduces the app to first-time users.
@@ -21,24 +22,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final _pageController = PageController();
   int _currentPage = 0;
 
-  static const _slides = [
-    OnboardingData(
-      title: 'Discover Projects',
-      description:
-          'Browse innovative software projects created by university students.',
-    ),
-    OnboardingData(
-      title: 'Rate & Vote',
-      description:
-          'Vote for your favorite projects and help choose the winners.',
-    ),
-    OnboardingData(
-      title: 'Celebrate Winners',
-      description:
-          'See trending projects and celebrate the top-voted creations.',
-    ),
-  ];
-
   @override
   void dispose() {
     _pageController.dispose();
@@ -49,16 +32,34 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    // Built inside build() because it depends on localized strings from context.
+    final slides = [
+      OnboardingData(
+        title: l10n.discoverOnboarding,
+        description: l10n.discoverOnboardingDesc,
+      ),
+      OnboardingData(
+        title: l10n.rateVote,
+        description: l10n.rateVoteDesc,
+      ),
+      OnboardingData(
+        title: l10n.celebrateWinners,
+        description: l10n.celebrateWinnersDesc,
+      ),
+    ];
+
     final content = Column(
       children: [
-        _buildSkipButton(),
-        Expanded(child: _buildPageView()),
-        _buildBottomSection(),
+        _buildSkipButton(l10n),
+        Expanded(child: _buildPageView(slides)),
+        _buildBottomSection(l10n, slides),
         const SizedBox(height: AppSpacing.xl),
       ],
     );
 
-    // On wider screens, show the onboarding as a centered card
+    // On wider screens, show the onboarding as a centered card.
     if (!AppBreakpoints.isMobile(context)) {
       return Scaffold(
         body: SafeArea(
@@ -88,7 +89,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   // -- Section: Skip button (subtle, secondary style) --
-  Widget _buildSkipButton() {
+  Widget _buildSkipButton(AppLocalizations l10n) {
     return Align(
       alignment: Alignment.centerRight,
       child: Padding(
@@ -96,7 +97,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         child: TextButton(
           onPressed: _goToAuth,
           child: Text(
-            'Skip',
+            l10n.skip,
             style: AppTypography.bodySmall.copyWith(
               color: context.colors.textHint,
             ),
@@ -107,32 +108,32 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   // -- Section: Swipable slides --
-  Widget _buildPageView() {
+  Widget _buildPageView(List<OnboardingData> slides) {
     return PageView.builder(
       controller: _pageController,
-      itemCount: _slides.length,
+      itemCount: slides.length,
       onPageChanged: (index) => setState(() => _currentPage = index),
       itemBuilder: (context, index) {
-        return OnboardingSlide(data: _slides[index]);
+        return OnboardingSlide(data: slides[index]);
       },
     );
   }
 
   // -- Section: Indicator + action button --
-  Widget _buildBottomSection() {
-    final isLastPage = _currentPage == _slides.length - 1;
+  Widget _buildBottomSection(AppLocalizations l10n, List<OnboardingData> slides) {
+    final isLastPage = _currentPage == slides.length - 1;
 
     return Padding(
       padding: AppSpacing.pagePadding,
       child: Column(
         children: [
           PageIndicator(
-            count: _slides.length,
+            count: slides.length,
             currentIndex: _currentPage,
           ),
           const SizedBox(height: AppSpacing.xl),
           GradientButton(
-            text: isLastPage ? 'Get Started' : 'Next',
+            text: isLastPage ? l10n.getStarted : l10n.next,
             onPressed: () {
               if (isLastPage) {
                 _goToAuth();

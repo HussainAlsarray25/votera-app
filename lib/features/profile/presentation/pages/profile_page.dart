@@ -23,7 +23,7 @@ class _ProfilePageState extends State<ProfilePage> {
     // Load profile data if not already loaded
     final profileState = context.read<ProfileCubit>().state;
     if (profileState is! ProfileLoaded) {
-      context.read<ProfileCubit>().loadProfile();
+      context.read<ProfileCubit>().loadProfile().ignore();
     }
   }
 

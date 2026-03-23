@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
 /// Shown after registration (to verify the account OTP) or after login
@@ -122,9 +123,10 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
 
   // -- Section: Title and description --
   Widget _buildHeader() {
+    final l10n = AppLocalizations.of(context)!;
     final title = widget.isRegistration
-        ? 'Verify Your Account'
-        : 'Enter Verification Code';
+        ? l10n.verifyYourAccount
+        : l10n.enterVerificationCode;
 
     return Column(
       children: [
@@ -135,7 +137,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'We sent a 6-digit code to',
+          l10n.codeSentTo,
           style: AppTypography.bodyMedium.copyWith(
             color: context.colors.textSecondary,
           ),
@@ -210,9 +212,10 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
   Widget _buildSubmitButton() {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
+        final l10n = AppLocalizations.of(context)!;
         final isLoading = state is AuthLoading;
         return GradientButton(
-          text: isLoading ? 'Verifying...' : 'Verify',
+          text: isLoading ? l10n.verifying : l10n.verify,
           onPressed: (isLoading || !_isComplete) ? null : _handleSubmit,
         );
       },

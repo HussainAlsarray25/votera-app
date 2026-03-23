@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Entry point for account verification. Shows two method cards:
 /// institutional email (immediate) and university ID card (admin review).
@@ -9,13 +10,14 @@ class VerifyAccountPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: BackButton(color: context.colors.textPrimary),
         title: Text(
-          'Verify Account',
+          l10n.verifyAccount,
           style: AppTypography.labelLarge.copyWith(
             color: context.colors.textPrimary,
           ),
@@ -30,15 +32,14 @@ class VerifyAccountPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: AppSpacing.lg),
-                _buildHeader(context),
+                _buildHeader(context, l10n),
                 const SizedBox(height: AppSpacing.xxl),
                 _buildMethodCard(
                   context: context,
                   icon: Icons.email_outlined,
-                  title: 'Institutional Email',
-                  subtitle: 'Verify with your university email address.\n'
-                      'You will receive a 6-digit OTP instantly.',
-                  badge: 'Instant',
+                  title: l10n.institutionalEmail,
+                  subtitle: l10n.verifyWithEmail,
+                  badge: l10n.instant,
                   badgeColor: context.colors.success,
                   onTap: () => context.push('/verify-account/email'),
                 ),
@@ -46,10 +47,9 @@ class VerifyAccountPage extends StatelessWidget {
                 _buildMethodCard(
                   context: context,
                   icon: Icons.badge_outlined,
-                  title: 'University ID Card',
-                  subtitle: 'Upload a photo of your university ID card.\n'
-                      'An admin will review your request.',
-                  badge: 'Requires Review',
+                  title: l10n.universityIdCard,
+                  subtitle: l10n.uploadIdCard,
+                  badge: l10n.requiresReview,
                   badgeColor: context.colors.warning,
                   onTap: () => context.push('/verify-account/uid'),
                 ),
@@ -61,11 +61,11 @@ class VerifyAccountPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
     return Column(
       children: [
         Text(
-          'Choose Verification Method',
+          l10n.chooseVerificationMethod,
           style: AppTypography.h1.copyWith(
             color: context.colors.textPrimary,
           ),
@@ -73,7 +73,7 @@ class VerifyAccountPage extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Verifying your account unlocks full access to all features.',
+          l10n.verificationUnlocks,
           style: AppTypography.bodyMedium.copyWith(
             color: context.colors.textSecondary,
           ),
@@ -100,7 +100,7 @@ class VerifyAccountPage extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          boxShadow: AppShadows.card,
+          boxShadow: AppShadows.card(Theme.of(context).brightness),
         ),
         child: Row(
           children: [

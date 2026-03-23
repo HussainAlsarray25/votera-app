@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 // Telegram brand color
 const _telegramBlue = Color(0xFF2CA5E0);
@@ -47,11 +48,12 @@ class TelegramLoginButton extends StatelessWidget {
             final isWaiting = state is AuthTelegramAwaitingUser;
             final isLoading = state is AuthLoading;
 
+            final l10n = AppLocalizations.of(context)!;
             return _buildButton(
               context: context,
               label: isWaiting
-                  ? 'Waiting for Telegram...'
-                  : 'Continue with Telegram',
+                  ? l10n.waitingForTelegram
+                  : l10n.continueWithTelegram,
               isDisabled: isLoading || isWaiting,
               onTap: () => context.read<AuthCubit>().loginWithTelegram(),
             );
@@ -102,7 +104,7 @@ class TelegramLoginButton extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Text(
-            'or continue with',
+            AppLocalizations.of(context)!.orContinueWith,
             style: AppTypography.bodySmall.copyWith(
               color: context.colors.textHint,
             ),

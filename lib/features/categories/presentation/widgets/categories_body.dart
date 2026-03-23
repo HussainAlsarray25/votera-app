@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/categories/domain/entities/category_entity.dart';
 import 'package:votera/features/categories/presentation/cubit/categories_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
 import 'package:votera/shared/widgets/empty_state.dart';
 
@@ -51,11 +52,12 @@ class _CategoriesBodyState extends State<CategoriesBody> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Categories',
+          l10n.categories,
           style: AppTypography.h1.copyWith(
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
@@ -64,7 +66,7 @@ class _CategoriesBodyState extends State<CategoriesBody> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Browse projects by category',
+          l10n.browseByCategory,
           style: AppTypography.bodyMedium.copyWith(
             color: context.colors.textSecondary,
           ),
@@ -96,13 +98,12 @@ class _CategoriesBodyState extends State<CategoriesBody> {
             return RefreshIndicator(
               onRefresh: _refresh,
               child: ListView(
-                children: const [
-                  SizedBox(height: 80),
+                children: [
+                  const SizedBox(height: 80),
                   EmptyState(
                     icon: Icons.category_outlined,
-                    title: 'No categories yet',
-                    subtitle:
-                        'There are no categories available for this event.',
+                    title: AppLocalizations.of(context)!.noCategoriesYet,
+                    subtitle: AppLocalizations.of(context)!.noCategoriesDesc,
                   ),
                 ],
               ),
@@ -155,7 +156,7 @@ class _CategoriesBodyState extends State<CategoriesBody> {
             onPressed: () => context
                 .read<CategoriesCubit>()
                 .loadCategories(page: 1, size: 50),
-            child: const Text('Retry'),
+            child: Text(AppLocalizations.of(context)!.retry),
           ),
         ],
       ),

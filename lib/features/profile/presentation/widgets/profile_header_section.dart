@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/verified_badge.dart';
 
 /// The top section of the profile page: avatar, name, role, and edit button.
@@ -108,7 +109,7 @@ class ProfileHeaderSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              name ?? 'User',
+              name ?? AppLocalizations.of(context)!.userFallback,
               style: AppTypography.h2.copyWith(
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,

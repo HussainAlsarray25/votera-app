@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// A reusable empty state widget displayed when there
 /// is no data to show (e.g. no events, no notifications).
@@ -176,7 +177,7 @@ class _EmptyStateState extends State<EmptyState>
         ),
         const SizedBox(width: 6),
         Text(
-          'Pull down to refresh',
+          AppLocalizations.of(context)!.pullToRefresh,
           style: AppTypography.caption.copyWith(
             color: context.colors.textHint.withValues(alpha: 0.6),
           ),

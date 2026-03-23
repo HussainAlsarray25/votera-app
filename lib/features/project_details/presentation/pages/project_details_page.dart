@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/features/comments/presentation/cubit/comments_cubit.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_comments_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_header_section.dart';
@@ -101,7 +102,7 @@ class _ProjectDetailsView extends StatelessWidget {
                               eventId: eventId,
                               projectId: projectId,
                             ),
-                        child: const Text('Retry'),
+                        child: Text(AppLocalizations.of(context)!.retry),
                       ),
                     ],
                   ),
@@ -143,8 +144,8 @@ class _ProjectDetailsView extends StatelessWidget {
           SnackBar(
             content: Text(state.message),
             action: state.isDeniedForever
-                ? const SnackBarAction(
-                    label: 'Settings',
+                ? SnackBarAction(
+                    label: AppLocalizations.of(context)!.settings,
                     onPressed: Geolocator.openAppSettings,
                   )
                 : null,
@@ -170,7 +171,7 @@ class _ProjectDetailsView extends StatelessWidget {
             _buildVoteButton(context),
           ],
           const SizedBox(height: AppSpacing.xl),
-          _buildSectionDivider('Community Feedback'),
+          _buildSectionDivider(context, AppLocalizations.of(context)!.communityFeedback),
           const SizedBox(height: AppSpacing.md),
           ProjectCommentsSection(projectId: projectId),
           const SizedBox(height: 100),
@@ -179,15 +180,15 @@ class _ProjectDetailsView extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionDivider(String label) {
+  Widget _buildSectionDivider(BuildContext context, String label) {
     return Row(
       children: [
         Text(
           label,
-          style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
+          style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
         ),
         const SizedBox(width: AppSpacing.md),
-        const Expanded(child: Divider(color: AppColors.border)),
+        Expanded(child: Divider(color: context.colors.border)),
       ],
     );
   }

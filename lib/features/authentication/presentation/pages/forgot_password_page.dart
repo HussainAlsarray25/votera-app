@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -42,7 +43,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         elevation: 0,
         leading: BackButton(color: context.colors.textPrimary),
         title: Text(
-          'Forgot Password',
+          AppLocalizations.of(context)!.forgotPasswordTitle,
           style: AppTypography.labelLarge.copyWith(
             color: context.colors.textPrimary,
           ),
@@ -91,16 +92,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   // -- Section: Title and description --
   Widget _buildHeader() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Text(
-          'Reset Your Password',
+          l10n.resetPassword,
           style: AppTypography.h1.copyWith(color: context.colors.textPrimary),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Enter your email and we will send you a link to reset your password.',
+          l10n.resetPasswordDesc,
           style: AppTypography.bodyMedium.copyWith(
             color: context.colors.textSecondary,
           ),
@@ -112,15 +114,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   // -- Section: Email input --
   Widget _buildEmailField() {
+    final l10n = AppLocalizations.of(context)!;
     return AppTextField(
-      label: 'Email',
+      label: l10n.email,
       controller: _emailController,
-      hint: 'Enter your email',
+      hint: l10n.enterEmail,
       prefixIcon: Icons.email_outlined,
       keyboardType: TextInputType.emailAddress,
       validator: (value) {
-        if (value == null || value.isEmpty) return 'Email is required';
-        if (!value.contains('@')) return 'Enter a valid email';
+        if (value == null || value.isEmpty) return l10n.emailRequired;
+        if (!value.contains('@')) return l10n.emailInvalid;
         return null;
       },
     );
@@ -130,9 +133,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   Widget _buildSubmitButton() {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
+        final l10n = AppLocalizations.of(context)!;
         final isLoading = state is AuthLoading;
         return GradientButton(
-          text: isLoading ? 'Sending...' : 'Send Reset Link',
+          text: isLoading ? l10n.sending : l10n.sendResetLink,
           onPressed: isLoading ? null : _handleSubmit,
         );
       },
@@ -141,6 +145,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   // -- Section: Success confirmation --
   Widget _buildSuccessView() {
+    final l10n = AppLocalizations.of(context)!;
+    final email = _emailController.text.trim();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -152,13 +158,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         ),
         const SizedBox(height: AppSpacing.xl),
         Text(
-          'Check Your Email',
+          l10n.checkYourEmail,
           style: AppTypography.h1.copyWith(color: context.colors.textPrimary),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'We sent a password reset link to\n${_emailController.text.trim()}',
+          l10n.resetLinkSent(email),
           style: AppTypography.bodyMedium.copyWith(
             color: context.colors.textSecondary,
           ),

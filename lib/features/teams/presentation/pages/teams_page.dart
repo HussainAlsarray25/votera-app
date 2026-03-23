@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:votera/app/view/shell_page.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/features/teams/domain/entities/invitation_entity.dart';
 import 'package:votera/features/teams/domain/entities/team_entity.dart';
@@ -109,11 +110,12 @@ class _TeamsPageState extends State<TeamsPage>
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AppBar(
       backgroundColor: context.colors.surface,
       elevation: 0,
       title: Text(
-        'Teams',
+        l10n.teams,
         style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
       ),
       actions: const [NotificationIconButton()],
@@ -121,6 +123,7 @@ class _TeamsPageState extends State<TeamsPage>
   }
 
   Widget _buildTabBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ColoredBox(
       color: context.colors.surface,
       child: TabBar(
@@ -129,12 +132,12 @@ class _TeamsPageState extends State<TeamsPage>
         unselectedLabelStyle: AppTypography.bodyMedium,
         labelColor: context.colors.textPrimary,
         unselectedLabelColor: context.colors.textHint,
-        indicatorColor: context.colors.secondary,
+        indicatorColor: context.colors.primary,
         indicatorWeight: 3,
         dividerHeight: 0,
-        tabs: const [
-          Tab(text: 'My Team'),
-          Tab(text: 'Browse'),
+        tabs: [
+          Tab(text: l10n.myTeam),
+          Tab(text: l10n.browse),
         ],
       ),
     );
@@ -240,7 +243,7 @@ class _MyTeamTabState extends State<_MyTeamTab> {
 
       case InvitationSent():
         setState(() => _isFirstTeamLoad = false);
-        _showSnackBar(context, 'Invitation sent successfully.');
+        _showSnackBar(context, AppLocalizations.of(context)!.invitationSentSuccess);
 
       default:
         break;
@@ -371,7 +374,7 @@ class _MyTeamTabState extends State<_MyTeamTab> {
                             Icons.exit_to_app_rounded,
                             size: 18,
                           ),
-                          label: const Text('Leave Team'),
+                          label: Text(AppLocalizations.of(context)!.leaveTeam),
                           style: TextButton.styleFrom(
                             foregroundColor: context.colors.error,
                             padding: const EdgeInsets.symmetric(vertical: 14),
@@ -421,11 +424,12 @@ class _MyTeamTabState extends State<_MyTeamTab> {
 
   Future<void> _inviteMember(BuildContext context) async {
     if (_team == null) return;
+    final l10n = AppLocalizations.of(context)!;
     final inviteeId = await _showInputDialog(
       context,
-      title: 'Invite Member',
-      hint: 'Enter user ID to invite',
-      confirmLabel: 'Send Invite',
+      title: l10n.inviteMember,
+      hint: l10n.enterUserIdToInvite,
+      confirmLabel: l10n.sendInvite,
     );
     if (inviteeId == null || !mounted) return;
     unawaited(
@@ -435,11 +439,12 @@ class _MyTeamTabState extends State<_MyTeamTab> {
 
   Future<void> _removeMember(BuildContext context, String memberId) async {
     if (_team == null) return;
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await _showConfirmDialog(
       context,
-      title: 'Remove Member',
-      message: 'Are you sure you want to remove this member from your team?',
-      confirmLabel: 'Remove',
+      title: l10n.removeMember,
+      message: l10n.removeMemberConfirm,
+      confirmLabel: l10n.remove,
       isDestructive: true,
     );
     if (confirmed != true || !mounted) return;
@@ -456,15 +461,16 @@ class _MyTeamTabState extends State<_MyTeamTab> {
         .where((m) => m.userId != _team!.leaderId)
         .toList();
 
+    final l10n = AppLocalizations.of(context)!;
     if (candidates.isEmpty) {
-      _showSnackBar(context, 'No other members to transfer leadership to.');
+      _showSnackBar(context, l10n.noMembersForLeadership);
       return;
     }
 
     final newLeaderId = await _showMemberPickerSheet(
       context,
-      title: 'Transfer Leadership',
-      subtitle: 'Select the member who will become the new team leader.',
+      title: l10n.transferLeadership,
+      subtitle: l10n.selectNewLeader,
       members: candidates,
     );
     if (newLeaderId == null || !mounted) return;
@@ -477,13 +483,11 @@ class _MyTeamTabState extends State<_MyTeamTab> {
     final isSolo = _team != null && _team!.members.length <= 1;
     final hasOtherMembers = _team != null && _team!.members.length > 1;
 
+    final l10n = AppLocalizations.of(context)!;
     // A leader cannot leave while other members are in the team —
     // they must transfer leadership first.
     if (_isLeader && hasOtherMembers) {
-      _showSnackBar(
-        context,
-        'Transfer leadership to another member before leaving.',
-      );
+      _showSnackBar(context, l10n.transferLeadershipFirst);
       return;
     }
 
@@ -492,11 +496,9 @@ class _MyTeamTabState extends State<_MyTeamTab> {
     if (_isLeader && isSolo) {
       final confirmed = await _showConfirmDialog(
         context,
-        title: 'Leave & Delete Team',
-        message:
-            'You are the only member. Leaving will permanently delete "${_team!.name}". '
-            'This cannot be undone.',
-        confirmLabel: 'Leave & Delete',
+        title: l10n.leaveAndDelete,
+        message: l10n.leaveAndDeleteDesc(_team!.name),
+        confirmLabel: l10n.leaveAndDeleteButton,
         isDestructive: true,
       );
       if (confirmed != true || !mounted) return;
@@ -507,10 +509,9 @@ class _MyTeamTabState extends State<_MyTeamTab> {
     // Regular member leaving.
     final confirmed = await _showConfirmDialog(
       context,
-      title: 'Leave Team',
-      message:
-          'Are you sure you want to leave your team? You can join or create another team later.',
-      confirmLabel: 'Leave',
+      title: l10n.leaveTeam,
+      message: l10n.leaveTeamConfirm,
+      confirmLabel: l10n.leave,
       isDestructive: true,
     );
     if (confirmed != true || !mounted) return;
@@ -519,12 +520,12 @@ class _MyTeamTabState extends State<_MyTeamTab> {
 
   Future<void> _deleteTeam(BuildContext context) async {
     if (_team == null) return;
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await _showConfirmDialog(
       context,
-      title: 'Delete Team',
-      message:
-          'This will permanently delete "${_team!.name}" and remove all members. This cannot be undone.',
-      confirmLabel: 'Delete Team',
+      title: l10n.deleteTeam,
+      message: l10n.deleteTeamDesc(_team!.name),
+      confirmLabel: l10n.deleteTeam,
       isDestructive: true,
     );
     if (confirmed != true || !mounted) return;
@@ -618,12 +619,12 @@ class _BrowseTabState extends State<_BrowseTab> {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Find a Team',
+              AppLocalizations.of(context)!.findATeam,
               style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'Search by team name to discover and join existing teams.',
+              AppLocalizations.of(context)!.findATeamDesc,
               style: AppTypography.bodyMedium.copyWith(
                 color: context.colors.textSecondary,
               ),
@@ -649,12 +650,12 @@ class _BrowseTabState extends State<_BrowseTab> {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'No teams found',
+              AppLocalizations.of(context)!.noTeamsFound,
               style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'No teams matched "$_query". Try a different name.',
+              AppLocalizations.of(context)!.noTeamsMatchedQuery(_query),
               style: AppTypography.bodyMedium.copyWith(
                 color: context.colors.textSecondary,
               ),
@@ -812,7 +813,7 @@ class _TeamHeaderCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                'Leader',
+                                AppLocalizations.of(context)!.leader,
                                 style: AppTypography.caption.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
@@ -855,8 +856,7 @@ class _TeamHeaderCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        '${team.members.length} '
-                        '${team.members.length == 1 ? 'member' : 'members'}',
+                        AppLocalizations.of(context)!.memberCount(team.members.length),
                         style: AppTypography.bodySmall.copyWith(
                           color: Colors.white.withValues(alpha: 0.85),
                           fontWeight: FontWeight.w600,
@@ -898,7 +898,7 @@ class _MembersSection extends StatelessWidget {
         Row(
           children: [
             Text(
-              'Members (${team.members.length})',
+              AppLocalizations.of(context)!.membersWithCount(team.members.length),
               style: AppTypography.labelLarge.copyWith(
                 color: context.colors.textPrimary,
               ),
@@ -952,7 +952,7 @@ class _InvitationsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Pending Invitations',
+          AppLocalizations.of(context)!.pendingInvitations,
           style: AppTypography.labelLarge.copyWith(
             color: context.colors.textPrimary,
           ),
@@ -1001,7 +1001,7 @@ class _TeamSettingsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Team Settings',
+          AppLocalizations.of(context)!.teamSettings,
           style: AppTypography.labelLarge.copyWith(
             color: context.colors.textPrimary,
           ),
@@ -1025,24 +1025,24 @@ class _TeamSettingsSection extends StatelessWidget {
               _SettingsTile(
                 icon: Icons.edit_outlined,
                 iconColor: context.colors.secondary,
-                title: 'Edit Team Info',
-                subtitle: 'Change team name or description',
+                title: AppLocalizations.of(context)!.editTeamInfo,
+                subtitle: AppLocalizations.of(context)!.changeTeamNameDesc,
                 onTap: onEdit,
               ),
               Divider(height: 1, indent: 56, color: context.colors.border),
               _SettingsTile(
                 icon: Icons.swap_horiz_rounded,
                 iconColor: context.colors.primary,
-                title: 'Transfer Leadership',
-                subtitle: 'Assign a new team leader',
+                title: AppLocalizations.of(context)!.transferLeadership,
+                subtitle: AppLocalizations.of(context)!.assignNewLeader,
                 onTap: onTransfer,
               ),
               Divider(height: 1, indent: 56, color: context.colors.border),
               _SettingsTile(
                 icon: Icons.delete_outline_rounded,
                 iconColor: context.colors.error,
-                title: 'Delete Team',
-                subtitle: 'Permanently disband this team',
+                title: AppLocalizations.of(context)!.deleteTeam,
+                subtitle: AppLocalizations.of(context)!.permanentlyDisband,
                 titleColor: context.colors.error,
                 onTap: onDelete,
                 showChevron: false,
@@ -1051,8 +1051,8 @@ class _TeamSettingsSection extends StatelessWidget {
               _SettingsTile(
                 icon: Icons.exit_to_app_rounded,
                 iconColor: context.colors.error,
-                title: 'Leave Team',
-                subtitle: 'If you are the only member, the team will be deleted',
+                title: AppLocalizations.of(context)!.leaveTeam,
+                subtitle: AppLocalizations.of(context)!.leaveTeamOnlyMember,
                 titleColor: context.colors.error,
                 onTap: onLeave,
                 showChevron: false,
@@ -1173,19 +1173,22 @@ class _NoTeamView extends StatelessWidget {
           _buildEmptyIllustration(context),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'You are not in a team yet',
+            AppLocalizations.of(context)!.notInTeamYet,
             style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Create your own team or browse existing ones to join.',
+            AppLocalizations.of(context)!.createOrJoinTeam,
             style: AppTypography.bodyMedium.copyWith(
               color: context.colors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xl),
-          GradientButton(text: 'Create a Team', onPressed: onCreateTeam),
+          GradientButton(
+            text: AppLocalizations.of(context)!.createATeam,
+            onPressed: onCreateTeam,
+          ),
           const SizedBox(height: AppSpacing.sm),
           SizedBox(
             width: double.infinity,
@@ -1199,7 +1202,7 @@ class _NoTeamView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
               ),
-              child: const Text('Browse Teams'),
+              child: Text(AppLocalizations.of(context)!.browseTeams),
             ),
           ),
           // Show pending invitations even when there's no team.
@@ -1208,7 +1211,7 @@ class _NoTeamView extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Pending Invitations',
+                AppLocalizations.of(context)!.pendingInvitations,
                 style: AppTypography.labelLarge.copyWith(
                   color: context.colors.textPrimary,
                 ),
@@ -1308,7 +1311,7 @@ class _InviteButton extends StatelessWidget {
             const Icon(Icons.person_add_rounded, size: 14, color: Colors.white),
             const SizedBox(width: 5),
             Text(
-              'Invite',
+              AppLocalizations.of(context)!.invite,
               style: AppTypography.caption.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
@@ -1344,7 +1347,7 @@ class _SearchBar extends StatelessWidget {
           color: context.colors.textPrimary,
         ),
         decoration: InputDecoration(
-          hintText: 'Search teams by name...',
+          hintText: AppLocalizations.of(context)!.searchTeamsByName,
           prefixIcon: Icon(
             Icons.search_rounded,
             color: context.colors.textHint,
@@ -1420,7 +1423,7 @@ Future<bool?> _showConfirmDialog(
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(false),
           child: Text(
-            'Cancel',
+            AppLocalizations.of(ctx)!.cancel,
             style: AppTypography.labelMedium.copyWith(
               color: ctx.colors.textSecondary,
             ),
@@ -1468,7 +1471,7 @@ Future<String?> _showInputDialog(
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(),
           child: Text(
-            'Cancel',
+            AppLocalizations.of(ctx)!.cancel,
             style: AppTypography.labelMedium.copyWith(
               color: ctx.colors.textSecondary,
             ),

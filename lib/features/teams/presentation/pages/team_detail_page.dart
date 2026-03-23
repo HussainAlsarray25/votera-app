@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/features/teams/domain/entities/team_entity.dart';
 import 'package:votera/features/teams/presentation/cubit/teams_cubit.dart';
 import 'package:votera/features/teams/presentation/widgets/team_member_tile.dart';
@@ -114,7 +115,7 @@ class _ErrorView extends StatelessWidget {
               TextButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Try again'),
+                label: Text(AppLocalizations.of(context)!.tryAgain),
               ),
             ],
           ),
@@ -167,7 +168,7 @@ class _TeamDetailAppBar extends StatelessWidget {
     return SliverAppBar(
       expandedHeight: 200,
       pinned: true,
-      backgroundColor: const Color(0xFF8B5CF6),
+      backgroundColor: AppColors.secondary,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
         onPressed: () => Navigator.of(context).pop(),
@@ -180,7 +181,7 @@ class _TeamDetailAppBar extends StatelessWidget {
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                  colors: [AppColors.secondary, AppColors.primary],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -245,8 +246,7 @@ class _TeamDetailAppBar extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${team.members.length} '
-                        '${team.members.length == 1 ? 'member' : 'members'}',
+                        AppLocalizations.of(context)!.memberCount(team.members.length),
                         style: AppTypography.bodySmall.copyWith(
                           color: Colors.white.withValues(alpha: 0.85),
                           fontWeight: FontWeight.w600,
@@ -283,7 +283,7 @@ class _DescriptionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'About',
+            AppLocalizations.of(context)!.about,
             style: AppTypography.labelLarge.copyWith(
               color: context.colors.textPrimary,
             ),
@@ -313,7 +313,7 @@ class _MembersCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Members (${team.members.length})',
+          AppLocalizations.of(context)!.membersWithCount(team.members.length),
           style: AppTypography.labelLarge.copyWith(
             color: context.colors.textPrimary,
           ),

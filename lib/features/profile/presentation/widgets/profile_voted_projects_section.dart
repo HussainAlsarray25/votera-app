@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// A horizontal list of projects the current user has voted for.
 class ProfileVotedProjectsSection extends StatelessWidget {
@@ -13,7 +14,7 @@ class ProfileVotedProjectsSection extends StatelessWidget {
         Padding(
           padding: AppSpacing.pagePadding,
           child: Text(
-            'Your Votes',
+            AppLocalizations.of(context)!.yourVotes,
             style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
           ),
         ),
@@ -25,7 +26,7 @@ class ProfileVotedProjectsSection extends StatelessWidget {
             padding: AppSpacing.pagePadding,
             itemCount: 4,
             separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
-            itemBuilder: (context, index) => _buildVotedCard(context, index),
+            itemBuilder: _buildVotedCard,
           ),
         ),
       ],
@@ -62,7 +63,7 @@ class ProfileVotedProjectsSection extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           Text(
-            'Voted',
+            AppLocalizations.of(context)!.voted,
             style: AppTypography.caption.copyWith(
               color: context.colors.textHint,
             ),

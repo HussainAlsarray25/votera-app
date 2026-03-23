@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/events/domain/entities/event_entity.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Gradient palette for the card header, cycled by list index.
 const _cardGradients = [
@@ -211,7 +212,7 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (label, dotColor) = _labelAndDot();
+    final (label, dotColor) = _labelAndDot(context);
     final isActive =
         status == EventStatus.open || status == EventStatus.voting;
 
@@ -252,18 +253,19 @@ class _StatusBadge extends StatelessWidget {
     );
   }
 
-  (String, Color) _labelAndDot() {
+  (String, Color) _labelAndDot(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (status) {
       case EventStatus.open:
-        return ('Open', const Color(0xFFBBF7D0));
+        return (l10n.open, const Color(0xFFBBF7D0));
       case EventStatus.voting:
-        return ('Voting', const Color(0xFFFDE68A));
+        return (l10n.voting, const Color(0xFFFDE68A));
       case EventStatus.draft:
-        return ('Upcoming', Colors.white);
+        return (l10n.upcoming, Colors.white);
       case EventStatus.closed:
-        return ('Closed', Colors.white);
+        return (l10n.closed, Colors.white);
       case EventStatus.archived:
-        return ('Archived', Colors.white);
+        return (l10n.archived, Colors.white);
     }
   }
 }
@@ -323,7 +325,7 @@ class _MetadataRow extends StatelessWidget {
           _iconLabel(
             context,
             Icons.how_to_vote_outlined,
-            '${event.maxCommunityVotes} votes',
+            AppLocalizations.of(context)!.maxVotes(event.maxCommunityVotes!),
           ),
         ],
         const Spacer(),
@@ -363,7 +365,7 @@ class _MetadataRow extends StatelessWidget {
   }
 
   Widget _buildTeamChip(BuildContext context) {
-    return _iconLabel(context, Icons.group_outlined, _teamLabel());
+    return _iconLabel(context, Icons.group_outlined, _teamLabel(context));
   }
 
   Widget _iconLabel(BuildContext context, IconData icon, String label) {
@@ -401,46 +403,48 @@ class _MetadataRow extends StatelessWidget {
   bool _hasTeamInfo() =>
       event.minTeamSize != null || event.maxTeamSize != null;
 
-  String _teamLabel() {
+  String _teamLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final min = event.minTeamSize;
     final max = event.maxTeamSize;
-    if (min != null && max != null) return '$min-$max members';
-    if (min != null) return '$min+ members';
-    if (max != null) return 'Up to $max';
+    if (min != null && max != null) return l10n.teamSizeRange(min, max);
+    if (min != null) return l10n.teamSizeMin(min);
+    if (max != null) return l10n.teamSizeMax(max);
     return '';
   }
 
   /// Returns (icon, label, color) for the current event phase.
   (IconData, String, Color) _phaseInfo(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (event.status) {
       case EventStatus.open:
         return (
           Icons.edit_note_rounded,
-          'Submissions open',
+          l10n.submissionsOpen,
           const Color(0xFF16A34A),
         );
       case EventStatus.voting:
         return (
           Icons.how_to_vote_rounded,
-          'Vote now',
+          l10n.voteNow,
           const Color(0xFF7C3AED),
         );
       case EventStatus.draft:
         return (
           Icons.schedule_rounded,
-          'Coming soon',
+          l10n.comingSoon,
           context.colors.primary,
         );
       case EventStatus.closed:
         return (
           Icons.check_circle_outline_rounded,
-          'Ended',
+          l10n.ended,
           context.colors.textHint,
         );
       case EventStatus.archived:
         return (
           Icons.inventory_2_outlined,
-          'Archived',
+          l10n.archived,
           context.colors.textHint,
         );
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Announcement banner displayed below the search bar.
 /// Shows a greeting and highlights the current event (e.g. hackathon voting).
@@ -52,11 +53,12 @@ class HomeBannerSection extends StatelessWidget {
   }
 
   Widget _buildText(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Hey there!',
+          l10n.heyThere,
           style: AppTypography.labelMedium.copyWith(
             color: context.colors.textPrimary,
             fontWeight: FontWeight.w700,
@@ -70,9 +72,9 @@ class HomeBannerSection extends StatelessWidget {
               height: 1.4,
             ),
             children: [
-              const TextSpan(text: 'The '),
+              TextSpan(text: l10n.thePrefix),
               TextSpan(
-                text: 'Spring Hackathon',
+                text: l10n.springHackathon,
                 style: AppTypography.bodySmall.copyWith(
                   color: context.colors.primary,
                   fontWeight: FontWeight.w700,

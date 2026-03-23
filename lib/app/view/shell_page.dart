@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/notification/presentation/cubit/unread_count_cubit.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 // Navigation destination descriptor — bundles icon, route, and label together
 // so the dynamic items list can be built without hard-coded index math.
@@ -21,34 +22,6 @@ class _NavItem {
   final IconData selectedIcon;
 }
 
-const _homeItem = _NavItem(
-  route: '/home',
-  label: 'Home',
-  icon: Icons.home_outlined,
-  selectedIcon: Icons.home,
-);
-
-const _teamsItem = _NavItem(
-  route: '/teams',
-  label: 'Teams',
-  icon: Icons.group_outlined,
-  selectedIcon: Icons.group_rounded,
-);
-
-const _profileItem = _NavItem(
-  route: '/profile',
-  label: 'Profile',
-  icon: Icons.person_outline,
-  selectedIcon: Icons.person,
-);
-
-const _settingsItem = _NavItem(
-  route: '/settings',
-  label: 'Settings',
-  icon: Icons.settings_outlined,
-  selectedIcon: Icons.settings,
-);
-
 class ShellPage extends StatelessWidget {
   const ShellPage({required this.child, super.key});
 
@@ -56,6 +29,8 @@ class ShellPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         // Hide Teams until the profile is loaded and the role is confirmed.
@@ -66,11 +41,31 @@ class ShellPage extends StatelessWidget {
             ? !state.profile.isVisitorOnly
             : false;
 
+        final homeItem = _NavItem(
+          route: '/home',
+          label: l10n.home,
+          icon: Icons.home_outlined,
+          selectedIcon: Icons.home,
+        );
+
+        final teamsItem = _NavItem(
+          route: '/teams',
+          label: l10n.teams,
+          icon: Icons.group_outlined,
+          selectedIcon: Icons.group_rounded,
+        );
+
+        final profileItem = _NavItem(
+          route: '/profile',
+          label: l10n.profile,
+          icon: Icons.person_outline,
+          selectedIcon: Icons.person,
+        );
+
         final items = [
-          _homeItem,
-          if (canViewTeams) _teamsItem,
-          _profileItem,
-          _settingsItem,
+          homeItem,
+          if (canViewTeams) teamsItem,
+          profileItem,
         ];
 
         final selectedIndex = _resolveIndex(context, items);

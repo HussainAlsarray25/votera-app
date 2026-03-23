@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/features/home/presentation/widgets/home_banner_section.dart';
 import 'package:votera/features/home/presentation/widgets/project_list_section.dart';
 import 'package:votera/features/home/presentation/widgets/search_bar_section.dart';
@@ -97,14 +98,15 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
             eventId: widget.eventId,
           ),
         ] else
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.only(top: 40),
-              child: EmptyState(
-                icon: Icons.folder_outlined,
-                title: 'No projects yet',
-                subtitle:
-                    'There are no projects submitted for this event yet.',
+              padding: const EdgeInsets.only(top: 40),
+              child: Builder(
+                builder: (context) => EmptyState(
+                  icon: Icons.folder_outlined,
+                  title: AppLocalizations.of(context)!.noProjectsYet,
+                  subtitle: AppLocalizations.of(context)!.noProjectsDesc,
+                ),
               ),
             ),
           ),
@@ -134,7 +136,7 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
             onPressed: () => context
                 .read<ProjectsCubit>()
                 .loadProjects(eventId: widget.eventId),
-            child: const Text('Retry'),
+            child: Text(AppLocalizations.of(context)!.retry),
           ),
         ],
       ),

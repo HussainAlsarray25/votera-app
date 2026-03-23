@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
 import 'package:votera/features/authentication/presentation/widgets/telegram_login_button.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -34,6 +35,7 @@ class _RegisterSectionState extends State<RegisterSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       padding: AppSpacing.pagePadding,
       child: Form(
@@ -43,19 +45,19 @@ class _RegisterSectionState extends State<RegisterSection> {
           children: [
             const SizedBox(height: AppSpacing.xxl),
             const SizedBox(height: AppSpacing.xxl),
-            _buildHeader(),
+            _buildHeader(l10n),
             const SizedBox(height: AppSpacing.xxl),
-            _buildNameField(),
+            _buildNameField(l10n),
             const SizedBox(height: AppSpacing.md),
-            _buildIdentifierField(),
+            _buildIdentifierField(l10n),
             const SizedBox(height: AppSpacing.md),
-            _buildPasswordField(),
+            _buildPasswordField(l10n),
             const SizedBox(height: AppSpacing.xl),
-            _buildSubmitButton(),
+            _buildSubmitButton(l10n),
             const SizedBox(height: AppSpacing.md),
             const TelegramLoginButton(),
             const SizedBox(height: AppSpacing.lg),
-            _buildSwitchLink(),
+            _buildSwitchLink(l10n),
           ],
         ),
       ),
@@ -63,16 +65,16 @@ class _RegisterSectionState extends State<RegisterSection> {
   }
 
   // -- Section: Header --
-  Widget _buildHeader() {
+  Widget _buildHeader(AppLocalizations l10n) {
     return Column(
       children: [
         Text(
-          'Create Account',
+          l10n.createAccount,
           style: AppTypography.h1.copyWith(color: context.colors.textPrimary),
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Join the exhibition and start voting',
+          l10n.joinExhibition,
           style: AppTypography.bodyMedium.copyWith(
             color: context.colors.textSecondary,
           ),
@@ -83,39 +85,39 @@ class _RegisterSectionState extends State<RegisterSection> {
   }
 
   // -- Section: Name input --
-  Widget _buildNameField() {
+  Widget _buildNameField(AppLocalizations l10n) {
     return AppTextField(
-      label: 'Full Name',
+      label: l10n.fullName,
       controller: _nameController,
-      hint: 'Enter your full name',
+      hint: l10n.enterFullName,
       prefixIcon: Icons.person_outline,
       validator: (value) {
-        if (value == null || value.isEmpty) return 'Name is required';
+        if (value == null || value.isEmpty) return l10n.nameRequired;
         return null;
       },
     );
   }
 
   // -- Section: Identifier input --
-  Widget _buildIdentifierField() {
+  Widget _buildIdentifierField(AppLocalizations l10n) {
     return AppTextField(
-      label: 'Identifier',
+      label: l10n.identifier,
       controller: _identifierController,
-      hint: 'Enter your email or username',
+      hint: l10n.enterIdentifier,
       prefixIcon: Icons.alternate_email_outlined,
       validator: (value) {
-        if (value == null || value.isEmpty) return 'Identifier is required';
+        if (value == null || value.isEmpty) return l10n.identifierRequired;
         return null;
       },
     );
   }
 
   // -- Section: Password input --
-  Widget _buildPasswordField() {
+  Widget _buildPasswordField(AppLocalizations l10n) {
     return AppTextField(
-      label: 'Password',
+      label: l10n.password,
       controller: _passwordController,
-      hint: 'Create a password',
+      hint: l10n.createPassword,
       prefixIcon: Icons.lock_outline,
       obscureText: _obscurePassword,
       suffixIcon: IconButton(
@@ -127,20 +129,20 @@ class _RegisterSectionState extends State<RegisterSection> {
         onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
       ),
       validator: (value) {
-        if (value == null || value.isEmpty) return 'Password is required';
-        if (value.length < 6) return 'Password must be at least 6 characters';
+        if (value == null || value.isEmpty) return l10n.passwordRequired;
+        if (value.length < 6) return l10n.passwordTooShort;
         return null;
       },
     );
   }
 
   // -- Section: Submit button --
-  Widget _buildSubmitButton() {
+  Widget _buildSubmitButton(AppLocalizations l10n) {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
         final isLoading = state is AuthLoading;
         return GradientButton(
-          text: isLoading ? 'Creating Account...' : 'Create Account',
+          text: isLoading ? l10n.creatingAccount : l10n.createAccount,
           onPressed: isLoading ? null : _handleRegister,
         );
       },
@@ -148,17 +150,17 @@ class _RegisterSectionState extends State<RegisterSection> {
   }
 
   // -- Section: Switch to login link --
-  Widget _buildSwitchLink() {
+  Widget _buildSwitchLink(AppLocalizations l10n) {
     return Center(
       child: TextButton(
         onPressed: widget.onSwitchToLogin,
         child: Text.rich(
           TextSpan(
-            text: 'Already have an account? ',
+            text: l10n.alreadyHaveAccount,
             style: AppTypography.bodyMedium,
             children: [
               TextSpan(
-                text: 'Sign In',
+                text: l10n.signIn,
                 style: AppTypography.labelMedium
                     .copyWith(color: context.colors.primary),
               ),

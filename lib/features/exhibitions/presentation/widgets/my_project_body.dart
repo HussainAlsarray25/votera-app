@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
 import 'package:votera/features/teams/presentation/cubit/teams_cubit.dart';
 import 'package:votera/features/teams/presentation/widgets/create_edit_team_sheet.dart';
@@ -200,7 +201,7 @@ class _MyProjectViewState extends State<_MyProjectView> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.md),
-            TextButton(onPressed: onRetry, child: const Text('Retry')),
+            TextButton(onPressed: onRetry, child: Text(AppLocalizations.of(context)!.retry)),
           ],
         ),
       ),
@@ -249,7 +250,7 @@ class _NoTeamPrompt extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    'You need a team first',
+                    AppLocalizations.of(context)!.needATeamFirst,
                     style: AppTypography.h3.copyWith(
                       fontWeight: FontWeight.w700,
                       color: context.colors.textPrimary,
@@ -257,7 +258,7 @@ class _NoTeamPrompt extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    'Create or join a team before you can submit a project to this event.',
+                    AppLocalizations.of(context)!.needATeamDesc,
                     style: AppTypography.bodyMedium.copyWith(
                       color: context.colors.textSecondary,
                     ),
@@ -266,7 +267,7 @@ class _NoTeamPrompt extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xl),
                   BlocBuilder<TeamsCubit, TeamsState>(
                     builder: (ctx, state) => GradientButton(
-                      text: 'Create a Team',
+                      text: AppLocalizations.of(context)!.createATeam,
                       isLoading: state is TeamsLoading,
                       onPressed: () => _openCreateTeamSheet(ctx),
                     ),
@@ -357,7 +358,7 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Submit Your Project',
+                AppLocalizations.of(context)!.submitYourProject,
                 style: AppTypography.h3.copyWith(
                   fontWeight: FontWeight.w700,
                   color: context.colors.textPrimary,
@@ -365,62 +366,87 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Fill in the details below to register your project for this event.',
+                AppLocalizations.of(context)!.submitYourProjectDesc,
                 style: AppTypography.bodyMedium.copyWith(
                   color: context.colors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              AppTextField(
-                label: 'Project Title *',
-                controller: _titleController,
-                hint: 'e.g. Smart Irrigation System',
-                prefixIcon: Icons.title_rounded,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Title is required';
-                  }
-                  if (value.trim().length < 3) {
-                    return 'Title must be at least 3 characters';
-                  }
-                  return null;
+              Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return AppTextField(
+                    label: l10n.projectTitle,
+                    controller: _titleController,
+                    hint: l10n.projectTitleHint,
+                    prefixIcon: Icons.title_rounded,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.projectTitleRequired;
+                      }
+                      if (value.trim().length < 3) {
+                        return l10n.projectTitleTooShort;
+                      }
+                      return null;
+                    },
+                  );
                 },
               ),
               const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                label: 'Description',
-                controller: _descriptionController,
-                hint: 'What does your project do?',
-                maxLines: 4,
-                keyboardType: TextInputType.multiline,
+              Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return AppTextField(
+                    label: l10n.descriptionLabel,
+                    controller: _descriptionController,
+                    hint: l10n.descriptionHint,
+                    maxLines: 4,
+                    keyboardType: TextInputType.multiline,
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                label: 'Tech Stack',
-                controller: _techStackController,
-                hint: 'e.g. Flutter, Firebase, Python',
-                prefixIcon: Icons.layers_outlined,
+              Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return AppTextField(
+                    label: l10n.techStackLabel,
+                    controller: _techStackController,
+                    hint: l10n.techStackHint,
+                    prefixIcon: Icons.layers_outlined,
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                label: 'Repository URL',
-                controller: _repoUrlController,
-                hint: 'https://github.com/...',
-                prefixIcon: Icons.code_outlined,
-                keyboardType: TextInputType.url,
+              Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return AppTextField(
+                    label: l10n.repositoryUrl,
+                    controller: _repoUrlController,
+                    hint: l10n.repositoryUrlHint,
+                    prefixIcon: Icons.code_outlined,
+                    keyboardType: TextInputType.url,
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                label: 'Demo URL',
-                controller: _demoUrlController,
-                hint: 'https://...',
-                prefixIcon: Icons.open_in_new_outlined,
-                keyboardType: TextInputType.url,
+              Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return AppTextField(
+                    label: l10n.demoUrl,
+                    controller: _demoUrlController,
+                    hint: l10n.demoUrlHint,
+                    prefixIcon: Icons.open_in_new_outlined,
+                    keyboardType: TextInputType.url,
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.xl),
               BlocBuilder<ProjectsCubit, ProjectsState>(
                 builder: (ctx, state) => GradientButton(
-                  text: 'Submit Project',
+                  text: AppLocalizations.of(ctx)!.submitProject,
                   isLoading: state is ProjectsLoading,
                   onPressed: _submit,
                 ),
@@ -501,13 +527,13 @@ class _ProjectActionsRow extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: isLoading ? null : () => _openEditSheet(ctx),
                 icon: const Icon(Icons.edit_outlined, size: 18),
-                label: const Text('Edit Project'),
+                label: Text(AppLocalizations.of(ctx)!.editProjectButton),
               ),
 
             if (project.status == ProjectStatus.draft) ...[
               const SizedBox(height: AppSpacing.sm),
               GradientButton(
-                text: 'Submit for Review',
+                text: AppLocalizations.of(ctx)!.submitForReview,
                 isLoading: isLoading,
                 onPressed: () => _confirmFinalize(ctx),
               ),
@@ -522,7 +548,7 @@ class _ProjectActionsRow extends StatelessWidget {
                   side: BorderSide(color: ctx.colors.error),
                 ),
                 icon: const Icon(Icons.cancel_outlined, size: 18),
-                label: const Text('Cancel Submission'),
+                label: Text(AppLocalizations.of(ctx)!.cancelSubmission),
               ),
             ],
           ],
@@ -547,23 +573,21 @@ class _ProjectActionsRow extends StatelessWidget {
   }
 
   Future<void> _confirmFinalize(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        title: const Text('Submit for Review?'),
-        content: const Text(
-          'Your project will be sent to the organizers for review. '
-          'You can cancel the submission at any time before it is reviewed.',
-        ),
+        title: Text(l10n.submitForReviewTitle),
+        content: Text(l10n.submitForReviewDesc),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: const Text('Not yet'),
+            child: Text(l10n.notYet),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(true),
             child: Text(
-              'Submit',
+              l10n.submit,
               style: TextStyle(color: context.colors.primary),
             ),
           ),
@@ -579,23 +603,21 @@ class _ProjectActionsRow extends StatelessWidget {
   }
 
   Future<void> _confirmCancel(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        title: const Text('Cancel Submission?'),
-        content: const Text(
-          'Your project will be moved back to draft. '
-          'You can re-submit at any time.',
-        ),
+        title: Text(l10n.cancelSubmissionTitle),
+        content: Text(l10n.cancelSubmissionDesc),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: const Text('Keep submitted'),
+            child: Text(l10n.keepSubmitted),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(true),
             child: Text(
-              'Cancel submission',
+              l10n.cancelSubmissionButton,
               style: TextStyle(color: context.colors.error),
             ),
           ),
@@ -620,26 +642,27 @@ class _StatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final (color, icon, label) = switch (status) {
       ProjectStatus.draft => (
           context.colors.warning,
           Icons.edit_note_outlined,
-          'Draft — not yet submitted for review',
+          l10n.draftStatusBanner,
         ),
       ProjectStatus.submitted => (
           context.colors.info,
           Icons.hourglass_top_outlined,
-          'Submitted — awaiting organizer review',
+          l10n.submittedStatusBanner,
         ),
       ProjectStatus.accepted => (
           context.colors.success,
           Icons.check_circle_outline,
-          'Accepted — your project was approved',
+          l10n.acceptedStatusBanner,
         ),
       ProjectStatus.rejected => (
           context.colors.error,
           Icons.cancel_outlined,
-          'Rejected — check organizer feedback',
+          l10n.rejectedStatusBanner,
         ),
     };
 
@@ -711,7 +734,7 @@ class _ProjectDetailsCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               TextButton(
                 onPressed: onViewDetails,
-                child: const Text('View'),
+                child: Text(AppLocalizations.of(context)!.viewProject),
               ),
             ],
           ),
@@ -765,7 +788,7 @@ class _ProjectDetailsCard extends StatelessWidget {
             _buildMeta(
               context: context,
               icon: Icons.calendar_today_outlined,
-              label: 'Created',
+              label: AppLocalizations.of(context)!.createdLabel,
               value: _formatDate(project.createdAt!),
             ),
           ],
@@ -780,7 +803,7 @@ class _ProjectDetailsCard extends StatelessWidget {
 
     if (!hasRepo && !hasDemo) {
       return Text(
-        'No links added yet',
+        AppLocalizations.of(context)!.noLinksAdded,
         style: AppTypography.bodySmall.copyWith(color: context.colors.textHint),
       );
     }
@@ -792,12 +815,12 @@ class _ProjectDetailsCard extends StatelessWidget {
         if (hasRepo)
           _LinkChip(
             icon: Icons.code_outlined,
-            label: 'Repository',
+            label: AppLocalizations.of(context)!.repositoryChip,
           ),
         if (hasDemo)
           _LinkChip(
             icon: Icons.open_in_new_outlined,
-            label: 'Demo',
+            label: AppLocalizations.of(context)!.demoChip,
           ),
       ],
     );
@@ -945,64 +968,89 @@ class _EditProjectSheetState extends State<_EditProjectSheet> {
                 ),
               ),
               Text(
-                'Edit Project',
+                AppLocalizations.of(context)!.editProject,
                 style: AppTypography.h3.copyWith(
                   color: context.colors.textPrimary,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Update your project details below.',
+                AppLocalizations.of(context)!.editProjectDesc,
                 style: AppTypography.bodyMedium.copyWith(
                   color: context.colors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              AppTextField(
-                label: 'Project Title *',
-                controller: _titleController,
-                prefixIcon: Icons.title_rounded,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Title is required';
-                  }
-                  if (value.trim().length < 3) {
-                    return 'Title must be at least 3 characters';
-                  }
-                  return null;
+              Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return AppTextField(
+                    label: l10n.projectTitle,
+                    controller: _titleController,
+                    prefixIcon: Icons.title_rounded,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.projectTitleRequired;
+                      }
+                      if (value.trim().length < 3) {
+                        return l10n.projectTitleTooShort;
+                      }
+                      return null;
+                    },
+                  );
                 },
               ),
               const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                label: 'Description',
-                controller: _descriptionController,
-                maxLines: 4,
-                keyboardType: TextInputType.multiline,
+              Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return AppTextField(
+                    label: l10n.descriptionLabel,
+                    controller: _descriptionController,
+                    maxLines: 4,
+                    keyboardType: TextInputType.multiline,
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                label: 'Tech Stack',
-                controller: _techStackController,
-                hint: 'e.g. Flutter, Firebase, Python',
-                prefixIcon: Icons.layers_outlined,
+              Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return AppTextField(
+                    label: l10n.techStackLabel,
+                    controller: _techStackController,
+                    hint: l10n.techStackHint,
+                    prefixIcon: Icons.layers_outlined,
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                label: 'Repository URL',
-                controller: _repoUrlController,
-                prefixIcon: Icons.code_outlined,
-                keyboardType: TextInputType.url,
+              Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return AppTextField(
+                    label: l10n.repositoryUrl,
+                    controller: _repoUrlController,
+                    prefixIcon: Icons.code_outlined,
+                    keyboardType: TextInputType.url,
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                label: 'Demo URL',
-                controller: _demoUrlController,
-                prefixIcon: Icons.open_in_new_outlined,
-                keyboardType: TextInputType.url,
+              Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return AppTextField(
+                    label: l10n.demoUrl,
+                    controller: _demoUrlController,
+                    prefixIcon: Icons.open_in_new_outlined,
+                    keyboardType: TextInputType.url,
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.xl),
               GradientButton(
-                text: 'Save Changes',
+                text: AppLocalizations.of(context)!.saveChanges,
                 onPressed: _save,
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -1011,7 +1059,7 @@ class _EditProjectSheetState extends State<_EditProjectSheet> {
                 child: TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(
-                    'Cancel',
+                    AppLocalizations.of(context)!.cancel,
                     style: AppTypography.labelMedium.copyWith(
                       color: context.colors.textSecondary,
                     ),

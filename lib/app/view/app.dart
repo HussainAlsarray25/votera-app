@@ -8,7 +8,9 @@ import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dar
 import 'package:votera/features/notification/presentation/cubit/push_notification_cubit.dart';
 import 'package:votera/features/notification/presentation/cubit/unread_count_cubit.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:votera/features/settings/presentation/cubit/locale_cubit.dart';
 import 'package:votera/features/settings/presentation/cubit/theme_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -27,34 +29,43 @@ class App extends StatelessWidget {
           create: (_) => di.sl<UnreadCountCubit>()..loadUnreadCount(),
         ),
         BlocProvider.value(value: di.sl<ThemeCubit>()),
+        BlocProvider.value(value: di.sl<LocaleCubit>()),
       ],
       child: _AuthStateListener(
-        child: BlocBuilder<ThemeCubit, ThemeMode>(
-          builder: (context, themeMode) {
-            return ScreenUtilInit(
-              designSize: const Size(375, 812),
-              minTextAdapt: true,
-              splitScreenMode: true,
-              useInheritedMediaQuery: true,
-              builder: (context, child) {
-                return MaterialApp.router(
-                  title: 'Votera',
-                  theme: AppTheme.lightTheme,
-                  darkTheme: AppTheme.darkTheme,
-                  themeMode: themeMode,
-                  debugShowCheckedModeBanner: false,
-                  routerConfig: appRouter.router,
+        child: BlocBuilder<LocaleCubit, Locale>(
+          builder: (context, locale) {
+            return BlocBuilder<ThemeCubit, ThemeMode>(
+              builder: (context, themeMode) {
+                return ScreenUtilInit(
+                  designSize: const Size(375, 812),
+                  minTextAdapt: true,
+                  splitScreenMode: true,
+                  useInheritedMediaQuery: true,
                   builder: (context, child) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(
-                        textScaler: TextScaler.linear(
-                          MediaQuery.of(context)
-                              .textScaler
-                              .scale(1)
-                              .clamp(0.8, 1.2),
-                        ),
-                      ),
-                      child: child ?? const SizedBox.shrink(),
+                    return MaterialApp.router(
+                      title: 'Votera',
+                      theme: AppTheme.lightTheme,
+                      darkTheme: AppTheme.darkTheme,
+                      themeMode: themeMode,
+                      locale: locale,
+                      localizationsDelegates:
+                          AppLocalizations.localizationsDelegates,
+                      supportedLocales: AppLocalizations.supportedLocales,
+                      debugShowCheckedModeBanner: false,
+                      routerConfig: appRouter.router,
+                      builder: (context, child) {
+                        return MediaQuery(
+                          data: MediaQuery.of(context).copyWith(
+                            textScaler: TextScaler.linear(
+                              MediaQuery.of(context)
+                                  .textScaler
+                                  .scale(1)
+                                  .clamp(0.8, 1.2),
+                            ),
+                          ),
+                          child: child ?? const SizedBox.shrink(),
+                        );
+                      },
                     );
                   },
                 );

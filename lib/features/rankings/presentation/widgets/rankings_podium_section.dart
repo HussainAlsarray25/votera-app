@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/rankings/domain/entities/leaderboard_entry_entity.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Podium display for the top 3 ranked projects.
 /// Layout order: 2nd (left) - 1st (center, tallest) - 3rd (right).
@@ -211,7 +212,7 @@ class _PodiumItem extends StatelessWidget {
 
   Widget _buildVotes(BuildContext context) {
     return Text(
-      '${entry!.voteCount} Votes',
+      AppLocalizations.of(context)!.votesWithCount(entry!.voteCount),
       style: TextStyle(
         fontSize: 12,
         fontWeight: rank == 1 ? FontWeight.w700 : FontWeight.w500,

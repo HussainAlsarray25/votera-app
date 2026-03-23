@@ -1,4 +1,459 @@
 {
   "@@locale": "en",
-  "appTitle": "Votera"
+
+  "appTitle": "Votera",
+  "appTagline": "Discover, vote, and celebrate\ninnovative projects.",
+  "appMotto": "Discover. Vote. Celebrate.",
+
+  "home": "Home",
+  "teams": "Teams",
+  "profile": "Profile",
+
+  "language": "Language",
+  "english": "English",
+  "arabic": "Arabic",
+  "darkMode": "Dark Mode",
+  "helpSupport": "Help & Support",
+  "signOut": "Sign Out",
+  "verifyAccount": "Verify Account",
+
+  "email": "Email",
+  "enterEmail": "Enter your email",
+  "emailRequired": "Email is required",
+  "emailInvalid": "Enter a valid email",
+  "password": "Password",
+  "enterPassword": "Enter your password",
+  "passwordRequired": "Password is required",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "forgotPassword": "Forgot Password?",
+  "signingIn": "Signing In...",
+  "signIn": "Sign In",
+  "noAccount": "Don't have an account? ",
+  "signUp": "Sign Up",
+
+  "createAccount": "Create Account",
+  "joinExhibition": "Join the exhibition and start voting",
+  "fullName": "Full Name",
+  "enterFullName": "Enter your full name",
+  "nameRequired": "Name is required",
+  "identifier": "Identifier",
+  "enterIdentifier": "Enter your email or username",
+  "identifierRequired": "Identifier is required",
+  "createPassword": "Create a password",
+  "creatingAccount": "Creating Account...",
+  "alreadyHaveAccount": "Already have an account? ",
+
+  "welcomeBack": "Welcome Back",
+  "signInToVote": "Sign in to vote for your favorite projects",
+
+  "yourRole": "Your Role",
+  "student": "Student",
+  "professor": "Professor",
+  "visitor": "Visitor",
+
+  "department": "Department",
+  "departmentHint": "e.g. Computer Science",
+  "universityIdOptional": "University ID (optional)",
+  "universityIdHint": "e.g. 2024001234",
+  "phoneOptional": "Phone Number (optional)",
+  "phoneHint": "+964 xxx xxx xxxx",
+  "continueButton": "Continue",
+
+  "tellUsAboutYou": "Tell Us About You",
+  "personalizeExperience": "Help us personalize your exhibition experience",
+
+  "forgotPasswordTitle": "Forgot Password",
+  "resetPassword": "Reset Your Password",
+  "resetPasswordDesc": "Enter your email and we will send you a link to reset your password.",
+  "sending": "Sending...",
+  "sendResetLink": "Send Reset Link",
+  "checkYourEmail": "Check Your Email",
+  "resetLinkSent": "We sent a password reset link to\n{email}",
+  "@resetLinkSent": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+
+  "verifyYourAccount": "Verify Your Account",
+  "enterVerificationCode": "Enter Verification Code",
+  "codeSentTo": "We sent a 6-digit code to",
+  "verifying": "Verifying...",
+  "verify": "Verify",
+
+  "categories": "Categories",
+  "browseByCategory": "Browse projects by category",
+  "aiMl": "AI / ML",
+  "webDev": "Web Dev",
+  "mobileApps": "Mobile Apps",
+  "game": "Game",
+  "iot": "IoT",
+  "data": "Data",
+  "projectCount": "{count} projects",
+  "@projectCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "discoverOnboarding": "Discover Projects",
+  "discoverOnboardingDesc": "Browse innovative software projects created by university students.",
+  "rateVote": "Rate & Vote",
+  "rateVoteDesc": "Vote for your favorite projects and help choose the winners.",
+  "celebrateWinners": "Celebrate Winners",
+  "celebrateWinnersDesc": "See trending projects and celebrate the top-voted creations.",
+  "skip": "Skip",
+  "next": "Next",
+  "getStarted": "Get Started",
+
+  "exhibitions": "Votera",
+  "exploreExhibitions": "Explore exhibitions & events",
+  "noEventsYet": "No events yet",
+  "noEventsDesc": "There are no exhibitions or events available right now. Check back later for updates.",
+  "retry": "Retry",
+
+  "exhibition": "Exhibition",
+  "projects": "Projects",
+  "rankings": "Rankings",
+  "myProject": "My Project",
+
+  "notifications": "Notifications",
+  "markAllRead": "Mark all read",
+  "noNotificationsYet": "No notifications yet",
+  "noNotificationsDesc": "Updates about events, votes, and results will appear here.",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "earlier": "Earlier",
+
+  "universityIdCard": "University ID Card",
+  "uploadIdDesc": "Please upload your university ID document.",
+  "requestPending": "Request submitted — pending review.",
+  "myRequests": "My Requests",
+  "submitNewRequest": "Submit New Request",
+  "fillIdForm": "Fill in your details and upload a clear photo of your university ID card.",
+  "nameAsOnId": "As shown on your ID",
+  "universityId": "University ID",
+  "universityIdExample": "e.g. CS2021001",
+  "universityIdRequired": "University ID is required",
+  "universityIdTooShort": "ID must be at least 3 characters",
+  "departmentRequired": "Department is required",
+  "stageYear": "Stage / Year",
+  "stageYearExample": "e.g. 3rd Year",
+  "stageRequired": "Stage is required",
+  "tapToUploadId": "Tap to upload ID document",
+  "submitting": "Submitting...",
+  "submitRequest": "Submit Request",
+  "approved": "Approved",
+  "rejected": "Rejected",
+  "pending": "Pending",
+  "noteLabel": "Note: {note}",
+  "@noteLabel": {
+    "placeholders": {
+      "note": { "type": "String" }
+    }
+  },
+
+  "chooseVerificationMethod": "Choose Verification Method",
+  "verificationUnlocks": "Verifying your account unlocks full access to all features.",
+  "institutionalEmail": "Institutional Email",
+  "verifyWithEmail": "Verify with your university email address.\nYou will receive a 6-digit OTP instantly.",
+  "instant": "Instant",
+  "uploadIdCard": "Upload a photo of your university ID card.\nAn admin will review your request.",
+  "requiresReview": "Requires Review",
+
+  "enterInstitutionalEmail": "Enter Your Institutional Email",
+  "institutionalEmailDesc": "We will send a 6-digit verification code to your university email.",
+  "institutionalEmailHint": "your.name@university.edu",
+  "sendOtp": "Send OTP",
+  "accountVerified": "Account verified! Participant role granted.",
+
+  "communityFeedback": "Community Feedback",
+  "aboutProject": "About this Project",
+  "techStack": "Tech Stack",
+  "projectLinks": "Project Links",
+  "sourceCode": "Source Code",
+  "liveDemo": "Live Demo",
+  "communityRating": "Community Rating",
+  "loading": "Loading...",
+  "ratingCount": "{totalRatings} rating(s)",
+  "@ratingCount": {
+    "placeholders": {
+      "totalRatings": { "type": "int" }
+    }
+  },
+  "rateThisProject": "Rate this project",
+  "tapStarToRate": "Tap a star to share your rating",
+  "comments": "Comments",
+  "addComment": "Add a comment...",
+  "noCommentsYet": "No comments yet. Be the first!",
+
+  "statusSubmitted": "Submitted",
+  "statusAccepted": "Accepted",
+  "statusRejected": "Rejected",
+  "statusDraft": "Draft",
+
+  "yourVotes": "Your Votes",
+  "votesCast": "Votes Cast",
+  "rated": "Rated",
+
+  "pullToRefresh": "Pull down to refresh",
+  "vote": "Vote",
+  "voted": "Voted",
+  "trending": "Trending",
+  "winner": "Winner",
+  "voteCount": "{voteCount} votes",
+  "@voteCount": {
+    "placeholders": {
+      "voteCount": { "type": "int" }
+    }
+  },
+
+  "myTeam": "My Team",
+  "browse": "Browse",
+  "invitationSent": "Invitation sent successfully.",
+  "leaveTeam": "Leave Team",
+  "inviteMember": "Invite Member",
+  "enterUserIdToInvite": "Enter user ID to invite",
+  "sendInvite": "Send Invite",
+  "removeMember": "Remove Member",
+  "removeMemberConfirm": "Are you sure you want to remove this member from your team?",
+  "remove": "Remove",
+  "noMembersForLeadership": "No other members to transfer leadership to.",
+  "transferLeadership": "Transfer Leadership",
+  "selectNewLeader": "Select the member who will become the new team leader.",
+  "transferLeadershipFirst": "Transfer leadership to another member before leaving.",
+  "leaveAndDelete": "Leave & Delete Team",
+  "leaveAndDeleteDesc": "You are the only member. Leaving will permanently delete \"{name}\". This cannot be undone.",
+  "@leaveAndDeleteDesc": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "leaveAndDeleteButton": "Leave & Delete",
+  "leaveTeamConfirm": "Are you sure you want to leave your team? You can join or create another team later.",
+  "leave": "Leave",
+  "deleteTeam": "Delete Team",
+  "deleteTeamDesc": "This will permanently delete \"{name}\" and remove all members. This cannot be undone.",
+  "@deleteTeamDesc": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "findATeam": "Find a Team",
+  "findATeamDesc": "Search by team name to discover and join existing teams.",
+  "noTeamsFound": "No teams found",
+  "noTeamsMatchedQuery": "No teams matched \"{query}\". Try a different name.",
+  "@noTeamsMatchedQuery": {
+    "placeholders": {
+      "query": { "type": "String" }
+    }
+  },
+  "leader": "Leader",
+  "memberCount": "{count} member(s)",
+  "@memberCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "membersWithCount": "Members ({count})",
+  "@membersWithCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "pendingInvitations": "Pending Invitations",
+  "teamSettings": "Team Settings",
+  "editTeamInfo": "Edit Team Info",
+  "changeTeamNameDesc": "Change team name or description",
+  "assignNewLeader": "Assign a new team leader",
+  "permanentlyDisband": "Permanently disband this team",
+  "leaveTeamOnlyMember": "If you are the only member, the team will be deleted",
+  "notInTeamYet": "You are not in a team yet",
+  "createOrJoinTeam": "Create your own team or browse existing ones to join.",
+  "createATeam": "Create a Team",
+  "browseTeams": "Browse Teams",
+  "invite": "Invite",
+  "searchTeamsByName": "Search teams by name...",
+  "cancel": "Cancel",
+  "about": "About",
+  "tryAgain": "Try again",
+
+  "open": "Open",
+  "voting": "Voting",
+  "upcoming": "Upcoming",
+  "closed": "Closed",
+  "archived": "Archived",
+  "submissionsOpen": "Submissions open",
+  "voteNow": "Vote now",
+  "comingSoon": "Coming soon",
+  "ended": "Ended",
+  "teamSizeRange": "{minSize}-{maxSize} members",
+  "@teamSizeRange": {
+    "placeholders": {
+      "minSize": { "type": "int" },
+      "maxSize": { "type": "int" }
+    }
+  },
+  "teamSizeMin": "{minSize}+ members",
+  "@teamSizeMin": {
+    "placeholders": {
+      "minSize": { "type": "int" }
+    }
+  },
+  "teamSizeMax": "Up to {maxSize}",
+  "@teamSizeMax": {
+    "placeholders": {
+      "maxSize": { "type": "int" }
+    }
+  },
+  "maxVotes": "{maxVotes} votes",
+  "@maxVotes": {
+    "placeholders": {
+      "maxVotes": { "type": "int" }
+    }
+  },
+
+  "teamInvitation": "Team Invitation",
+  "teamLabel": "Team: {teamId}",
+  "@teamLabel": {
+    "placeholders": {
+      "teamId": { "type": "String" }
+    }
+  },
+  "invitedBy": "Invited by: {inviter}",
+  "@invitedBy": {
+    "placeholders": {
+      "inviter": { "type": "String" }
+    }
+  },
+  "decline": "Decline",
+  "accept": "Accept",
+
+  "userFallback": "User",
+
+  "justNow": "Just now",
+  "minutesAgo": "{count}m ago",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "hoursAgo": "{count}h ago",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "daysAgo": "{count}d ago",
+  "@daysAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "noRankingsYet": "No rankings yet",
+  "rankingsWillAppear": "Rankings will appear once voting begins.",
+  "rankingsLabel": "RANKINGS",
+  "votesLabel": "VOTES",
+  "votesWithCount": "{count} Votes",
+  "@votesWithCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "noCategoriesYet": "No categories yet",
+  "noCategoriesDesc": "There are no categories available for this event.",
+
+  "youSuffix": "(you)",
+  "joinedDate": "Joined {date}",
+  "@joinedDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "removeMemberTooltip": "Remove member",
+
+  "invitationSentSuccess": "Invitation sent successfully.",
+
+  "editTeamInfoTitle": "Edit Team Info",
+  "transferLeadershipTitle": "Transfer Leadership",
+  "deleteTeamTitle": "Delete Team",
+  "leaveTeamTitle": "Leave Team",
+
+  "needATeamFirst": "You need a team first",
+  "needATeamDesc": "Create or join a team before you can submit a project to this event.",
+
+  "submitYourProject": "Submit Your Project",
+  "submitYourProjectDesc": "Fill in the details below to register your project for this event.",
+  "projectTitle": "Project Title *",
+  "projectTitleHint": "e.g. Smart Irrigation System",
+  "projectTitleRequired": "Title is required",
+  "projectTitleTooShort": "Title must be at least 3 characters",
+  "descriptionLabel": "Description",
+  "descriptionHint": "What does your project do?",
+  "techStackLabel": "Tech Stack",
+  "techStackHint": "e.g. Flutter, Firebase, Python",
+  "repositoryUrl": "Repository URL",
+  "repositoryUrlHint": "https://github.com/...",
+  "demoUrl": "Demo URL",
+  "demoUrlHint": "https://...",
+  "submitProject": "Submit Project",
+
+  "editProject": "Edit Project",
+  "editProjectDesc": "Update your project details below.",
+  "saveChanges": "Save Changes",
+
+  "viewProject": "View",
+  "noLinksAdded": "No links added yet",
+  "repositoryChip": "Repository",
+  "demoChip": "Demo",
+  "createdLabel": "Created",
+
+  "draftStatusBanner": "Draft — not yet submitted for review",
+  "submittedStatusBanner": "Submitted — awaiting organizer review",
+  "acceptedStatusBanner": "Accepted — your project was approved",
+  "rejectedStatusBanner": "Rejected — check organizer feedback",
+
+  "editProjectButton": "Edit Project",
+  "submitForReview": "Submit for Review",
+  "cancelSubmission": "Cancel Submission",
+
+  "submitForReviewTitle": "Submit for Review?",
+  "submitForReviewDesc": "Your project will be sent to the organizers for review. You can cancel the submission at any time before it is reviewed.",
+  "notYet": "Not yet",
+  "submit": "Submit",
+
+  "cancelSubmissionTitle": "Cancel Submission?",
+  "cancelSubmissionDesc": "Your project will be moved back to draft. You can re-submit at any time.",
+  "keepSubmitted": "Keep submitted",
+  "cancelSubmissionButton": "Cancel submission",
+
+  "editTeamTitle": "Edit Team",
+  "editTeamDesc": "Update your team details below.",
+  "createTeamDesc": "Give your team a name and an optional description.",
+  "teamName": "Team Name",
+  "teamNameHint": "e.g. The Innovators",
+  "teamNameRequired": "Team name is required",
+  "teamNameTooShort": "Name must be at least 3 characters",
+  "teamDescriptionOptional": "Description (optional)",
+  "teamDescriptionHint": "What is your team about?",
+  "createTeamButton": "Create Team",
+
+  "noProjectsYet": "No projects yet",
+  "noProjectsDesc": "There are no projects submitted for this event yet.",
+
+  "searchProjectsTeams": "Search projects or teams...",
+
+  "trendingNow": "Trending Now",
+  "seeAll": "See all",
+
+  "heyThere": "Hey there!",
+  "springHackathon": "Spring Hackathon",
+  "thePrefix": "The ",
+
+  "orContinueWith": "or continue with",
+  "waitingForTelegram": "Waiting for Telegram...",
+  "continueWithTelegram": "Continue with Telegram",
+  "settings": "Settings"
 }

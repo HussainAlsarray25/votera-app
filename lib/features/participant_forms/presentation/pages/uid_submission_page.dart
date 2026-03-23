@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/participant_forms/domain/entities/participant_request.dart';
 import 'package:votera/features/participant_forms/presentation/cubit/forms_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -54,7 +55,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
       if (_documentUrl == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Please upload your university ID document.'),
+            content: Text(AppLocalizations.of(context)!.uploadIdDesc),
             backgroundColor: context.colors.warning,
           ),
         );
@@ -78,7 +79,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
         elevation: 0,
         leading: BackButton(color: context.colors.textPrimary),
         title: Text(
-          'University ID Card',
+          AppLocalizations.of(context)!.universityIdCard,
           style: AppTypography.labelLarge.copyWith(
             color: context.colors.textPrimary,
           ),
@@ -95,7 +96,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
           } else if (state is FormsUidSubmitted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Request submitted — pending review.'),
+                content: Text(AppLocalizations.of(context)!.requestPending),
                 backgroundColor: context.colors.success,
               ),
             );
@@ -147,11 +148,12 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
         if (state is! FormsUidRequestsLoaded || state.requests.isEmpty) {
           return const SizedBox.shrink();
         }
+        final l10n = AppLocalizations.of(context)!;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'My Requests',
+              l10n.myRequests,
               style: AppTypography.labelLarge.copyWith(
                 color: context.colors.textPrimary,
               ),
@@ -169,10 +171,11 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
   }
 
   Widget _buildRequestCard(BuildContext context, ParticipantRequest request) {
+    final l10n = AppLocalizations.of(context)!;
     final (chipColor, chipLabel) = switch (request.status) {
-      'approved' => (context.colors.success, 'Approved'),
-      'rejected' => (context.colors.error, 'Rejected'),
-      _ => (context.colors.warning, 'Pending'),
+      'approved' => (context.colors.success, l10n.approved),
+      'rejected' => (context.colors.error, l10n.rejected),
+      _ => (context.colors.warning, l10n.pending),
     };
 
     return Container(
@@ -181,7 +184,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        boxShadow: AppShadows.card,
+        boxShadow: AppShadows.card(Theme.of(context).brightness),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,7 +226,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
           if (request.isRejected && request.reviewNote != null) ...[
             const SizedBox(height: 6),
             Text(
-              'Note: ${request.reviewNote}',
+              AppLocalizations.of(context)!.noteLabel(request.reviewNote!),
               style: AppTypography.bodySmall.copyWith(
                 color: context.colors.error,
               ),
@@ -236,18 +239,19 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
 
   // -- Section: Submission form --
   Widget _buildSubmitForm(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Submit New Request',
+          l10n.submitNewRequest,
           style: AppTypography.labelLarge.copyWith(
             color: context.colors.textPrimary,
           ),
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Fill in your details and upload a clear photo of your university ID card.',
+          l10n.fillIdForm,
           style: AppTypography.bodySmall.copyWith(
             color: context.colors.textSecondary,
           ),
@@ -258,42 +262,42 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
           child: Column(
             children: [
               AppTextField(
-                label: 'Full Name',
+                label: l10n.fullName,
                 controller: _fullNameController,
-                hint: 'As shown on your ID',
+                hint: l10n.nameAsOnId,
                 prefixIcon: Icons.person_outline,
                 validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Full name is required' : null,
+                    (v == null || v.isEmpty) ? l10n.nameRequired : null,
               ),
               const SizedBox(height: AppSpacing.md),
               AppTextField(
-                label: 'University ID',
+                label: l10n.universityId,
                 controller: _universityIdController,
-                hint: 'e.g. CS2021001',
+                hint: l10n.universityIdExample,
                 prefixIcon: Icons.badge_outlined,
                 validator: (v) {
-                  if (v == null || v.isEmpty) return 'University ID is required';
-                  if (v.length < 3) return 'ID must be at least 3 characters';
+                  if (v == null || v.isEmpty) return l10n.universityIdRequired;
+                  if (v.length < 3) return l10n.universityIdTooShort;
                   return null;
                 },
               ),
               const SizedBox(height: AppSpacing.md),
               AppTextField(
-                label: 'Department',
+                label: l10n.department,
                 controller: _departmentController,
-                hint: 'e.g. Computer Science',
+                hint: l10n.departmentHint,
                 prefixIcon: Icons.school_outlined,
                 validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Department is required' : null,
+                    (v == null || v.isEmpty) ? l10n.departmentRequired : null,
               ),
               const SizedBox(height: AppSpacing.md),
               AppTextField(
-                label: 'Stage / Year',
+                label: l10n.stageYear,
                 controller: _stageController,
-                hint: 'e.g. 3rd Year',
+                hint: l10n.stageYearExample,
                 prefixIcon: Icons.layers_outlined,
                 validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Stage is required' : null,
+                    (v == null || v.isEmpty) ? l10n.stageRequired : null,
               ),
               const SizedBox(height: AppSpacing.md),
               _buildDocumentField(context),
@@ -303,9 +307,10 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
         const SizedBox(height: AppSpacing.xl),
         BlocBuilder<FormsCubit, FormsState>(
           builder: (context, state) {
+            final l10n = AppLocalizations.of(context)!;
             final isLoading = state is FormsLoading;
             return GradientButton(
-              text: isLoading ? 'Submitting...' : 'Submit Request',
+              text: isLoading ? l10n.submitting : l10n.submitRequest,
               onPressed: isLoading ? null : _handleSubmit,
             );
           },
@@ -341,7 +346,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
-                _documentFileName ?? 'Tap to upload ID document',
+                _documentFileName ?? AppLocalizations.of(context)!.tapToUploadId,
                 style: AppTypography.bodyMedium.copyWith(
                   color: _documentUrl != null
                       ? context.colors.textPrimary

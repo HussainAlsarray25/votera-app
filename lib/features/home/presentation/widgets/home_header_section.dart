@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Top section of the home page: app title, subtitle, and notification bell.
 class HomeHeaderSection extends StatelessWidget {
@@ -22,11 +23,12 @@ class HomeHeaderSection extends StatelessWidget {
   }
 
   Widget _buildTitle(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Votera',
+          l10n.appTitle,
           style: AppTypography.h1.copyWith(
             color: context.colors.textPrimary,
             fontWeight: FontWeight.w800,
@@ -35,7 +37,7 @@ class HomeHeaderSection extends StatelessWidget {
         ),
         const SizedBox(height: 2),
         Text(
-          'Vote for top projects',
+          l10n.appMotto,
           style: AppTypography.bodySmall.copyWith(
             color: context.colors.textHint,
           ),

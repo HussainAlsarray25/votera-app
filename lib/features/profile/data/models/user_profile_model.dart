@@ -42,7 +42,8 @@ class UserProfileModel extends UserProfile {
       fullName: json['full_name'] as String? ?? '',
       roles: List<String>.from(json['roles'] as List? ?? []),
       identifiers: (json['identifiers'] as List? ?? [])
-          .map((e) => ProfileIdentifierModel.fromJson(e as Map<String, dynamic>))
+          .map((e) =>
+              ProfileIdentifierModel.fromJson(e as Map<String, dynamic>))
           .toList(),
       avatarUrl: json['profile_picture_url'] as String?,
     );
@@ -59,7 +60,7 @@ class UserProfileModel extends UserProfile {
                 type: e.type,
                 value: e.value,
                 isVerified: e.isVerified,
-              ).toJson())
+              ).toJson(),)
           .toList(),
       'profile_picture_url': avatarUrl,
     };

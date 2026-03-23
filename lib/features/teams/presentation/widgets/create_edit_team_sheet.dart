@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -71,6 +72,7 @@ class _CreateEditTeamSheetState extends State<_CreateEditTeamSheet> {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -105,46 +107,44 @@ class _CreateEditTeamSheetState extends State<_CreateEditTeamSheet> {
               ),
             ),
             Text(
-              _isEditing ? 'Edit Team' : 'Create a Team',
+              _isEditing ? l10n.editTeamTitle : l10n.createATeam,
               style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              _isEditing
-                  ? 'Update your team details below.'
-                  : 'Give your team a name and an optional description.',
+              _isEditing ? l10n.editTeamDesc : l10n.createTeamDesc,
               style: AppTypography.bodyMedium.copyWith(
                 color: context.colors.textSecondary,
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
             AppTextField(
-              label: 'Team Name',
+              label: l10n.teamName,
               controller: _nameController,
-              hint: 'e.g. The Innovators',
+              hint: l10n.teamNameHint,
               prefixIcon: Icons.group_rounded,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Team name is required';
+                  return l10n.teamNameRequired;
                 }
                 if (value.trim().length < 3) {
-                  return 'Name must be at least 3 characters';
+                  return l10n.teamNameTooShort;
                 }
                 return null;
               },
             ),
             const SizedBox(height: AppSpacing.md),
             AppTextField(
-              label: 'Description (optional)',
+              label: l10n.teamDescriptionOptional,
               controller: _descController,
-              hint: 'What is your team about?',
+              hint: l10n.teamDescriptionHint,
               prefixIcon: Icons.notes_rounded,
               maxLines: 3,
               keyboardType: TextInputType.multiline,
             ),
             const SizedBox(height: AppSpacing.xl),
             GradientButton(
-              text: _isEditing ? 'Save Changes' : 'Create Team',
+              text: _isEditing ? l10n.saveChanges : l10n.createTeamButton,
               onPressed: _save,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -153,7 +153,7 @@ class _CreateEditTeamSheetState extends State<_CreateEditTeamSheet> {
               child: TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(
-                  'Cancel',
+                  l10n.cancel,
                   style: AppTypography.labelMedium.copyWith(
                     color: context.colors.textSecondary,
                   ),

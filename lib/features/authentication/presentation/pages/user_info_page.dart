@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/widgets/role_selector_section.dart';
 import 'package:votera/features/authentication/presentation/widgets/user_info_form_section.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Collects additional user info after registration:
 /// role (student, professor, visitor), department, and university ID.
@@ -20,7 +21,7 @@ class UserInfoPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: AppSpacing.xl),
-                _buildHeader(),
+                _buildHeader(context),
                 const SizedBox(height: AppSpacing.xl),
                 const RoleSelectorSection(),
                 const SizedBox(height: AppSpacing.lg),
@@ -34,14 +35,15 @@ class UserInfoPage extends StatelessWidget {
   }
 
   // -- Section: Page header --
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Tell Us About You', style: AppTypography.h1),
+        Text(l10n.tellUsAboutYou, style: AppTypography.h1),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Help us personalize your exhibition experience',
+          l10n.personalizeExperience,
           style: AppTypography.bodyMedium,
         ),
       ],

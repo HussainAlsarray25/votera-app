@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/participant_forms/presentation/cubit/forms_cubit.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -85,7 +86,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
         elevation: 0,
         leading: BackButton(color: context.colors.textPrimary),
         title: Text(
-          'Institutional Email',
+          AppLocalizations.of(context)!.institutionalEmail,
           style: AppTypography.labelLarge.copyWith(
             color: context.colors.textPrimary,
           ),
@@ -99,7 +100,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             context.read<ProfileCubit>().forceRefresh();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Account verified! Participant role granted.'),
+                content: Text(AppLocalizations.of(context)!.accountVerified),
                 backgroundColor: context.colors.success,
               ),
             );
@@ -134,6 +135,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   // -- Step 1: Email input --
   Widget _buildEmailStep() {
+    final l10n = AppLocalizations.of(context)!;
     return Form(
       key: _formKey,
       child: Column(
@@ -142,7 +144,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
         children: [
           const SizedBox(height: AppSpacing.xl),
           Text(
-            'Enter Your Institutional Email',
+            l10n.enterInstitutionalEmail,
             style: AppTypography.h1.copyWith(
               color: context.colors.textPrimary,
             ),
@@ -150,7 +152,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'We will send a 6-digit verification code to your university email.',
+            l10n.institutionalEmailDesc,
             style: AppTypography.bodyMedium.copyWith(
               color: context.colors.textSecondary,
             ),
@@ -158,14 +160,14 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           ),
           const SizedBox(height: AppSpacing.xxl),
           AppTextField(
-            label: 'Institutional Email',
+            label: l10n.institutionalEmail,
             controller: _emailController,
-            hint: 'your.name@university.edu',
+            hint: l10n.institutionalEmailHint,
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             validator: (value) {
-              if (value == null || value.isEmpty) return 'Email is required';
-              if (!value.contains('@')) return 'Enter a valid email';
+              if (value == null || value.isEmpty) return l10n.emailRequired;
+              if (!value.contains('@')) return l10n.emailInvalid;
               return null;
             },
           ),
@@ -174,7 +176,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             builder: (context, state) {
               final isLoading = state is FormsLoading;
               return GradientButton(
-                text: isLoading ? 'Sending...' : 'Send OTP',
+                text: isLoading ? l10n.sending : l10n.sendOtp,
                 onPressed: isLoading ? null : _handleSendOtp,
               );
             },
@@ -186,13 +188,14 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   // -- Step 2: OTP input --
   Widget _buildOtpStep(String email) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       key: const ValueKey('otp-step'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: AppSpacing.xl),
         Text(
-          'Enter Verification Code',
+          l10n.enterVerificationCode,
           style: AppTypography.h1.copyWith(
             color: context.colors.textPrimary,
           ),
@@ -200,7 +203,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'We sent a 6-digit code to',
+          l10n.codeSentTo,
           style: AppTypography.bodyMedium.copyWith(
             color: context.colors.textSecondary,
           ),
@@ -221,7 +224,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           builder: (context, state) {
             final isLoading = state is FormsLoading;
             return GradientButton(
-              text: isLoading ? 'Verifying...' : 'Verify',
+              text: isLoading ? l10n.verifying : l10n.verify,
               onPressed: (isLoading || !_isOtpComplete) ? null : _handleVerifyOtp,
             );
           },

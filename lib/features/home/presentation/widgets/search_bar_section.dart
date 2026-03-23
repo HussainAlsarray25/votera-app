@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Search input with an adjacent filter button.
 /// Calls [onSearchChanged] on every keystroke for live filtering.
@@ -39,7 +40,7 @@ class SearchBarSection extends StatelessWidget {
       child: TextField(
         onChanged: onSearchChanged,
         decoration: InputDecoration(
-          hintText: 'Search projects or teams...',
+          hintText: AppLocalizations.of(context)!.searchProjectsTeams,
           hintStyle: TextStyle(
             color: Colors.grey.shade400,
             fontSize: 14,

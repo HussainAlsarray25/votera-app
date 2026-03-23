@@ -61,7 +61,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   /// is not shown to the next user session.
   void reset() {
     // Fire-and-forget — the result does not affect the reset flow.
-    clearProfileCache(NoParams());
+    clearProfileCache(NoParams()).ignore();
     emit(ProfileInitial());
   }
 
@@ -93,7 +93,8 @@ class ProfileCubit extends Cubit<ProfileState> {
       emit(ProfileAvatarUploading(profile: currentProfile));
     }
 
-    final result = await uploadAvatarUseCase(UploadAvatarParams(filePath: filePath));
+    final result =
+        await uploadAvatarUseCase(UploadAvatarParams(filePath: filePath));
     result.fold(
       (failure) => emit(ProfileError(message: failure.message)),
       (_) async {
@@ -103,7 +104,8 @@ class ProfileCubit extends Cubit<ProfileState> {
     );
   }
 
-  /// Returns the current [UserProfile] regardless of which loaded state we are in.
+  /// Returns the current [UserProfile] regardless of which loaded
+  /// state we are in.
   UserProfile? get _currentProfile {
     final s = state;
     if (s is ProfileLoaded) return s.profile;

@@ -5,6 +5,7 @@ import 'package:votera/features/rankings/domain/entities/leaderboard_entry_entit
 import 'package:votera/features/rankings/presentation/cubit/rankings_cubit.dart';
 import 'package:votera/features/rankings/presentation/widgets/rankings_list_item.dart';
 import 'package:votera/features/rankings/presentation/widgets/rankings_podium_section.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
 import 'package:votera/shared/widgets/empty_state.dart';
 
@@ -48,16 +49,16 @@ class _RankingsBodyState extends State<RankingsBody> {
         if (state is RankingsLoaded) {
           final entries = state.leaderboard.entries;
           if (entries.isEmpty) {
+            final l10n = AppLocalizations.of(context)!;
             return RefreshIndicator(
               onRefresh: _refresh,
               child: ListView(
-                children: const [
-                  SizedBox(height: 80),
+                children: [
+                  const SizedBox(height: 80),
                   EmptyState(
                     icon: Icons.leaderboard_outlined,
-                    title: 'No rankings yet',
-                    subtitle:
-                        'Rankings will appear once voting begins.',
+                    title: l10n.noRankingsYet,
+                    subtitle: l10n.rankingsWillAppear,
                   ),
                 ],
               ),
@@ -111,7 +112,7 @@ class _RankingsBodyState extends State<RankingsBody> {
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
-          'RANKINGS',
+          AppLocalizations.of(context)!.rankingsLabel,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w800,
@@ -141,7 +142,7 @@ class _RankingsBodyState extends State<RankingsBody> {
           TextButton(
             onPressed: () =>
                 context.read<RankingsCubit>().loadLeaderboard(widget.eventId),
-            child: const Text('Retry'),
+            child: Text(AppLocalizations.of(context)!.retry),
           ),
         ],
       ),

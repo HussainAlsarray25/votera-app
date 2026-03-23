@@ -17,7 +17,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>> getUserProfile() async {
-    final response = await apiClient.get<Map<String, dynamic>>(ProfileEndpoints.me);
+    final response =
+        await apiClient.get<Map<String, dynamic>>(ProfileEndpoints.me);
     // Identity module wraps response in {success, data}
     final body = response.data!;
     if (body.containsKey('data')) {

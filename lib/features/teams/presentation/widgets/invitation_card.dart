@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/teams/domain/entities/invitation_entity.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Card shown to the current user for a pending team invitation.
 ///
@@ -78,7 +79,7 @@ class _InvitationHeader extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [context.colors.secondary, const Color(0xFFEC4899)],
+                colors: [context.colors.secondary, context.colors.primary],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -96,14 +97,14 @@ class _InvitationHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Team Invitation',
+                  AppLocalizations.of(context)!.teamInvitation,
                   style: AppTypography.labelMedium.copyWith(
                     color: context.colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Team: ${invitation.teamId}',
+                  AppLocalizations.of(context)!.teamLabel(invitation.teamId),
                   style: AppTypography.bodySmall.copyWith(
                     color: context.colors.textSecondary,
                   ),
@@ -112,7 +113,7 @@ class _InvitationHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Invited by: ${invitation.invitedBy}',
+                  AppLocalizations.of(context)!.invitedBy(invitation.invitedBy),
                   style: AppTypography.caption.copyWith(
                     color: context.colors.textSecondary,
                   ),
@@ -141,7 +142,7 @@ class _PendingBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
       ),
       child: Text(
-        'Pending',
+        AppLocalizations.of(context)!.pending,
         style: AppTypography.caption.copyWith(
           color: context.colors.warning,
           fontWeight: FontWeight.w700,
@@ -173,7 +174,7 @@ class _InvitationActions extends StatelessWidget {
         children: [
           Expanded(
             child: _ActionButton(
-              label: 'Decline',
+              label: AppLocalizations.of(context)!.decline,
               icon: Icons.close_rounded,
               color: context.colors.error,
               onPressed: isLoading ? null : onDecline,
@@ -182,7 +183,7 @@ class _InvitationActions extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: _ActionButton(
-              label: 'Accept',
+              label: AppLocalizations.of(context)!.accept,
               icon: Icons.check_rounded,
               color: context.colors.success,
               filled: true,

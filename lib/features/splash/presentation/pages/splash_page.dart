@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Splash screen shown at app launch.
 /// Checks for saved auth tokens and navigates to the appropriate screen.
@@ -62,16 +63,13 @@ class _SplashPageState extends State<SplashPage>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF3B82F6), Color(0xFF8B5CF6)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          gradient: AppColors.primaryGradient,
         ),
         child: FadeTransition(
           opacity: _fadeIn,
@@ -93,13 +91,12 @@ class _SplashPageState extends State<SplashPage>
                     ),
                   ],
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
                     'V',
-                    style: TextStyle(
+                    style: AppTypography.h1.copyWith(
                       fontSize: 48,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF3B82F6),
+                      color: AppColors.primary,
                       height: 1,
                     ),
                   ),
@@ -107,21 +104,18 @@ class _SplashPageState extends State<SplashPage>
               ),
               const SizedBox(height: AppSpacing.lg),
               // App name
-              const Text(
-                'Votera',
-                style: TextStyle(
+              Text(
+                l10n.appTitle,
+                style: AppTypography.h1.copyWith(
                   fontSize: 36,
-                  fontWeight: FontWeight.w700,
                   color: Colors.white,
                   letterSpacing: 1.2,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Discover. Vote. Celebrate.',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
+                l10n.appMotto,
+                style: AppTypography.bodyMedium.copyWith(
                   color: Colors.white.withValues(alpha: 0.8),
                   letterSpacing: 0.5,
                 ),

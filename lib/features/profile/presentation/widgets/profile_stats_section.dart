@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Displays a row of stat cards: votes cast, projects rated, and comments.
 /// Shows placeholder values until a stats endpoint is available.
@@ -8,13 +9,14 @@ class ProfileStatsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: AppSpacing.pagePadding,
       child: Row(
         children: [
           _buildStatCard(
             context,
-            'Votes Cast',
+            l10n.votesCast,
             '\u2014',
             Icons.how_to_vote,
             context.colors.primary,
@@ -22,7 +24,7 @@ class ProfileStatsSection extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           _buildStatCard(
             context,
-            'Rated',
+            l10n.rated,
             '\u2014',
             Icons.star,
             context.colors.accent,
@@ -30,7 +32,7 @@ class ProfileStatsSection extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           _buildStatCard(
             context,
-            'Comments',
+            l10n.comments,
             '\u2014',
             Icons.chat_bubble,
             context.colors.secondary,
@@ -53,7 +55,7 @@ class ProfileStatsSection extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          boxShadow: AppShadows.card,
+          boxShadow: AppShadows.card(Theme.of(context).brightness),
         ),
         child: Column(
           children: [

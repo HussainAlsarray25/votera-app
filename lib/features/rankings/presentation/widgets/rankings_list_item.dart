@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/rankings/domain/entities/leaderboard_entry_entity.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// A single ranked project row showing rank number, avatar, name,
 /// vote count, and a chevron indicator.
@@ -107,7 +108,7 @@ class RankingsListItem extends StatelessWidget {
           ),
         ),
         Text(
-          'VOTES',
+          AppLocalizations.of(context)!.votesLabel,
           style: TextStyle(
             fontSize: 9,
             fontWeight: FontWeight.w700,

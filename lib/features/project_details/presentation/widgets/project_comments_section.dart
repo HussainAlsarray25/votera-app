@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/comments/domain/entities/comment_entity.dart';
 import 'package:votera/features/comments/presentation/cubit/comments_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Displays a list of user comments and an input field to add a new one.
 /// Reads from and dispatches to CommentsCubit.
@@ -31,7 +32,8 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
 
     context.read<CommentsCubit>().addComment(
           projectId: widget.projectId,
-          body: text,
+          text: text,
+          score: 1,
         );
     _commentController.clear();
   }
@@ -66,10 +68,11 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
 
   // -- Section: Comments header with count --
   Widget _buildHeader() {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         Text(
-          'Comments',
+          l10n.comments,
           style: AppTypography.labelLarge.copyWith(
             color: context.colors.textPrimary,
           ),
@@ -117,8 +120,8 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
           Expanded(
             child: TextField(
               controller: _commentController,
-              decoration: const InputDecoration(
-                hintText: 'Add a comment...',
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.addComment,
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
@@ -134,7 +137,7 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
           ),
         ],
       ),
-    );
+);
   }
 
   // -- Section: Comments list --
@@ -154,7 +157,7 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
             child: Center(
               child: Text(
-                'No comments yet. Be the first!',
+                AppLocalizations.of(context)!.noCommentsYet,
                 style: AppTypography.bodySmall.copyWith(
                   color: context.colors.textSecondary,
                 ),
@@ -200,13 +203,15 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
               children: [
                 Row(
                   children: [
-                    Text(
-                      comment.authorId,
-                      style: AppTypography.labelMedium.copyWith(
-                        color: context.colors.textPrimary,
+                    Expanded(
+                      child: Text(
+                        comment.authorId,
+                        style: AppTypography.labelMedium.copyWith(
+                          color: context.colors.textPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const Spacer(),
                     if (timeAgo.isNotEmpty)
                       Text(
                         timeAgo,
@@ -218,7 +223,7 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  comment.body,
+                  comment.text,
                   style: AppTypography.bodyMedium.copyWith(
                     color: context.colors.textSecondary,
                   ),
@@ -232,10 +237,11 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
   }
 
   String _formatTimeAgo(DateTime dateTime) {
+    final l10n = AppLocalizations.of(context)!;
     final diff = DateTime.now().difference(dateTime);
-    if (diff.inDays > 0) return '${diff.inDays}d ago';
-    if (diff.inHours > 0) return '${diff.inHours}h ago';
-    if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
-    return 'Just now';
+    if (diff.inDays > 0) return l10n.daysAgo(diff.inDays);
+    if (diff.inHours > 0) return l10n.hoursAgo(diff.inHours);
+    if (diff.inMinutes > 0) return l10n.minutesAgo(diff.inMinutes);
+    return l10n.justNow;
   }
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Collapsible app bar with a gradient hero background, project title,
 /// status badge, back button, and share action.
@@ -19,6 +20,9 @@ class ProjectHeaderSection extends StatelessWidget {
       pinned: true,
       backgroundColor: AppColors.primaryDark,
       elevation: 0,
+      scrolledUnderElevation: 0,
+      shadowColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
       leading: _buildBackButton(context),
       actions: [_buildShareButton()],
       flexibleSpace: FlexibleSpaceBar(
@@ -83,7 +87,7 @@ class ProjectHeaderSection extends StatelessWidget {
           ),
 
         // Decorative floating icon
-        Positioned(
+        const Positioned(
           right: 24,
           top: 70,
           child: Opacity(
@@ -100,13 +104,20 @@ class ProjectHeaderSection extends StatelessWidget {
   }
 
   Widget _buildProjectInfo(ProjectEntity project) {
-    final statusConfig = _statusConfig(project.status);
+    // Context is not directly available here; use a Builder to access it.
+    return Builder(
+      builder: (context) => _buildProjectInfoContent(context, project),
+    );
+  }
+
+  Widget _buildProjectInfoContent(BuildContext context, ProjectEntity project) {
+    final statusConfig = _statusConfig(context, project.status);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Status badge
+        // Status badge shown below the flexible space background.
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
@@ -154,69 +165,47 @@ class ProjectHeaderSection extends StatelessWidget {
   }
 
   Widget _buildBackButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: _HeaderIconButton(
-        icon: Icons.arrow_back_ios_new_rounded,
-        onTap: () => context.pop(),
-      ),
+    return IconButton(
+      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+      onPressed: () => context.pop(),
     );
   }
 
   Widget _buildShareButton() {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: _HeaderIconButton(
-        icon: Icons.ios_share_rounded,
-        onTap: () {},
-      ),
+    return IconButton(
+      icon: const Icon(Icons.share, color: Colors.white),
+      onPressed: () {},
     );
   }
 
-  _StatusConfig _statusConfig(ProjectStatus status) {
+  _StatusConfig _statusConfig(BuildContext context, ProjectStatus status) {
+    final l10n = AppLocalizations.of(context)!;
     switch (status) {
       case ProjectStatus.submitted:
         return _StatusConfig(
-          label: 'Submitted',
+          label: l10n.statusSubmitted,
           color: AppColors.accent,
           icon: Icons.check_circle_outline_rounded,
         );
       case ProjectStatus.accepted:
         return _StatusConfig(
-          label: 'Accepted',
+          label: l10n.statusAccepted,
           color: AppColors.success,
           icon: Icons.verified_rounded,
         );
       case ProjectStatus.rejected:
         return _StatusConfig(
-          label: 'Rejected',
+          label: l10n.statusRejected,
           color: AppColors.error,
           icon: Icons.cancel_outlined,
         );
       case ProjectStatus.draft:
         return _StatusConfig(
-          label: 'Draft',
+          label: l10n.statusDraft,
           color: AppColors.textHint,
           icon: Icons.edit_outlined,
         );
     }
-  }
-}
-
-// -- Small icon button with frosted-glass style --
-class _HeaderIconButton extends StatelessWidget {
-  const _HeaderIconButton({required this.icon, required this.onTap});
-
-  final IconData icon;
-  final VoidCallback onTap;
-
-  Widget _buildImage() {
-    return const ColoredBox(
-      color: AppColors.border,
-      child: Center(
-        child: Icon(Icons.code, size: 64, color: AppColors.textHint),
-      ),
-    );
   }
 }
 

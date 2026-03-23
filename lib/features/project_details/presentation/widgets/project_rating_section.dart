@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/ratings/presentation/cubit/ratings_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/animated_star_rating.dart';
 
 /// Displays the community average rating and lets the user submit their own.
@@ -15,15 +16,15 @@ class ProjectRatingSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.border),
-        boxShadow: AppShadows.card,
+        border: Border.all(color: context.colors.border),
+        boxShadow: AppShadows.card(Theme.of(context).brightness),
       ),
       child: Column(
         children: [
           _buildAverageRating(context),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: context.colors.divider),
           _buildUserRating(context),
         ],
       ),
@@ -34,6 +35,7 @@ class ProjectRatingSection extends StatelessWidget {
   Widget _buildAverageRating(BuildContext context) {
     return BlocBuilder<RatingsCubit, RatingsState>(
       builder: (context, state) {
+        final l10n = AppLocalizations.of(context)!;
         final isLoading = state is RatingsLoading;
         final averageScore =
             state is RatingSummaryLoaded ? state.summary.averageScore : 0.0;
@@ -82,9 +84,9 @@ class ProjectRatingSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Community Rating',
+                      l10n.communityRating,
                       style: AppTypography.labelLarge.copyWith(
-                        color: AppColors.textPrimary,
+                        color: context.colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -96,10 +98,10 @@ class ProjectRatingSection extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       isLoading
-                          ? 'Loading...'
-                          : '$totalRatings ${totalRatings == 1 ? 'rating' : 'ratings'}',
+                          ? l10n.loading
+                          : l10n.ratingCount(totalRatings),
                       style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ],
@@ -114,6 +116,7 @@ class ProjectRatingSection extends StatelessWidget {
 
   // -- Bottom half: user's own rating picker --
   Widget _buildUserRating(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: AppSpacing.cardPadding,
       child: Row(
@@ -123,16 +126,16 @@ class ProjectRatingSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Rate this project',
+                  l10n.rateThisProject,
                   style: AppTypography.labelLarge.copyWith(
-                    color: AppColors.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Tap a star to share your rating',
+                  l10n.tapStarToRate,
                   style: AppTypography.caption.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],

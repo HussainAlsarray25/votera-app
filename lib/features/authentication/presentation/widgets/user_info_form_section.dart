@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -26,33 +27,34 @@ class _UserInfoFormSectionState extends State<UserInfoFormSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         AppTextField(
-          label: 'Department',
+          label: l10n.department,
           controller: _departmentController,
-          hint: 'e.g. Computer Science',
+          hint: l10n.departmentHint,
           prefixIcon: Icons.apartment,
         ),
         const SizedBox(height: AppSpacing.md),
         AppTextField(
-          label: 'University ID (optional)',
+          label: l10n.universityIdOptional,
           controller: _universityIdController,
-          hint: 'e.g. 2024001234',
+          hint: l10n.universityIdHint,
           prefixIcon: Icons.badge_outlined,
           keyboardType: TextInputType.number,
         ),
         const SizedBox(height: AppSpacing.md),
         AppTextField(
-          label: 'Phone Number (optional)',
+          label: l10n.phoneOptional,
           controller: _phoneController,
-          hint: '+964 xxx xxx xxxx',
+          hint: l10n.phoneHint,
           prefixIcon: Icons.phone_outlined,
           keyboardType: TextInputType.phone,
         ),
         const SizedBox(height: AppSpacing.xl),
         GradientButton(
-          text: 'Continue',
+          text: l10n.continueButton,
           onPressed: () {
             // Navigate to home
           },

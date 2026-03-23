@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Lets the user pick their role: Student, Professor, or Visitor.
 /// Each option is a tappable card with an icon and label.
@@ -13,33 +14,36 @@ class RoleSelectorSection extends StatefulWidget {
 class _RoleSelectorSectionState extends State<RoleSelectorSection> {
   int _selectedIndex = -1;
 
-  static const _roles = [
-    _RoleOption(icon: Icons.school, label: 'Student'),
-    _RoleOption(icon: Icons.science, label: 'Professor'),
-    _RoleOption(icon: Icons.person, label: 'Visitor'),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    // Built inside build() because role labels depend on localized strings.
+    final roles = [
+      _RoleOption(icon: Icons.school, label: l10n.student),
+      _RoleOption(icon: Icons.science, label: l10n.professor),
+      _RoleOption(icon: Icons.person, label: l10n.visitor),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Your Role',
+          l10n.yourRole,
           style: AppTypography.labelLarge.copyWith(
             color: context.colors.textPrimary,
           ),
         ),
         const SizedBox(height: AppSpacing.md),
         Row(
-          children: List.generate(_roles.length, (index) {
-            final role = _roles[index];
+          children: List.generate(roles.length, (index) {
+            final role = roles[index];
             final isSelected = _selectedIndex == index;
 
             return Expanded(
               child: Padding(
                 padding: EdgeInsets.only(
-                  right: index < _roles.length - 1 ? AppSpacing.sm : 0,
+                  right: index < roles.length - 1 ? AppSpacing.sm : 0,
                 ),
                 child: _buildRoleCard(role, isSelected, index),
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Rotating gradient palette for trending card headers.
 const _trendingGradients = [
@@ -57,6 +58,7 @@ class TrendingSection extends StatelessWidget {
   }
 
   Widget _buildSectionHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Row(
@@ -71,7 +73,7 @@ class TrendingSection extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                'Trending Now',
+                l10n.trendingNow,
                 style: AppTypography.h3.copyWith(
                   color: context.colors.textPrimary,
                   fontWeight: FontWeight.w800,
@@ -80,7 +82,7 @@ class TrendingSection extends StatelessWidget {
             ],
           ),
           Text(
-            'See all',
+            l10n.seeAll,
             style: AppTypography.labelMedium.copyWith(
               color: context.colors.primary,
             ),

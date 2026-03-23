@@ -6,6 +6,7 @@ import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/features/events/presentation/cubit/events_cubit.dart';
 import 'package:votera/features/exhibitions/presentation/widgets/exhibition_card.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
 import 'package:votera/shared/widgets/empty_state.dart';
 
@@ -48,6 +49,7 @@ class ExhibitionsPage extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, AppSpacing.md, 20, AppSpacing.lg),
       child: Row(
@@ -57,7 +59,7 @@ class ExhibitionsPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Votera',
+                l10n.exhibitions,
                 style: AppTypography.h1.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.5,
@@ -66,7 +68,7 @@ class ExhibitionsPage extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                'Explore exhibitions & events',
+                l10n.exploreExhibitions,
                 style: AppTypography.bodyMedium.copyWith(
                   color: context.colors.textSecondary,
                 ),
@@ -108,14 +110,14 @@ class _EventsListSliver extends StatelessWidget {
         if (state is EventsLoaded) {
           final events = state.response.items;
           if (events.isEmpty) {
+            final l10n = AppLocalizations.of(context)!;
             return SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.only(top: 80),
                 child: EmptyState(
                   icon: Icons.event_outlined,
-                  title: 'No events yet',
-                  subtitle:
-                      'There are no exhibitions or events available right now. Check back later for updates.',
+                  title: l10n.noEventsYet,
+                  subtitle: l10n.noEventsDesc,
                 ),
               ),
             );
@@ -160,7 +162,7 @@ class _EventsListSliver extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           TextButton(
             onPressed: () => context.read<EventsCubit>().loadEvents(),
-            child: const Text('Retry'),
+            child: Text(AppLocalizations.of(context)!.retry),
           ),
         ],
       ),

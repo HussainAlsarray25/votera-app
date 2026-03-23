@@ -16,12 +16,10 @@ import 'package:votera/features/exhibitions/presentation/pages/exhibition_detail
 import 'package:votera/features/exhibitions/presentation/pages/exhibitions_page.dart';
 import 'package:votera/features/notification/presentation/pages/notification_page.dart';
 import 'package:votera/features/onboarding/presentation/pages/onboarding_page.dart';
-import 'package:votera/features/profile/presentation/pages/comments_page.dart';
 import 'package:votera/features/profile/presentation/pages/profile_page.dart';
 import 'package:votera/features/project_details/presentation/pages/project_details_page.dart';
 import 'package:votera/features/splash/presentation/pages/splash_page.dart';
 import 'package:votera/features/teams/presentation/pages/team_detail_page.dart';
-import 'package:votera/features/settings/presentation/pages/settings_page.dart';
 import 'package:votera/features/teams/presentation/pages/teams_page.dart';
 
 class AppRouter {
@@ -94,10 +92,6 @@ class AppRouter {
             path: '/profile',
             builder: (context, state) => const ProfilePage(),
           ),
-          GoRoute(
-            path: '/settings',
-            builder: (context, state) => const SettingsPage(),
-          ),
         ],
       ),
       GoRoute(
@@ -117,10 +111,6 @@ class AppRouter {
           final id = state.pathParameters['id'] ?? '';
           return ExhibitionDetailPage(exhibitionId: id);
         },
-      ),
-      GoRoute(
-        path: '/comments',
-        builder: (context, state) => const CommentsPage(),
       ),
       GoRoute(
         path: '/project/:eventId/:projectId',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/animated_star_rating.dart';
 import 'package:votera/shared/widgets/verified_badge.dart';
 
@@ -72,7 +73,7 @@ class _ProjectCardState extends State<ProjectCard>
                   ? AppShadows.goldenGlow
                   : (_elevationAnimation.value > 0.5
                       ? AppShadows.cardHover
-                      : AppShadows.card),
+                      : AppShadows.card(Theme.of(context).brightness)),
               // Golden border for the winner
               border: widget.isWinner
                   ? Border.all(color: context.colors.accent, width: 2)
@@ -147,14 +148,14 @@ class _ProjectCardState extends State<ProjectCard>
           color: context.colors.error,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.local_fire_department, size: 14, color: Colors.white),
-            SizedBox(width: 4),
+            const Icon(Icons.local_fire_department, size: 14, color: Colors.white),
+            const SizedBox(width: 4),
             Text(
-              'Trending',
-              style: TextStyle(
+              AppLocalizations.of(context)!.trending,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -170,26 +171,28 @@ class _ProjectCardState extends State<ProjectCard>
     return Positioned(
       top: 8,
       right: 8,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          gradient: AppColorScheme.goldGradient,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.emoji_events, size: 14, color: Colors.white),
-            SizedBox(width: 4),
-            Text(
-              'Winner',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
+      child: Builder(
+        builder: (context) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            gradient: AppColorScheme.goldGradient,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.emoji_events, size: 14, color: Colors.white),
+              const SizedBox(width: 4),
+              Text(
+                AppLocalizations.of(context)!.winner,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -242,7 +245,7 @@ class _ProjectCardState extends State<ProjectCard>
         ),
         const SizedBox(width: 4),
         Text(
-          '${widget.voteCount} votes',
+          AppLocalizations.of(context)!.voteCount(widget.voteCount),
           style: AppTypography.caption.copyWith(color: context.colors.primary),
         ),
       ],

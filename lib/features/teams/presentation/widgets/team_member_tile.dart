@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/teams/domain/entities/team_member_entity.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Displays a single team member as a bordered row.
 ///
@@ -49,7 +50,7 @@ class TeamMemberTile extends StatelessWidget {
                     Flexible(
                       child: Text(
                         isCurrentUser
-                            ? '${member.userId} (you)'
+                            ? '${member.userId} ${AppLocalizations.of(context)!.youSuffix}'
                             : member.userId,
                         style: AppTypography.labelMedium.copyWith(
                           color: context.colors.textPrimary,
@@ -66,7 +67,7 @@ class TeamMemberTile extends StatelessWidget {
                 if (member.joinedAt != null) ...[
                   const SizedBox(height: 2),
                   Text(
-                    'Joined ${_formatDate(member.joinedAt!)}',
+                    AppLocalizations.of(context)!.joinedDate(_formatDate(member.joinedAt!)),
                     style: AppTypography.caption.copyWith(
                       color: context.colors.textSecondary,
                     ),
@@ -79,7 +80,7 @@ class TeamMemberTile extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.person_remove_outlined, size: 20),
               color: context.colors.error,
-              tooltip: 'Remove member',
+              tooltip: AppLocalizations.of(context)!.removeMemberTooltip,
               onPressed: onRemove,
             ),
         ],
@@ -192,9 +193,9 @@ class _LeaderBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
       ),
       child: Text(
-        'Leader',
+        AppLocalizations.of(context)!.leader,
         style: AppTypography.caption.copyWith(
-          color: const Color(0xFFB45309),
+          color: context.colors.accent,
           fontWeight: FontWeight.w700,
           fontSize: 10,
         ),

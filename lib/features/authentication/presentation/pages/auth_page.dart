@@ -6,6 +6,7 @@ import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dar
 import 'package:votera/features/authentication/presentation/widgets/login_section.dart';
 import 'package:votera/features/authentication/presentation/widgets/register_section.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// The authentication page handles both login and registration.
 /// Mobile: plain scaffold with the form filling the screen.
@@ -113,6 +114,7 @@ class _AuthPageState extends State<AuthPage> {
 
   // -- Section: Desktop branding panel --
   Widget _buildBrandingPanel() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         gradient: context.colors.primaryGradient,
@@ -128,7 +130,7 @@ class _AuthPageState extends State<AuthPage> {
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              'Votera',
+              l10n.appTitle,
               style: AppTypography.h1.copyWith(
                 color: Colors.white,
                 fontSize: 40,
@@ -137,7 +139,7 @@ class _AuthPageState extends State<AuthPage> {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Discover, vote, and celebrate\ninnovative projects.',
+              l10n.appTagline,
               style: AppTypography.bodyLarge.copyWith(
                 color: Colors.white70,
               ),

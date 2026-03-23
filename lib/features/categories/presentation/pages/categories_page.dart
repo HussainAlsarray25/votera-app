@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Grid page showing all project categories with emoji, name, and count.
 class CategoriesPage extends StatelessWidget {
@@ -67,11 +68,12 @@ class CategoriesPage extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Categories',
+          l10n.categories,
           style: AppTypography.h1.copyWith(
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
@@ -80,7 +82,7 @@ class CategoriesPage extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'Browse projects by category',
+          l10n.browseByCategory,
           style: AppTypography.bodyMedium.copyWith(
             color: context.colors.textSecondary,
           ),
@@ -152,7 +154,7 @@ class _CategoryCard extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            '${category.count} projects',
+            AppLocalizations.of(context)!.projectCount(category.count),
             style: AppTypography.bodySmall.copyWith(
               color: context.colors.textSecondary,
             ),
