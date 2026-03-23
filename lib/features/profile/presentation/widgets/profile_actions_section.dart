@@ -35,7 +35,7 @@ class ProfileActionsSection extends StatelessWidget {
           child: BlocBuilder<ProfileCubit, ProfileState>(
             builder: (context, profileState) {
               final isVisitor = profileState is ProfileLoaded &&
-                  profileState.profile.hasRole('visitor');
+                  profileState.profile.isVisitorOnly;
               return Column(
                 children: [
                   if (isVisitor) ...[

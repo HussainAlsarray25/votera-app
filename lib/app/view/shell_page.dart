@@ -53,8 +53,10 @@ class ShellPage extends StatelessWidget {
       builder: (context, state) {
         // Hide Teams until the profile is loaded and the role is confirmed.
         // Defaulting to false prevents the tab from flashing for visitors.
+        // Show Teams for any user who holds at least one non-visitor role
+        // (participant, admin, organizer, etc.).
         final canViewTeams = state is ProfileLoaded
-            ? !state.profile.hasRole('visitor')
+            ? !state.profile.isVisitorOnly
             : false;
 
         final items = [

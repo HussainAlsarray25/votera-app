@@ -39,6 +39,11 @@ class UserProfile extends Equatable {
   /// Use this inline wherever a page or widget needs to be gated by role.
   bool hasRole(String role) => roles.contains(role);
 
+  /// Returns true when the user's only role is 'visitor'.
+  /// Use this to gate features that require any verified role
+  /// (participant, admin, organizer, etc.).
+  bool get isVisitorOnly => roles.every((r) => r == 'visitor');
+
   @override
   List<Object?> get props => [id, fullName, roles, identifiers];
 }

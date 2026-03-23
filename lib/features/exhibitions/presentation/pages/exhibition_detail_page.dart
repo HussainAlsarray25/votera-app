@@ -40,8 +40,9 @@ class _ExhibitionDetailPageState extends State<ExhibitionDetailPage>
     // Resolve tab count based on current profile role.
     // ProfileCubit is provided globally at the App level.
     final profileState = context.read<ProfileCubit>().state;
+    // Show tab for any verified role (participant, admin, organizer, etc.).
     _canViewMyProject = profileState is ProfileLoaded
-        ? !profileState.profile.hasRole('visitor')
+        ? !profileState.profile.isVisitorOnly
         : false;
 
     _tabController = TabController(
