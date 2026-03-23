@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:votera/core/design_system/tokens/app_colors.dart';
 
-/// Typography tokens built on top of Google Fonts (Poppins).
-/// Every text style in the app should use one of these to
-/// maintain a unified typographic hierarchy.
+/// Typography tokens built on top of Google Fonts (Inter).
+///
+/// Styles are intentionally colorless — they define font, size, weight,
+/// and line-height only. Color is applied by each widget via:
+///   style: AppTypography.h1.copyWith(color: context.colors.textPrimary)
+///
+/// This makes styles theme-agnostic and reusable across light and dark modes.
 class AppTypography {
   AppTypography._();
 
-  static String get _fontFamily => GoogleFonts.poppins().fontFamily!;
+  static String get _fontFamily => GoogleFonts.inter().fontFamily!;
 
   // -- Headings --
   static TextStyle get h1 => TextStyle(
         fontFamily: _fontFamily,
         fontSize: 28,
         fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
         height: 1.3,
       );
 
@@ -23,7 +25,6 @@ class AppTypography {
         fontFamily: _fontFamily,
         fontSize: 24,
         fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
         height: 1.3,
       );
 
@@ -31,7 +32,6 @@ class AppTypography {
         fontFamily: _fontFamily,
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
         height: 1.3,
       );
 
@@ -40,7 +40,6 @@ class AppTypography {
         fontFamily: _fontFamily,
         fontSize: 16,
         fontWeight: FontWeight.normal,
-        color: AppColors.textPrimary,
         height: 1.5,
       );
 
@@ -48,7 +47,6 @@ class AppTypography {
         fontFamily: _fontFamily,
         fontSize: 14,
         fontWeight: FontWeight.normal,
-        color: AppColors.textSecondary,
         height: 1.5,
       );
 
@@ -56,7 +54,6 @@ class AppTypography {
         fontFamily: _fontFamily,
         fontSize: 12,
         fontWeight: FontWeight.normal,
-        color: AppColors.textSecondary,
         height: 1.5,
       );
 
@@ -65,21 +62,18 @@ class AppTypography {
         fontFamily: _fontFamily,
         fontSize: 16,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
       );
 
   static TextStyle get labelMedium => TextStyle(
         fontFamily: _fontFamily,
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
       );
 
   static TextStyle get button => TextStyle(
         fontFamily: _fontFamily,
         fontSize: 16,
         fontWeight: FontWeight.w600,
-        color: AppColors.textOnPrimary,
         letterSpacing: 0.5,
       );
 
@@ -88,6 +82,5 @@ class AppTypography {
         fontFamily: _fontFamily,
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: AppColors.textHint,
       );
 }

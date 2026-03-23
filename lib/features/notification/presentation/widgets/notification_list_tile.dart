@@ -27,13 +27,13 @@ class NotificationListTile extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: isUnread
-              ? AppColors.primary.withValues(alpha: 0.06)
-              : AppColors.surface,
+              ? context.colors.primary.withValues(alpha: 0.06)
+              : context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           border: Border.all(
             color: isUnread
-                ? AppColors.primary.withValues(alpha: 0.15)
-                : AppColors.border,
+                ? context.colors.primary.withValues(alpha: 0.15)
+                : context.colors.border,
           ),
           boxShadow: [
             BoxShadow(
@@ -52,19 +52,21 @@ class NotificationListTile extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 color: isUnread
-                    ? AppColors.primary.withValues(alpha: 0.12)
-                    : AppColors.surface,
+                    ? context.colors.primary.withValues(alpha: 0.12)
+                    : context.colors.surface,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isUnread
-                      ? AppColors.primary.withValues(alpha: 0.2)
-                      : AppColors.border,
+                      ? context.colors.primary.withValues(alpha: 0.2)
+                      : context.colors.border,
                 ),
               ),
               child: Icon(
                 Icons.notifications_outlined,
                 size: 20,
-                color: isUnread ? AppColors.primary : AppColors.textHint,
+                color: isUnread
+                    ? context.colors.primary
+                    : context.colors.textHint,
               ),
             ),
             const SizedBox(width: AppSpacing.md),
@@ -82,7 +84,7 @@ class NotificationListTile extends StatelessWidget {
                             fontWeight: isUnread
                                 ? FontWeight.w700
                                 : FontWeight.w500,
-                            color: AppColors.textPrimary,
+                            color: context.colors.textPrimary,
                           ),
                         ),
                       ),
@@ -90,7 +92,7 @@ class NotificationListTile extends StatelessWidget {
                       Text(
                         _formatTime(notification.createdAt),
                         style: AppTypography.caption.copyWith(
-                          color: AppColors.textHint,
+                          color: context.colors.textHint,
                         ),
                       ),
                     ],
@@ -100,7 +102,7 @@ class NotificationListTile extends StatelessWidget {
                     Text(
                       notification.body,
                       style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -116,9 +118,9 @@ class NotificationListTile extends StatelessWidget {
                 child: Container(
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.primary,
+                    color: context.colors.primary,
                   ),
                 ),
               ),

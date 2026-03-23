@@ -39,16 +39,16 @@ class _CommentsPageState extends State<CommentsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: CenteredContent(
           child: Column(
             children: [
               _buildHeader(context),
               const SizedBox(height: 18),
-              _buildTabBar(),
+              _buildTabBar(context),
               const SizedBox(height: AppSpacing.md),
-              Expanded(child: _buildCommentsList()),
+              Expanded(child: _buildCommentsList(context)),
             ],
           ),
         ),
@@ -67,7 +67,7 @@ class _CommentsPageState extends State<CommentsPage> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: context.colors.surface,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 boxShadow: [
                   BoxShadow(
@@ -77,10 +77,10 @@ class _CommentsPageState extends State<CommentsPage> {
                   ),
                 ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back_rounded,
                 size: 20,
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
               ),
             ),
           ),
@@ -94,12 +94,13 @@ class _CommentsPageState extends State<CommentsPage> {
                   style: AppTypography.h2.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
+                    color: context.colors.textPrimary,
                   ),
                 ),
                 Text(
                   '$_unreadCount unread',
                   style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.primary,
+                    color: context.colors.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -121,13 +122,13 @@ class _CommentsPageState extends State<CommentsPage> {
                 vertical: 8,
               ),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: context.colors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
               ),
               child: Text(
                 'Mark all read',
                 style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.primary,
+                  color: context.colors.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -138,7 +139,7 @@ class _CommentsPageState extends State<CommentsPage> {
     );
   }
 
-  Widget _buildTabBar() {
+  Widget _buildTabBar(BuildContext context) {
     const activeColor = Color(0xFF1A1D2E);
 
     return Container(
@@ -180,7 +181,7 @@ class _CommentsPageState extends State<CommentsPage> {
                       fontWeight: FontWeight.w700,
                       color: isActive
                           ? Colors.white
-                          : AppColors.textSecondary,
+                          : context.colors.textSecondary,
                     ),
                   ),
                 ),
@@ -192,7 +193,7 @@ class _CommentsPageState extends State<CommentsPage> {
     );
   }
 
-  Widget _buildCommentsList() {
+  Widget _buildCommentsList(BuildContext context) {
     final comments = _filteredComments;
 
     if (comments.isEmpty) {
@@ -203,13 +204,13 @@ class _CommentsPageState extends State<CommentsPage> {
             Icon(
               Icons.chat_bubble_outline_rounded,
               size: 56,
-              color: AppColors.textHint.withValues(alpha: 0.4),
+              color: context.colors.textHint.withValues(alpha: 0.4),
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               'No comments here',
               style: AppTypography.bodyLarge.copyWith(
-                color: AppColors.textHint,
+                color: context.colors.textHint,
               ),
             ),
           ],
@@ -246,12 +247,12 @@ class _CommentCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           // Subtle left accent for unread comments
           border: !comment.isRead
-              ? const Border(
-                  left: BorderSide(color: AppColors.primary, width: 3),
+              ? Border(
+                  left: BorderSide(color: context.colors.primary, width: 3),
                 )
               : null,
           boxShadow: [
@@ -265,11 +266,11 @@ class _CommentCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTopRow(),
+            _buildTopRow(context),
             const SizedBox(height: 10),
-            _buildCommentBody(),
+            _buildCommentBody(context),
             const SizedBox(height: 10),
-            _buildProjectTag(),
+            _buildProjectTag(context),
           ],
         ),
       ),
@@ -277,7 +278,7 @@ class _CommentCard extends StatelessWidget {
   }
 
   /// Commenter avatar, name, time, and unread dot
-  Widget _buildTopRow() {
+  Widget _buildTopRow(BuildContext context) {
     return Row(
       children: [
         // Avatar
@@ -309,11 +310,14 @@ class _CommentCard extends StatelessWidget {
                 comment.authorName,
                 style: AppTypography.labelMedium.copyWith(
                   fontWeight: FontWeight.w700,
+                  color: context.colors.textPrimary,
                 ),
               ),
               Text(
                 comment.timeAgo,
-                style: AppTypography.caption,
+                style: AppTypography.caption.copyWith(
+                  color: context.colors.textHint,
+                ),
               ),
             ],
           ),
@@ -323,20 +327,20 @@ class _CommentCard extends StatelessWidget {
           Container(
             width: 10,
             height: 10,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primary,
+              color: context.colors.primary,
             ),
           ),
       ],
     );
   }
 
-  Widget _buildCommentBody() {
+  Widget _buildCommentBody(BuildContext context) {
     return Text(
       comment.text,
       style: AppTypography.bodyMedium.copyWith(
-        color: AppColors.textPrimary,
+        color: context.colors.textPrimary,
         height: 1.5,
       ),
       maxLines: 3,
@@ -345,7 +349,7 @@ class _CommentCard extends StatelessWidget {
   }
 
   /// Shows which project this comment belongs to
-  Widget _buildProjectTag() {
+  Widget _buildProjectTag(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -365,7 +369,7 @@ class _CommentCard extends StatelessWidget {
               comment.projectName,
               style: AppTypography.bodySmall.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
               overflow: TextOverflow.ellipsis,
             ),

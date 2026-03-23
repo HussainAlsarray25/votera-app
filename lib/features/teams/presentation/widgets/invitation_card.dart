@@ -27,7 +27,7 @@ class InvitationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: AppColors.secondary.withValues(alpha: 0.08),
+            color: context.colors.secondary.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -35,17 +35,17 @@ class InvitationCard extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           border: Border.all(
-            color: AppColors.secondary.withValues(alpha: 0.2),
+            color: context.colors.secondary.withValues(alpha: 0.2),
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _InvitationHeader(invitation: invitation),
-            const Divider(height: 1, thickness: 1, color: AppColors.divider),
+            Divider(height: 1, thickness: 1, color: context.colors.divider),
             _InvitationActions(
               onAccept: onAccept,
               onDecline: onDecline,
@@ -77,8 +77,8 @@ class _InvitationHeader extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.secondary, Color(0xFFEC4899)],
+              gradient: LinearGradient(
+                colors: [context.colors.secondary, const Color(0xFFEC4899)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -95,19 +95,27 @@ class _InvitationHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Team Invitation', style: AppTypography.labelMedium),
+                Text(
+                  'Team Invitation',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: context.colors.textPrimary,
+                  ),
+                ),
                 const SizedBox(height: 2),
                 Text(
                   'Team: ${invitation.teamId}',
-                  style: AppTypography.bodySmall
-                      .copyWith(color: AppColors.textSecondary),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: context.colors.textSecondary,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Invited by: ${invitation.invitedBy}',
-                  style: AppTypography.caption,
+                  style: AppTypography.caption.copyWith(
+                    color: context.colors.textSecondary,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -129,13 +137,13 @@ class _PendingBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: AppColors.warning.withValues(alpha: 0.12),
+        color: context.colors.warning.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
       ),
       child: Text(
         'Pending',
         style: AppTypography.caption.copyWith(
-          color: AppColors.warning,
+          color: context.colors.warning,
           fontWeight: FontWeight.w700,
           fontSize: 10,
         ),
@@ -167,7 +175,7 @@ class _InvitationActions extends StatelessWidget {
             child: _ActionButton(
               label: 'Decline',
               icon: Icons.close_rounded,
-              color: AppColors.error,
+              color: context.colors.error,
               onPressed: isLoading ? null : onDecline,
             ),
           ),
@@ -176,7 +184,7 @@ class _InvitationActions extends StatelessWidget {
             child: _ActionButton(
               label: 'Accept',
               icon: Icons.check_rounded,
-              color: AppColors.success,
+              color: context.colors.success,
               filled: true,
               onPressed: isLoading ? null : onAccept,
             ),

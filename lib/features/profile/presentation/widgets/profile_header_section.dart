@@ -25,9 +25,10 @@ class ProfileHeaderSection extends StatelessWidget {
 
           return Column(
             children: [
-              _buildAvatar(),
+              _buildAvatar(context),
               const SizedBox(height: 16),
               _buildNameAndRole(
+                context: context,
                 name: name,
                 subtitle: subtitle,
                 isLoading: isLoading,
@@ -39,16 +40,16 @@ class ProfileHeaderSection extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar() {
+  Widget _buildAvatar(BuildContext context) {
     return Container(
       width: 100,
       height: 100,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: AppColors.primaryGradient,
+        gradient: context.colors.primaryGradient,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
+            color: context.colors.primary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -56,15 +57,15 @@ class ProfileHeaderSection extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(3),
       child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.surface,
+          color: context.colors.surface,
         ),
-        child: const Center(
+        child: Center(
           child: Icon(
             Icons.person_rounded,
             size: 48,
-            color: AppColors.primary,
+            color: context.colors.primary,
           ),
         ),
       ),
@@ -72,6 +73,7 @@ class ProfileHeaderSection extends StatelessWidget {
   }
 
   Widget _buildNameAndRole({
+    required BuildContext context,
     required String? name,
     required String? subtitle,
     required bool isLoading,
@@ -83,7 +85,7 @@ class ProfileHeaderSection extends StatelessWidget {
             width: 140,
             height: 20,
             decoration: BoxDecoration(
-              color: AppColors.border,
+              color: context.colors.border,
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -92,7 +94,7 @@ class ProfileHeaderSection extends StatelessWidget {
             width: 180,
             height: 14,
             decoration: BoxDecoration(
-              color: AppColors.border,
+              color: context.colors.border,
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -110,6 +112,7 @@ class ProfileHeaderSection extends StatelessWidget {
               style: AppTypography.h2.copyWith(
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
+                color: context.colors.textPrimary,
               ),
             ),
             const SizedBox(width: 6),
@@ -121,13 +124,13 @@ class ProfileHeaderSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.08),
+              color: context.colors.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               subtitle,
               style: AppTypography.bodySmall.copyWith(
-                color: AppColors.primary,
+                color: context.colors.primary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -136,5 +139,4 @@ class ProfileHeaderSection extends StatelessWidget {
       ],
     );
   }
-
 }

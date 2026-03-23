@@ -56,7 +56,7 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
         }
 
         if (state is ProjectsError) {
-          return _buildErrorState(state.message);
+          return _buildErrorState(context, state.message);
         }
 
         if (state is ProjectsLoaded) {
@@ -116,14 +116,19 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
     );
   }
 
-  Widget _buildErrorState(String message) {
+  Widget _buildErrorState(BuildContext context, String message) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+          Icon(Icons.error_outline, size: 48, color: context.colors.error),
           const SizedBox(height: AppSpacing.md),
-          Text(message, style: AppTypography.bodyMedium),
+          Text(
+            message,
+            style: AppTypography.bodyMedium.copyWith(
+              color: context.colors.textSecondary,
+            ),
+          ),
           const SizedBox(height: AppSpacing.md),
           TextButton(
             onPressed: () => context

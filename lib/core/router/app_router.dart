@@ -21,6 +21,7 @@ import 'package:votera/features/profile/presentation/pages/profile_page.dart';
 import 'package:votera/features/project_details/presentation/pages/project_details_page.dart';
 import 'package:votera/features/splash/presentation/pages/splash_page.dart';
 import 'package:votera/features/teams/presentation/pages/team_detail_page.dart';
+import 'package:votera/features/settings/presentation/pages/settings_page.dart';
 import 'package:votera/features/teams/presentation/pages/teams_page.dart';
 
 class AppRouter {
@@ -92,6 +93,10 @@ class AppRouter {
           GoRoute(
             path: '/profile',
             builder: (context, state) => const ProfilePage(),
+          ),
+          GoRoute(
+            path: '/settings',
+            builder: (context, state) => const SettingsPage(),
           ),
         ],
       ),

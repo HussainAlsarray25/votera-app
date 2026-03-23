@@ -84,7 +84,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: BackButton(color: AppColors.textPrimary),
+        leading: BackButton(color: context.colors.textPrimary),
       ),
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
@@ -95,7 +95,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.error,
+                backgroundColor: context.colors.error,
               ),
             );
           }
@@ -128,17 +128,25 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
 
     return Column(
       children: [
-        Text(title, style: AppTypography.h1, textAlign: TextAlign.center),
+        Text(
+          title,
+          style: AppTypography.h1.copyWith(color: context.colors.textPrimary),
+          textAlign: TextAlign.center,
+        ),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'We sent a 6-digit code to',
-          style: AppTypography.bodyMedium,
+          style: AppTypography.bodyMedium.copyWith(
+            color: context.colors.textSecondary,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
           widget.identifier,
-          style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
+          style: AppTypography.labelMedium.copyWith(
+            color: context.colors.primary,
+          ),
           textAlign: TextAlign.center,
         ),
       ],
@@ -162,17 +170,17 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
               maxLength: 1,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
                 height: 1,
               ),
               decoration: InputDecoration(
                 counterText: '',
                 contentPadding: EdgeInsets.zero,
                 filled: true,
-                fillColor: AppColors.background,
+                fillColor: context.colors.background,
                 border: OutlineInputBorder(
                   borderRadius:
                       BorderRadius.circular(AppSpacing.radiusMd),
@@ -181,8 +189,8 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius:
                       BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: const BorderSide(
-                    color: AppColors.primary,
+                  borderSide: BorderSide(
+                    color: context.colors.primary,
                     width: 2,
                   ),
                 ),

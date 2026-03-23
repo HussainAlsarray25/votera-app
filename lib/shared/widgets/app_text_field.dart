@@ -34,7 +34,12 @@ class AppTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTypography.labelMedium),
+        Text(
+          label,
+          style: AppTypography.labelMedium.copyWith(
+            color: context.colors.textPrimary,
+          ),
+        ),
         const SizedBox(height: AppSpacing.sm),
         TextFormField(
           controller: controller,
@@ -43,11 +48,13 @@ class AppTextField extends StatelessWidget {
           validator: validator,
           onChanged: onChanged,
           maxLines: maxLines,
-          style: AppTypography.bodyLarge,
+          style: AppTypography.bodyLarge.copyWith(
+            color: context.colors.textPrimary,
+          ),
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: prefixIcon != null
-                ? Icon(prefixIcon, color: AppColors.textHint, size: 20)
+                ? Icon(prefixIcon, color: context.colors.textHint, size: 20)
                 : null,
             suffixIcon: suffixIcon,
           ),

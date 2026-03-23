@@ -68,11 +68,13 @@ class _EmptyStateState extends State<EmptyState>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildAnimatedIcon(),
+            _buildAnimatedIcon(context),
             const SizedBox(height: AppSpacing.lg),
             Text(
               widget.title,
-              style: AppTypography.h3,
+              style: AppTypography.h3.copyWith(
+                color: context.colors.textPrimary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -81,21 +83,21 @@ class _EmptyStateState extends State<EmptyState>
               child: Text(
                 widget.subtitle,
                 style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textHint,
+                  color: context.colors.textHint,
                   height: 1.6,
                 ),
                 textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            _buildPullHint(),
+            _buildPullHint(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAnimatedIcon() {
+  Widget _buildAnimatedIcon(BuildContext context) {
     return AnimatedBuilder(
       animation: _float,
       builder: (context, child) {
@@ -104,11 +106,11 @@ class _EmptyStateState extends State<EmptyState>
           child: child,
         );
       },
-      child: _buildIconBubble(),
+      child: _buildIconBubble(context),
     );
   }
 
-  Widget _buildIconBubble() {
+  Widget _buildIconBubble(BuildContext context) {
     return Container(
       width: 130,
       height: 130,
@@ -116,8 +118,8 @@ class _EmptyStateState extends State<EmptyState>
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            AppColors.primary.withValues(alpha: 0.06),
-            AppColors.secondary.withValues(alpha: 0.06),
+            context.colors.primary.withValues(alpha: 0.06),
+            context.colors.secondary.withValues(alpha: 0.06),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -131,15 +133,15 @@ class _EmptyStateState extends State<EmptyState>
             shape: BoxShape.circle,
             gradient: LinearGradient(
               colors: [
-                AppColors.primary.withValues(alpha: 0.12),
-                AppColors.secondary.withValues(alpha: 0.12),
+                context.colors.primary.withValues(alpha: 0.12),
+                context.colors.secondary.withValues(alpha: 0.12),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.08),
+                color: context.colors.primary.withValues(alpha: 0.08),
                 blurRadius: 20,
                 spreadRadius: 4,
               ),
@@ -148,7 +150,7 @@ class _EmptyStateState extends State<EmptyState>
           child: Center(
             child: ShaderMask(
               shaderCallback: (bounds) {
-                return AppColors.primaryGradient.createShader(bounds);
+                return context.colors.primaryGradient.createShader(bounds);
               },
               child: Icon(
                 widget.icon,
@@ -163,20 +165,20 @@ class _EmptyStateState extends State<EmptyState>
   }
 
   /// A subtle hint telling the user they can swipe down to refresh.
-  Widget _buildPullHint() {
+  Widget _buildPullHint(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           Icons.arrow_downward_rounded,
           size: 14,
-          color: AppColors.textHint.withValues(alpha: 0.6),
+          color: context.colors.textHint.withValues(alpha: 0.6),
         ),
         const SizedBox(width: 6),
         Text(
           'Pull down to refresh',
           style: AppTypography.caption.copyWith(
-            color: AppColors.textHint.withValues(alpha: 0.6),
+            color: context.colors.textHint.withValues(alpha: 0.6),
           ),
         ),
       ],

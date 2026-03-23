@@ -47,7 +47,7 @@ class CategoriesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: CenteredContent(
           child: Padding(
@@ -55,7 +55,7 @@ class CategoriesPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(),
+                _buildHeader(context),
                 const SizedBox(height: AppSpacing.lg),
                 Expanded(child: _buildGrid()),
               ],
@@ -66,7 +66,7 @@ class CategoriesPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -75,12 +75,15 @@ class CategoriesPage extends StatelessWidget {
           style: AppTypography.h1.copyWith(
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
+            color: context.colors.textPrimary,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           'Browse projects by category',
-          style: AppTypography.bodyMedium,
+          style: AppTypography.bodyMedium.copyWith(
+            color: context.colors.textSecondary,
+          ),
         ),
       ],
     );
@@ -125,7 +128,7 @@ class _CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -144,12 +147,15 @@ class _CategoryCard extends StatelessWidget {
             category.name,
             style: AppTypography.labelMedium.copyWith(
               fontWeight: FontWeight.w700,
+              color: context.colors.textPrimary,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             '${category.count} projects',
-            style: AppTypography.bodySmall,
+            style: AppTypography.bodySmall.copyWith(
+              color: context.colors.textSecondary,
+            ),
           ),
         ],
       ),

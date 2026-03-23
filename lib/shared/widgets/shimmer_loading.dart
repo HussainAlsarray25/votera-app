@@ -39,17 +39,18 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
 
   @override
   Widget build(BuildContext context) {
+    // Use theme-aware surface and border colors so the shimmer adapts to
+    // both light and dark modes.
+    final baseColor = context.colors.surface;
+    final highlightColor = context.colors.border;
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
         return ShaderMask(
           shaderCallback: (bounds) {
             return LinearGradient(
-              colors: const [
-                Color(0xFFE2E8F0),
-                Color(0xFFF1F5F9),
-                Color(0xFFE2E8F0),
-              ],
+              colors: [baseColor, highlightColor, baseColor],
               stops: [
                 _controller.value - 0.3,
                 _controller.value,
@@ -76,7 +77,7 @@ class ShimmerCard extends StatelessWidget {
       child: Container(
         padding: AppSpacing.cardPadding,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
         child: Column(
@@ -86,7 +87,7 @@ class ShimmerCard extends StatelessWidget {
             Container(
               height: 140,
               decoration: BoxDecoration(
-                color: AppColors.border,
+                color: context.colors.border,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
             ),
@@ -96,7 +97,7 @@ class ShimmerCard extends StatelessWidget {
               height: 16,
               width: 180,
               decoration: BoxDecoration(
-                color: AppColors.border,
+                color: context.colors.border,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -106,7 +107,7 @@ class ShimmerCard extends StatelessWidget {
               height: 12,
               width: 120,
               decoration: BoxDecoration(
-                color: AppColors.border,
+                color: context.colors.border,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),

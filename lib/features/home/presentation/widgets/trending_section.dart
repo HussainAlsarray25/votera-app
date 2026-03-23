@@ -29,7 +29,7 @@ class TrendingSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(),
+        _buildSectionHeader(context),
         const SizedBox(height: AppSpacing.sm),
         SizedBox(
           height: 220,
@@ -56,7 +56,7 @@ class TrendingSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader() {
+  Widget _buildSectionHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Row(
@@ -64,15 +64,16 @@ class TrendingSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.local_fire_department,
-                color: AppColors.error,
+                color: context.colors.error,
                 size: 22,
               ),
               const SizedBox(width: 6),
               Text(
                 'Trending Now',
                 style: AppTypography.h3.copyWith(
+                  color: context.colors.textPrimary,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -81,7 +82,7 @@ class TrendingSection extends StatelessWidget {
           Text(
             'See all',
             style: AppTypography.labelMedium.copyWith(
-              color: AppColors.primary,
+              color: context.colors.primary,
             ),
           ),
         ],
@@ -108,7 +109,7 @@ class _TrendingCard extends StatelessWidget {
       child: Container(
         width: 220,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           boxShadow: [
             BoxShadow(
@@ -122,7 +123,7 @@ class _TrendingCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildCardImage(),
-            _buildCardInfo(),
+            _buildCardInfo(context),
           ],
         ),
       ),
@@ -160,7 +161,7 @@ class _TrendingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCardInfo() {
+  Widget _buildCardInfo(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       child: Column(
@@ -169,6 +170,7 @@ class _TrendingCard extends StatelessWidget {
           Text(
             project.title,
             style: AppTypography.labelMedium.copyWith(
+              color: context.colors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
             maxLines: 1,
@@ -179,7 +181,10 @@ class _TrendingCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               project.description!,
-              style: AppTypography.bodySmall.copyWith(height: 1.4),
+              style: AppTypography.bodySmall.copyWith(
+                color: context.colors.textSecondary,
+                height: 1.4,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

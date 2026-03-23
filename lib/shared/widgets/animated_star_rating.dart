@@ -110,11 +110,13 @@ class _AnimatedStarRatingState extends State<AnimatedStarRating>
               child: Icon(
                 isFilled ? Icons.star_rounded : Icons.star_outline_rounded,
                 size: widget.size,
-                color: isFilled ? AppColors.accent : AppColors.textHint,
+                color: isFilled
+                    ? context.colors.accent
+                    : context.colors.textHint,
                 shadows: isFilled
                     ? [
                         Shadow(
-                          color: AppColors.accent.withValues(alpha: 0.4),
+                          color: context.colors.accent.withValues(alpha: 0.4),
                           blurRadius: 8,
                         ),
                       ]

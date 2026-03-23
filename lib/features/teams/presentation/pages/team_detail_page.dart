@@ -41,7 +41,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: BlocBuilder<TeamsCubit, TeamsState>(
         bloc: _cubit,
         builder: (context, state) {
@@ -73,9 +73,9 @@ class _LoadingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: AppColors.background,
-      body: Center(child: AppLoadingIndicator()),
+    return Scaffold(
+      backgroundColor: context.colors.background,
+      body: const Center(child: AppLoadingIndicator()),
     );
   }
 }
@@ -89,23 +89,25 @@ class _ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(backgroundColor: AppColors.surface),
+      backgroundColor: context.colors.background,
+      appBar: AppBar(backgroundColor: context.colors.surface),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.error_outline_rounded,
                 size: 52,
-                color: AppColors.error,
+                color: context.colors.error,
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
                 message,
-                style: AppTypography.bodyMedium,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: context.colors.textSecondary,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.md),
@@ -273,18 +275,26 @@ class _DescriptionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('About', style: AppTypography.labelLarge),
+          Text(
+            'About',
+            style: AppTypography.labelLarge.copyWith(
+              color: context.colors.textPrimary,
+            ),
+          ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             description,
-            style: AppTypography.bodyMedium.copyWith(height: 1.6),
+            style: AppTypography.bodyMedium.copyWith(
+              color: context.colors.textSecondary,
+              height: 1.6,
+            ),
           ),
         ],
       ),
@@ -304,7 +314,9 @@ class _MembersCard extends StatelessWidget {
       children: [
         Text(
           'Members (${team.members.length})',
-          style: AppTypography.labelLarge,
+          style: AppTypography.labelLarge.copyWith(
+            color: context.colors.textPrimary,
+          ),
         ),
         const SizedBox(height: AppSpacing.sm),
         ...team.members.map(

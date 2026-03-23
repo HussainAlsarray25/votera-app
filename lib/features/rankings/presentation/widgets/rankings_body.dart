@@ -106,8 +106,8 @@ class _RankingsBodyState extends State<RankingsBody> {
   }
 
   Widget _buildRankingsLabel() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
@@ -115,7 +115,8 @@ class _RankingsBodyState extends State<RankingsBody> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w800,
-            color: AppColors.textHint,
+            // textHint is appropriate for a muted section label
+            color: context.colors.textHint,
             letterSpacing: 1.5,
           ),
         ),
@@ -128,9 +129,14 @@ class _RankingsBodyState extends State<RankingsBody> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+          Icon(Icons.error_outline, size: 48, color: context.colors.error),
           const SizedBox(height: AppSpacing.md),
-          Text(message, style: AppTypography.bodyMedium),
+          Text(
+            message,
+            style: AppTypography.bodyMedium.copyWith(
+              color: context.colors.textSecondary,
+            ),
+          ),
           const SizedBox(height: AppSpacing.md),
           TextButton(
             onPressed: () =>

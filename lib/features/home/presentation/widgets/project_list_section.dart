@@ -63,7 +63,7 @@ class _ProjectListItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           boxShadow: [
             BoxShadow(
@@ -77,11 +77,11 @@ class _ProjectListItem extends StatelessWidget {
           children: [
             _buildIcon(),
             const SizedBox(width: 14),
-            Expanded(child: _buildContent()),
-            const Icon(
+            Expanded(child: _buildContent(context)),
+            Icon(
               Icons.chevron_right_rounded,
               size: 20,
-              color: AppColors.textHint,
+              color: context.colors.textHint,
             ),
           ],
         ),
@@ -116,13 +116,14 @@ class _ProjectListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           project.title,
           style: AppTypography.labelMedium.copyWith(
+            color: context.colors.textPrimary,
             fontWeight: FontWeight.w700,
           ),
           overflow: TextOverflow.ellipsis,
@@ -131,7 +132,9 @@ class _ProjectListItem extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             project.description!,
-            style: AppTypography.bodySmall,
+            style: AppTypography.bodySmall.copyWith(
+              color: context.colors.textSecondary,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

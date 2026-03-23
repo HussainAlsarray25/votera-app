@@ -54,7 +54,7 @@ class ExhibitionCard extends StatelessWidget {
           ],
         ),
         child: Material(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
@@ -286,7 +286,7 @@ class _CardBody extends StatelessWidget {
           Text(
             event.description,
             style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
               height: 1.5,
             ),
             maxLines: 2,
@@ -312,15 +312,16 @@ class _MetadataRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _buildPhaseChip(),
+        _buildPhaseChip(context),
         if (_hasTeamInfo()) ...[
-          _dot(),
-          _buildTeamChip(),
+          _dot(context),
+          _buildTeamChip(context),
         ],
         if (event.status == EventStatus.voting &&
             event.maxCommunityVotes != null) ...[
-          _dot(),
+          _dot(context),
           _iconLabel(
+            context,
             Icons.how_to_vote_outlined,
             '${event.maxCommunityVotes} votes',
           ),
@@ -330,21 +331,21 @@ class _MetadataRow extends StatelessWidget {
           width: 28,
           height: 28,
           decoration: BoxDecoration(
-            color: AppColors.background,
+            color: context.colors.background,
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.arrow_forward_rounded,
             size: 16,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildPhaseChip() {
-    final (icon, label, color) = _phaseInfo();
+  Widget _buildPhaseChip(BuildContext context) {
+    final (icon, label, color) = _phaseInfo(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -361,20 +362,20 @@ class _MetadataRow extends StatelessWidget {
     );
   }
 
-  Widget _buildTeamChip() {
-    return _iconLabel(Icons.group_outlined, _teamLabel());
+  Widget _buildTeamChip(BuildContext context) {
+    return _iconLabel(context, Icons.group_outlined, _teamLabel());
   }
 
-  Widget _iconLabel(IconData icon, String label) {
+  Widget _iconLabel(BuildContext context, IconData icon, String label) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: AppColors.textHint),
+        Icon(icon, size: 14, color: context.colors.textHint),
         const SizedBox(width: 4),
         Text(
           label,
           style: AppTypography.caption.copyWith(
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -383,15 +384,15 @@ class _MetadataRow extends StatelessWidget {
   }
 
   /// Small separator dot between metadata items.
-  Widget _dot() {
+  Widget _dot(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Container(
         width: 3,
         height: 3,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.textHint,
+          color: context.colors.textHint,
         ),
       ),
     );
@@ -410,7 +411,7 @@ class _MetadataRow extends StatelessWidget {
   }
 
   /// Returns (icon, label, color) for the current event phase.
-  (IconData, String, Color) _phaseInfo() {
+  (IconData, String, Color) _phaseInfo(BuildContext context) {
     switch (event.status) {
       case EventStatus.open:
         return (
@@ -428,19 +429,19 @@ class _MetadataRow extends StatelessWidget {
         return (
           Icons.schedule_rounded,
           'Coming soon',
-          AppColors.primary,
+          context.colors.primary,
         );
       case EventStatus.closed:
         return (
           Icons.check_circle_outline_rounded,
           'Ended',
-          AppColors.textHint,
+          context.colors.textHint,
         );
       case EventStatus.archived:
         return (
           Icons.inventory_2_outlined,
           'Archived',
-          AppColors.textHint,
+          context.colors.textHint,
         );
     }
   }

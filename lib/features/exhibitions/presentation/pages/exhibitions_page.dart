@@ -19,7 +19,7 @@ class ExhibitionsPage extends StatelessWidget {
     return BlocProvider<EventsCubit>(
       create: (_) => sl<EventsCubit>()..loadEvents(),
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.colors.background,
         body: SafeArea(
           child: CenteredContent(
             child: BlocBuilder<EventsCubit, EventsState>(
@@ -61,12 +61,15 @@ class ExhibitionsPage extends StatelessWidget {
                 style: AppTypography.h1.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.5,
+                  color: context.colors.textPrimary,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 'Explore exhibitions & events',
-                style: AppTypography.bodyMedium,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: context.colors.textSecondary,
+                ),
               ),
             ],
           ),
@@ -146,9 +149,14 @@ class _EventsListSliver extends StatelessWidget {
       padding: const EdgeInsets.only(top: 80),
       child: Column(
         children: [
-          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+          Icon(Icons.error_outline, size: 48, color: context.colors.error),
           const SizedBox(height: AppSpacing.md),
-          Text(message, style: AppTypography.bodyMedium),
+          Text(
+            message,
+            style: AppTypography.bodyMedium.copyWith(
+              color: context.colors.textSecondary,
+            ),
+          ),
           const SizedBox(height: AppSpacing.md),
           TextButton(
             onPressed: () => context.read<EventsCubit>().loadEvents(),

@@ -16,45 +16,46 @@ class OnboardingSlide extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildAccentLine(),
+          _buildAccentLine(context),
           const SizedBox(height: AppSpacing.lg),
-          _buildTitle(),
+          _buildTitle(context),
           const SizedBox(height: AppSpacing.md),
-          _buildDescription(),
+          _buildDescription(context),
         ],
       ),
     );
   }
 
   // Small gradient bar as a decorative accent above the title
-  Widget _buildAccentLine() {
+  Widget _buildAccentLine(BuildContext context) {
     return Container(
       width: 48,
       height: 4,
       decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
+        gradient: context.colors.primaryGradient,
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
       ),
     );
   }
 
-  Widget _buildTitle() {
+  Widget _buildTitle(BuildContext context) {
     return Text(
       data.title,
       style: AppTypography.h1.copyWith(
         fontSize: 30,
         letterSpacing: -0.5,
+        color: context.colors.textPrimary,
       ),
       textAlign: TextAlign.center,
     );
   }
 
-  Widget _buildDescription() {
+  Widget _buildDescription(BuildContext context) {
     return Text(
       data.description,
       style: AppTypography.bodyMedium.copyWith(
         height: 1.7,
-        color: AppColors.textHint,
+        color: context.colors.textHint,
       ),
       textAlign: TextAlign.center,
     );

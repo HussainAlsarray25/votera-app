@@ -37,11 +37,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildMobileLayout() {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () => context.read<ProfileCubit>().forceRefresh(),
-          color: AppColors.primary,
+          color: context.colors.primary,
           child: const SingleChildScrollView(
             physics: AlwaysScrollableScrollPhysics(),
             child: Column(
@@ -62,12 +62,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildWideLayout() {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: CenteredContent(
           child: RefreshIndicator(
             onRefresh: () => context.read<ProfileCubit>().forceRefresh(),
-            color: AppColors.primary,
+            color: context.colors.primary,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(AppSpacing.lg),

@@ -67,21 +67,22 @@ class _ExhibitionDetailPageState extends State<ExhibitionDetailPage>
         BlocProvider<VotingCubit>(create: (_) => sl<VotingCubit>()),
       ],
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.colors.background,
         appBar: AppBar(
-          backgroundColor: AppColors.background,
+          backgroundColor: context.colors.background,
           surfaceTintColor: Colors.transparent,
           title: Text(
             'Exhibition',
             style: AppTypography.h3.copyWith(
               fontWeight: FontWeight.w700,
+              color: context.colors.textPrimary,
             ),
           ),
           bottom: TabBar(
             controller: _tabController,
-            labelColor: AppColors.textPrimary,
-            unselectedLabelColor: AppColors.textHint,
-            indicatorColor: AppColors.primary,
+            labelColor: context.colors.textPrimary,
+            unselectedLabelColor: context.colors.textHint,
+            indicatorColor: context.colors.primary,
             dividerHeight: 0,
             indicatorWeight: 3,
             labelStyle: const TextStyle(

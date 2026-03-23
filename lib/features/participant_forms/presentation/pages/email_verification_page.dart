@@ -83,8 +83,13 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: BackButton(color: AppColors.textPrimary),
-        title: Text('Institutional Email', style: AppTypography.labelLarge),
+        leading: BackButton(color: context.colors.textPrimary),
+        title: Text(
+          'Institutional Email',
+          style: AppTypography.labelLarge.copyWith(
+            color: context.colors.textPrimary,
+          ),
+        ),
       ),
       body: BlocListener<FormsCubit, FormsState>(
         listener: (context, state) {
@@ -93,9 +98,9 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             // so the Teams tab and other role-gated UI update immediately.
             context.read<ProfileCubit>().forceRefresh();
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Account verified! Participant role granted.'),
-                backgroundColor: AppColors.success,
+              SnackBar(
+                content: const Text('Account verified! Participant role granted.'),
+                backgroundColor: context.colors.success,
               ),
             );
             context.go('/profile');
@@ -103,7 +108,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.error,
+                backgroundColor: context.colors.error,
               ),
             );
           }
@@ -138,13 +143,17 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           const SizedBox(height: AppSpacing.xl),
           Text(
             'Enter Your Institutional Email',
-            style: AppTypography.h1,
+            style: AppTypography.h1.copyWith(
+              color: context.colors.textPrimary,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             'We will send a 6-digit verification code to your university email.',
-            style: AppTypography.bodyMedium,
+            style: AppTypography.bodyMedium.copyWith(
+              color: context.colors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xxl),
@@ -184,19 +193,25 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
         const SizedBox(height: AppSpacing.xl),
         Text(
           'Enter Verification Code',
-          style: AppTypography.h1,
+          style: AppTypography.h1.copyWith(
+            color: context.colors.textPrimary,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'We sent a 6-digit code to',
-          style: AppTypography.bodyMedium,
+          style: AppTypography.bodyMedium.copyWith(
+            color: context.colors.textSecondary,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
           email,
-          style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
+          style: AppTypography.labelMedium.copyWith(
+            color: context.colors.primary,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.xxl),
@@ -231,25 +246,25 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
               maxLength: 1,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
                 height: 1,
               ),
               decoration: InputDecoration(
                 counterText: '',
                 contentPadding: EdgeInsets.zero,
                 filled: true,
-                fillColor: AppColors.background,
+                fillColor: context.colors.background,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: const BorderSide(
-                    color: AppColors.primary,
+                  borderSide: BorderSide(
+                    color: context.colors.primary,
                     width: 2,
                   ),
                 ),

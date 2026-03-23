@@ -79,9 +79,9 @@ class _CreateEditTeamSheetState extends State<_CreateEditTeamSheet> {
         AppSpacing.md,
         AppSpacing.md + bottomInset,
       ),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),
         ),
       ),
@@ -99,21 +99,23 @@ class _CreateEditTeamSheetState extends State<_CreateEditTeamSheet> {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: AppSpacing.lg),
                 decoration: BoxDecoration(
-                  color: AppColors.border,
+                  color: context.colors.border,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                 ),
               ),
             ),
             Text(
               _isEditing ? 'Edit Team' : 'Create a Team',
-              style: AppTypography.h3,
+              style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               _isEditing
                   ? 'Update your team details below.'
                   : 'Give your team a name and an optional description.',
-              style: AppTypography.bodyMedium,
+              style: AppTypography.bodyMedium.copyWith(
+                color: context.colors.textSecondary,
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
             AppTextField(
@@ -153,7 +155,7 @@ class _CreateEditTeamSheetState extends State<_CreateEditTeamSheet> {
                 child: Text(
                   'Cancel',
                   style: AppTypography.labelMedium.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ),

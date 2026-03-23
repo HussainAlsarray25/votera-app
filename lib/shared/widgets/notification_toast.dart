@@ -46,28 +46,30 @@ class NotificationToast extends StatefulWidget {
 class _NotificationToastState extends State<NotificationToast> {
   @override
   Widget build(BuildContext context) {
-    return _buildContent();
+    return _buildContent(context);
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         boxShadow: AppShadows.cardHover,
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: context.colors.primary.withValues(alpha: 0.2),
+        ),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: context.colors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
             ),
-            child: Icon(widget.icon, color: AppColors.primary, size: 20),
+            child: Icon(widget.icon, color: context.colors.primary, size: 20),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -75,11 +77,18 @@ class _NotificationToastState extends State<NotificationToast> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(widget.title, style: AppTypography.labelMedium),
+                Text(
+                  widget.title,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: context.colors.textPrimary,
+                  ),
+                ),
                 const SizedBox(height: 2),
                 Text(
                   widget.message,
-                  style: AppTypography.bodySmall,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: context.colors.textSecondary,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

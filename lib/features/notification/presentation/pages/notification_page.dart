@@ -26,14 +26,17 @@ class _NotificationView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.colors.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         title: Text(
           'Notifications',
-          style: AppTypography.h3.copyWith(fontWeight: FontWeight.w700),
+          style: AppTypography.h3.copyWith(
+            fontWeight: FontWeight.w700,
+            color: context.colors.textPrimary,
+          ),
         ),
         actions: [
           BlocBuilder<NotificationCubit, NotificationState>(
@@ -52,7 +55,7 @@ class _NotificationView extends StatelessWidget {
                 child: Text(
                   'Mark all read',
                   style: AppTypography.labelMedium.copyWith(
-                    color: AppColors.primary,
+                    color: context.colors.primary,
                   ),
                 ),
               );
@@ -74,17 +77,17 @@ class _NotificationView extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.error_outline,
                         size: 48,
-                        color: AppColors.error,
+                        color: context.colors.error,
                       ),
                       const SizedBox(height: AppSpacing.md),
                       Text(
                         state.message,
                         textAlign: TextAlign.center,
                         style: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: AppSpacing.md),
@@ -103,9 +106,9 @@ class _NotificationView extends StatelessWidget {
               return RefreshIndicator(
                 onRefresh: () async =>
                     context.read<NotificationCubit>().loadNotifications(),
-                color: AppColors.primary,
+                color: context.colors.primary,
                 child: state.notifications.isEmpty
-                    ? _buildEmpty()
+                    ? _buildEmpty(context)
                     : _buildList(context, state.notifications),
               );
             }
@@ -117,7 +120,7 @@ class _NotificationView extends StatelessWidget {
     );
   }
 
-  Widget _buildEmpty() {
+  Widget _buildEmpty(BuildContext context) {
     return ListView(
       children: [
         const SizedBox(height: 120),
@@ -130,25 +133,28 @@ class _NotificationView extends StatelessWidget {
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.08),
+                    color: context.colors.primary.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.notifications_none_outlined,
                     size: 36,
-                    color: AppColors.primary,
+                    color: context.colors.primary,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   'No notifications yet',
-                  style: AppTypography.h3.copyWith(fontWeight: FontWeight.w700),
+                  style: AppTypography.h3.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   'Updates about events, votes, and results will appear here.',
                   style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -242,7 +248,7 @@ class _SectionHeader extends StatelessWidget {
     return Text(
       label,
       style: AppTypography.labelMedium.copyWith(
-        color: AppColors.textHint,
+        color: context.colors.textHint,
         fontWeight: FontWeight.w600,
       ),
     );

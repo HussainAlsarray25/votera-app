@@ -33,7 +33,7 @@ class TelegramLoginButton extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: AppColors.error,
+                  backgroundColor: context.colors.error,
                 ),
               );
             }
@@ -104,7 +104,7 @@ class TelegramLoginButton extends StatelessWidget {
           child: Text(
             'or continue with',
             style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textHint,
+              color: context.colors.textHint,
             ),
           ),
         ),

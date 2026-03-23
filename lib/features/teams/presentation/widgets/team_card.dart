@@ -47,7 +47,7 @@ class TeamCard extends StatelessWidget {
           ],
         ),
         child: Material(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
@@ -161,7 +161,7 @@ class _TeamCardBody extends StatelessWidget {
             Text(
               team.description!,
               style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
                 height: 1.5,
               ),
               maxLines: 2,
@@ -171,17 +171,17 @@ class _TeamCardBody extends StatelessWidget {
           ],
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.group_outlined,
                 size: 14,
-                color: AppColors.textHint,
+                color: context.colors.textHint,
               ),
               const SizedBox(width: 4),
               Text(
                 '${team.members.length} '
                 '${team.members.length == 1 ? 'member' : 'members'}',
                 style: AppTypography.caption.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -190,13 +190,13 @@ class _TeamCardBody extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: AppColors.background,
+                  color: context.colors.background,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_forward_rounded,
                   size: 16,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ],

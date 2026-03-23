@@ -79,12 +79,12 @@ class _TeamsPageState extends State<TeamsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: _buildAppBar(),
+      backgroundColor: context.colors.background,
+      appBar: _buildAppBar(context),
       body: CenteredContent(
         child: Column(
           children: [
-            _buildTabBar(),
+            _buildTabBar(context),
             Expanded(
               child: TabBarView(
                 controller: _tabController,
@@ -108,25 +108,28 @@ class _TeamsPageState extends State<TeamsPage>
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.colors.surface,
       elevation: 0,
-      title: Text('Teams', style: AppTypography.h3),
+      title: Text(
+        'Teams',
+        style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
+      ),
       actions: const [NotificationIconButton()],
     );
   }
 
-  Widget _buildTabBar() {
+  Widget _buildTabBar(BuildContext context) {
     return ColoredBox(
-      color: AppColors.surface,
+      color: context.colors.surface,
       child: TabBar(
         controller: _tabController,
         labelStyle: AppTypography.labelMedium,
         unselectedLabelStyle: AppTypography.bodyMedium,
-        labelColor: AppColors.textPrimary,
-        unselectedLabelColor: AppColors.textHint,
-        indicatorColor: AppColors.secondary,
+        labelColor: context.colors.textPrimary,
+        unselectedLabelColor: context.colors.textHint,
+        indicatorColor: context.colors.secondary,
         indicatorWeight: 3,
         dividerHeight: 0,
         tabs: const [
@@ -299,7 +302,7 @@ class _MyTeamTabState extends State<_MyTeamTab> {
       ],
       child: RefreshIndicator(
         onRefresh: () async => _refresh(),
-        color: AppColors.secondary,
+        color: context.colors.secondary,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
@@ -358,7 +361,7 @@ class _MyTeamTabState extends State<_MyTeamTab> {
                       ),
                     ] else ...[
                       const SizedBox(height: AppSpacing.lg),
-                      const Divider(color: AppColors.border),
+                      Divider(color: context.colors.border),
                       const SizedBox(height: AppSpacing.sm),
                       SizedBox(
                         width: double.infinity,
@@ -370,7 +373,7 @@ class _MyTeamTabState extends State<_MyTeamTab> {
                           ),
                           label: const Text('Leave Team'),
                           style: TextButton.styleFrom(
-                            foregroundColor: AppColors.error,
+                            foregroundColor: context.colors.error,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
                         ),
@@ -572,17 +575,17 @@ class _BrowseTabState extends State<_BrowseTab> {
             bloc: widget.searchCubit,
             builder: (context, state) {
               if (_query.trim().isEmpty) {
-                return _buildIdlePrompt();
+                return _buildIdlePrompt(context);
               }
               if (state is TeamsLoading) {
                 return const Center(child: AppLoadingIndicator());
               }
               if (state is TeamsSearchResults) {
-                if (state.teams.isEmpty) return _buildNoResults();
+                if (state.teams.isEmpty) return _buildNoResults(context);
                 return _buildResults(state.teams);
               }
               if (state is TeamsError) {
-                return _buildError(state.message);
+                return _buildError(context, state.message);
               }
               // Query entered but debounce hasn't fired yet.
               return const Center(child: AppLoadingIndicator(size: 40));
@@ -593,7 +596,7 @@ class _BrowseTabState extends State<_BrowseTab> {
     );
   }
 
-  Widget _buildIdlePrompt() {
+  Widget _buildIdlePrompt(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -605,20 +608,25 @@ class _BrowseTabState extends State<_BrowseTab> {
               height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.secondary.withValues(alpha: 0.08),
+                color: context.colors.secondary.withValues(alpha: 0.08),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.search_rounded,
                 size: 36,
-                color: AppColors.secondary,
+                color: context.colors.secondary,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            Text('Find a Team', style: AppTypography.h3),
+            Text(
+              'Find a Team',
+              style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
+            ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               'Search by team name to discover and join existing teams.',
-              style: AppTypography.bodyMedium,
+              style: AppTypography.bodyMedium.copyWith(
+                color: context.colors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -627,24 +635,29 @@ class _BrowseTabState extends State<_BrowseTab> {
     );
   }
 
-  Widget _buildNoResults() {
+  Widget _buildNoResults(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.group_off_rounded,
               size: 52,
-              color: AppColors.textHint,
+              color: context.colors.textHint,
             ),
             const SizedBox(height: AppSpacing.md),
-            Text('No teams found', style: AppTypography.h3),
+            Text(
+              'No teams found',
+              style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
+            ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               'No teams matched "$_query". Try a different name.',
-              style: AppTypography.bodyMedium,
+              style: AppTypography.bodyMedium.copyWith(
+                color: context.colors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -668,22 +681,24 @@ class _BrowseTabState extends State<_BrowseTab> {
     );
   }
 
-  Widget _buildError(String message) {
+  Widget _buildError(BuildContext context, String message) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline_rounded,
               size: 48,
-              color: AppColors.error,
+              color: context.colors.error,
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               message,
-              style: AppTypography.bodyMedium,
+              style: AppTypography.bodyMedium.copyWith(
+                color: context.colors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -712,7 +727,7 @@ class _TeamHeaderCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
         boxShadow: [
           BoxShadow(
-            color: AppColors.secondary.withValues(alpha: 0.2),
+            color: context.colors.secondary.withValues(alpha: 0.2),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -790,10 +805,10 @@ class _TeamHeaderCard extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.workspace_premium_rounded,
                                 size: 13,
-                                color: AppColors.accentLight,
+                                color: context.colors.accentLight,
                               ),
                               const SizedBox(width: 4),
                               Text(
@@ -884,7 +899,9 @@ class _MembersSection extends StatelessWidget {
           children: [
             Text(
               'Members (${team.members.length})',
-              style: AppTypography.labelLarge,
+              style: AppTypography.labelLarge.copyWith(
+                color: context.colors.textPrimary,
+              ),
             ),
             const Spacer(),
             if (isLeader)
@@ -934,7 +951,12 @@ class _InvitationsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Pending Invitations', style: AppTypography.labelLarge),
+        Text(
+          'Pending Invitations',
+          style: AppTypography.labelLarge.copyWith(
+            color: context.colors.textPrimary,
+          ),
+        ),
         const SizedBox(height: AppSpacing.sm),
         if (isLoading && invitations.isEmpty)
           const Center(
@@ -978,13 +1000,18 @@ class _TeamSettingsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Team Settings', style: AppTypography.labelLarge),
+        Text(
+          'Team Settings',
+          style: AppTypography.labelLarge.copyWith(
+            color: context.colors.textPrimary,
+          ),
+        ),
         const SizedBox(height: AppSpacing.sm),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.colors.surface,
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: context.colors.border),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.04),
@@ -997,36 +1024,36 @@ class _TeamSettingsSection extends StatelessWidget {
             children: [
               _SettingsTile(
                 icon: Icons.edit_outlined,
-                iconColor: AppColors.secondary,
+                iconColor: context.colors.secondary,
                 title: 'Edit Team Info',
                 subtitle: 'Change team name or description',
                 onTap: onEdit,
               ),
-              const Divider(height: 1, indent: 56, color: AppColors.border),
+              Divider(height: 1, indent: 56, color: context.colors.border),
               _SettingsTile(
                 icon: Icons.swap_horiz_rounded,
-                iconColor: AppColors.primary,
+                iconColor: context.colors.primary,
                 title: 'Transfer Leadership',
                 subtitle: 'Assign a new team leader',
                 onTap: onTransfer,
               ),
-              const Divider(height: 1, indent: 56, color: AppColors.border),
+              Divider(height: 1, indent: 56, color: context.colors.border),
               _SettingsTile(
                 icon: Icons.delete_outline_rounded,
-                iconColor: AppColors.error,
+                iconColor: context.colors.error,
                 title: 'Delete Team',
                 subtitle: 'Permanently disband this team',
-                titleColor: AppColors.error,
+                titleColor: context.colors.error,
                 onTap: onDelete,
                 showChevron: false,
               ),
-              const Divider(height: 1, indent: 56, color: AppColors.border),
+              Divider(height: 1, indent: 56, color: context.colors.border),
               _SettingsTile(
                 icon: Icons.exit_to_app_rounded,
-                iconColor: AppColors.error,
+                iconColor: context.colors.error,
                 title: 'Leave Team',
                 subtitle: 'If you are the only member, the team will be deleted',
-                titleColor: AppColors.error,
+                titleColor: context.colors.error,
                 onTap: onLeave,
                 showChevron: false,
               ),
@@ -1086,7 +1113,7 @@ class _SettingsTile extends StatelessWidget {
                   Text(
                     title,
                     style: AppTypography.labelMedium.copyWith(
-                      color: titleColor ?? AppColors.textPrimary,
+                      color: titleColor ?? context.colors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -1095,7 +1122,7 @@ class _SettingsTile extends StatelessWidget {
                     Text(
                       subtitle!,
                       style: AppTypography.caption.copyWith(
-                        color: AppColors.textHint,
+                        color: context.colors.textHint,
                       ),
                     ),
                   ],
@@ -1103,10 +1130,10 @@ class _SettingsTile extends StatelessWidget {
               ),
             ),
             if (showChevron)
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
                 size: 20,
-                color: AppColors.textHint,
+                color: context.colors.textHint,
               ),
           ],
         ),
@@ -1143,13 +1170,18 @@ class _NoTeamView extends StatelessWidget {
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.xl),
-          _buildEmptyIllustration(),
+          _buildEmptyIllustration(context),
           const SizedBox(height: AppSpacing.lg),
-          Text('You are not in a team yet', style: AppTypography.h3),
+          Text(
+            'You are not in a team yet',
+            style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
+          ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             'Create your own team or browse existing ones to join.',
-            style: AppTypography.bodyMedium,
+            style: AppTypography.bodyMedium.copyWith(
+              color: context.colors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -1160,8 +1192,8 @@ class _NoTeamView extends StatelessWidget {
             child: OutlinedButton(
               onPressed: onBrowse,
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.secondary,
-                side: const BorderSide(color: AppColors.secondary),
+                foregroundColor: context.colors.secondary,
+                side: BorderSide(color: context.colors.secondary),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -1177,7 +1209,9 @@ class _NoTeamView extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Pending Invitations',
-                style: AppTypography.labelLarge,
+                style: AppTypography.labelLarge.copyWith(
+                  color: context.colors.textPrimary,
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -1198,7 +1232,7 @@ class _NoTeamView extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyIllustration() {
+  Widget _buildEmptyIllustration(BuildContext context) {
     return Container(
       width: 120,
       height: 120,
@@ -1206,8 +1240,8 @@ class _NoTeamView extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            AppColors.secondary.withValues(alpha: 0.08),
-            AppColors.primary.withValues(alpha: 0.08),
+            context.colors.secondary.withValues(alpha: 0.08),
+            context.colors.primary.withValues(alpha: 0.08),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -1221,17 +1255,17 @@ class _NoTeamView extends StatelessWidget {
             shape: BoxShape.circle,
             gradient: LinearGradient(
               colors: [
-                AppColors.secondary.withValues(alpha: 0.15),
-                AppColors.primary.withValues(alpha: 0.15),
+                context.colors.secondary.withValues(alpha: 0.15),
+                context.colors.primary.withValues(alpha: 0.15),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.group_add_rounded,
             size: 36,
-            color: AppColors.secondary,
+            color: context.colors.secondary,
           ),
         ),
       ),
@@ -1258,11 +1292,11 @@ class _InviteButton extends StatelessWidget {
           vertical: 6,
         ),
         decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient,
+          gradient: context.colors.primaryGradient,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           boxShadow: [
             BoxShadow(
-              color: AppColors.secondary.withValues(alpha: 0.3),
+              color: context.colors.secondary.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -1296,7 +1330,7 @@ class _SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.surface,
+      color: context.colors.surface,
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.md,
         AppSpacing.md,
@@ -1306,12 +1340,14 @@ class _SearchBar extends StatelessWidget {
       child: TextField(
         controller: controller,
         onChanged: onChanged,
-        style: AppTypography.bodyLarge,
+        style: AppTypography.bodyLarge.copyWith(
+          color: context.colors.textPrimary,
+        ),
         decoration: InputDecoration(
           hintText: 'Search teams by name...',
-          prefixIcon: const Icon(
+          prefixIcon: Icon(
             Icons.search_rounded,
-            color: AppColors.textHint,
+            color: context.colors.textHint,
           ),
           suffixIcon: controller.text.isNotEmpty
               ? IconButton(
@@ -1323,7 +1359,7 @@ class _SearchBar extends StatelessWidget {
                 )
               : null,
           filled: true,
-          fillColor: AppColors.background,
+          fillColor: context.colors.background,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
             borderSide: BorderSide.none,
@@ -1372,15 +1408,22 @@ Future<bool?> _showConfirmDialog(
   return showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: Text(title, style: AppTypography.h3),
-      content: Text(message, style: AppTypography.bodyMedium),
+      title: Text(
+        title,
+        style: AppTypography.h3.copyWith(color: ctx.colors.textPrimary),
+      ),
+      content: Text(
+        message,
+        style: AppTypography.bodyMedium.copyWith(color: ctx.colors.textSecondary),
+      ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(false),
           child: Text(
             'Cancel',
-            style: AppTypography.labelMedium
-                .copyWith(color: AppColors.textSecondary),
+            style: AppTypography.labelMedium.copyWith(
+              color: ctx.colors.textSecondary,
+            ),
           ),
         ),
         TextButton(
@@ -1388,7 +1431,7 @@ Future<bool?> _showConfirmDialog(
           child: Text(
             confirmLabel,
             style: AppTypography.labelMedium.copyWith(
-              color: isDestructive ? AppColors.error : AppColors.primary,
+              color: isDestructive ? ctx.colors.error : ctx.colors.primary,
             ),
           ),
         ),
@@ -1408,7 +1451,10 @@ Future<String?> _showInputDialog(
   return showDialog<String>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: Text(title, style: AppTypography.h3),
+      title: Text(
+        title,
+        style: AppTypography.h3.copyWith(color: ctx.colors.textPrimary),
+      ),
       content: TextField(
         controller: controller,
         autofocus: true,
@@ -1416,15 +1462,16 @@ Future<String?> _showInputDialog(
           hintText: hint,
           border: const OutlineInputBorder(),
         ),
-        style: AppTypography.bodyLarge,
+        style: AppTypography.bodyLarge.copyWith(color: ctx.colors.textPrimary),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(),
           child: Text(
             'Cancel',
-            style: AppTypography.labelMedium
-                .copyWith(color: AppColors.textSecondary),
+            style: AppTypography.labelMedium.copyWith(
+              color: ctx.colors.textSecondary,
+            ),
           ),
         ),
         TextButton(
@@ -1434,8 +1481,9 @@ Future<String?> _showInputDialog(
           },
           child: Text(
             confirmLabel,
-            style: AppTypography.labelMedium
-                .copyWith(color: AppColors.primary),
+            style: AppTypography.labelMedium.copyWith(
+              color: ctx.colors.primary,
+            ),
           ),
         ),
       ],
@@ -1452,10 +1500,10 @@ Future<String?> _showMemberPickerSheet(
   return showModalBottomSheet<String>(
     context: context,
     backgroundColor: Colors.transparent,
-    builder: (_) => Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(
+    builder: (ctx) => Container(
+      decoration: BoxDecoration(
+        color: ctx.colors.surface,
+        borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),
         ),
       ),
@@ -1472,7 +1520,7 @@ Future<String?> _showMemberPickerSheet(
                 bottom: AppSpacing.md,
               ),
               decoration: BoxDecoration(
-                color: AppColors.border,
+                color: ctx.colors.border,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
               ),
             ),
@@ -1482,33 +1530,48 @@ Future<String?> _showMemberPickerSheet(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTypography.h3),
+                Text(
+                  title,
+                  style: AppTypography.h3.copyWith(
+                    color: ctx.colors.textPrimary,
+                  ),
+                ),
                 const SizedBox(height: AppSpacing.xs),
-                Text(subtitle, style: AppTypography.bodyMedium),
+                Text(
+                  subtitle,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: ctx.colors.textSecondary,
+                  ),
+                ),
               ],
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          const Divider(height: 1, color: AppColors.border),
+          Divider(height: 1, color: ctx.colors.border),
           ...members.map(
             (m) => ListTile(
               leading: CircleAvatar(
-                backgroundColor: AppColors.secondary.withValues(alpha: 0.15),
+                backgroundColor: ctx.colors.secondary.withValues(alpha: 0.15),
                 child: Text(
                   m.userId.length >= 2
                       ? m.userId.substring(0, 2).toUpperCase()
                       : m.userId.toUpperCase(),
                   style: AppTypography.labelMedium.copyWith(
-                    color: AppColors.secondary,
+                    color: ctx.colors.secondary,
                     fontSize: 13,
                   ),
                 ),
               ),
-              title: Text(m.userId, style: AppTypography.labelMedium),
-              trailing: const Icon(
+              title: Text(
+                m.userId,
+                style: AppTypography.labelMedium.copyWith(
+                  color: ctx.colors.textPrimary,
+                ),
+              ),
+              trailing: Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 14,
-                color: AppColors.textHint,
+                color: ctx.colors.textHint,
               ),
               onTap: () => Navigator.of(context).pop(m.userId),
             ),

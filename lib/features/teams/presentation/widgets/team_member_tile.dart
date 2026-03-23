@@ -32,9 +32,9 @@ class TeamMemberTile extends StatelessWidget {
         vertical: AppSpacing.sm + 2,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Row(
         children: [
@@ -51,7 +51,9 @@ class TeamMemberTile extends StatelessWidget {
                         isCurrentUser
                             ? '${member.userId} (you)'
                             : member.userId,
-                        style: AppTypography.labelMedium,
+                        style: AppTypography.labelMedium.copyWith(
+                          color: context.colors.textPrimary,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -65,7 +67,9 @@ class TeamMemberTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     'Joined ${_formatDate(member.joinedAt!)}',
-                    style: AppTypography.caption,
+                    style: AppTypography.caption.copyWith(
+                      color: context.colors.textSecondary,
+                    ),
                   ),
                 ],
               ],
@@ -74,7 +78,7 @@ class TeamMemberTile extends StatelessWidget {
           if (onRemove != null)
             IconButton(
               icon: const Icon(Icons.person_remove_outlined, size: 20),
-              color: AppColors.error,
+              color: context.colors.error,
               tooltip: 'Remove member',
               onPressed: onRemove,
             ),
@@ -129,10 +133,10 @@ class _MemberAvatar extends StatelessWidget {
             shape: BoxShape.circle,
             gradient: LinearGradient(
               colors: isLeader
-                  ? [AppColors.accent, const Color(0xFFF59E0B)]
+                  ? [context.colors.accent, const Color(0xFFF59E0B)]
                   : [
-                      AppColors.secondary.withValues(alpha: 0.15),
-                      AppColors.primary.withValues(alpha: 0.15),
+                      context.colors.secondary.withValues(alpha: 0.15),
+                      context.colors.primary.withValues(alpha: 0.15),
                     ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -144,7 +148,7 @@ class _MemberAvatar extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: isLeader ? Colors.white : AppColors.secondary,
+                color: isLeader ? Colors.white : context.colors.secondary,
               ),
             ),
           ),
@@ -158,7 +162,7 @@ class _MemberAvatar extends StatelessWidget {
               width: 18,
               height: 18,
               decoration: BoxDecoration(
-                color: AppColors.accent,
+                color: context.colors.accent,
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 1.5),
               ),
@@ -184,7 +188,7 @@ class _LeaderBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: AppColors.accent.withValues(alpha: 0.15),
+        color: context.colors.accent.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
       ),
       child: Text(

@@ -15,7 +15,7 @@ class RankingsListItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
@@ -27,31 +27,31 @@ class RankingsListItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _buildRankNumber(),
+          _buildRankNumber(context),
           const SizedBox(width: 12),
           _buildAvatar(),
           const SizedBox(width: 14),
-          Expanded(child: _buildInfo()),
-          _buildVoteCount(),
+          Expanded(child: _buildInfo(context)),
+          _buildVoteCount(context),
           const SizedBox(width: AppSpacing.sm),
-          const Icon(
+          Icon(
             Icons.chevron_right_rounded,
             size: 20,
-            color: AppColors.border,
+            color: context.colors.border,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRankNumber() {
+  Widget _buildRankNumber(BuildContext context) {
     return SizedBox(
       width: 28,
       child: Text(
         '${entry.rank}',
         style: AppTypography.labelLarge.copyWith(
           fontWeight: FontWeight.w800,
-          color: AppColors.textHint,
+          color: context.colors.textHint,
         ),
       ),
     );
@@ -83,18 +83,19 @@ class RankingsListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildInfo() {
+  Widget _buildInfo(BuildContext context) {
     return Text(
       entry.title,
       style: AppTypography.labelMedium.copyWith(
         fontWeight: FontWeight.w700,
+        color: context.colors.textPrimary,
       ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
   }
 
-  Widget _buildVoteCount() {
+  Widget _buildVoteCount(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -102,14 +103,15 @@ class RankingsListItem extends StatelessWidget {
           '${entry.voteCount}',
           style: AppTypography.labelLarge.copyWith(
             fontWeight: FontWeight.w800,
+            color: context.colors.textPrimary,
           ),
         ),
-        const Text(
+        Text(
           'VOTES',
           style: TextStyle(
             fontSize: 9,
             fontWeight: FontWeight.w700,
-            color: AppColors.textHint,
+            color: context.colors.textHint,
             letterSpacing: 0.8,
           ),
         ),

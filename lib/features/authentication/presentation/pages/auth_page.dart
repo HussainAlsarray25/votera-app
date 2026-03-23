@@ -72,7 +72,7 @@ class _AuthPageState extends State<AuthPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: context.colors.error,
             ),
           );
         }
@@ -114,8 +114,8 @@ class _AuthPageState extends State<AuthPage> {
   // -- Section: Desktop branding panel --
   Widget _buildBrandingPanel() {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: AppColors.primaryGradient,
+      decoration: BoxDecoration(
+        gradient: context.colors.primaryGradient,
       ),
       child: Center(
         child: Column(
