@@ -15,7 +15,8 @@ class PostComment extends UseCase<CommentEntity, PostCommentParams> {
   Future<Either<Failure, CommentEntity>> call(PostCommentParams params) {
     return repository.postComment(
       projectId: params.projectId,
-      body: params.body,
+      text: params.text,
+      score: params.score,
     );
   }
 }
@@ -24,12 +25,14 @@ class PostComment extends UseCase<CommentEntity, PostCommentParams> {
 class PostCommentParams extends Equatable {
   const PostCommentParams({
     required this.projectId,
-    required this.body,
+    required this.text,
+    required this.score,
   });
 
   final String projectId;
-  final String body;
+  final String text;
+  final int score;
 
   @override
-  List<Object> get props => [projectId, body];
+  List<Object> get props => [projectId, text, score];
 }

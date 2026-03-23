@@ -155,11 +155,13 @@ class _ProjectDetailsView extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, {required bool showInlineVote}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.lg,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: AppSpacing.md),
           ProjectInfoSection(projectId: projectId),
           const SizedBox(height: AppSpacing.lg),
           ProjectRatingSection(projectId: projectId),
@@ -167,11 +169,26 @@ class _ProjectDetailsView extends StatelessWidget {
             const SizedBox(height: AppSpacing.lg),
             _buildVoteButton(context),
           ],
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xl),
+          _buildSectionDivider('Community Feedback'),
+          const SizedBox(height: AppSpacing.md),
           ProjectCommentsSection(projectId: projectId),
           const SizedBox(height: 100),
         ],
       ),
+    );
+  }
+
+  Widget _buildSectionDivider(String label) {
+    return Row(
+      children: [
+        Text(
+          label,
+          style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        const Expanded(child: Divider(color: AppColors.border)),
+      ],
     );
   }
 

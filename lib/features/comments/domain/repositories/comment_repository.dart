@@ -15,9 +15,11 @@ abstract class CommentRepository {
   });
 
   /// Post a new comment on a project.
+  /// [score] is the 1–5 star rating the user selected alongside their text.
   Future<Either<Failure, CommentEntity>> postComment({
     required String projectId,
-    required String body,
+    required String text,
+    required int score,
   });
 
   /// Update an existing comment's body.

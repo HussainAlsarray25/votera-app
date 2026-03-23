@@ -13,11 +13,12 @@ abstract class CommentRemoteDataSource {
     required int size,
   });
 
-  /// POST /v1/projects/{projectId}/comments with {body}
+  /// POST /v1/projects/{projectId}/comments with {score, text}
   /// Returns the created CommentResponse as a raw map.
   Future<Map<String, dynamic>> postComment({
     required String projectId,
-    required String body,
+    required String text,
+    required int score,
   });
 
   /// PUT /v1/projects/{projectId}/comments/{commentId} with {body}
@@ -58,11 +59,12 @@ class CommentRemoteDataSourceImpl implements CommentRemoteDataSource {
   @override
   Future<Map<String, dynamic>> postComment({
     required String projectId,
-    required String body,
+    required String text,
+    required int score,
   }) async {
     final response = await apiClient.post<Map<String, dynamic>>(
       CommentEndpoints.comments(projectId),
-      data: {'body': body},
+      data: {'score': score, 'text': text},
     );
     return response.data!;
   }

@@ -8,20 +8,21 @@ class CommentModel extends CommentEntity {
     required super.id,
     required super.projectId,
     required super.authorId,
-    required super.body,
+    required super.text,
+    super.score,
     super.createdAt,
     super.updatedAt,
   });
 
   /// Build a [CommentModel] from the raw JSON object returned by the API.
-  /// Field names mirror the CommentResponse shape: id, project_id, author_id,
-  /// body, created_at, updated_at.
+  /// The API uses "text" for comment content and "score" for the 1–5 rating.
   factory CommentModel.fromJson(Map<String, dynamic> json) {
     return CommentModel(
       id: json['id']?.toString() ?? '',
       projectId: json['project_id']?.toString() ?? '',
-      authorId: json['author_id']?.toString() ?? '',
-      body: json['body'] as String? ?? '',
+      authorId: (json['author_id'] ?? json['user_id'])?.toString() ?? '',
+      text: json['text'] as String? ?? '',
+      score: json['score'] as int?,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())
           : null,
@@ -36,7 +37,8 @@ class CommentModel extends CommentEntity {
       'id': id,
       'project_id': projectId,
       'author_id': authorId,
-      'body': body,
+      'text': text,
+      'score': score,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };

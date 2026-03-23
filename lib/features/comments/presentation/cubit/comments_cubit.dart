@@ -51,10 +51,11 @@ class CommentsCubit extends Cubit<CommentsState> {
   /// so the UI can prepend the new item without a full list reload.
   Future<void> addComment({
     required String projectId,
-    required String body,
+    required String text,
+    required int score,
   }) async {
     final result = await postComment(
-      PostCommentParams(projectId: projectId, body: body),
+      PostCommentParams(projectId: projectId, text: text, score: score),
     );
     result.fold(
       (failure) => emit(CommentsError(message: failure.message)),

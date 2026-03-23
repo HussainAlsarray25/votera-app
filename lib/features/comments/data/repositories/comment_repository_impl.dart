@@ -45,7 +45,8 @@ class CommentRepositoryImpl implements CommentRepository {
   @override
   Future<Either<Failure, CommentEntity>> postComment({
     required String projectId,
-    required String body,
+    required String text,
+    required int score,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
@@ -53,7 +54,8 @@ class CommentRepositoryImpl implements CommentRepository {
     try {
       final json = await remote.postComment(
         projectId: projectId,
-        body: body,
+        text: text,
+        score: score,
       );
       return Right(CommentModel.fromJson(json));
     } on Exception catch (e) {
