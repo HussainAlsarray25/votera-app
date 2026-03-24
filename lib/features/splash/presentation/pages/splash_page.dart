@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
-import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Splash screen shown at app launch.
@@ -36,22 +35,18 @@ class _SplashPageState extends State<SplashPage>
   }
 
   Future<void> _checkAuth() async {
-    final authCubit = context.read<AuthCubit>();
-    await authCubit.checkAuthStatus();
-
-    // Brief delay so the splash is visible before navigating.
+    // checkAuthStatus() is now called centrally from _AuthStateListener in
+    // app.dart on the first frame, so we only need to wait for the auth state
+    // to settle and then navigate.
     await Future<void>.delayed(const Duration(milliseconds: 1200));
 
     if (!mounted) return;
 
-    if (authCubit.state is AuthAuthenticated) {
-      // Load the profile so role-based navigation is ready before home renders.
-      if (mounted) {
-        await context.read<ProfileCubit>().loadProfile();
-      }
-      if (mounted) context.go('/home');
+    final authState = context.read<AuthCubit>().state;
+    if (authState is AuthAuthenticated) {
+      context.go('/home');
     } else {
-      if (mounted) context.go('/onboarding');
+      context.go('/onboarding');
     }
   }
 

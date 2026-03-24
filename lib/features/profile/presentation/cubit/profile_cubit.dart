@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/usecases/usecase.dart';
 import 'package:votera/features/profile/domain/entities/user_profile.dart';
@@ -84,17 +85,23 @@ class ProfileCubit extends Cubit<ProfileState> {
     );
   }
 
-  /// Uploads [filePath] as the new profile picture.
+  /// Uploads the picked [file] as the new profile picture.
+  /// On mobile/desktop uses the file path; on web falls back to bytes.
   /// Emits [ProfileAvatarUploading] while uploading, then [ProfileLoaded]
   /// with the refreshed profile on success, or [ProfileError] on failure.
-  Future<void> uploadAvatar(String filePath) async {
+  Future<void> uploadAvatar(PlatformFile file) async {
     final currentProfile = _currentProfile;
     if (currentProfile != null) {
       emit(ProfileAvatarUploading(profile: currentProfile));
     }
 
-    final result =
-        await uploadAvatarUseCase(UploadAvatarParams(filePath: filePath));
+    final result = await uploadAvatarUseCase(
+      UploadAvatarParams(
+        filePath: file.path,
+        bytes: file.bytes != null ? List<int>.from(file.bytes!) : null,
+        fileName: file.name,
+      ),
+    );
     result.fold(
       (failure) => emit(ProfileError(message: failure.message)),
       (_) async {

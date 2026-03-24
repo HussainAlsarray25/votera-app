@@ -48,6 +48,17 @@ class AuthCubit extends Cubit<AuthState> {
   // Active polling timer — cancelled on cubit close or successful auth.
   Timer? _pollTimer;
 
+  // Optional async callback invoked at the start of logout, before tokens are
+  // cleared. Used by PushNotificationCubit to unregister the FCM token while
+  // the access token is still valid.
+  Future<void> Function()? _preLogoutCallback;
+
+  /// Registers a callback to run before logout clears auth tokens.
+  /// Call this once from DI setup after both cubits are created.
+  void setPreLogoutCallback(Future<void> Function() callback) {
+    _preLogoutCallback = callback;
+  }
+
   @override
   Future<void> close() {
     _pollTimer?.cancel();
@@ -126,6 +137,9 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> logout() async {
     emit(AuthLoading());
+    // Unregister the push token before the logout use case clears auth tokens,
+    // so the DELETE /notifications/tokens request still has a valid bearer token.
+    await _preLogoutCallback?.call();
     final result = await logoutUser(NoParams());
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
@@ -189,6 +203,23 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
+  /// Called when the app returns to the foreground while waiting for Telegram.
+  /// Performs an immediate poll so a completed auth is not missed due to
+  /// the timer being cancelled during a lifecycle pause.
+  Future<void> onAppResumedDuringTelegramLogin() async {
+    final current = state;
+    if (current is! AuthTelegramAwaitingUser) return;
+
+    // Re-start the periodic timer if it was cancelled (e.g. cubit recreated
+    // or timer died during background suspension).
+    if (_pollTimer == null || !_pollTimer!.isActive) {
+      _startPolling(current.token);
+    }
+
+    // Do an immediate check rather than waiting for the next timer tick.
+    await _pollOnce(current.token);
+  }
+
   void _startPolling(String token) {
     var attempts = 0;
     // Allow up to 5 minutes (150 polls at 2-second intervals) before giving up.
@@ -198,28 +229,40 @@ class AuthCubit extends Cubit<AuthState> {
       attempts++;
       if (attempts >= maxAttempts) {
         timer.cancel();
-        emit(const AuthError(
-            message: 'Telegram login timed out. Please try again.'));
+        if (!isClosed) {
+          emit(const AuthError(
+              message: 'Telegram login timed out. Please try again.'));
+        }
         return;
       }
 
-      final result =
-          await getTelegramStatus(TelegramStatusParams(token: token));
-      result.fold(
-        // Silently ignore transient network errors (e.g. 502) while polling.
-        (_) {},
-        (status) {
-          if (status.isComplete) {
-            timer.cancel();
-            emit(const AuthAuthenticated(fromTelegram: true));
-          } else if (status.isExpired) {
-            timer.cancel();
-            emit(const AuthError(
-              message: 'Telegram login session expired. Please try again.',
-            ));
-          }
-        },
-      );
+      await _pollOnce(token);
     });
+  }
+
+  /// Performs a single status poll and reacts to the result.
+  Future<void> _pollOnce(String token) async {
+    // Guard: do not emit if the cubit was closed while the request was in-flight.
+    if (isClosed) return;
+
+    final result = await getTelegramStatus(TelegramStatusParams(token: token));
+
+    if (isClosed) return;
+
+    result.fold(
+      // Silently ignore transient network errors (e.g. 502) while polling.
+      (_) {},
+      (status) {
+        if (status.isComplete) {
+          _pollTimer?.cancel();
+          emit(const AuthAuthenticated(fromTelegram: true));
+        } else if (status.isExpired) {
+          _pollTimer?.cancel();
+          emit(const AuthError(
+            message: 'Telegram login session expired. Please try again.',
+          ));
+        }
+      },
+    );
   }
 }

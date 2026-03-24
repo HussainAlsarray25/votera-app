@@ -13,8 +13,39 @@ const _telegramBlue = Color(0xFF2CA5E0);
 /// Tapping it asks the cubit for a deep link, then the listener opens the
 /// Telegram app automatically. The button switches to a disabled "waiting"
 /// state while polling is in progress.
-class TelegramLoginButton extends StatelessWidget {
+///
+/// Also observes app lifecycle: when the user returns from Telegram, an
+/// immediate status check is fired so a completed auth is never missed.
+class TelegramLoginButton extends StatefulWidget {
   const TelegramLoginButton({super.key});
+
+  @override
+  State<TelegramLoginButton> createState() => _TelegramLoginButtonState();
+}
+
+class _TelegramLoginButtonState extends State<TelegramLoginButton>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // When the user comes back from Telegram, immediately check whether the
+    // backend already completed authentication so we do not wait for the next
+    // timer tick (or miss it entirely if the timer was cancelled).
+    if (state == AppLifecycleState.resumed && mounted) {
+      context.read<AuthCubit>().onAppResumedDuringTelegramLogin();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

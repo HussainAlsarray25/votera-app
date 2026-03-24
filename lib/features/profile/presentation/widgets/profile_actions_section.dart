@@ -35,41 +35,51 @@ class ProfileActionsSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
             boxShadow: AppShadows.card(Theme.of(context).brightness),
           ),
-          child: BlocBuilder<ProfileCubit, ProfileState>(
-            builder: (context, profileState) {
-              final isVisitor = profileState is ProfileLoaded &&
-                  profileState.profile.isVisitorOnly;
-              final l10n = AppLocalizations.of(context)!;
-              return Column(
-                children: [
-                  if (isVisitor) ...[
-                    _buildActionTile(
-                      context: context,
-                      icon: Icons.verified_user_outlined,
-                      label: l10n.verifyAccount,
-                      onTap: () => context.push('/verify-account'),
-                    ),
-                    Divider(height: 1, color: context.colors.divider),
-                  ],
-                  _buildThemeToggle(context, l10n),
-                  Divider(height: 1, color: context.colors.divider),
-                  _buildLanguageTile(context, l10n),
-                  Divider(height: 1, color: context.colors.divider),
-                  _buildActionTile(
-                    context: context,
-                    icon: Icons.help_outline,
-                    label: l10n.helpSupport,
-                    onTap: () {},
-                  ),
-                  Divider(height: 1, color: context.colors.divider),
-                  _buildActionTile(
-                    context: context,
-                    icon: Icons.logout,
-                    label: l10n.signOut,
-                    isDestructive: true,
-                    onTap: () => context.read<AuthCubit>().logout(),
-                  ),
-                ],
+          child: BlocBuilder<AuthCubit, AuthState>(
+            buildWhen: (previous, current) =>
+                (previous is AuthLoading) != (current is AuthLoading),
+            builder: (context, authState) {
+              final isLoggingOut = authState is AuthLoading;
+              return BlocBuilder<ProfileCubit, ProfileState>(
+                builder: (context, profileState) {
+                  final isVisitor = profileState is ProfileLoaded &&
+                      profileState.profile.isVisitorOnly;
+                  final l10n = AppLocalizations.of(context)!;
+                  return Column(
+                    children: [
+                      if (isVisitor) ...[
+                        _buildActionTile(
+                          context: context,
+                          icon: Icons.verified_user_outlined,
+                          label: l10n.verifyAccount,
+                          onTap: () => context.push('/verify-account'),
+                        ),
+                        Divider(height: 1, color: context.colors.divider),
+                      ],
+                      _buildThemeToggle(context, l10n),
+                      Divider(height: 1, color: context.colors.divider),
+                      _buildLanguageTile(context, l10n),
+                      Divider(height: 1, color: context.colors.divider),
+                      _buildActionTile(
+                        context: context,
+                        icon: Icons.help_outline,
+                        label: l10n.helpSupport,
+                        onTap: () {},
+                      ),
+                      Divider(height: 1, color: context.colors.divider),
+                      _buildActionTile(
+                        context: context,
+                        icon: Icons.logout,
+                        label: l10n.signOut,
+                        isDestructive: true,
+                        // Disable while logout is in progress to prevent double calls.
+                        onTap: isLoggingOut
+                            ? null
+                            : () => context.read<AuthCubit>().logout(),
+                      ),
+                    ],
+                  );
+                },
               );
             },
           ),
@@ -237,7 +247,7 @@ class ProfileActionsSection extends StatelessWidget {
     required BuildContext context,
     required IconData icon,
     required String label,
-    required VoidCallback onTap,
+    required VoidCallback? onTap,
     bool isDestructive = false,
   }) {
     final color =

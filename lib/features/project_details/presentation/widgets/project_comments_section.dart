@@ -4,6 +4,7 @@ import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/comments/domain/entities/comment_entity.dart';
 import 'package:votera/features/comments/presentation/cubit/comments_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/cached_image.dart';
 
 /// Displays a list of user comments and an input field to add a new one.
 /// Reads from and dispatches to CommentsCubit.
@@ -174,9 +175,10 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
   }
 
   Widget _buildCommentItem(CommentEntity comment) {
-    final initial = comment.authorId.isNotEmpty
-        ? comment.authorId[0].toUpperCase()
-        : '?';
+    final displayName = comment.authorName?.isNotEmpty == true
+        ? comment.authorName!
+        : comment.authorId;
+    final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : '?';
     final timeAgo = comment.createdAt != null
         ? _formatTimeAgo(comment.createdAt!)
         : '';
@@ -186,15 +188,10 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
+          CachedAvatar(
             radius: 18,
-            backgroundColor: context.colors.secondaryLight,
-            child: Text(
-              initial,
-              style: AppTypography.labelMedium.copyWith(
-                color: context.colors.secondary,
-              ),
-            ),
+            url: comment.authorAvatarUrl,
+            initial: initial,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -205,7 +202,7 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
                   children: [
                     Expanded(
                       child: Text(
-                        comment.authorId,
+                        displayName,
                         style: AppTypography.labelMedium.copyWith(
                           color: context.colors.textPrimary,
                         ),
@@ -221,18 +218,38 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  comment.text,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: context.colors.textSecondary,
+                // Star rating row — only shown when a score is present.
+                if (comment.score != null) ...[
+                  const SizedBox(height: 2),
+                  _buildStarRating(comment.score!),
+                ],
+                if (comment.text.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    comment.text,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: context.colors.textSecondary,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  /// Renders [score] filled stars out of 5.
+  Widget _buildStarRating(int score) {
+    return Row(
+      children: List.generate(5, (index) {
+        return Icon(
+          index < score ? Icons.star_rounded : Icons.star_outline_rounded,
+          size: 14,
+          color: index < score ? Colors.amber : context.colors.textSecondary,
+        );
+      }),
     );
   }
 

@@ -9,6 +9,8 @@ class CommentModel extends CommentEntity {
     required super.projectId,
     required super.authorId,
     required super.text,
+    super.authorName,
+    super.authorAvatarUrl,
     super.score,
     super.createdAt,
     super.updatedAt,
@@ -22,6 +24,8 @@ class CommentModel extends CommentEntity {
       projectId: json['project_id']?.toString() ?? '',
       authorId: (json['author_id'] ?? json['user_id'])?.toString() ?? '',
       text: json['text'] as String? ?? '',
+      authorName: json['user_full_name'] as String?,
+      authorAvatarUrl: json['user_profile_picture_url'] as String?,
       score: json['score'] as int?,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())

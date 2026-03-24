@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/animated_star_rating.dart';
+import 'package:votera/shared/widgets/cached_image.dart';
 import 'package:votera/shared/widgets/verified_badge.dart';
 
 /// A card that displays a project summary: image, title, author, rating,
@@ -113,24 +114,13 @@ class _ProjectCardState extends State<ProjectCard>
   Widget _buildImage(BuildContext context) {
     return Stack(
       children: [
-        ClipRRect(
+        CachedImage(
+          url: widget.imageUrl,
+          height: 160,
+          width: double.infinity,
+          fit: BoxFit.cover,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          child: Container(
-            height: 160,
-            width: double.infinity,
-            color: context.colors.border,
-            child: Image.network(
-              widget.imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Center(
-                child: Icon(
-                  Icons.code,
-                  size: 48,
-                  color: context.colors.textHint,
-                ),
-              ),
-            ),
-          ),
+          errorIcon: Icons.code,
         ),
         if (widget.isTrending) _buildTrendingBadge(context),
         if (widget.isWinner) _buildWinnerBadge(),

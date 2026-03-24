@@ -39,7 +39,10 @@ class RatingRemoteDataSourceImpl implements RatingRemoteDataSource {
     final response = await apiClient.get<Map<String, dynamic>>(
       RatingEndpoints.rating(projectId),
     );
-    return RatingSummaryModel.fromJson(response.data!);
+    // The API wraps the payload in { "success": true, "data": { ... } }.
+    final body = response.data!;
+    final data = (body['data'] as Map<String, dynamic>?) ?? body;
+    return RatingSummaryModel.fromJson(data);
   }
 
   @override

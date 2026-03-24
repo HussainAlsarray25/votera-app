@@ -47,6 +47,8 @@ class EventEntity extends Equatable {
     this.maxSupervisorVotes,
     this.minTeamSize,
     this.maxTeamSize,
+    this.latitude,
+    this.longitude,
   });
 
   final String id;
@@ -79,6 +81,12 @@ class EventEntity extends Equatable {
   /// Maximum number of members allowed per team.
   final int? maxTeamSize;
 
+  /// Geographic latitude of the event venue. Null when not set by the organiser.
+  final double? latitude;
+
+  /// Geographic longitude of the event venue. Null when not set by the organiser.
+  final double? longitude;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -97,6 +105,8 @@ class EventEntity extends Equatable {
         maxSupervisorVotes,
         minTeamSize,
         maxTeamSize,
+        latitude,
+        longitude,
         createdAt,
         updatedAt,
       ];

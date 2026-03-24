@@ -64,16 +64,6 @@ class VotingLocationCheck extends VotingState {
   const VotingLocationCheck();
 }
 
-/// Emitted when the voting area polygon has been pre-fetched successfully.
-class VotingAreaLoaded extends VotingState {
-  const VotingAreaLoaded({required this.votingArea});
-
-  final VotingAreaEntity votingArea;
-
-  @override
-  List<Object?> get props => [votingArea];
-}
-
 /// Emitted when the user is outside the allowed voting area.
 class OutsideVotingArea extends VotingState {
   const OutsideVotingArea({required this.message});

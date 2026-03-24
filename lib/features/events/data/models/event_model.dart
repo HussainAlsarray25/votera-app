@@ -19,6 +19,8 @@ class EventModel extends EventEntity {
     super.maxSupervisorVotes,
     super.minTeamSize,
     super.maxTeamSize,
+    super.latitude,
+    super.longitude,
   });
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
@@ -37,6 +39,8 @@ class EventModel extends EventEntity {
       maxSupervisorVotes: json['max_supervisor_votes'] as int?,
       minTeamSize: json['min_team_size'] as int?,
       maxTeamSize: json['max_team_size'] as int?,
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );

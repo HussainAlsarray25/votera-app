@@ -17,6 +17,8 @@ import 'package:votera/core/services/location_service_impl.dart';
 import 'package:votera/features/authentication/data/services/token_service.dart';
 import 'package:votera/features/authentication/data/services/token_service_auth_provider.dart';
 import 'package:votera/features/authentication/di/auth_injection.dart';
+import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/features/notification/presentation/cubit/push_notification_cubit.dart';
 import 'package:votera/features/categories/di/categories_injection.dart';
 import 'package:votera/features/certifications/di/certifications_injection.dart';
 import 'package:votera/features/comments/di/comments_injection.dart';
@@ -110,6 +112,14 @@ void _initFeatures() {
   initAuthFeature(sl);
   initProfileFeature(sl);
   initNotificationFeature(sl);
+
+  // Wire up the pre-logout callback after both singletons are registered.
+  // AuthCubit calls this before clearing tokens so the push token DELETE
+  // request still has a valid Authorization header.
+  sl<AuthCubit>().setPreLogoutCallback(
+    sl<PushNotificationCubit>().unregisterToken,
+  );
+
   initOnboardingFeature(sl);
   initHomeFeature(sl);
   initCategoriesFeature(sl);

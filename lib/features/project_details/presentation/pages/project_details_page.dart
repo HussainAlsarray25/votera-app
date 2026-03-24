@@ -46,7 +46,7 @@ class ProjectDetailsPage extends StatelessWidget {
         BlocProvider<VotingCubit>(
           create: (_) => sl<VotingCubit>()
             ..loadMyVotes(eventId: eventId)
-            ..prefetchVotingArea(eventId: eventId),
+            ..loadEventLocation(eventId: eventId),
         ),
       ],
       child: _ProjectDetailsView(

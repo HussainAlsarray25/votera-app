@@ -88,6 +88,10 @@ class PushNotificationCubit extends Cubit<PushNotificationState> {
     );
   }
 
+  /// Public entry point for pre-logout unregistration. Called by AuthCubit
+  /// via the pre-logout callback before auth tokens are cleared.
+  Future<void> unregisterToken() => _unregisterToken();
+
   Future<void> _unregisterToken() async {
     if (_currentToken == null) return;
 

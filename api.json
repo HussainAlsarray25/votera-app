@@ -3417,6 +3417,7 @@
             "BearerAuth": []
           }
         ],
+        "description": "Returns submitted projects for an event including the team name for each project.",
         "tags": [
           "projects"
         ],
@@ -3432,7 +3433,7 @@
             }
           },
           {
-            "description": "Page",
+            "description": "Page number (default 1)",
             "name": "page",
             "in": "query",
             "schema": {
@@ -3440,7 +3441,7 @@
             }
           },
           {
-            "description": "Size",
+            "description": "Page size (default 20)",
             "name": "size",
             "in": "query",
             "schema": {
@@ -5851,6 +5852,624 @@
                           "type": "array",
                           "items": {
                             "$ref": "#/components/schemas/votera_app_api_internal_modules_forms_dto_v1.ParticipantRequestResponse"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/forms/supervisors": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Admin endpoint to list all supervisor role applications with optional status filter",
+        "tags": [
+          "Supervisor Forms"
+        ],
+        "summary": "List all supervisor requests (Admin)",
+        "parameters": [
+          {
+            "description": "Filter by status (pending|approved|rejected)",
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page number",
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page size",
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/votera_app_api_internal_modules_forms_dto_v1.SupervisorRequestResponse"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Submit credentials for admin review to gain the supervisor role",
+        "tags": [
+          "Supervisor Forms"
+        ],
+        "summary": "Submit supervisor role application (Client)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_forms_dto_v1.SubmitSupervisorRequest"
+              }
+            }
+          },
+          "description": "Supervisor request details",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_forms_dto_v1.SupervisorRequestResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/forms/supervisors/email": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Start the supervisor-email verification flow: send a 6-digit OTP to the provided supervisor domain email",
+        "tags": [
+          "Supervisor Forms"
+        ],
+        "summary": "Submit supervisor email and receive OTP (Client)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_forms_dto_v1.RequestSupervisorEmailOTPRequest"
+              }
+            }
+          },
+          "description": "Supervisor email",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/forms/supervisors/email/verify": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Complete supervisor-email verification; on success the supervisor role is granted",
+        "tags": [
+          "Supervisor Forms"
+        ],
+        "summary": "Verify supervisor email OTP (Client)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_forms_dto_v1.VerifySupervisorEmailOTPRequest"
+              }
+            }
+          },
+          "description": "Supervisor email and OTP code",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/forms/supervisors/me": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get all supervisor role applications submitted by the current user",
+        "tags": [
+          "Supervisor Forms"
+        ],
+        "summary": "List my supervisor requests (Client)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/votera_app_api_internal_modules_forms_dto_v1.SupervisorRequestResponse"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/forms/supervisors/upload-url": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Generate a 15-minute presigned PUT URL for direct upload to MinIO object storage",
+        "tags": [
+          "Supervisor Forms"
+        ],
+        "summary": "Get presigned URL to upload supervisor credential document (Client)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_forms_dto_v1.SupervisorDocumentUploadRequest"
+              }
+            }
+          },
+          "description": "File name",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/votera_app_api_internal_modules_forms_dto_v1.SupervisorDocumentUploadResponse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Storage not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/forms/supervisors/{id}/review": {
+      "patch": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Approve or reject a supervisor role application",
+        "tags": [
+          "Supervisor Forms"
+        ],
+        "summary": "Review a supervisor request (Admin)",
+        "parameters": [
+          {
+            "description": "Request ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/votera_app_api_internal_modules_forms_dto_v1.ReviewSupervisorRequestBody"
+              }
+            }
+          },
+          "description": "Review action",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/votera_app_api_pkg_response.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/forms/supervisors/{user_id}": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Admin endpoint to retrieve all supervisor requests submitted by a specific user",
+        "tags": [
+          "Supervisor Forms"
+        ],
+        "summary": "Get a user's supervisor requests (Admin)",
+        "parameters": [
+          {
+            "description": "User ID",
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/votera_app_api_pkg_response.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/votera_app_api_internal_modules_forms_dto_v1.SupervisorRequestResponse"
                           }
                         }
                       }
@@ -10428,6 +11047,18 @@
           }
         }
       },
+      "votera_app_api_internal_modules_forms_dto_v1.RequestSupervisorEmailOTPRequest": {
+        "type": "object",
+        "required": [
+          "supervisor_email"
+        ],
+        "properties": {
+          "supervisor_email": {
+            "type": "string",
+            "maxLength": 255
+          }
+        }
+      },
       "votera_app_api_internal_modules_forms_dto_v1.ReviewRequestBody": {
         "type": "object",
         "required": [
@@ -10444,6 +11075,54 @@
           "note": {
             "type": "string",
             "maxLength": 500
+          }
+        }
+      },
+      "votera_app_api_internal_modules_forms_dto_v1.ReviewSupervisorRequestBody": {
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "approve",
+              "reject"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      },
+      "votera_app_api_internal_modules_forms_dto_v1.SubmitSupervisorRequest": {
+        "type": "object",
+        "required": [
+          "document_url",
+          "full_name",
+          "institution",
+          "position"
+        ],
+        "properties": {
+          "document_url": {
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "institution": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1
+          },
+          "position": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
           }
         }
       },
@@ -10482,6 +11161,66 @@
           }
         }
       },
+      "votera_app_api_internal_modules_forms_dto_v1.SupervisorDocumentUploadRequest": {
+        "type": "object",
+        "required": [
+          "file_name"
+        ],
+        "properties": {
+          "file_name": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_forms_dto_v1.SupervisorDocumentUploadResponse": {
+        "type": "object",
+        "properties": {
+          "public_url": {
+            "type": "string"
+          },
+          "upload_url": {
+            "type": "string"
+          }
+        }
+      },
+      "votera_app_api_internal_modules_forms_dto_v1.SupervisorRequestResponse": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "document_url": {
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "institution": {
+            "type": "string"
+          },
+          "position": {
+            "type": "string"
+          },
+          "review_note": {
+            "type": "string"
+          },
+          "reviewed_at": {
+            "type": "string"
+          },
+          "reviewed_by": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        }
+      },
       "votera_app_api_internal_modules_forms_dto_v1.UIDDocumentUploadRequest": {
         "type": "object",
         "required": [
@@ -10515,6 +11254,22 @@
             "type": "string"
           },
           "institutional_email": {
+            "type": "string",
+            "maxLength": 255
+          }
+        }
+      },
+      "votera_app_api_internal_modules_forms_dto_v1.VerifySupervisorEmailOTPRequest": {
+        "type": "object",
+        "required": [
+          "code",
+          "supervisor_email"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "supervisor_email": {
             "type": "string",
             "maxLength": 255
           }
@@ -11182,6 +11937,9 @@
               "$ref": "#/components/schemas/votera_app_api_internal_modules_identity_dto_v1.IdentifierResponse"
             }
           },
+          "profile_picture_url": {
+            "type": "string"
+          },
           "roles": {
             "type": "array",
             "items": {
@@ -11507,6 +12265,9 @@
           "team_id": {
             "type": "string"
           },
+          "team_name": {
+            "type": "string"
+          },
           "tech_stack": {
             "type": "string"
           },
@@ -11641,7 +12402,13 @@
           "text": {
             "type": "string"
           },
+          "user_full_name": {
+            "type": "string"
+          },
           "user_id": {
+            "type": "string"
+          },
+          "user_profile_picture_url": {
             "type": "string"
           }
         }

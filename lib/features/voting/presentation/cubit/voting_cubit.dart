@@ -2,20 +2,20 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/domain/services/location_service.dart';
 import 'package:votera/core/utils/geo_utils.dart';
+import 'package:votera/features/events/domain/usecases/get_event_by_id.dart';
 import 'package:votera/features/voting/domain/entities/tally_entity.dart';
 import 'package:votera/features/voting/domain/entities/vote_entity.dart';
-import 'package:votera/features/voting/domain/entities/voting_area_entity.dart';
 import 'package:votera/features/voting/domain/usecases/cast_vote.dart';
 import 'package:votera/features/voting/domain/usecases/get_event_votes.dart';
 import 'package:votera/features/voting/domain/usecases/get_my_votes.dart';
 import 'package:votera/features/voting/domain/usecases/get_vote_tally.dart';
-import 'package:votera/features/voting/domain/usecases/get_voting_area.dart';
 import 'package:votera/features/voting/domain/usecases/retract_vote.dart';
 
 part 'voting_state.dart';
 
 /// Manages all voting actions for an event: casting, fetching, tallying, and
-/// retracting votes. Includes geofence verification before casting.
+/// retracting votes. Includes geofence verification before casting when the
+/// event has a configured location (latitude/longitude).
 class VotingCubit extends Cubit<VotingState> {
   VotingCubit({
     required this.castVote,
@@ -23,7 +23,7 @@ class VotingCubit extends Cubit<VotingState> {
     required this.getVoteTally,
     required this.retractVote,
     required this.getEventVotes,
-    required this.getVotingArea,
+    required this.getEventById,
     required this.locationService,
   }) : super(const VotingInitial());
 
@@ -32,23 +32,27 @@ class VotingCubit extends Cubit<VotingState> {
   final GetVoteTally getVoteTally;
   final RetractVote retractVote;
   final GetEventVotes getEventVotes;
-  final GetVotingArea getVotingArea;
+  final GetEventById getEventById;
   final LocationService locationService;
 
-  VotingAreaEntity? _cachedVotingArea;
+  // The event's venue coordinates, loaded during init.
+  // Null means no geo-fence restriction is applied for this event.
+  GeoPosition? _eventLocation;
 
-  /// Pre-fetches the voting area polygon for [eventId] on page load.
-  /// The result is cached so that submitVote does not need a second fetch.
-  Future<void> prefetchVotingArea({required String eventId}) async {
-    final result = await getVotingArea(
-      GetVotingAreaParams(eventId: eventId),
-    );
+  /// Loads the event by [eventId] and stores its location for geo-fencing.
+  /// Called on page load so that submitVote does not need a separate fetch.
+  /// Failure here is non-critical — voting will proceed without geo-fencing.
+  Future<void> loadEventLocation({required String eventId}) async {
+    final result = await getEventById(GetEventByIdParams(id: eventId));
     result.fold(
-      // Prefetch failure is non-critical; will retry on vote tap.
       (_) {},
-      (area) {
-        _cachedVotingArea = area;
-        emit(VotingAreaLoaded(votingArea: area));
+      (event) {
+        if (event.latitude != null && event.longitude != null) {
+          _eventLocation = GeoPosition(
+            latitude: event.latitude!,
+            longitude: event.longitude!,
+          );
+        }
       },
     );
   }
@@ -66,57 +70,38 @@ class VotingCubit extends Cubit<VotingState> {
     required String eventId,
     required String projectId,
   }) async {
-    // 1. Check GPS location.
-    emit(const VotingLocationCheck());
+    // Only run a geo-fence check when the event has a configured location.
+    if (_eventLocation != null) {
+      emit(const VotingLocationCheck());
 
-    final locationResult = await locationService.getCurrentPosition();
+      final locationResult = await locationService.getCurrentPosition();
 
-    final position = locationResult.fold<GeoPosition?>(
-      (failure) {
-        emit(
-          LocationUnavailable(
-            message: failure.message,
-            isDeniedForever: failure.isDeniedForever,
-          ),
-        );
-        return null;
-      },
-      (pos) => pos,
-    );
-
-    if (position == null) return;
-
-    // 2. Get voting area -- use cache or fetch on demand.
-    var votingArea = _cachedVotingArea;
-    if (votingArea == null) {
-      final areaResult = await getVotingArea(
-        GetVotingAreaParams(eventId: eventId),
-      );
-      final fetched = areaResult.fold<VotingAreaEntity?>(
+      final position = locationResult.fold<GeoPosition?>(
         (failure) {
-          emit(VotingError(message: failure.message));
+          emit(
+            LocationUnavailable(
+              message: failure.message,
+              isDeniedForever: failure.isDeniedForever,
+            ),
+          );
           return null;
         },
-        (area) {
-          _cachedVotingArea = area;
-          return area;
-        },
+        (pos) => pos,
       );
-      if (fetched == null) return;
-      votingArea = fetched;
+
+      if (position == null) return;
+
+      if (!isWithinRadius(position, _eventLocation)) {
+        emit(
+          const OutsideVotingArea(
+            message: 'You must be inside the voting area to cast your vote.',
+          ),
+        );
+        return;
+      }
     }
 
-    // 3. Run geofence check.
-    if (!isPointInPolygon(position, votingArea.polygon)) {
-      emit(
-        const OutsideVotingArea(
-          message: 'You must be inside the voting area to cast your vote.',
-        ),
-      );
-      return;
-    }
-
-    // 4. Cast the vote.
+    // Cast the vote.
     emit(const VotingLoading());
     final result = await castVote(
       CastVoteParams(eventId: eventId, projectId: projectId),

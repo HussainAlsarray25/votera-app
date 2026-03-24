@@ -22,9 +22,6 @@ abstract class VotingRemoteDataSource {
 
   // Retrieves all votes for a given event.
   Future<List<Map<String, dynamic>>> getEventVotes({required String eventId});
-
-  // Retrieves the voting area polygon for a given event.
-  Future<Map<String, dynamic>> getVotingArea({required String eventId});
 }
 
 class VotingRemoteDataSourceImpl implements VotingRemoteDataSource {
@@ -41,16 +38,21 @@ class VotingRemoteDataSourceImpl implements VotingRemoteDataSource {
       VotingEndpoints.votes(eventId),
       data: {'project_id': projectId},
     );
-    return response.data!;
+    final body = response.data!;
+    // Unwrap { "success": true, "data": {...} } if present.
+    return (body['data'] as Map<String, dynamic>?) ?? body;
   }
 
   @override
   Future<List<Map<String, dynamic>>> getMyVotes({
     required String eventId,
   }) async {
-    final response =
-        await apiClient.get<List<dynamic>>(VotingEndpoints.myVotes(eventId));
-    return (response.data ?? []).cast<Map<String, dynamic>>();
+    // The API wraps the payload in { "success": true, "data": [...] }.
+    final response = await apiClient
+        .get<Map<String, dynamic>>(VotingEndpoints.myVotes(eventId));
+    final body = response.data!;
+    final list = (body['data'] as List<dynamic>?) ?? [];
+    return list.cast<Map<String, dynamic>>();
   }
 
   @override
@@ -59,7 +61,9 @@ class VotingRemoteDataSourceImpl implements VotingRemoteDataSource {
   }) async {
     final response = await apiClient
         .get<Map<String, dynamic>>(VotingEndpoints.voteTally(eventId));
-    return response.data!;
+    final body = response.data!;
+    // Unwrap { "success": true, "data": {...} } if present.
+    return (body['data'] as Map<String, dynamic>?) ?? body;
   }
 
   @override
@@ -74,17 +78,11 @@ class VotingRemoteDataSourceImpl implements VotingRemoteDataSource {
   Future<List<Map<String, dynamic>>> getEventVotes({
     required String eventId,
   }) async {
-    final response =
-        await apiClient.get<List<dynamic>>(VotingEndpoints.votes(eventId));
-    return (response.data ?? []).cast<Map<String, dynamic>>();
-  }
-
-  @override
-  Future<Map<String, dynamic>> getVotingArea({
-    required String eventId,
-  }) async {
+    // The API wraps the payload in { "success": true, "data": [...] }.
     final response = await apiClient
-        .get<Map<String, dynamic>>(VotingEndpoints.votingArea(eventId));
-    return response.data!;
+        .get<Map<String, dynamic>>(VotingEndpoints.votes(eventId));
+    final body = response.data!;
+    final list = (body['data'] as List<dynamic>?) ?? [];
+    return list.cast<Map<String, dynamic>>();
   }
 }

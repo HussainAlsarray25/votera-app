@@ -81,10 +81,32 @@ class App extends StatelessWidget {
 /// Listens to auth state changes and manages session data.
 /// On login: loads fresh profile and unread notification count.
 /// On logout: resets all user-scoped cubits so stale data is cleared.
-class _AuthStateListener extends StatelessWidget {
+///
+/// Also triggers checkAuthStatus() on the first frame so that the profile
+/// is loaded on every app start, regardless of which route is entered first.
+/// Without this, GoRouter's redirect can bypass the SplashPage and the
+/// profile would never load (leaving Teams and MyProject tabs empty).
+class _AuthStateListener extends StatefulWidget {
   const _AuthStateListener({required this.child});
 
   final Widget child;
+
+  @override
+  State<_AuthStateListener> createState() => _AuthStateListenerState();
+}
+
+class _AuthStateListenerState extends State<_AuthStateListener> {
+  @override
+  void initState() {
+    super.initState();
+    // Defer until the first frame so the BlocListener is fully subscribed
+    // before the state change fires.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<AuthCubit>().checkAuthStatus();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +120,7 @@ class _AuthStateListener extends StatelessWidget {
           context.read<UnreadCountCubit>().reset();
         }
       },
-      child: child,
+      child: widget.child,
     );
   }
 }
