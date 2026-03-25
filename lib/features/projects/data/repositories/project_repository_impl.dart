@@ -24,6 +24,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
     required String eventId,
     required int page,
     required int size,
+    String? title,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
@@ -33,6 +34,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
         eventId: eventId,
         page: page,
         size: size,
+        title: title,
       );
       final paginated = PaginatedResponse<ProjectEntity>.fromJson(
         json,

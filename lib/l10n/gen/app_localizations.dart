@@ -98,6 +98,18 @@ abstract class AppLocalizations {
     Locale('en')
   ];
 
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @allProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'All Projects'**
+  String get allProjects;
+
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
@@ -1855,6 +1867,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'There are no projects submitted for this event yet.'**
   String get noProjectsDesc;
+
+  /// No description provided for @noProjectsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No projects found'**
+  String get noProjectsFound;
+
+  /// No description provided for @noProjectsFoundDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'No projects matched your search. Try a different title.'**
+  String get noProjectsFoundDesc;
 
   /// No description provided for @searchProjectsTeams.
   ///

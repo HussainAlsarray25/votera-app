@@ -49,20 +49,62 @@ class ProjectsCubit extends Cubit<ProjectsState> {
   final CancelProject cancelProject;
   final DeleteProjectMedia deleteProjectMedia;
 
+  // Prevents concurrent pagination requests.
+  bool _isLoadingMore = false;
+  bool get isLoadingMore => _isLoadingMore;
+
   Future<void> loadProjects({
     required String eventId,
     int page = 1,
     int size = 20,
+    String? title,
   }) async {
     emit(const ProjectsLoading());
     final result = await getProjects(
-      GetProjectsParams(eventId: eventId, page: page, size: size),
+      GetProjectsParams(
+        eventId: eventId,
+        page: page,
+        size: size,
+        title: title,
+      ),
     );
     result.fold(
       (failure) => emit(ProjectsError(message: failure.message)),
       (paginated) => emit(
         ProjectsLoaded(
           projects: paginated.items,
+          hasNextPage: paginated.hasNextPage,
+          currentPage: paginated.page,
+        ),
+      ),
+    );
+  }
+
+  /// Appends the next page of projects to the already-loaded list.
+  /// No-ops if a fetch is already in flight or there is no next page.
+  Future<void> loadMoreProjects({
+    required String eventId,
+    required List<ProjectEntity> existingProjects,
+    required int nextPage,
+    int size = 20,
+    String? title,
+  }) async {
+    if (_isLoadingMore) return;
+    _isLoadingMore = true;
+    final result = await getProjects(
+      GetProjectsParams(
+        eventId: eventId,
+        page: nextPage,
+        size: size,
+        title: title,
+      ),
+    );
+    _isLoadingMore = false;
+    result.fold(
+      (failure) => emit(ProjectsError(message: failure.message)),
+      (paginated) => emit(
+        ProjectsLoaded(
+          projects: [...existingProjects, ...paginated.items],
           hasNextPage: paginated.hasNextPage,
           currentPage: paginated.page,
         ),

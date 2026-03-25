@@ -1,6 +1,9 @@
 {
   "@@locale": "en",
 
+  "all": "All",
+  "allProjects": "All Projects",
+
   "appTitle": "Votera",
   "appTagline": "Discover, vote, and celebrate\ninnovative projects.",
   "appMotto": "Discover. Vote. Celebrate.",
@@ -442,6 +445,9 @@
 
   "noProjectsYet": "No projects yet",
   "noProjectsDesc": "There are no projects submitted for this event yet.",
+
+  "noProjectsFound": "No projects found",
+  "noProjectsFoundDesc": "No projects matched your search. Try a different title.",
 
   "searchProjectsTeams": "Search projects or teams...",
 

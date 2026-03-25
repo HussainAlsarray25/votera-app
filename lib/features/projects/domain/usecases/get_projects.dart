@@ -6,7 +6,8 @@ import 'package:votera/core/usecases/usecase.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 import 'package:votera/features/projects/domain/repositories/project_repository.dart';
 
-class GetProjects extends UseCase<PaginatedResponse<ProjectEntity>, GetProjectsParams> {
+class GetProjects
+    extends UseCase<PaginatedResponse<ProjectEntity>, GetProjectsParams> {
   GetProjects(this.repository);
 
   final ProjectRepository repository;
@@ -19,6 +20,7 @@ class GetProjects extends UseCase<PaginatedResponse<ProjectEntity>, GetProjectsP
       eventId: params.eventId,
       page: params.page,
       size: params.size,
+      title: params.title,
     );
   }
 }
@@ -28,12 +30,16 @@ class GetProjectsParams extends Equatable {
     required this.eventId,
     required this.page,
     required this.size,
+    this.title,
   });
 
   final String eventId;
   final int page;
   final int size;
 
+  /// When set, filters projects by title partial match.
+  final String? title;
+
   @override
-  List<Object?> get props => [eventId, page, size];
+  List<Object?> get props => [eventId, page, size, title];
 }

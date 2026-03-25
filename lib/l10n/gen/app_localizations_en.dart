@@ -9,6 +9,12 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get all => 'All';
+
+  @override
+  String get allProjects => 'All Projects';
+
+  @override
   String get appTitle => 'Votera';
 
   @override
@@ -956,6 +962,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noProjectsDesc =>
       'There are no projects submitted for this event yet.';
+
+  @override
+  String get noProjectsFound => 'No projects found';
+
+  @override
+  String get noProjectsFoundDesc =>
+      'No projects matched your search. Try a different title.';
 
   @override
   String get searchProjectsTeams => 'Search projects or teams...';

@@ -9,6 +9,12 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get all => 'الكل';
+
+  @override
+  String get allProjects => 'جميع المشاريع';
+
+  @override
   String get appTitle => 'فوتيرا';
 
   @override
@@ -945,6 +951,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noProjectsDesc => 'لا توجد مشاريع مقدمة لهذه الفعالية بعد.';
+
+  @override
+  String get noProjectsFound => 'لم يتم العثور على مشاريع';
+
+  @override
+  String get noProjectsFoundDesc =>
+      'لا توجد مشاريع تطابق بحثك. جرّب عنواناً مختلفاً.';
 
   @override
   String get searchProjectsTeams => 'ابحث عن مشاريع أو فرق...';

@@ -13,12 +13,14 @@ class EmptyState extends StatefulWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.showRefreshHint = true,
     super.key,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
+  final bool showRefreshHint;
 
   @override
   State<EmptyState> createState() => _EmptyStateState();
@@ -90,8 +92,10 @@ class _EmptyStateState extends State<EmptyState>
                 textAlign: TextAlign.center,
               ),
             ),
-            const SizedBox(height: AppSpacing.xl),
-            _buildPullHint(context),
+            if (widget.showRefreshHint) ...[
+              const SizedBox(height: AppSpacing.xl),
+              _buildPullHint(context),
+            ]
           ],
         ),
       ),

@@ -10,6 +10,7 @@ abstract class ProjectRepository {
     required String eventId,
     required int page,
     required int size,
+    String? title,
   });
 
   /// Fetches a single project by its ID within an event.

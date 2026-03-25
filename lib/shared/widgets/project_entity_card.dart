@@ -1,0 +1,257 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/features/projects/domain/entities/project_entity.dart';
+import 'package:votera/shared/widgets/cached_image.dart';
+
+// ---------------------------------------------------------------------------
+// Accent palette — each project gets a consistent pair derived from its title
+// ---------------------------------------------------------------------------
+
+const _accentPalette = [
+  [Color(0xFF3ECF8E), Color(0xFF059669)],
+  [Color(0xFF6366F1), Color(0xFF4338CA)],
+  [Color(0xFFF59E0B), Color(0xFFD97706)],
+  [Color(0xFFEC4899), Color(0xFFBE185D)],
+  [Color(0xFF8B5CF6), Color(0xFF6D28D9)],
+  [Color(0xFF14B8A6), Color(0xFF0F766E)],
+];
+
+List<Color> _accentFor(String title) =>
+    _accentPalette[title.hashCode.abs() % _accentPalette.length];
+
+// ---------------------------------------------------------------------------
+// Card
+// ---------------------------------------------------------------------------
+
+/// Full-bleed project card. The gradient (or image) covers the entire surface;
+/// content floats at the bottom over a dark scrim.
+///
+/// Used in both the 2-column grid and the trending horizontal carousel.
+/// Pass [width] to constrain for horizontal layouts.
+class ProjectEntityCard extends StatelessWidget {
+  const ProjectEntityCard({
+    required this.project,
+    required this.eventId,
+    this.width,
+    super.key,
+  });
+
+  final ProjectEntity project;
+  final String eventId;
+  final double? width;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = _accentFor(project.title);
+    final firstMedia = project.media.isNotEmpty ? project.media.first : null;
+    final hasImage = firstMedia != null && firstMedia.url.isNotEmpty;
+
+    return GestureDetector(
+      onTap: () => context.push('/project/$eventId/${project.id}'),
+      child: Container(
+        width: width,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          boxShadow: [
+            BoxShadow(
+              color: accent.first.withValues(alpha: 0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // -- Layer 1: background (image or gradient) --
+              if (hasImage)
+                CachedImage(
+                  url: firstMedia.url,
+                  width: double.infinity,
+                  errorIcon: Icons.code,
+                )
+              else
+                _buildGradientBackground(accent),
+
+              // -- Layer 2: watermark initial (gradient cards only) --
+              if (!hasImage) _buildWatermark(),
+
+              // -- Layer 3: dark scrim from bottom --
+              _buildScrim(),
+
+              // -- Layer 4: content pinned to bottom --
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: _buildContent(context, accent),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGradientBackground(List<Color> accent) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            accent[0],
+            accent[1],
+            Color.lerp(accent[1], Colors.black, 0.4)!,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          stops: const [0.0, 0.55, 1.0],
+        ),
+      ),
+    );
+  }
+
+  // Large semi-transparent letter that bleeds off the top-right corner
+  Widget _buildWatermark() {
+    final initial =
+        project.title.isNotEmpty ? project.title[0].toUpperCase() : '?';
+    return Positioned(
+      top: -16,
+      right: -12,
+      child: Text(
+        initial,
+        style: TextStyle(
+          fontSize: 120,
+          fontWeight: FontWeight.w900,
+          color: Colors.white.withValues(alpha: 0.1),
+          letterSpacing: -6,
+          height: 1,
+        ),
+      ),
+    );
+  }
+
+  // Gradient scrim: transparent at top → dark at bottom
+  Widget _buildScrim() {
+    return Positioned.fill(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.transparent,
+              Colors.black.withValues(alpha: 0.15),
+              Colors.black.withValues(alpha: 0.72),
+            ],
+            stops: const [0.0, 0.4, 1.0],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Title + description + bottom row, all on top of the scrim
+  Widget _buildContent(BuildContext context, List<Color> accent) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            project.title,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              height: 1.3,
+              letterSpacing: -0.2,
+              shadows: [
+                Shadow(
+                  color: Colors.black54,
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          if (project.description != null &&
+              project.description!.isNotEmpty) ...[
+            const SizedBox(height: 3),
+            Text(
+              project.description!,
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.white.withValues(alpha: 0.65),
+                height: 1.4,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          const SizedBox(height: 10),
+          _buildBottomRow(accent),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomRow(List<Color> accent) {
+    final hasTech =
+        project.techStack != null && project.techStack!.isNotEmpty;
+    final firstTag = hasTech
+        ? project.techStack!.split(RegExp('[,/| ]')).first.trim()
+        : null;
+
+    return Row(
+      children: [
+        if (firstTag != null) ...[
+          // Frosted tech pill
+          Container(
+            constraints: const BoxConstraints(maxWidth: 96),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.25),
+              ),
+            ),
+            child: Text(
+              firstTag,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                letterSpacing: 0.2,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+        const Spacer(),
+        // Accent arrow circle
+        Container(
+          width: 26,
+          height: 26,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.35),
+            ),
+          ),
+          child: const Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 11,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+}
