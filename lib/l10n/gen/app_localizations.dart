@@ -179,7 +179,7 @@ abstract class AppLocalizations {
   /// No description provided for @signOut.
   ///
   /// In en, this message translates to:
-  /// **'Sign Out'**
+  /// **'Log Out'**
   String get signOut;
 
   /// No description provided for @verifyAccount.

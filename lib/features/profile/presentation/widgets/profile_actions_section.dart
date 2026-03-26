@@ -72,6 +72,7 @@ class ProfileActionsSection extends StatelessWidget {
                         icon: Icons.logout,
                         label: l10n.signOut,
                         isDestructive: true,
+                        isLoading: isLoggingOut,
                         // Disable while logout is in progress to prevent double calls.
                         onTap: isLoggingOut
                             ? null
@@ -249,6 +250,7 @@ class ProfileActionsSection extends StatelessWidget {
     required String label,
     required VoidCallback? onTap,
     bool isDestructive = false,
+    bool isLoading = false,
   }) {
     final color =
         isDestructive ? context.colors.error : context.colors.textPrimary;
@@ -259,10 +261,21 @@ class ProfileActionsSection extends StatelessWidget {
         label,
         style: AppTypography.bodyLarge.copyWith(color: color),
       ),
-      trailing: Icon(
-        Icons.chevron_right,
-        color: isDestructive ? context.colors.error : context.colors.textHint,
-      ),
+      trailing: isLoading
+          ? SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: color,
+              ),
+            )
+          : Icon(
+              Icons.chevron_right,
+              color: isDestructive
+                  ? context.colors.error
+                  : context.colors.textHint,
+            ),
       onTap: onTap,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),

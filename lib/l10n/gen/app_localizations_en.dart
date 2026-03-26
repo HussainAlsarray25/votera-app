@@ -49,7 +49,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpSupport => 'Help & Support';
 
   @override
-  String get signOut => 'Sign Out';
+  String get signOut => 'Log Out';
 
   @override
   String get verifyAccount => 'Verify Account';
