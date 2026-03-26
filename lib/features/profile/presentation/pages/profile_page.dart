@@ -4,7 +4,6 @@ import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/features/profile/presentation/widgets/profile_actions_section.dart';
 import 'package:votera/features/profile/presentation/widgets/profile_header_section.dart';
-import 'package:votera/features/profile/presentation/widgets/profile_stats_section.dart';
 
 /// User profile screen showing personal info, voting stats,
 /// and account actions.
@@ -48,8 +47,6 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 ProfileHeaderSection(),
                 SizedBox(height: AppSpacing.lg),
-                ProfileStatsSection(),
-                SizedBox(height: AppSpacing.lg),
                 ProfileActionsSection(),
                 SizedBox(height: AppSpacing.xxl),
               ],
@@ -80,8 +77,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Column(
                       children: [
                         ProfileHeaderSection(),
-                        SizedBox(height: AppSpacing.lg),
-                        ProfileStatsSection(),
                       ],
                     ),
                   ),

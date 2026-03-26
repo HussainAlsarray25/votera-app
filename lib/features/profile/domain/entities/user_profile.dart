@@ -25,6 +25,7 @@ class UserProfile extends Equatable {
     required this.fullName,
     required this.roles,
     required this.identifiers,
+    this.handle,
     this.avatarUrl,
   });
 
@@ -32,6 +33,9 @@ class UserProfile extends Equatable {
   final String fullName;
   final List<String> roles;
   final List<ProfileIdentifier> identifiers;
+  /// Short unique handle for the user (e.g. "u_4a2b3c"), used as a copyable
+  /// identifier on the profile page.
+  final String? handle;
   /// Remote URL of the user's profile picture, or null if not set.
   final String? avatarUrl;
 
@@ -50,5 +54,5 @@ class UserProfile extends Equatable {
   bool get isVisitorOnly => roles.every((r) => r == 'visitor');
 
   @override
-  List<Object?> get props => [id, fullName, roles, identifiers, avatarUrl];
+  List<Object?> get props => [id, fullName, roles, identifiers, handle, avatarUrl];
 }

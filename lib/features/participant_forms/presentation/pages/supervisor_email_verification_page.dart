@@ -9,17 +9,19 @@ import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
-/// Two-step institutional email verification page.
-/// Step 1: Enter email → OTP sent.
-/// Step 2: Enter 6-digit OTP → participant role granted.
-class EmailVerificationPage extends StatefulWidget {
-  const EmailVerificationPage({super.key});
+/// Two-step supervisor email verification page.
+/// Step 1: Enter supervisor email → OTP sent.
+/// Step 2: Enter 6-digit OTP → supervisor role granted.
+class SupervisorEmailVerificationPage extends StatefulWidget {
+  const SupervisorEmailVerificationPage({super.key});
 
   @override
-  State<EmailVerificationPage> createState() => _EmailVerificationPageState();
+  State<SupervisorEmailVerificationPage> createState() =>
+      _SupervisorEmailVerificationPageState();
 }
 
-class _EmailVerificationPageState extends State<EmailVerificationPage> {
+class _SupervisorEmailVerificationPageState
+    extends State<SupervisorEmailVerificationPage> {
   static const _otpLength = 6;
 
   final _formKey = GlobalKey<FormState>();
@@ -32,17 +34,6 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   // Tracks the email submitted in step 1 so step 2 can reuse it.
   String _submittedEmail = '';
-
-  @override
-  void initState() {
-    super.initState();
-    // Pre-fill email from profile if available.
-    final profileState = context.read<ProfileCubit>().state;
-    if (profileState is ProfileLoaded) {
-      final email = profileState.profile.email;
-      if (email != null) _emailController.text = email;
-    }
-  }
 
   @override
   void dispose() {
@@ -69,13 +60,15 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   void _handleSendOtp() {
     if (_formKey.currentState?.validate() ?? false) {
       _submittedEmail = _emailController.text.trim();
-      context.read<FormsCubit>().sendEmailOtp(_submittedEmail);
+      context.read<FormsCubit>().sendSupervisorEmailOtp(_submittedEmail);
     }
   }
 
   void _handleVerifyOtp() {
     if (!_isOtpComplete) return;
-    context.read<FormsCubit>().confirmEmailOtp(_submittedEmail, _otpCode);
+    context
+        .read<FormsCubit>()
+        .confirmSupervisorEmailOtp(_submittedEmail, _otpCode);
   }
 
   @override
@@ -86,7 +79,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
         elevation: 0,
         leading: BackButton(color: context.colors.textPrimary),
         title: Text(
-          AppLocalizations.of(context)!.institutionalEmail,
+          AppLocalizations.of(context)!.supervisorEmail,
           style: AppTypography.labelLarge.copyWith(
             color: context.colors.textPrimary,
           ),
@@ -94,14 +87,15 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       ),
       body: BlocListener<FormsCubit, FormsState>(
         listener: (context, state) {
-          if (state is FormsEmailVerified) {
+          if (state is FormsSupervisorEmailVerified) {
             // Force-refresh clears the stale cached role before fetching,
-            // so the Teams tab and other role-gated UI update immediately.
+            // so the profile and all role-gated UI update immediately.
             context.read<ProfileCubit>().forceRefresh();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(AppLocalizations.of(context)!.accountVerified),
-                backgroundColor: context.colors.success,
+                content: Text(
+                    AppLocalizations.of(context)!.supervisorAccountVerified),
+                backgroundColor: context.colors.primary,
               ),
             );
             context.go('/profile');
@@ -121,7 +115,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
               builder: (context, state) {
                 return AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  child: state is FormsEmailOtpSent
+                  child: state is FormsSupEmailOtpSent
                       ? _buildOtpStep(state.email)
                       : _buildEmailStep(),
                 );
@@ -139,12 +133,12 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     return Form(
       key: _formKey,
       child: Column(
-        key: const ValueKey('email-step'),
+        key: const ValueKey('supervisor-email-step'),
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: AppSpacing.xl),
           Text(
-            l10n.enterInstitutionalEmail,
+            l10n.enterSupervisorEmail,
             style: AppTypography.h1.copyWith(
               color: context.colors.textPrimary,
             ),
@@ -152,7 +146,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            l10n.institutionalEmailDesc,
+            l10n.supervisorEmailDesc,
             style: AppTypography.bodyMedium.copyWith(
               color: context.colors.textSecondary,
             ),
@@ -160,18 +154,21 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           ),
           const SizedBox(height: AppSpacing.xxl),
           AppTextField(
-            label: l10n.institutionalEmail,
+            label: l10n.supervisorEmail,
             controller: _emailController,
-            hint: l10n.institutionalEmailHint,
+            hint: l10n.supervisorEmailHint,
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             validator: (value) {
               if (value == null || value.isEmpty) return l10n.emailRequired;
               if (!value.contains('@')) return l10n.emailInvalid;
-              // Restrict to the student subdomain to prevent supervisors from
-              // accidentally using the student flow.
-              if (!value.toLowerCase().endsWith('@student.uokufa.edu.iq')) {
-                return l10n.studentEmailDomainError;
+              // The supervisor domain is @uokufa.edu.iq, but student emails use
+              // the @student.uokufa.edu.iq subdomain — reject those here.
+              if (value.toLowerCase().endsWith('@student.uokufa.edu.iq')) {
+                return l10n.teacherEmailNotStudent;
+              }
+              if (!value.toLowerCase().endsWith('@uokufa.edu.iq')) {
+                return l10n.teacherEmailDomainError;
               }
               return null;
             },
@@ -195,7 +192,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   Widget _buildOtpStep(String email) {
     final l10n = AppLocalizations.of(context)!;
     return Column(
-      key: const ValueKey('otp-step'),
+      key: const ValueKey('supervisor-otp-step'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: AppSpacing.xl),
@@ -230,7 +227,8 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             final isLoading = state is FormsLoading;
             return GradientButton(
               text: isLoading ? l10n.verifying : l10n.verify,
-              onPressed: (isLoading || !_isOtpComplete) ? null : _handleVerifyOtp,
+              onPressed:
+                  (isLoading || !_isOtpComplete) ? null : _handleVerifyOtp,
             );
           },
         ),

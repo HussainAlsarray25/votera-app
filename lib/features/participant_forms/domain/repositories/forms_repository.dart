@@ -26,4 +26,10 @@ abstract class FormsRepository {
     required String stage,
     required String documentUrl,
   });
+
+  /// Sends a 6-digit OTP to the provided supervisor email.
+  Future<Either<Failure, void>> requestSupervisorEmailOtp(String email);
+
+  /// Verifies the OTP; on success the supervisor role is granted by the backend.
+  Future<Either<Failure, void>> verifySupervisorEmailOtp(String email, String code);
 }

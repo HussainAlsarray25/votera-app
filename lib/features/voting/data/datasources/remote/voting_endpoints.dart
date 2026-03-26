@@ -11,4 +11,5 @@ class VotingEndpoints {
 
   static String voteById(String eventId, String voteId) =>
       'events/$eventId/votes/$voteId';
+
 }

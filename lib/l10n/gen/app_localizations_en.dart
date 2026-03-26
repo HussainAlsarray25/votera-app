@@ -530,7 +530,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inviteMember => 'Invite Member';
 
   @override
-  String get enterUserIdToInvite => 'Enter user ID to invite';
+  String get enterUserIdToInvite => 'Enter email address to invite';
 
   @override
   String get sendInvite => 'Send Invite';
@@ -939,6 +939,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get teamName => 'Team Name';
 
   @override
+  String get teamHandle => 'Team Handle';
+
+  @override
+  String get memberName => 'Member Name';
+
+  @override
+  String get userId => 'User ID';
+
+  @override
   String get teamNameHint => 'e.g. The Innovators';
 
   @override
@@ -999,4 +1008,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings => 'Settings';
+
+  @override
+  String get copiedToClipboard => 'Copied to clipboard';
+
+  @override
+  String get createdAt => 'Created';
+
+  @override
+  String get whoAreYou => 'Who Are You?';
+
+  @override
+  String get chooseRoleToVerify =>
+      'Choose your role to verify your university account.';
+
+  @override
+  String get iAmStudent => 'I am a Student';
+
+  @override
+  String get studentEmailExample => 'e.g. 5920220096@student.uokufa.edu.iq';
+
+  @override
+  String get iAmTeacher => 'I am a Teacher / Supervisor';
+
+  @override
+  String get teacherEmailExample => 'e.g. ahmedh.almajidy@uokufa.edu.iq';
+
+  @override
+  String get studentEmailDomainError =>
+      'Must be a student email (@student.uokufa.edu.iq)';
+
+  @override
+  String get teacherEmailDomainError =>
+      'Must be a supervisor email (@uokufa.edu.iq)';
+
+  @override
+  String get teacherEmailNotStudent =>
+      'Teacher email cannot be a student email';
+
+  @override
+  String get supervisorEmail => 'Supervisor Email';
+
+  @override
+  String get enterSupervisorEmail => 'Enter Your Supervisor Email';
+
+  @override
+  String get supervisorEmailDesc =>
+      'We will send a 6-digit verification code to your supervisor email.';
+
+  @override
+  String get supervisorEmailHint => 'your.name@uokufa.edu.iq';
+
+  @override
+  String get supervisorAccountVerified =>
+      'Account verified! Supervisor role granted.';
+
+  @override
+  String get studentVerified => 'Student Verified';
+
+  @override
+  String get teacherVerified => 'Teacher Verified';
 }

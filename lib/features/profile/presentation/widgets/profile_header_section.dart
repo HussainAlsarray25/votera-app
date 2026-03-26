@@ -1,8 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/features/profile/domain/entities/user_profile.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/verified_badge.dart';
@@ -14,32 +17,71 @@ class ProfileHeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, AppSpacing.lg, 20, 0),
-      child: BlocBuilder<ProfileCubit, ProfileState>(
-        builder: (context, state) {
-          final name = state is ProfileLoaded
-              ? state.profile.fullName
-              : null;
-          final subtitle = state is ProfileLoaded && state.profile.roles.isNotEmpty
-              ? state.profile.roles.first
-              : null;
-          final isLoading = state is ProfileLoading;
+    return BlocBuilder<ProfileCubit, ProfileState>(
+      builder: (context, state) {
+        final profile = state is ProfileLoaded ? state.profile : null;
+        final name = profile?.fullName;
+        final handle = profile?.handle;
+        final isLoading = state is ProfileLoading;
+        final roles = profile?.roles ?? [];
+        final identifiers = profile?.identifiers ?? [];
 
-          return Column(
-            children: [
-              _buildAvatar(context),
-              const SizedBox(height: 16),
-              _buildNameAndRole(
-                context: context,
-                name: name,
-                subtitle: subtitle,
-                isLoading: isLoading,
+        // Determine verified role label and color for the card outside the
+        // header padding so it can use AppSpacing.pagePadding to match the
+        // settings section below.
+        final String? verifiedLabel;
+        final Color? verifiedColor;
+        if (roles.contains('participant')) {
+          verifiedLabel = AppLocalizations.of(context)!.studentVerified;
+          verifiedColor = context.colors.success;
+        } else if (roles.contains('supervisor')) {
+          verifiedLabel = AppLocalizations.of(context)!.teacherVerified;
+          verifiedColor = context.colors.primary;
+        } else {
+          verifiedLabel = null;
+          verifiedColor = null;
+        }
+
+        final telegramId =
+            identifiers.where((i) => i.type == 'telegram').firstOrNull;
+        final emailId = identifiers
+            .where((i) =>
+                i.type == 'institutional_email' || i.type == 'email')
+            .firstOrNull;
+
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, AppSpacing.lg, 20, 0),
+              child: Column(
+                children: [
+                  _buildAvatar(context),
+                  const SizedBox(height: 16),
+                  _buildNameAndRole(
+                    context: context,
+                    name: name,
+                    handle: handle,
+                    isLoading: isLoading,
+                  ),
+                ],
+              ),
+            ),
+            if (verifiedLabel != null && verifiedColor != null) ...[
+              const SizedBox(height: 14),
+              Padding(
+                padding: AppSpacing.pagePadding,
+                child: _buildVerificationCard(
+                  context: context,
+                  label: verifiedLabel,
+                  color: verifiedColor,
+                  telegramId: telegramId,
+                  emailId: emailId,
+                ),
               ),
             ],
-          );
-        },
-      ),
+          ],
+        );
+      },
     );
   }
 
@@ -172,7 +214,7 @@ class ProfileHeaderSection extends StatelessWidget {
   Widget _buildNameAndRole({
     required BuildContext context,
     required String? name,
-    required String? subtitle,
+    required String? handle,
     required bool isLoading,
   }) {
     if (isLoading) {
@@ -199,13 +241,15 @@ class ProfileHeaderSection extends StatelessWidget {
       );
     }
 
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              name ?? AppLocalizations.of(context)!.userFallback,
+              name ?? l10n.userFallback,
               style: AppTypography.h2.copyWith(
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
@@ -216,24 +260,160 @@ class ProfileHeaderSection extends StatelessWidget {
             const VerifiedBadge(size: 20),
           ],
         ),
-        if (subtitle != null && subtitle.isNotEmpty) ...[
-          const SizedBox(height: 4),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: context.colors.primary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              subtitle,
-              style: AppTypography.bodySmall.copyWith(
-                color: context.colors.primary,
-                fontWeight: FontWeight.w600,
+        if (handle != null && handle.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () => _copyHandle(context, handle),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: context.colors.background,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                border: Border.all(color: context.colors.border),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.tag_rounded,
+                    size: 16,
+                    color: context.colors.textHint,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    handle,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: context.colors.textHint,
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.copy_rounded,
+                    size: 16,
+                    color: context.colors.textHint,
+                  ),
+                ],
               ),
             ),
           ),
         ],
       ],
+    );
+  }
+
+  Widget _buildVerificationCard({
+    required BuildContext context,
+    required String label,
+    required Color color,
+    required ProfileIdentifier? telegramId,
+    required ProfileIdentifier? emailId,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        boxShadow: AppShadows.card(Theme.of(context).brightness),
+        border: Border.all(
+          color: color.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header: verified badge + role label
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.verified_rounded, size: 14, color: color),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: AppTypography.labelMedium.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Divider(height: 1, color: context.colors.divider),
+          const SizedBox(height: 14),
+          // Telegram row — uses the real Telegram SVG logo asset.
+          if (telegramId != null)
+            _buildIdentifierRow(
+              context: context,
+              iconWidget: SvgPicture.asset(
+                'assets/images/features/profile/telegram.svg',
+                width: 28,
+                height: 28,
+              ),
+              label: 'Telegram',
+              labelColor: context.colors.textPrimary,
+            ),
+          if (telegramId != null && emailId != null)
+            const SizedBox(height: 10),
+          // Email row — uses a custom red circle SVG matching the email icon style.
+          if (emailId != null)
+            _buildIdentifierRow(
+              context: context,
+              iconWidget: SvgPicture.asset(
+                'assets/images/features/profile/email.svg',
+                width: 22,
+                height: 22,
+              ),
+              label: emailId.value,
+              labelColor: context.colors.textSecondary,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIdentifierRow({
+    required BuildContext context,
+    required Widget iconWidget,
+    required String label,
+    required Color labelColor,
+  }) {
+    return Row(
+      children: [
+        SizedBox(width: 32, child: Center(child: iconWidget)),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            label,
+            style: AppTypography.bodySmall.copyWith(
+              color: labelColor,
+              fontWeight: FontWeight.w500,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _copyHandle(BuildContext context, String handle) {
+    Clipboard.setData(ClipboardData(text: handle));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.copiedToClipboard),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+      ),
     );
   }
 }

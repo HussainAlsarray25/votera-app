@@ -26,6 +26,9 @@ class EventsCubit extends Cubit<EventsState> {
       GetEventsParams(status: status, page: page, size: size),
     );
 
+    // Guard against the widget being disposed before the network call returns.
+    if (isClosed) return;
+
     result.fold(
       (failure) => emit(EventsError(message: failure.message)),
       (response) => emit(EventsLoaded(response: response)),

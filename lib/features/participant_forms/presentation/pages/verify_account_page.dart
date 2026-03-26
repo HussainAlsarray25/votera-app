@@ -3,8 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
 
-/// Entry point for account verification. Shows two method cards:
-/// institutional email (immediate) and university ID card (admin review).
+/// Entry point for account verification. Shows two method cards — one for
+/// students (participant email OTP) and one for professors/supervisors
+/// (supervisor email OTP) — so the user picks the path that matches their role.
 class VerifyAccountPage extends StatelessWidget {
   const VerifyAccountPage({super.key});
 
@@ -36,9 +37,9 @@ class VerifyAccountPage extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xxl),
                 _buildMethodCard(
                   context: context,
-                  icon: Icons.email_outlined,
-                  title: l10n.institutionalEmail,
-                  subtitle: l10n.verifyWithEmail,
+                  icon: Icons.school_outlined,
+                  title: l10n.student,
+                  subtitle: l10n.studentEmailExample,
                   badge: l10n.instant,
                   badgeColor: context.colors.success,
                   onTap: () => context.push('/verify-account/email'),
@@ -46,12 +47,12 @@ class VerifyAccountPage extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
                 _buildMethodCard(
                   context: context,
-                  icon: Icons.badge_outlined,
-                  title: l10n.universityIdCard,
-                  subtitle: l10n.uploadIdCard,
-                  badge: l10n.requiresReview,
-                  badgeColor: context.colors.warning,
-                  onTap: () => context.push('/verify-account/uid'),
+                  icon: Icons.person_outlined,
+                  title: l10n.professor,
+                  subtitle: l10n.teacherEmailExample,
+                  badge: l10n.instant,
+                  badgeColor: context.colors.primary,
+                  onTap: () => context.push('/verify-account/supervisor-email'),
                 ),
               ],
             ),
@@ -108,10 +109,10 @@ class VerifyAccountPage extends StatelessWidget {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: context.colors.primary.withValues(alpha: 0.1),
+                color: badgeColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
-              child: Icon(icon, color: context.colors.primary, size: 28),
+              child: Icon(icon, color: badgeColor, size: 28),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(

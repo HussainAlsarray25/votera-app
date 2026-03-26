@@ -1097,7 +1097,7 @@ abstract class AppLocalizations {
   /// No description provided for @enterUserIdToInvite.
   ///
   /// In en, this message translates to:
-  /// **'Enter user ID to invite'**
+  /// **'Enter email address to invite'**
   String get enterUserIdToInvite;
 
   /// No description provided for @sendInvite.
@@ -1820,6 +1820,24 @@ abstract class AppLocalizations {
   /// **'Team Name'**
   String get teamName;
 
+  /// No description provided for @teamHandle.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Handle'**
+  String get teamHandle;
+
+  /// No description provided for @memberName.
+  ///
+  /// In en, this message translates to:
+  /// **'Member Name'**
+  String get memberName;
+
+  /// No description provided for @userId.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get userId;
+
   /// No description provided for @teamNameHint.
   ///
   /// In en, this message translates to:
@@ -1939,6 +1957,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get copiedToClipboard;
+
+  /// No description provided for @createdAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get createdAt;
+
+  /// No description provided for @whoAreYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Who Are You?'**
+  String get whoAreYou;
+
+  /// No description provided for @chooseRoleToVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your role to verify your university account.'**
+  String get chooseRoleToVerify;
+
+  /// No description provided for @iAmStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'I am a Student'**
+  String get iAmStudent;
+
+  /// No description provided for @studentEmailExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 5920220096@student.uokufa.edu.iq'**
+  String get studentEmailExample;
+
+  /// No description provided for @iAmTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'I am a Teacher / Supervisor'**
+  String get iAmTeacher;
+
+  /// No description provided for @teacherEmailExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. ahmedh.almajidy@uokufa.edu.iq'**
+  String get teacherEmailExample;
+
+  /// No description provided for @studentEmailDomainError.
+  ///
+  /// In en, this message translates to:
+  /// **'Must be a student email (@student.uokufa.edu.iq)'**
+  String get studentEmailDomainError;
+
+  /// No description provided for @teacherEmailDomainError.
+  ///
+  /// In en, this message translates to:
+  /// **'Must be a supervisor email (@uokufa.edu.iq)'**
+  String get teacherEmailDomainError;
+
+  /// No description provided for @teacherEmailNotStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher email cannot be a student email'**
+  String get teacherEmailNotStudent;
+
+  /// No description provided for @supervisorEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervisor Email'**
+  String get supervisorEmail;
+
+  /// No description provided for @enterSupervisorEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Your Supervisor Email'**
+  String get enterSupervisorEmail;
+
+  /// No description provided for @supervisorEmailDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'We will send a 6-digit verification code to your supervisor email.'**
+  String get supervisorEmailDesc;
+
+  /// No description provided for @supervisorEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'your.name@uokufa.edu.iq'**
+  String get supervisorEmailHint;
+
+  /// No description provided for @supervisorAccountVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Account verified! Supervisor role granted.'**
+  String get supervisorAccountVerified;
+
+  /// No description provided for @studentVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Verified'**
+  String get studentVerified;
+
+  /// No description provided for @teacherVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Verified'**
+  String get teacherVerified;
 }
 
 class _AppLocalizationsDelegate

@@ -33,6 +33,7 @@ class UserProfileModel extends UserProfile {
     required super.fullName,
     required super.roles,
     required super.identifiers,
+    super.handle,
     super.avatarUrl,
   });
 
@@ -45,6 +46,7 @@ class UserProfileModel extends UserProfile {
           .map((e) =>
               ProfileIdentifierModel.fromJson(e as Map<String, dynamic>))
           .toList(),
+      handle: json['handle'] as String?,
       avatarUrl: json['profile_picture_url'] as String?,
     );
   }
@@ -62,6 +64,7 @@ class UserProfileModel extends UserProfile {
                 isVerified: e.isVerified,
               ).toJson(),)
           .toList(),
+      'handle': handle,
       'profile_picture_url': avatarUrl,
     };
   }

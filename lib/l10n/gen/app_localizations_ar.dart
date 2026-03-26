@@ -525,7 +525,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get inviteMember => 'دعوة عضو';
 
   @override
-  String get enterUserIdToInvite => 'أدخل معرّف المستخدم للدعوة';
+  String get enterUserIdToInvite => 'أدخل البريد الإلكتروني للدعوة';
 
   @override
   String get sendInvite => 'إرسال الدعوة';
@@ -929,6 +929,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get teamName => 'اسم الفريق';
 
   @override
+  String get teamHandle => 'معرّف الفريق';
+
+  @override
+  String get memberName => 'اسم العضو';
+
+  @override
+  String get userId => 'معرّف المستخدم';
+
+  @override
   String get teamNameHint => 'مثال: المبتكرون';
 
   @override
@@ -988,4 +997,61 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings => 'الإعدادات';
+
+  @override
+  String get copiedToClipboard => 'تم النسخ';
+
+  @override
+  String get createdAt => 'تاريخ الإنشاء';
+
+  @override
+  String get whoAreYou => 'من أنت؟';
+
+  @override
+  String get chooseRoleToVerify => 'اختر دورك لتوثيق حسابك الجامعي.';
+
+  @override
+  String get iAmStudent => 'أنا طالب';
+
+  @override
+  String get studentEmailExample => 'مثال: 5920220096@student.uokufa.edu.iq';
+
+  @override
+  String get iAmTeacher => 'أنا أستاذ / مشرف';
+
+  @override
+  String get teacherEmailExample => 'مثال: ahmedh.almajidy@uokufa.edu.iq';
+
+  @override
+  String get studentEmailDomainError =>
+      'يجب أن يكون بريدًا جامعيًا للطلاب (@student.uokufa.edu.iq)';
+
+  @override
+  String get teacherEmailDomainError =>
+      'يجب أن يكون بريد مشرف (@uokufa.edu.iq)';
+
+  @override
+  String get teacherEmailNotStudent => 'بريد الأستاذ لا يمكن أن يكون بريد طالب';
+
+  @override
+  String get supervisorEmail => 'بريد المشرف';
+
+  @override
+  String get enterSupervisorEmail => 'أدخل بريد المشرف';
+
+  @override
+  String get supervisorEmailDesc =>
+      'سنرسل رمز تحقق مكوّنًا من 6 أرقام إلى بريد المشرف الخاص بك.';
+
+  @override
+  String get supervisorEmailHint => 'your.name@uokufa.edu.iq';
+
+  @override
+  String get supervisorAccountVerified => 'تم توثيق الحساب! تم منح دور المشرف.';
+
+  @override
+  String get studentVerified => 'طالب موثق';
+
+  @override
+  String get teacherVerified => 'أستاذ موثق';
 }

@@ -10,6 +10,7 @@ import 'package:votera/features/authentication/presentation/pages/otp_verificati
 import 'package:votera/features/authentication/presentation/pages/user_info_page.dart';
 import 'package:votera/features/participant_forms/presentation/cubit/forms_cubit.dart';
 import 'package:votera/features/participant_forms/presentation/pages/email_verification_page.dart';
+import 'package:votera/features/participant_forms/presentation/pages/supervisor_email_verification_page.dart';
 import 'package:votera/features/participant_forms/presentation/pages/uid_submission_page.dart';
 import 'package:votera/features/participant_forms/presentation/pages/verify_account_page.dart';
 import 'package:votera/features/exhibitions/presentation/pages/exhibition_detail_page.dart';
@@ -68,6 +69,13 @@ class AppRouter {
         builder: (context, state) => BlocProvider(
           create: (_) => sl<FormsCubit>(),
           child: const EmailVerificationPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/verify-account/supervisor-email',
+        builder: (context, state) => BlocProvider(
+          create: (_) => sl<FormsCubit>(),
+          child: const SupervisorEmailVerificationPage(),
         ),
       ),
       GoRoute(
