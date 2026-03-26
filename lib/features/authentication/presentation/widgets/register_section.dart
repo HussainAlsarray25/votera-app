@@ -98,15 +98,17 @@ class _RegisterSectionState extends State<RegisterSection> {
     );
   }
 
-  // -- Section: Identifier input --
+  // -- Section: Email input --
   Widget _buildIdentifierField(AppLocalizations l10n) {
     return AppTextField(
-      label: l10n.identifier,
+      label: l10n.email,
       controller: _identifierController,
-      hint: l10n.enterIdentifier,
-      prefixIcon: Icons.alternate_email_outlined,
+      hint: l10n.enterEmail,
+      prefixIcon: Icons.email_outlined,
+      keyboardType: TextInputType.emailAddress,
       validator: (value) {
-        if (value == null || value.isEmpty) return l10n.identifierRequired;
+        if (value == null || value.isEmpty) return l10n.emailRequired;
+        if (!value.contains('@')) return l10n.emailInvalid;
         return null;
       },
     );

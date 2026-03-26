@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
@@ -170,20 +171,21 @@ class _TelegramLoginButtonState extends State<TelegramLoginButton>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.send_rounded,
-              color: isDisabled
-                  ? _telegramBlue.withValues(alpha: 0.4)
-                  : _telegramBlue,
-              size: 20,
-            ),
-            const SizedBox(width: AppSpacing.sm),
             Text(
               label,
               style: AppTypography.labelMedium.copyWith(
                 color: isDisabled
                     ? _telegramBlue.withValues(alpha: 0.4)
                     : _telegramBlue,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Opacity(
+              opacity: isDisabled ? 0.4 : 1.0,
+              child: SvgPicture.asset(
+                'assets/images/features/profile/telegram.svg',
+                width: 24,
+                height: 24,
               ),
             ),
           ],

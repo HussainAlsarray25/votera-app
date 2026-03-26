@@ -40,7 +40,6 @@ class _LoginSectionState extends State<LoginSection> {
       child: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: AppSpacing.xxl),
             _buildHeader(l10n),
@@ -123,20 +122,22 @@ class _LoginSectionState extends State<LoginSection> {
 
   // -- Section: Forgot password link --
   Widget _buildForgotPassword(AppLocalizations l10n) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: TextButton(
-        onPressed: () => context.go('/forgot-password'),
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        ),
-        child: Text(
-          l10n.forgotPassword,
-          style: AppTypography.bodySmall.copyWith(
-            color: context.colors.primary,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        TextButton(
+          onPressed: () => context.go('/forgot-password'),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          ),
+          child: Text(
+            l10n.forgotPassword,
+            style: AppTypography.bodySmall.copyWith(
+              color: context.colors.primary,
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 

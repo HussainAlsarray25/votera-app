@@ -10,7 +10,7 @@ import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Settings and account actions at the bottom of the profile page.
 class ProfileActionsSection extends StatelessWidget {
-  const ProfileActionsSection({super.key});
+const ProfileActionsSection({super.key});
 
   @override
   Widget build(BuildContext context) {

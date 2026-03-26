@@ -91,7 +91,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   // -- Section: Skip button (subtle, secondary style) --
   Widget _buildSkipButton(AppLocalizations l10n) {
     return Align(
-      alignment: Alignment.centerRight,
+      alignment: AlignmentDirectional.centerEnd,
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: TextButton(

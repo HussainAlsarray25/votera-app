@@ -547,7 +547,7 @@ class _NoTeamView extends StatelessWidget {
           if (invitations.isNotEmpty || isInvitationLoading) ...[
             const SizedBox(height: AppSpacing.xl),
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: Text(
                 AppLocalizations.of(context)!.pendingInvitations,
                 style: AppTypography.labelLarge.copyWith(

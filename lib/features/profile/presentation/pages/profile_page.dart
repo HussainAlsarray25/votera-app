@@ -65,10 +65,10 @@ class _ProfilePageState extends State<ProfilePage> {
           child: RefreshIndicator(
             onRefresh: () => context.read<ProfileCubit>().forceRefresh(),
             color: context.colors.primary,
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: const Row(
+            child: const SingleChildScrollView(
+              physics: AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.all(AppSpacing.lg),
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Left column: header + stats

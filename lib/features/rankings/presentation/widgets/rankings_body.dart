@@ -110,7 +110,7 @@ class _RankingsBodyState extends State<RankingsBody> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Align(
-        alignment: Alignment.centerLeft,
+        alignment: AlignmentDirectional.centerStart,
         child: Text(
           AppLocalizations.of(context)!.rankingsLabel,
           style: TextStyle(
