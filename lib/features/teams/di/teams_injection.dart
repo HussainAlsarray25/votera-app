@@ -14,7 +14,7 @@ import 'package:votera/features/teams/domain/usecases/invite_member.dart';
 import 'package:votera/features/teams/domain/usecases/leave_team.dart';
 import 'package:votera/features/teams/domain/usecases/remove_member.dart';
 import 'package:votera/features/teams/domain/usecases/respond_to_invitation.dart';
-import 'package:votera/features/teams/domain/usecases/search_teams.dart';
+import 'package:votera/features/teams/domain/usecases/search_teams.dart' show ListTeams;
 import 'package:votera/features/teams/domain/usecases/transfer_leadership.dart';
 import 'package:votera/features/teams/domain/usecases/update_team.dart';
 import 'package:votera/features/teams/presentation/cubit/teams_cubit.dart';
@@ -36,7 +36,7 @@ void initTeamsFeature(GetIt sl) {
         leaveTeam: sl<LeaveTeam>(),
         removeMember: sl<RemoveMember>(),
         transferLeadership: sl<TransferLeadership>(),
-        searchTeams: sl<SearchTeams>(),
+        listTeams: sl<ListTeams>(),
         cancelInvitation: sl<CancelInvitation>(),
       ),
     )
@@ -74,8 +74,8 @@ void initTeamsFeature(GetIt sl) {
     ..registerLazySingleton<TransferLeadership>(
       () => TransferLeadership(sl<TeamRepository>()),
     )
-    ..registerLazySingleton<SearchTeams>(
-      () => SearchTeams(sl<TeamRepository>()),
+    ..registerLazySingleton<ListTeams>(
+      () => ListTeams(sl<TeamRepository>()),
     )
     ..registerLazySingleton<CancelInvitation>(
       () => CancelInvitation(sl<TeamRepository>()),

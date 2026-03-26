@@ -12,7 +12,7 @@ abstract class TeamRepository {
 
   Future<Either<Failure, TeamEntity>> getTeam(String teamId);
 
-  Future<Either<Failure, TeamEntity>> getMyTeam();
+  Future<Either<Failure, List<TeamEntity>>> getMyTeams();
 
   Future<Either<Failure, TeamEntity>> updateTeam({
     required String teamId,
@@ -24,7 +24,7 @@ abstract class TeamRepository {
 
   Future<Either<Failure, InvitationEntity>> inviteMember({
     required String teamId,
-    required String inviteeId,
+    required String inviteeEmail,
   });
 
   Future<Either<Failure, List<InvitationEntity>>> getMyInvitations();
@@ -34,7 +34,7 @@ abstract class TeamRepository {
     required bool accept,
   });
 
-  Future<Either<Failure, void>> leaveTeam();
+  Future<Either<Failure, void>> leaveTeam(String teamId);
 
   Future<Either<Failure, void>> removeMember({
     required String teamId,
@@ -46,8 +46,13 @@ abstract class TeamRepository {
     required String newLeaderId,
   });
 
-  Future<Either<Failure, List<TeamEntity>>> searchTeams({
-    required String query,
+  Future<Either<Failure, List<TeamEntity>>> listTeams({
+    String? name,
+    String? teamHandle,
+    String? teamId,
+    String? userId,
+    String? userHandle,
+    String? userName,
   });
 
   Future<Either<Failure, void>> cancelInvitation({

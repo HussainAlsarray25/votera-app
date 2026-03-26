@@ -39,7 +39,7 @@ class TeamMemberTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _MemberAvatar(userId: member.userId, isLeader: isLeader),
+          _MemberAvatar(displayName: member.displayName, isLeader: isLeader),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
@@ -50,8 +50,8 @@ class TeamMemberTile extends StatelessWidget {
                     Flexible(
                       child: Text(
                         isCurrentUser
-                            ? '${member.userId} ${AppLocalizations.of(context)!.youSuffix}'
-                            : member.userId,
+                            ? '${member.displayName} ${AppLocalizations.of(context)!.youSuffix}'
+                            : member.displayName,
                         style: AppTypography.labelMedium.copyWith(
                           color: context.colors.textPrimary,
                         ),
@@ -112,14 +112,18 @@ class TeamMemberTile extends StatelessWidget {
 /// Round avatar showing up to two initials of the user ID.
 /// Gold gradient for the leader; subtle secondary/primary for members.
 class _MemberAvatar extends StatelessWidget {
-  const _MemberAvatar({required this.userId, required this.isLeader});
+  const _MemberAvatar({required this.displayName, required this.isLeader});
 
-  final String userId;
+  final String displayName;
   final bool isLeader;
 
   String get _initials {
-    if (userId.length >= 2) return userId.substring(0, 2).toUpperCase();
-    return userId.toUpperCase();
+    final parts = displayName.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    if (displayName.length >= 2) return displayName.substring(0, 2).toUpperCase();
+    return displayName.toUpperCase();
   }
 
   @override

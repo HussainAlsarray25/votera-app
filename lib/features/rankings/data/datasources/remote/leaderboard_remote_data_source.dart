@@ -22,7 +22,9 @@ class LeaderboardRemoteDataSourceImpl implements LeaderboardRemoteDataSource {
     );
 
     final body = response.data ?? {};
-    return LeaderboardModel.fromJson(body);
+    // The API wraps the payload in { "success": true, "data": { ... } }.
+    final data = (body['data'] as Map<String, dynamic>?) ?? body;
+    return LeaderboardModel.fromJson(data);
   }
 
   @override
@@ -32,6 +34,8 @@ class LeaderboardRemoteDataSourceImpl implements LeaderboardRemoteDataSource {
     );
 
     final body = response.data ?? {};
-    return LeaderboardModel.fromJson(body);
+    // The API wraps the payload in { "success": true, "data": { ... } }.
+    final data = (body['data'] as Map<String, dynamic>?) ?? body;
+    return LeaderboardModel.fromJson(data);
   }
 }

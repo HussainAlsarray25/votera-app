@@ -15,6 +15,15 @@ class TeamsLoading extends TeamsState {
   const TeamsLoading();
 }
 
+class MyTeamsLoaded extends TeamsState {
+  const MyTeamsLoaded({required this.teams});
+
+  final List<TeamEntity> teams;
+
+  @override
+  List<Object?> get props => [teams];
+}
+
 class TeamLoaded extends TeamsState {
   const TeamLoaded({required this.team});
 

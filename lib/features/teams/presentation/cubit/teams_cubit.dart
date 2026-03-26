@@ -13,7 +13,7 @@ import 'package:votera/features/teams/domain/usecases/leave_team.dart';
 import 'package:votera/features/teams/domain/usecases/remove_member.dart';
 import 'package:votera/features/teams/domain/usecases/cancel_invitation.dart';
 import 'package:votera/features/teams/domain/usecases/respond_to_invitation.dart';
-import 'package:votera/features/teams/domain/usecases/search_teams.dart';
+import 'package:votera/features/teams/domain/usecases/search_teams.dart' show ListTeams, ListTeamsParams;
 import 'package:votera/features/teams/domain/usecases/transfer_leadership.dart';
 import 'package:votera/features/teams/domain/usecases/update_team.dart';
 
@@ -33,7 +33,7 @@ class TeamsCubit extends Cubit<TeamsState> {
     required this.leaveTeam,
     required this.removeMember,
     required this.transferLeadership,
-    required this.searchTeams,
+    required this.listTeams,
     required this.cancelInvitation,
   }) : super(const TeamsInitial());
 
@@ -48,7 +48,7 @@ class TeamsCubit extends Cubit<TeamsState> {
   final LeaveTeam leaveTeam;
   final RemoveMember removeMember;
   final TransferLeadership transferLeadership;
-  final SearchTeams searchTeams;
+  final ListTeams listTeams;
   final CancelInvitation cancelInvitation;
 
   Future<void> create({required String name, String? description}) async {
@@ -56,6 +56,7 @@ class TeamsCubit extends Cubit<TeamsState> {
     final result = await createTeam(
       CreateTeamParams(name: name, description: description),
     );
+    if (isClosed) return;
     result.fold(
       (failure) => emit(TeamsError(message: failure.message)),
       (team) => emit(TeamLoaded(team: team)),
@@ -65,6 +66,7 @@ class TeamsCubit extends Cubit<TeamsState> {
   Future<void> loadTeam(String teamId) async {
     emit(const TeamsLoading());
     final result = await getTeam(GetTeamParams(teamId: teamId));
+    if (isClosed) return;
     result.fold(
       (failure) => emit(TeamsError(message: failure.message)),
       (team) => emit(TeamLoaded(team: team)),
@@ -74,9 +76,10 @@ class TeamsCubit extends Cubit<TeamsState> {
   Future<void> loadMyTeam() async {
     emit(const TeamsLoading());
     final result = await getMyTeam(NoParams());
+    if (isClosed) return;
     result.fold(
       (failure) => emit(TeamsError(message: failure.message)),
-      (team) => emit(TeamLoaded(team: team)),
+      (teams) => emit(MyTeamsLoaded(teams: teams)),
     );
   }
 
@@ -89,6 +92,7 @@ class TeamsCubit extends Cubit<TeamsState> {
     final result = await updateTeam(
       UpdateTeamParams(teamId: teamId, name: name, description: description),
     );
+    if (isClosed) return;
     result.fold(
       // Update failed — team is still there, so use TeamsActionFailed
       // to avoid wiping the loaded team from the UI.
@@ -100,6 +104,7 @@ class TeamsCubit extends Cubit<TeamsState> {
   Future<void> delete(String teamId) async {
     emit(const TeamsLoading());
     final result = await deleteTeam(DeleteTeamParams(teamId: teamId));
+    if (isClosed) return;
     result.fold(
       (failure) => emit(TeamsActionFailed(message: failure.message)),
       (_) => emit(const TeamsActionSuccess()),
@@ -108,12 +113,13 @@ class TeamsCubit extends Cubit<TeamsState> {
 
   Future<void> invite({
     required String teamId,
-    required String inviteeId,
+    required String inviteeEmail,
   }) async {
     emit(const TeamsLoading());
     final result = await inviteMember(
-      InviteMemberParams(teamId: teamId, inviteeId: inviteeId),
+      InviteMemberParams(teamId: teamId, inviteeEmail: inviteeEmail),
     );
+    if (isClosed) return;
     result.fold(
       (failure) => emit(TeamsActionFailed(message: failure.message)),
       (invitation) => emit(InvitationSent(invitation: invitation)),
@@ -123,6 +129,7 @@ class TeamsCubit extends Cubit<TeamsState> {
   Future<void> loadInvitations() async {
     emit(const TeamsLoading());
     final result = await getMyInvitations(NoParams());
+    if (isClosed) return;
     result.fold(
       (failure) => emit(TeamsError(message: failure.message)),
       (invitations) => emit(InvitationsLoaded(invitations: invitations)),
@@ -137,15 +144,17 @@ class TeamsCubit extends Cubit<TeamsState> {
     final result = await respondToInvitation(
       RespondToInvitationParams(invitationId: invitationId, accept: accept),
     );
+    if (isClosed) return;
     result.fold(
       (failure) => emit(TeamsActionFailed(message: failure.message)),
       (_) => emit(const TeamsActionSuccess()),
     );
   }
 
-  Future<void> leave() async {
+  Future<void> leave({required String teamId}) async {
     emit(const TeamsLoading());
-    final result = await leaveTeam(NoParams());
+    final result = await leaveTeam(LeaveTeamParams(teamId: teamId));
+    if (isClosed) return;
     result.fold(
       // The backend rejected the leave (e.g. leader must transfer first).
       // Team still exists — preserve the loaded view, surface the error.
@@ -162,6 +171,7 @@ class TeamsCubit extends Cubit<TeamsState> {
     final result = await removeMember(
       RemoveMemberParams(teamId: teamId, memberId: memberId),
     );
+    if (isClosed) return;
     result.fold(
       (failure) => emit(TeamsActionFailed(message: failure.message)),
       (_) => emit(const TeamsActionSuccess()),
@@ -176,26 +186,48 @@ class TeamsCubit extends Cubit<TeamsState> {
     final result = await transferLeadership(
       TransferLeadershipParams(teamId: teamId, newLeaderId: newLeaderId),
     );
+    if (isClosed) return;
     result.fold(
       (failure) => emit(TeamsActionFailed(message: failure.message)),
       (_) => emit(const TeamsActionSuccess()),
     );
   }
 
-  Future<void> search({required String query}) async {
+  Future<void> browseTeams({
+    String? name,
+    String? teamHandle,
+    String? teamId,
+    String? userId,
+    String? userHandle,
+    String? userName,
+  }) async {
     emit(const TeamsLoading());
-    final result = await searchTeams(SearchTeamsParams(query: query));
+    final result = await listTeams(
+      ListTeamsParams(
+        name: name,
+        teamHandle: teamHandle,
+        teamId: teamId,
+        userId: userId,
+        userHandle: userHandle,
+        userName: userName,
+      ),
+    );
+    if (isClosed) return;
     result.fold(
       (failure) => emit(TeamsError(message: failure.message)),
       (teams) => emit(TeamsSearchResults(teams: teams)),
     );
   }
 
+  // Resets the cubit to its initial state (e.g. when the search query is cleared).
+  void reset() => emit(const TeamsInitial());
+
   Future<void> revokeInvitation({required String invitationId}) async {
     emit(const TeamsLoading());
     final result = await cancelInvitation(
       CancelInvitationParams(invitationId: invitationId),
     );
+    if (isClosed) return;
     result.fold(
       (failure) => emit(TeamsActionFailed(message: failure.message)),
       (_) => emit(const TeamsActionSuccess()),

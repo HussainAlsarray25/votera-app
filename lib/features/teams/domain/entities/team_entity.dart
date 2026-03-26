@@ -8,6 +8,7 @@ class TeamEntity extends Equatable {
     required this.name,
     required this.leaderId,
     required this.members,
+    this.handle,
     this.description,
     this.createdAt,
     this.updatedAt,
@@ -15,6 +16,7 @@ class TeamEntity extends Equatable {
 
   final String id;
   final String name;
+  final String? handle;
   final String? description;
   final String leaderId;
   final List<TeamMemberEntity> members;
@@ -25,6 +27,7 @@ class TeamEntity extends Equatable {
   List<Object?> get props => [
         id,
         name,
+        handle,
         description,
         leaderId,
         members,

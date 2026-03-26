@@ -46,12 +46,12 @@ class TeamRepositoryImpl implements TeamRepository {
   }
 
   @override
-  Future<Either<Failure, TeamEntity>> getMyTeam() async {
+  Future<Either<Failure, List<TeamEntity>>> getMyTeams() async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
     try {
-      final result = await remote.getMyTeam();
+      final result = await remote.getMyTeams();
       return Right(result);
     } on Exception catch (e) {
       return Left(ServerFailure(message: extractErrorMessage(e)));
@@ -95,13 +95,13 @@ class TeamRepositoryImpl implements TeamRepository {
   @override
   Future<Either<Failure, InvitationEntity>> inviteMember({
     required String teamId,
-    required String inviteeId,
+    required String inviteeEmail,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
     try {
-      final result = await remote.inviteMember(teamId: teamId, inviteeId: inviteeId);
+      final result = await remote.inviteMember(teamId: teamId, inviteeEmail: inviteeEmail);
       return Right(result);
     } on Exception catch (e) {
       return Left(ServerFailure(message: extractErrorMessage(e)));
@@ -138,12 +138,12 @@ class TeamRepositoryImpl implements TeamRepository {
   }
 
   @override
-  Future<Either<Failure, void>> leaveTeam() async {
+  Future<Either<Failure, void>> leaveTeam(String teamId) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
     try {
-      await remote.leaveTeam();
+      await remote.leaveTeam(teamId);
       return const Right(null);
     } on Exception catch (e) {
       return Left(ServerFailure(message: extractErrorMessage(e)));
@@ -183,14 +183,26 @@ class TeamRepositoryImpl implements TeamRepository {
   }
 
   @override
-  Future<Either<Failure, List<TeamEntity>>> searchTeams({
-    required String query,
+  Future<Either<Failure, List<TeamEntity>>> listTeams({
+    String? name,
+    String? teamHandle,
+    String? teamId,
+    String? userId,
+    String? userHandle,
+    String? userName,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
     try {
-      final result = await remote.searchTeams(query: query);
+      final result = await remote.listTeams(
+        name: name,
+        teamHandle: teamHandle,
+        teamId: teamId,
+        userId: userId,
+        userHandle: userHandle,
+        userName: userName,
+      );
       return Right(result);
     } on Exception catch (e) {
       return Left(ServerFailure(message: extractErrorMessage(e)));

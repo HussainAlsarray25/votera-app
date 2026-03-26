@@ -6,13 +6,13 @@ import 'package:votera/features/teams/domain/entities/invitation_entity.dart';
 import 'package:votera/features/teams/domain/repositories/team_repository.dart';
 
 class InviteMemberParams extends Equatable {
-  const InviteMemberParams({required this.teamId, required this.inviteeId});
+  const InviteMemberParams({required this.teamId, required this.inviteeEmail});
 
   final String teamId;
-  final String inviteeId;
+  final String inviteeEmail;
 
   @override
-  List<Object> get props => [teamId, inviteeId];
+  List<Object> get props => [teamId, inviteeEmail];
 }
 
 class InviteMember extends UseCase<InvitationEntity, InviteMemberParams> {
@@ -24,7 +24,7 @@ class InviteMember extends UseCase<InvitationEntity, InviteMemberParams> {
   Future<Either<Failure, InvitationEntity>> call(InviteMemberParams params) {
     return repository.inviteMember(
       teamId: params.teamId,
-      inviteeId: params.inviteeId,
+      inviteeEmail: params.inviteeEmail,
     );
   }
 }

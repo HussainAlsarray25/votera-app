@@ -5,22 +5,50 @@ import 'package:votera/core/usecases/usecase.dart';
 import 'package:votera/features/teams/domain/entities/team_entity.dart';
 import 'package:votera/features/teams/domain/repositories/team_repository.dart';
 
-class SearchTeamsParams extends Equatable {
-  const SearchTeamsParams({required this.query});
+class ListTeamsParams extends Equatable {
+  const ListTeamsParams({
+    this.name,
+    this.teamHandle,
+    this.teamId,
+    this.userId,
+    this.userHandle,
+    this.userName,
+  });
 
-  final String query;
+  final String? name;
+  final String? teamHandle;
+  final String? teamId;
+  final String? userId;
+  final String? userHandle;
+  final String? userName;
+
+  bool get isEmpty =>
+      name == null &&
+      teamHandle == null &&
+      teamId == null &&
+      userId == null &&
+      userHandle == null &&
+      userName == null;
 
   @override
-  List<Object> get props => [query];
+  List<Object?> get props =>
+      [name, teamHandle, teamId, userId, userHandle, userName];
 }
 
-class SearchTeams extends UseCase<List<TeamEntity>, SearchTeamsParams> {
-  SearchTeams(this.repository);
+class ListTeams extends UseCase<List<TeamEntity>, ListTeamsParams> {
+  ListTeams(this.repository);
 
   final TeamRepository repository;
 
   @override
-  Future<Either<Failure, List<TeamEntity>>> call(SearchTeamsParams params) {
-    return repository.searchTeams(query: params.query);
+  Future<Either<Failure, List<TeamEntity>>> call(ListTeamsParams params) {
+    return repository.listTeams(
+      name: params.name,
+      teamHandle: params.teamHandle,
+      teamId: params.teamId,
+      userId: params.userId,
+      userHandle: params.userHandle,
+      userName: params.userName,
+    );
   }
 }

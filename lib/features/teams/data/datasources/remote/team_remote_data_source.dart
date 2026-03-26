@@ -6,18 +6,25 @@ import 'package:votera/features/teams/data/models/team_model.dart';
 abstract class TeamRemoteDataSource {
   Future<TeamModel> createTeam({required String name, String? description});
   Future<TeamModel> getTeam(String teamId);
-  Future<TeamModel> getMyTeam();
+  Future<List<TeamModel>> getMyTeams();
   Future<TeamModel> updateTeam({required String teamId, String? name, String? description});
   Future<void> deleteTeam(String teamId);
-  Future<InvitationModel> inviteMember({required String teamId, required String inviteeId});
+  Future<InvitationModel> inviteMember({required String teamId, required String inviteeEmail});
   Future<List<InvitationModel>> getMyInvitations();
   Future<void> respondToInvitation({required String invitationId, required bool accept});
-  Future<void> leaveTeam();
+  Future<void> leaveTeam(String teamId);
   Future<void> removeMember({required String teamId, required String memberId});
   Future<void> transferLeadership({required String teamId, required String newLeaderId});
 
-  /// GET /v1/teams/search?q={query}
-  Future<List<TeamModel>> searchTeams({required String query});
+  /// GET /v1/teams with optional filter params
+  Future<List<TeamModel>> listTeams({
+    String? name,
+    String? teamHandle,
+    String? teamId,
+    String? userId,
+    String? userHandle,
+    String? userName,
+  });
 
   /// POST /v1/teams/invitations/{id}/cancel
   Future<void> cancelInvitation({required String invitationId});
@@ -48,11 +55,15 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
   }
 
   @override
-  Future<TeamModel> getMyTeam() async {
+  Future<List<TeamModel>> getMyTeams() async {
+    // GET /teams/my returns an array of teams.
     final response = await apiClient.get<Map<String, dynamic>>(
       TeamEndpoints.myTeam,
     );
-    return TeamModel.fromJson(response.data!);
+    final items = response.data!['data'] as List<dynamic>? ?? [];
+    return items
+        .map((e) => TeamModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -79,11 +90,11 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
   @override
   Future<InvitationModel> inviteMember({
     required String teamId,
-    required String inviteeId,
+    required String inviteeEmail,
   }) async {
     final response = await apiClient.post<Map<String, dynamic>>(
       TeamEndpoints.teamInvitations(teamId),
-      data: {'invitee_id': inviteeId},
+      data: {'invitee_email': inviteeEmail},
     );
     return InvitationModel.fromJson(response.data!);
   }
@@ -110,8 +121,8 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
   }
 
   @override
-  Future<void> leaveTeam() async {
-    await apiClient.post<void>(TeamEndpoints.leaveTeam);
+  Future<void> leaveTeam(String teamId) async {
+    await apiClient.post<void>(TeamEndpoints.leaveTeam(teamId));
   }
 
   @override
@@ -134,12 +145,29 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
   }
 
   @override
-  Future<List<TeamModel>> searchTeams({required String query}) async {
-    final response = await apiClient.get<List<dynamic>>(
-      TeamEndpoints.searchTeams,
-      queryParameters: {'q': query},
+  Future<List<TeamModel>> listTeams({
+    String? name,
+    String? teamHandle,
+    String? teamId,
+    String? userId,
+    String? userHandle,
+    String? userName,
+  }) async {
+    final query = <String, dynamic>{};
+    if (name != null) query['name'] = name;
+    if (teamHandle != null) query['team_handle'] = teamHandle;
+    if (teamId != null) query['team_id'] = teamId;
+    if (userId != null) query['user_id'] = userId;
+    if (userHandle != null) query['user_handle'] = userHandle;
+    if (userName != null) query['user_name'] = userName;
+
+    final response = await apiClient.get<Map<String, dynamic>>(
+      TeamEndpoints.teams,
+      queryParameters: query.isEmpty ? null : query,
     );
-    return (response.data ?? [])
+    final dataMap = response.data!['data'] as Map<String, dynamic>;
+    final items = dataMap['items'] as List<dynamic>? ?? [];
+    return items
         .map((e) => TeamModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }

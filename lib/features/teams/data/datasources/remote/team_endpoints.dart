@@ -5,7 +5,7 @@ class TeamEndpoints {
 
   static const String teams = 'teams';
   static const String myTeam = 'teams/my';
-  static const String leaveTeam = 'teams/my/leave';
+  static String leaveTeam(String teamId) => 'teams/$teamId/leave';
   static const String myInvitations = 'teams/invitations';
 
   static String teamById(String teamId) => 'teams/$teamId';
@@ -21,8 +21,6 @@ class TeamEndpoints {
 
   static String transferLeadership(String teamId) =>
       'teams/$teamId/transfer-leadership';
-
-  static const String searchTeams = 'teams/search';
 
   static String cancelInvitation(String invitationId) =>
       'teams/invitations/$invitationId/cancel';
