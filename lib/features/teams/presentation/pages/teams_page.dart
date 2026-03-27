@@ -404,6 +404,10 @@ class _TeamListTile extends StatelessWidget {
   final TeamEntity team;
   final VoidCallback onTap;
 
+  // Kept in sync with team_card.dart.
+  static const _royalTeamName = 'Frogs Team';
+  bool get _isRoyal => team.name == _royalTeamName;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -416,9 +420,25 @@ class _TeamListTile extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: context.colors.surface,
+          color: _isRoyal
+              ? const Color(0xFF1A0045).withValues(alpha: 0.06)
+              : context.colors.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: context.colors.border),
+          border: Border.all(
+            color: _isRoyal
+                ? const Color(0xFFFFD700).withValues(alpha: 0.6)
+                : context.colors.border,
+            width: _isRoyal ? 1.5 : 1,
+          ),
+          boxShadow: _isRoyal
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFFFFD700).withValues(alpha: 0.12),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -426,21 +446,45 @@ class _TeamListTile extends StatelessWidget {
             // Header row: avatar, name, chevron.
             Row(
               children: [
+                // Royal team gets a dark-purple avatar with a crown instead of the initial.
                 Container(
                   width: 52.r,
                   height: 52.r,
                   decoration: BoxDecoration(
-                    color: context.colors.primary.withValues(alpha: 0.1),
+                    gradient: _isRoyal
+                        ? const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFF1A0045), Color(0xFF5B0092)],
+                          )
+                        : null,
+                    color: _isRoyal
+                        ? null
+                        : context.colors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
+                    border: _isRoyal
+                        ? Border.all(
+                            color:
+                                const Color(0xFFFFD700).withValues(alpha: 0.7),
+                            width: 1.5,
+                          )
+                        : null,
                   ),
                   child: Center(
-                    child: Text(
-                      team.name.isNotEmpty ? team.name[0].toUpperCase() : '?',
-                      style: AppTypography.h3.copyWith(
-                        color: context.colors.primary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
+                    child: _isRoyal
+                        ? Text(
+                            '\u{1F451}',
+                            style: TextStyle(fontSize: 24.sp),
+                          )
+                        : Text(
+                            team.name.isNotEmpty
+                                ? team.name[0].toUpperCase()
+                                : '?',
+                            style: AppTypography.h3.copyWith(
+                              color: context.colors.primary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                   ),
                 ),
                 SizedBox(width: AppSpacing.md),
@@ -448,7 +492,9 @@ class _TeamListTile extends StatelessWidget {
                   child: Text(
                     team.name,
                     style: AppTypography.labelLarge.copyWith(
-                      color: context.colors.textPrimary,
+                      color: _isRoyal
+                          ? const Color(0xFFB8860B)
+                          : context.colors.textPrimary,
                       fontWeight: FontWeight.w700,
                     ),
                     maxLines: 1,
@@ -457,7 +503,9 @@ class _TeamListTile extends StatelessWidget {
                 ),
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: context.colors.textHint,
+                  color: _isRoyal
+                      ? const Color(0xFFFFD700)
+                      : context.colors.textHint,
                 ),
               ],
             ),
@@ -476,7 +524,12 @@ class _TeamListTile extends StatelessWidget {
             ],
 
             SizedBox(height: AppSpacing.sm),
-            Divider(color: context.colors.border, height: 1),
+            Divider(
+              color: _isRoyal
+                  ? const Color(0xFFFFD700).withValues(alpha: 0.3)
+                  : context.colors.border,
+              height: 1,
+            ),
             SizedBox(height: AppSpacing.sm),
 
             // Footer row: member count and creation date.
