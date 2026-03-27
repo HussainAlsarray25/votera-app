@@ -43,4 +43,10 @@ abstract class AuthRepository {
   Future<Either<Failure, TelegramLinkData>> requestTelegramLink();
 
   Future<Either<Failure, TelegramAuthStatus>> getTelegramStatus(String token);
+
+  // Pending session persistence — used to resume polling after a process restart.
+  Future<Either<Failure, void>> savePendingTelegramSession(
+      String token, String link);
+  Future<Either<Failure, PendingTelegramSession?>> loadPendingTelegramSession();
+  Future<Either<Failure, void>> clearPendingTelegramSession();
 }

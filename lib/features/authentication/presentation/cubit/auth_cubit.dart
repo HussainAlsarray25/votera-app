@@ -5,13 +5,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/domain/services/auth_token_provider.dart';
 import 'package:votera/core/usecases/usecase.dart';
 import 'package:votera/features/authentication/domain/usecases/change_password.dart';
+import 'package:votera/features/authentication/domain/usecases/clear_pending_telegram_session.dart';
 import 'package:votera/features/authentication/domain/usecases/confirm_reset_password.dart';
 import 'package:votera/features/authentication/domain/usecases/get_telegram_status.dart';
+import 'package:votera/features/authentication/domain/usecases/load_pending_telegram_session.dart';
 import 'package:votera/features/authentication/domain/usecases/login_user.dart';
 import 'package:votera/features/authentication/domain/usecases/logout_user.dart';
 import 'package:votera/features/authentication/domain/usecases/register_user.dart';
 import 'package:votera/features/authentication/domain/usecases/request_telegram_link.dart';
 import 'package:votera/features/authentication/domain/usecases/reset_password.dart';
+import 'package:votera/features/authentication/domain/usecases/save_pending_telegram_session.dart';
 import 'package:votera/features/authentication/domain/usecases/verify_login.dart';
 import 'package:votera/features/authentication/domain/usecases/verify_registration.dart';
 
@@ -31,6 +34,9 @@ class AuthCubit extends Cubit<AuthState> {
     required this.confirmResetPassword,
     required this.requestTelegramLink,
     required this.getTelegramStatus,
+    required this.savePendingTelegramSession,
+    required this.loadPendingTelegramSession,
+    required this.clearPendingTelegramSession,
   }) : super(AuthInitial());
 
   final AuthTokenProvider authTokenProvider;
@@ -44,9 +50,17 @@ class AuthCubit extends Cubit<AuthState> {
   final ConfirmResetPassword confirmResetPassword;
   final RequestTelegramLink requestTelegramLink;
   final GetTelegramStatus getTelegramStatus;
+  final SavePendingTelegramSession savePendingTelegramSession;
+  final LoadPendingTelegramSession loadPendingTelegramSession;
+  final ClearPendingTelegramSession clearPendingTelegramSession;
 
   // Active polling timer — cancelled on cubit close or successful auth.
   Timer? _pollTimer;
+
+  // Prevents overlapping concurrent poll requests on slow connections.
+  // Timer.periodic does not await async callbacks, so without this guard
+  // multiple polls can run simultaneously when each request takes > 2 seconds.
+  bool _isPollInFlight = false;
 
   // Optional async callback invoked at the start of logout, before tokens are
   // cleared. Used by PushNotificationCubit to unregister the FCM token while
@@ -66,11 +80,32 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   /// Checks for saved tokens and restores authenticated state on app startup.
+  /// Also resumes any pending Telegram polling session that survived a process restart.
   Future<void> checkAuthStatus() async {
     final isAuthenticated = await authTokenProvider.isAuthenticated();
     if (isAuthenticated) {
       emit(const AuthAuthenticated());
+      return;
     }
+
+    // Check whether a Telegram login was started before the process was killed.
+    // If the session is still within the 5-minute polling window, resume it.
+    final sessionResult = await loadPendingTelegramSession(NoParams());
+    sessionResult.fold(
+      (_) {}, // Storage error — treat as no pending session.
+      (session) {
+        if (session == null) return;
+        if (session.isExpired) {
+          // Session has passed its window; clean up the stale entry.
+          // ignore: discarded_futures
+          clearPendingTelegramSession(NoParams());
+          return;
+        }
+        // Restore state and resume polling so the user does not have to restart.
+        emit(AuthTelegramAwaitingUser(link: session.link, token: session.token));
+        _startPolling(session.token);
+      },
+    );
   }
 
   Future<void> login({
@@ -191,6 +226,7 @@ class AuthCubit extends Cubit<AuthState> {
   /// widget can open Telegram, then starts polling the status endpoint.
   Future<void> loginWithTelegram() async {
     _pollTimer?.cancel();
+    _isPollInFlight = false;
     emit(AuthLoading());
 
     final linkResult = await requestTelegramLink(NoParams());
@@ -199,6 +235,12 @@ class AuthCubit extends Cubit<AuthState> {
       (data) {
         emit(AuthTelegramAwaitingUser(link: data.link, token: data.token));
         _startPolling(data.token);
+        // Persist the session so polling can resume if the process is killed.
+        // Fire-and-forget: a storage failure here does not affect the flow.
+        // ignore: discarded_futures
+        savePendingTelegramSession(
+          SavePendingTelegramSessionParams(token: data.token, link: data.link),
+        );
       },
     );
   }
@@ -226,10 +268,18 @@ class AuthCubit extends Cubit<AuthState> {
     const maxAttempts = 150;
 
     _pollTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      // If a poll is already in-flight, skip this tick rather than stacking up
+      // concurrent requests. On slow connections a single request can take several
+      // seconds, and overlapping polls can exhaust the attempt budget before any
+      // of them return a useful response.
+      if (_isPollInFlight) return;
+
       attempts++;
       if (attempts >= maxAttempts) {
         timer.cancel();
         if (!isClosed) {
+          // ignore: discarded_futures
+          clearPendingTelegramSession(NoParams());
           emit(const AuthError(
               message: 'Telegram login timed out. Please try again.'));
         }
@@ -245,24 +295,37 @@ class AuthCubit extends Cubit<AuthState> {
     // Guard: do not emit if the cubit was closed while the request was in-flight.
     if (isClosed) return;
 
-    final result = await getTelegramStatus(TelegramStatusParams(token: token));
+    // Guard: prevent concurrent polls when the previous request is still running.
+    if (_isPollInFlight) return;
+    _isPollInFlight = true;
 
-    if (isClosed) return;
+    try {
+      final result = await getTelegramStatus(TelegramStatusParams(token: token));
 
-    result.fold(
-      // Silently ignore transient network errors (e.g. 502) while polling.
-      (_) {},
-      (status) {
-        if (status.isComplete) {
-          _pollTimer?.cancel();
-          emit(const AuthAuthenticated(fromTelegram: true));
-        } else if (status.isExpired) {
-          _pollTimer?.cancel();
-          emit(const AuthError(
-            message: 'Telegram login session expired. Please try again.',
-          ));
-        }
-      },
-    );
+      if (isClosed) return;
+
+      result.fold(
+        // Silently ignore transient network errors (e.g. 502, timeouts) while
+        // polling. The next timer tick will retry automatically.
+        (_) {},
+        (status) {
+          if (status.isComplete) {
+            _pollTimer?.cancel();
+            // ignore: discarded_futures
+            clearPendingTelegramSession(NoParams());
+            emit(const AuthAuthenticated(fromTelegram: true));
+          } else if (status.isExpired) {
+            _pollTimer?.cancel();
+            // ignore: discarded_futures
+            clearPendingTelegramSession(NoParams());
+            emit(const AuthError(
+              message: 'Telegram login session expired. Please try again.',
+            ));
+          }
+        },
+      );
+    } finally {
+      _isPollInFlight = false;
+    }
   }
 }
