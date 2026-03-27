@@ -141,153 +141,230 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   Widget _buildContent(BuildContext context, TeamEntity team) {
     final l10n = AppLocalizations.of(context)!;
+    final isRoyal = team.name == 'Frogs Team';
+    // The hero gradient adapts to the royal team or falls back to the app palette.
+    final heroGradient = isRoyal
+        ? const [Color(0xFF1A0045), Color(0xFF5B0092)]
+        : [context.colors.primary, context.colors.secondary];
+
     return Scaffold(
       backgroundColor: context.colors.background,
-      appBar: AppBar(
-        backgroundColor: context.colors.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: context.colors.textPrimary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          team.name,
-          style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
-        ),
-        // Leader-only three-dot menu in the app bar.
-        actions: [
-          if (_isLeader)
-            PopupMenuButton<_TeamAction>(
-              icon: Icon(Icons.more_vert_rounded, color: context.colors.textPrimary),
-              color: context.colors.surface,
-              onSelected: (action) {
-                switch (action) {
-                  case _TeamAction.edit:
-                    _editTeam(context);
-                  case _TeamAction.transfer:
-                    _transferLeadership(context);
-                  case _TeamAction.leave:
-                    _leaveTeam(context);
-                  case _TeamAction.delete:
-                    _deleteTeam(context);
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: _TeamAction.edit,
-                  child: _MenuRow(
-                    icon: Icons.edit_rounded,
-                    label: l10n.editTeamInfo,
-                  ),
-                ),
-                PopupMenuItem(
-                  value: _TeamAction.transfer,
-                  child: _MenuRow(
-                    icon: Icons.swap_horiz_rounded,
-                    label: l10n.transferLeadership,
-                  ),
-                ),
-                PopupMenuItem(
-                  value: _TeamAction.leave,
-                  child: _MenuRow(
-                    icon: Icons.exit_to_app_rounded,
-                    label: l10n.leaveTeam,
-                    color: context.colors.error,
-                  ),
-                ),
-                PopupMenuItem(
-                  value: _TeamAction.delete,
-                  child: _MenuRow(
-                    icon: Icons.delete_outline_rounded,
-                    label: l10n.deleteTeam,
-                    color: context.colors.error,
-                  ),
-                ),
-              ],
-            ),
-        ],
-      ),
       body: CenteredContent(
         maxWidth: 900,
         child: RefreshIndicator(
           onRefresh: () async => _loadCubit.loadTeam(widget.teamId),
           color: context.colors.secondary,
-          child: ListView(
+          child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.all(AppSpacing.md),
-            children: [
-              _TeamHeaderCard(team: team, isLeader: _isLeader),
-              SizedBox(height: AppSpacing.md),
-              if (team.description != null && team.description!.isNotEmpty) ...[
-                _DescriptionCard(description: team.description!),
-                SizedBox(height: AppSpacing.md),
-              ],
-              _MembersCard(
-                team: team,
-                currentUserId: _currentUserId,
-                isLeader: _isLeader,
-                onRemoveMember: _isMember
-                    ? (memberId) => _removeMember(context, memberId)
-                    : null,
-                onInviteMember: _isLeader ? () => _inviteMember(context) : null,
+            slivers: [
+              // Gradient hero app bar — collapses to show only the team name.
+              SliverAppBar(
+                expandedHeight: 230.h,
+                pinned: true,
+                stretch: true,
+                backgroundColor: heroGradient.first,
+                leading: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_rounded,
+                    color: Colors.white,
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                title: Text(
+                  team.name,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                // Leader-only three-dot menu — white icon to contrast the hero.
+                actions: [
+                  if (_isLeader)
+                    PopupMenuButton<_TeamAction>(
+                      icon: const Icon(
+                        Icons.more_vert_rounded,
+                        color: Colors.white,
+                      ),
+                      color: context.colors.surface,
+                      onSelected: (action) {
+                        switch (action) {
+                          case _TeamAction.edit:
+                            _editTeam(context);
+                          case _TeamAction.transfer:
+                            _transferLeadership(context);
+                          case _TeamAction.leave:
+                            _leaveTeam(context);
+                          case _TeamAction.delete:
+                            _deleteTeam(context);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: _TeamAction.edit,
+                          child: _MenuRow(
+                            icon: Icons.edit_rounded,
+                            label: l10n.editTeamInfo,
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: _TeamAction.transfer,
+                          child: _MenuRow(
+                            icon: Icons.swap_horiz_rounded,
+                            label: l10n.transferLeadership,
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: _TeamAction.leave,
+                          child: _MenuRow(
+                            icon: Icons.exit_to_app_rounded,
+                            label: l10n.leaveTeam,
+                            color: context.colors.error,
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: _TeamAction.delete,
+                          child: _MenuRow(
+                            icon: Icons.delete_outline_rounded,
+                            label: l10n.deleteTeam,
+                            color: context.colors.error,
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+                flexibleSpace: FlexibleSpaceBar(
+                  titlePadding: EdgeInsets.zero,
+                  collapseMode: CollapseMode.parallax,
+                  background: _TeamHeroBackground(
+                    team: team,
+                    isLeader: _isLeader,
+                    isRoyal: isRoyal,
+                    gradient: heroGradient,
+                  ),
+                ),
               ),
-              // Leader only: show pending join requests below the members card.
-              if (_isLeader) ...[
-                SizedBox(height: AppSpacing.md),
-                _JoinRequestsCard(
-                  requests: _joinRequests,
-                  onApprove: (req) => unawaited(
-                    _actionCubit.respondToJoinRequest(
-                      teamId: team.id,
-                      requestId: req.id,
-                      approve: true,
-                    ),
-                  ),
-                  onDecline: (req) => unawaited(
-                    _actionCubit.respondToJoinRequest(
-                      teamId: team.id,
-                      requestId: req.id,
-                      approve: false,
-                    ),
-                  ),
+
+              // Scrollable content below the hero.
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  AppSpacing.md,
+                  AppSpacing.md,
+                  AppSpacing.xxl,
                 ),
-              ],
-              // Non-member: show a request-to-join button.
-              if (!_isMember) ...[
-                SizedBox(height: AppSpacing.lg),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: () => _requestToJoin(context),
-                    icon: Icon(Icons.person_add_outlined, size: AppSizes.iconSm),
-                    label: Text(l10n.requestToJoin),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: context.colors.secondary,
-                      foregroundColor: context.colors.textOnPrimary,
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // Stat pills — member count and creation date.
+                    _StatsRow(team: team, isRoyal: isRoyal),
+                    SizedBox(height: AppSpacing.sm),
+                    // Team handle / ID chip.
+                    if (team.handle != null || team.id.isNotEmpty)
+                      _HandleChip(
+                        handle: team.handle ?? team.id,
+                        isRoyal: isRoyal,
+                      ),
+                    SizedBox(height: AppSpacing.md),
+                    // About section.
+                    if (team.description != null &&
+                        team.description!.isNotEmpty) ...[
+                      _SectionCard(
+                        title: l10n.about,
+                        accentColor: isRoyal
+                            ? const Color(0xFFFFD700)
+                            : context.colors.secondary,
+                        child: Text(
+                          team.description!,
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: context.colors.textSecondary,
+                            height: 1.6,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: AppSpacing.md),
+                    ],
+                    // Members section.
+                    _MembersCard(
+                      team: team,
+                      currentUserId: _currentUserId,
+                      isLeader: _isLeader,
+                      isRoyal: isRoyal,
+                      onRemoveMember: _isMember
+                          ? (memberId) => _removeMember(context, memberId)
+                          : null,
+                      onInviteMember:
+                          _isLeader ? () => _inviteMember(context) : null,
                     ),
-                  ),
+                    // Join requests (leader only).
+                    if (_isLeader) ...[
+                      SizedBox(height: AppSpacing.md),
+                      _JoinRequestsCard(
+                        requests: _joinRequests,
+                        isRoyal: isRoyal,
+                        onApprove: (req) => unawaited(
+                          _actionCubit.respondToJoinRequest(
+                            teamId: team.id,
+                            requestId: req.id,
+                            approve: true,
+                          ),
+                        ),
+                        onDecline: (req) => unawaited(
+                          _actionCubit.respondToJoinRequest(
+                            teamId: team.id,
+                            requestId: req.id,
+                            approve: false,
+                          ),
+                        ),
+                      ),
+                    ],
+                    // Non-member: request to join.
+                    if (!_isMember) ...[
+                      SizedBox(height: AppSpacing.lg),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: () => _requestToJoin(context),
+                          icon: Icon(
+                            Icons.person_add_outlined,
+                            size: AppSizes.iconSm,
+                          ),
+                          label: Text(l10n.requestToJoin),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: context.colors.secondary,
+                            foregroundColor: context.colors.textOnPrimary,
+                            padding: EdgeInsets.symmetric(vertical: 14.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusMd,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                    // Regular member: leave button.
+                    if (!_isLeader && _isMember) ...[
+                      SizedBox(height: AppSpacing.lg),
+                      Divider(color: context.colors.border),
+                      SizedBox(height: AppSpacing.sm),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton.icon(
+                          onPressed: () => _leaveTeam(context),
+                          icon: Icon(
+                            Icons.exit_to_app_rounded,
+                            size: AppSizes.iconSm,
+                          ),
+                          label: Text(l10n.leaveTeam),
+                          style: TextButton.styleFrom(
+                            foregroundColor: context.colors.error,
+                            padding: EdgeInsets.symmetric(vertical: 14.h),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ]),
                 ),
-              ],
-              // Regular member: show leave button at the bottom.
-              if (!_isLeader && _isMember) ...[
-                SizedBox(height: AppSpacing.lg),
-                Divider(color: context.colors.border),
-                SizedBox(height: AppSpacing.sm),
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton.icon(
-                    onPressed: () => _leaveTeam(context),
-                    icon: Icon(Icons.exit_to_app_rounded, size: AppSizes.iconSm),
-                    label: Text(l10n.leaveTeam),
-                    style: TextButton.styleFrom(
-                      foregroundColor: context.colors.error,
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
-                    ),
-                  ),
-                ),
-              ],
-              SizedBox(height: AppSpacing.xxl),
+              ),
             ],
           ),
         ),
@@ -510,174 +587,377 @@ class _ErrorView extends StatelessWidget {
 // Inner widgets
 // =============================================================================
 
-/// Team header card shown at the top of the scrollable content area.
-/// Team header card — centered layout with avatar, name, stats, and ID chip.
-class _TeamHeaderCard extends StatelessWidget {
-  const _TeamHeaderCard({required this.team, required this.isLeader});
+// The hero gradient background shown inside the SliverAppBar flexible space.
+class _TeamHeroBackground extends StatelessWidget {
+  const _TeamHeroBackground({
+    required this.team,
+    required this.isLeader,
+    required this.isRoyal,
+    required this.gradient,
+  });
 
   final TeamEntity team;
   final bool isLeader;
+  final bool isRoyal;
+  final List<Color> gradient;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.lg,
-      ),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: context.colors.border),
-      ),
-      child: Column(
-        children: [
-          // Avatar + name + badge — identity block.
-          Container(
-            width: 100.r,
-            height: 100.r,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  context.colors.secondary.withValues(alpha: 0.15),
-                  context.colors.primary.withValues(alpha: 0.15),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              border: Border.all(
-                color: context.colors.secondary.withValues(alpha: 0.3),
-                width: 2,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                team.name.isNotEmpty ? team.name[0].toUpperCase() : '?',
-                style: AppTypography.h3.copyWith(
-                  color: context.colors.secondary,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 38.sp,
-                ),
-              ),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Gradient background.
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: gradient,
             ),
           ),
-          SizedBox(height: AppSpacing.md),
-          Text(
-            team.name,
-            style: AppTypography.h3.copyWith(
-              color: context.colors.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (isLeader) ...[
-            SizedBox(height: AppSpacing.xs),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
+        ),
+        // Decorative background circles for depth.
+        Positioned(top: -30, right: -20, child: _HeroCircle(size: 200.r, opacity: 0.07)),
+        Positioned(top: 60, right: 80, child: _HeroCircle(size: 80.r, opacity: 0.06)),
+        Positioned(bottom: -30, left: 20, child: _HeroCircle(size: 140.r, opacity: 0.05)),
+        // Extra golden shimmer orb for the royal team.
+        if (isRoyal)
+          Positioned(
+            top: 10,
+            right: 10,
+            child: Container(
+              width: 130.r,
+              height: 130.r,
               decoration: BoxDecoration(
-                color: context.colors.accent.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.workspace_premium_rounded,
-                      size: AppSizes.iconXs, color: context.colors.accent),
-                  SizedBox(width: AppSpacing.xs),
-                  Text(
-                    l10n.leader,
-                    style: AppTypography.caption.copyWith(
-                      color: context.colors.accent,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-
-          SizedBox(height: AppSpacing.md),
-          Divider(color: context.colors.border, height: 1),
-          SizedBox(height: AppSpacing.md),
-
-          // Stats block — each stat in its own equal-width cell.
-          IntrinsicHeight(
-            child: Row(
-              children: [
-                Expanded(
-                  child: _StatCell(
-                    icon: Icons.group_outlined,
-                    value: '${team.members.length}',
-                    label: l10n.memberCount(team.members.length),
-                  ),
-                ),
-                if (team.createdAt != null) ...[
-                  VerticalDivider(
-                    color: context.colors.border,
-                    width: 1,
-                    thickness: 1,
-                  ),
-                  Expanded(
-                    child: _StatCell(
-                      icon: Icons.calendar_today_outlined,
-                      value: _formatDate(team.createdAt!),
-                      label: l10n.createdAt,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-
-          SizedBox(height: AppSpacing.md),
-          Divider(color: context.colors.border, height: 1),
-          SizedBox(height: AppSpacing.sm),
-
-          // Handle chip — centered, tappable to copy.
-          if (team.handle != null || team.id.isNotEmpty)
-            GestureDetector(
-              onTap: () => _copyId(context, team.handle ?? team.id),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-                decoration: BoxDecoration(
-                  color: context.colors.background,
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.radiusFull),
-                  border: Border.all(color: context.colors.border),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.tag_rounded,
-                        size: AppSizes.iconSm, color: context.colors.textHint),
-                    SizedBox(width: 5.w),
-                    Text(
-                      team.handle ?? team.id,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: context.colors.textHint,
-                        fontFamily: 'monospace',
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Icon(Icons.copy_rounded,
-                        size: AppSizes.iconSm, color: context.colors.textHint),
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFFFFD700).withValues(alpha: 0.22),
+                    const Color(0xFFFFD700).withValues(alpha: 0.0),
                   ],
                 ),
               ),
             ),
+          ),
+        // Centered: avatar, team name, leader badge.
+        Padding(
+          padding: EdgeInsets.only(top: 48.h),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Avatar circle.
+              Container(
+                width: 82.r,
+                height: 82.r,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.15),
+                  border: Border.all(
+                    color: isRoyal
+                        ? const Color(0xFFFFD700)
+                        : Colors.white.withValues(alpha: 0.5),
+                    width: 2.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      blurRadius: 20,
+                      offset: const Offset(0, 6),
+                    ),
+                    if (isRoyal)
+                      BoxShadow(
+                        color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+                        blurRadius: 24,
+                      ),
+                  ],
+                ),
+                child: Center(
+                  child: isRoyal
+                      // Crown emoji for the royal team — same as on the rankings podium.
+                      ? Text('\u{1F451}', style: TextStyle(fontSize: 38.sp))
+                      : Text(
+                          team.name.isNotEmpty
+                              ? team.name[0].toUpperCase()
+                              : '?',
+                          style: AppTypography.h2.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                ),
+              ),
+              SizedBox(height: AppSpacing.sm),
+              // Team name.
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32.w),
+                child: Text(
+                  team.name,
+                  style: AppTypography.h3.copyWith(
+                    color: isRoyal ? const Color(0xFFFFD700) : Colors.white,
+                    fontWeight: FontWeight.w800,
+                    shadows: isRoyal
+                        ? [
+                            Shadow(
+                              color:
+                                  const Color(0xFFFFD700).withValues(alpha: 0.5),
+                              blurRadius: 8,
+                            ),
+                          ]
+                        : [
+                            Shadow(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              blurRadius: 4,
+                            ),
+                          ],
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              // Leader badge shown below the name.
+              if (isLeader) ...[
+                SizedBox(height: AppSpacing.xs),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusFull),
+                    border: Border.all(
+                      color: isRoyal
+                          ? const Color(0xFFFFD700).withValues(alpha: 0.5)
+                          : Colors.white.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.workspace_premium_rounded,
+                        size: AppSizes.iconXs,
+                        color: isRoyal
+                            ? const Color(0xFFFFD700)
+                            : Colors.white,
+                      ),
+                      SizedBox(width: AppSpacing.xs),
+                      Text(
+                        l10n.leader,
+                        style: AppTypography.caption.copyWith(
+                          color: isRoyal
+                              ? const Color(0xFFFFD700)
+                              : Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// A white semi-transparent circle used as a decorative background element.
+class _HeroCircle extends StatelessWidget {
+  const _HeroCircle({required this.size, required this.opacity});
+
+  final double size;
+  final double opacity;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white.withValues(alpha: opacity),
+      ),
+    );
+  }
+}
+
+// A reusable section card with a gradient left accent bar, a title row,
+// an optional trailing widget, and arbitrary child content.
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({
+    required this.title,
+    required this.child,
+    this.accentColor,
+    this.trailing,
+  });
+
+  final String title;
+  final Widget child;
+  final Color? accentColor;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = accentColor ?? context.colors.primary;
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: context.colors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header with gradient left bar.
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.md,
+              AppSpacing.md,
+              AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 4.r,
+                  height: 20.r,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: context.colors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (trailing != null) trailing!,
+              ],
+            ),
+          ),
+          Divider(color: context.colors.border, height: 1),
+          Padding(
+            padding: EdgeInsets.all(AppSpacing.md),
+            child: child,
+          ),
         ],
       ),
     );
   }
+}
 
-  void _copyId(BuildContext context, String id) {
-    Clipboard.setData(ClipboardData(text: id));
+// Horizontal row of stat pills — member count and creation date.
+class _StatsRow extends StatelessWidget {
+  const _StatsRow({required this.team, required this.isRoyal});
+
+  final TeamEntity team;
+  final bool isRoyal;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final accentColor =
+        isRoyal ? const Color(0xFFB8860B) : context.colors.primary;
+
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: [
+        _StatPill(
+          icon: Icons.group_rounded,
+          label: l10n.memberCount(team.members.length),
+          color: accentColor,
+        ),
+        if (team.createdAt != null)
+          _StatPill(
+            icon: Icons.calendar_today_rounded,
+            label: _formatDate(team.createdAt!),
+            color: context.colors.textHint,
+          ),
+      ],
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${months[date.month - 1]} ${date.year}';
+  }
+}
+
+// A single pill chip showing an icon and a label.
+class _StatPill extends StatelessWidget {
+  const _StatPill({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+        border: Border.all(color: context.colors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14.r, color: color),
+          SizedBox(width: 6.w),
+          Text(
+            label,
+            style: AppTypography.bodySmall.copyWith(
+              color: context.colors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Team handle/ID chip — tappable to copy the handle to clipboard.
+class _HandleChip extends StatelessWidget {
+  const _HandleChip({required this.handle, this.isRoyal = false});
+
+  final String handle;
+  final bool isRoyal;
+
+  void _copy(BuildContext context) {
+    Clipboard.setData(ClipboardData(text: handle));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(AppLocalizations.of(context)!.copiedToClipboard),
@@ -690,12 +970,50 @@ class _TeamHeaderCard extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${months[date.month - 1]} ${date.year}';
+  @override
+  Widget build(BuildContext context) {
+    final textColor =
+        isRoyal ? const Color(0xFFB8860B) : context.colors.textHint;
+    return GestureDetector(
+      onTap: () => _copy(context),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+          border: Border.all(
+            color: isRoyal
+                ? const Color(0xFFFFD700).withValues(alpha: 0.5)
+                : context.colors.border,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.tag_rounded, size: AppSizes.iconSm, color: textColor),
+            SizedBox(width: 6.w),
+            Text(
+              handle,
+              style: AppTypography.bodySmall.copyWith(
+                color: textColor,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'monospace',
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Icon(Icons.copy_rounded,
+                size: AppSizes.iconSm, color: context.colors.textHint),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -723,75 +1041,54 @@ class _MenuRow extends StatelessWidget {
   }
 }
 
-/// A centered stat cell used in the header card stats row.
-/// Shows an icon + value on top and a smaller label below.
-class _StatCell extends StatelessWidget {
-  const _StatCell({
-    required this.icon,
-    required this.value,
-    required this.label,
+class _MembersCard extends StatelessWidget {
+  const _MembersCard({
+    required this.team,
+    required this.currentUserId,
+    required this.isLeader,
+    required this.onRemoveMember,
+    required this.onInviteMember,
+    this.isRoyal = false,
   });
 
-  final IconData icon;
-  final String value;
-  final String label;
+  final TeamEntity team;
+  final String? currentUserId;
+  final bool isLeader;
+  final bool isRoyal;
+  final void Function(String memberId)? onRemoveMember;
+  final VoidCallback? onInviteMember;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: AppSizes.iconSm, color: context.colors.secondary),
-        SizedBox(height: AppSpacing.xs),
-        Text(
-          value,
-          style: AppTypography.labelMedium.copyWith(
-            color: context.colors.textPrimary,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        SizedBox(height: 2),
-        Text(
-          label,
-          style: AppTypography.caption.copyWith(
-            color: context.colors.textHint,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DescriptionCard extends StatelessWidget {
-  const _DescriptionCard({required this.description});
-
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: context.colors.border),
-      ),
+    final l10n = AppLocalizations.of(context)!;
+    return _SectionCard(
+      title: l10n.membersWithCount(team.members.length),
+      accentColor:
+          isRoyal ? const Color(0xFFFFD700) : context.colors.secondary,
+      trailing: onInviteMember != null
+          ? TextButton.icon(
+              onPressed: onInviteMember,
+              icon: Icon(Icons.person_add_rounded, size: AppSizes.iconSm),
+              label: Text(l10n.invite),
+              style: TextButton.styleFrom(
+                foregroundColor: context.colors.secondary,
+                visualDensity: VisualDensity.compact,
+              ),
+            )
+          : null,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            AppLocalizations.of(context)!.about,
-            style: AppTypography.labelLarge.copyWith(
-              color: context.colors.textPrimary,
-            ),
-          ),
-          SizedBox(height: AppSpacing.sm),
-          Text(
-            description,
-            style: AppTypography.bodyMedium.copyWith(
-              color: context.colors.textSecondary,
-              height: 1.6,
+          ...team.members.map(
+            (member) => Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.sm),
+              child: TeamMemberTile(
+                member: member,
+                isLeader: member.userId == team.leaderId,
+                // Leaders can remove anyone except themselves.
+                onRemove: isLeader && member.userId != currentUserId
+                    ? () => onRemoveMember?.call(member.userId)
+                    : null,
+              ),
             ),
           ),
         ],
@@ -800,136 +1097,68 @@ class _DescriptionCard extends StatelessWidget {
   }
 }
 
-class _MembersCard extends StatelessWidget {
-  const _MembersCard({
-    required this.team,
-    required this.currentUserId,
-    required this.isLeader,
-    required this.onRemoveMember,
-    required this.onInviteMember,
-  });
-
-  final TeamEntity team;
-  final String? currentUserId;
-  final bool isLeader;
-  final void Function(String memberId)? onRemoveMember;
-  final VoidCallback? onInviteMember;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              l10n.membersWithCount(team.members.length),
-              style: AppTypography.labelLarge.copyWith(
-                color: context.colors.textPrimary,
-              ),
-            ),
-            const Spacer(),
-            if (onInviteMember != null)
-              TextButton.icon(
-                onPressed: onInviteMember,
-                icon: Icon(Icons.person_add_rounded, size: AppSizes.iconSm),
-                label: Text(l10n.invite),
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colors.secondary,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-          ],
-        ),
-        SizedBox(height: AppSpacing.sm),
-        ...team.members.map(
-          (member) => Padding(
-            padding: EdgeInsets.only(bottom: AppSpacing.sm),
-            child: TeamMemberTile(
-              member: member,
-              isLeader: member.userId == team.leaderId,
-              // Leaders can remove anyone except themselves.
-              onRemove: isLeader && member.userId != currentUserId
-                  ? () => onRemoveMember?.call(member.userId)
-                  : null,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 /// Card displayed to team leaders listing all pending join requests.
-/// Each row shows the requesting user's ID and approve/decline buttons.
+/// Each row shows the requesting user's handle and approve/decline buttons.
 class _JoinRequestsCard extends StatelessWidget {
   const _JoinRequestsCard({
     required this.requests,
     required this.onApprove,
     required this.onDecline,
+    this.isRoyal = false,
   });
 
   final List<JoinRequestEntity> requests;
   final void Function(JoinRequestEntity) onApprove;
   final void Function(JoinRequestEntity) onDecline;
+  final bool isRoyal;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              l10n.joinRequests,
-              style: AppTypography.labelLarge.copyWith(
-                color: context.colors.textPrimary,
+    // Badge showing the pending count in the section header.
+    final countBadge = requests.isNotEmpty
+        ? Container(
+            padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+            decoration: BoxDecoration(
+              color: context.colors.secondary.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+            ),
+            child: Text(
+              '${requests.length}',
+              style: AppTypography.caption.copyWith(
+                color: context.colors.secondary,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            if (requests.isNotEmpty) ...[
-              SizedBox(width: AppSpacing.xs),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
-                decoration: BoxDecoration(
-                  color: context.colors.secondary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                ),
-                child: Text(
-                  '${requests.length}',
-                  style: AppTypography.caption.copyWith(
-                    color: context.colors.secondary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-        SizedBox(height: AppSpacing.sm),
-        if (requests.isEmpty)
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-            child: Text(
+          )
+        : null;
+
+    return _SectionCard(
+      title: l10n.joinRequests,
+      accentColor:
+          isRoyal ? const Color(0xFFFFD700) : context.colors.secondary,
+      trailing: countBadge,
+      child: requests.isEmpty
+          ? Text(
               l10n.noJoinRequests,
               style: AppTypography.bodySmall.copyWith(
                 color: context.colors.textHint,
               ),
+            )
+          : Column(
+              children: [
+                ...requests.map(
+                  (req) => Padding(
+                    padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: _JoinRequestTile(
+                      request: req,
+                      onApprove: () => onApprove(req),
+                      onDecline: () => onDecline(req),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          )
-        else
-          ...requests.map(
-            (req) => Padding(
-              padding: EdgeInsets.only(bottom: AppSpacing.sm),
-              child: _JoinRequestTile(
-                request: req,
-                onApprove: () => onApprove(req),
-                onDecline: () => onDecline(req),
-              ),
-            ),
-          ),
-      ],
     );
   }
 }

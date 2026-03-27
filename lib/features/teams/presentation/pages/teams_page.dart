@@ -404,11 +404,6 @@ class _TeamListTile extends StatelessWidget {
   final TeamEntity team;
   final VoidCallback onTap;
 
-  // The team name that receives the royal treatment — kept in sync with team_card.dart.
-  static const _royalTeamName = 'Frogs Team';
-
-  bool get _isRoyal => team.name == _royalTeamName;
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -421,27 +416,9 @@ class _TeamListTile extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          // Royal tile gets a very subtle dark-purple background tint.
-          color: _isRoyal
-              ? const Color(0xFF1A0045).withValues(alpha: 0.06)
-              : context.colors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            // Golden border for the royal team.
-            color: _isRoyal
-                ? const Color(0xFFFFD700).withValues(alpha: 0.6)
-                : context.colors.border,
-            width: _isRoyal ? 1.5 : 1,
-          ),
-          boxShadow: _isRoyal
-              ? [
-                  BoxShadow(
-                    color: const Color(0xFFFFD700).withValues(alpha: 0.12),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
+          border: Border.all(color: context.colors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -449,16 +426,29 @@ class _TeamListTile extends StatelessWidget {
             // Header row: avatar, name, chevron.
             Row(
               children: [
-                _TeamAvatar(team: team, isRoyal: _isRoyal),
+                Container(
+                  width: 52.r,
+                  height: 52.r,
+                  decoration: BoxDecoration(
+                    color: context.colors.primary.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      team.name.isNotEmpty ? team.name[0].toUpperCase() : '?',
+                      style: AppTypography.h3.copyWith(
+                        color: context.colors.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
                 SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
                     team.name,
                     style: AppTypography.labelLarge.copyWith(
-                      // Gold name text for the royal team.
-                      color: _isRoyal
-                          ? const Color(0xFFB8860B)
-                          : context.colors.textPrimary,
+                      color: context.colors.textPrimary,
                       fontWeight: FontWeight.w700,
                     ),
                     maxLines: 1,
@@ -467,9 +457,7 @@ class _TeamListTile extends StatelessWidget {
                 ),
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: _isRoyal
-                      ? const Color(0xFFFFD700)
-                      : context.colors.textHint,
+                  color: context.colors.textHint,
                 ),
               ],
             ),
@@ -488,12 +476,7 @@ class _TeamListTile extends StatelessWidget {
             ],
 
             SizedBox(height: AppSpacing.sm),
-            Divider(
-              color: _isRoyal
-                  ? const Color(0xFFFFD700).withValues(alpha: 0.3)
-                  : context.colors.border,
-              height: 1,
-            ),
+            Divider(color: context.colors.border, height: 1),
             SizedBox(height: AppSpacing.sm),
 
             // Footer row: member count and creation date.
@@ -541,66 +524,6 @@ class _TeamListTile extends StatelessWidget {
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
     return '${months[date.month - 1]} ${date.year}';
-  }
-}
-
-// Extracted so the royal crown overlay stays isolated and easy to adjust.
-class _TeamAvatar extends StatelessWidget {
-  const _TeamAvatar({required this.team, required this.isRoyal});
-
-  final TeamEntity team;
-  final bool isRoyal;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 52.r,
-      height: 52.r,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // Avatar circle.
-          Container(
-            width: 52.r,
-            height: 52.r,
-            decoration: BoxDecoration(
-              gradient: isRoyal
-                  ? const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF1A0045), Color(0xFF5B0092)],
-                    )
-                  : null,
-              color: isRoyal
-                  ? null
-                  : context.colors.primary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-              border: isRoyal
-                  ? Border.all(
-                      color: const Color(0xFFFFD700).withValues(alpha: 0.7),
-                      width: 1.5,
-                    )
-                  : null,
-            ),
-            child: Center(
-              child: isRoyal
-                  ? Text(
-                      // Crown emoji instead of initial for the royal team.
-                      '\u{1F451}',
-                      style: TextStyle(fontSize: 24.sp),
-                    )
-                  : Text(
-                      team.name.isNotEmpty ? team.name[0].toUpperCase() : '?',
-                      style: AppTypography.h3.copyWith(
-                        color: context.colors.primary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 
