@@ -4,6 +4,7 @@ import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/features/profile/presentation/widgets/profile_actions_section.dart';
 import 'package:votera/features/profile/presentation/widgets/profile_header_section.dart';
+import 'package:votera/features/profile/presentation/widgets/profile_verification_section.dart';
 
 /// User profile screen showing personal info, voting stats,
 /// and account actions.
@@ -48,6 +49,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 const ProfileHeaderSection(),
                 SizedBox(height: AppSpacing.lg),
                 const ProfileActionsSection(),
+                SizedBox(height: AppSpacing.lg),
+                const ProfileVerificationSection(),
                 SizedBox(height: AppSpacing.xxl),
               ],
             ),
@@ -81,11 +84,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   SizedBox(width: AppSpacing.lg),
-                  // Right column: actions
+                  // Right column: actions + verification cards
                   Expanded(
                     child: Column(
                       children: [
                         const ProfileActionsSection(),
+                        SizedBox(height: AppSpacing.lg),
+                        const ProfileVerificationSection(),
                         SizedBox(height: AppSpacing.xxl),
                       ],
                     ),

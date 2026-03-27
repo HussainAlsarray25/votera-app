@@ -147,13 +147,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get department => 'القسم';
 
   @override
-  String get departmentHint => 'مثال: علوم الحاسوب';
+  String get departmentHint => 'علوم الحاسوب';
 
   @override
   String get universityIdOptional => 'الرقم الجامعي (اختياري)';
 
   @override
-  String get universityIdHint => 'مثال: 2024001234';
+  String get universityIdHint => '2024001234';
 
   @override
   String get phoneOptional => 'رقم الهاتف (اختياري)';
@@ -178,21 +178,65 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resetPasswordDesc =>
-      'أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.';
+      'أدخل بريدك الإلكتروني وسنرسل لك رمز إعادة التعيين.';
 
   @override
   String get sending => 'جارٍ الإرسال...';
 
   @override
-  String get sendResetLink => 'إرسال رابط الإعادة';
+  String get sendResetLink => 'إرسال رمز الإعادة';
 
   @override
   String get checkYourEmail => 'تحقق من بريدك الإلكتروني';
 
   @override
   String resetLinkSent(String email) {
-    return 'أرسلنا رابط إعادة تعيين كلمة المرور إلى\n$email';
+    return 'أرسلنا رمز إعادة تعيين كلمة المرور إلى\n$email';
   }
+
+  @override
+  String get confirmResetTitle => 'تعيين كلمة مرور جديدة';
+
+  @override
+  String get confirmResetDesc =>
+      'الصق الرمز من بريدك الإلكتروني وأدخل كلمة مرور جديدة.';
+
+  @override
+  String get resetToken => 'رمز الإعادة';
+
+  @override
+  String get pasteToken => 'الصق الرمز من البريد الإلكتروني';
+
+  @override
+  String get tokenRequired => 'الرمز مطلوب';
+
+  @override
+  String get newPasswordLabel => 'كلمة المرور الجديدة';
+
+  @override
+  String get enterNewPassword => 'أدخل كلمة المرور الجديدة';
+
+  @override
+  String get newPasswordRequired => 'كلمة المرور الجديدة مطلوبة';
+
+  @override
+  String get confirmPasswordLabel => 'تأكيد كلمة المرور';
+
+  @override
+  String get confirmPasswordHint => 'أعد إدخال كلمة المرور الجديدة';
+
+  @override
+  String get passwordsDoNotMatch => 'كلمتا المرور غير متطابقتين';
+
+  @override
+  String get resetting => 'جارٍ الإعادة...';
+
+  @override
+  String get setNewPassword => 'تعيين كلمة المرور';
+
+  @override
+  String get passwordResetSuccess =>
+      'تم إعادة تعيين كلمة المرور. يرجى تسجيل الدخول.';
 
   @override
   String get verifyYourAccount => 'توثيق حسابك';
@@ -342,7 +386,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get universityId => 'الرقم الجامعي';
 
   @override
-  String get universityIdExample => 'مثال: CS2021001';
+  String get universityIdExample => 'CS2021001';
 
   @override
   String get universityIdRequired => 'الرقم الجامعي مطلوب';
@@ -357,7 +401,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get stageYear => 'المرحلة / السنة';
 
   @override
-  String get stageYearExample => 'مثال: السنة الثالثة';
+  String get stageYearExample => 'السنة الثالثة';
 
   @override
   String get stageRequired => 'المرحلة مطلوبة';
@@ -810,7 +854,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get projectTitle => 'عنوان المشروع *';
 
   @override
-  String get projectTitleHint => 'مثال: نظام الري الذكي';
+  String get projectTitleHint => 'نظام الري الذكي';
 
   @override
   String get projectTitleRequired => 'العنوان مطلوب';
@@ -828,7 +872,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get techStackLabel => 'التقنيات المستخدمة';
 
   @override
-  String get techStackHint => 'مثال: Flutter, Firebase, Python';
+  String get techStackHint => 'Flutter, Firebase, Python';
 
   @override
   String get repositoryUrl => 'رابط المستودع';
@@ -938,7 +982,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get userId => 'معرّف المستخدم';
 
   @override
-  String get teamNameHint => 'مثال: المبتكرون';
+  String get teamNameHint => 'المبتكرون';
 
   @override
   String get teamNameRequired => 'اسم الفريق مطلوب';
@@ -1014,13 +1058,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get iAmStudent => 'أنا طالب';
 
   @override
-  String get studentEmailExample => 'مثال: 5920220096@student.uokufa.edu.iq';
+  String get studentEmailExample => '5920220096@student.uokufa.edu.iq';
 
   @override
   String get iAmTeacher => 'أنا أستاذ / مشرف';
 
   @override
-  String get teacherEmailExample => 'مثال: ahmedh.almajidy@uokufa.edu.iq';
+  String get teacherEmailExample => 'ahmedh.almajidy@uokufa.edu.iq';
 
   @override
   String get studentEmailDomainError =>
@@ -1054,4 +1098,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get teacherVerified => 'أستاذ موثق';
+
+  @override
+  String get telegramVerified => 'موثق عبر تيليغرام';
 }

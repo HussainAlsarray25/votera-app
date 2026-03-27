@@ -37,12 +37,6 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill email from profile if available.
-    final profileState = context.read<ProfileCubit>().state;
-    if (profileState is ProfileLoaded) {
-      final email = profileState.profile.email;
-      if (email != null) _emailController.text = email;
-    }
   }
 
   @override
@@ -115,22 +109,16 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             );
           }
         },
-        child: SafeArea(
-          child: CenteredContent(
-            maxWidth: AppBreakpoints.formPanelMax,
-            child: SingleChildScrollView(
-              padding: AppSpacing.pagePadding,
-              child: BlocBuilder<FormsCubit, FormsState>(
-                builder: (context, state) {
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: state is FormsEmailOtpSent
-                        ? _buildOtpStep(state.email)
-                        : _buildEmailStep(),
-                  );
-                },
-              ),
-            ),
+        child: FormCardShell(
+          child: BlocBuilder<FormsCubit, FormsState>(
+            builder: (context, state) {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: state is FormsEmailOtpSent
+                    ? _buildOtpStep(state.email)
+                    : _buildEmailStep(),
+              );
+            },
           ),
         ),
       ),

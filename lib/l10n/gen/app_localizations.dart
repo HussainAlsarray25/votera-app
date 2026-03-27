@@ -377,7 +377,7 @@ abstract class AppLocalizations {
   /// No description provided for @departmentHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. Computer Science'**
+  /// **'Computer Science'**
   String get departmentHint;
 
   /// No description provided for @universityIdOptional.
@@ -389,7 +389,7 @@ abstract class AppLocalizations {
   /// No description provided for @universityIdHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. 2024001234'**
+  /// **'2024001234'**
   String get universityIdHint;
 
   /// No description provided for @phoneOptional.
@@ -437,7 +437,7 @@ abstract class AppLocalizations {
   /// No description provided for @resetPasswordDesc.
   ///
   /// In en, this message translates to:
-  /// **'Enter your email and we will send you a link to reset your password.'**
+  /// **'Enter your email and we will send you a reset token.'**
   String get resetPasswordDesc;
 
   /// No description provided for @sending.
@@ -449,7 +449,7 @@ abstract class AppLocalizations {
   /// No description provided for @sendResetLink.
   ///
   /// In en, this message translates to:
-  /// **'Send Reset Link'**
+  /// **'Send Reset Token'**
   String get sendResetLink;
 
   /// No description provided for @checkYourEmail.
@@ -461,8 +461,92 @@ abstract class AppLocalizations {
   /// No description provided for @resetLinkSent.
   ///
   /// In en, this message translates to:
-  /// **'We sent a password reset link to\n{email}'**
+  /// **'We sent a password reset token to\n{email}'**
   String resetLinkSent(String email);
+
+  /// No description provided for @confirmResetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set New Password'**
+  String get confirmResetTitle;
+
+  /// No description provided for @confirmResetDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the token from your email and enter a new password.'**
+  String get confirmResetDesc;
+
+  /// No description provided for @resetToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Token'**
+  String get resetToken;
+
+  /// No description provided for @pasteToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste token from email'**
+  String get pasteToken;
+
+  /// No description provided for @tokenRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Token is required'**
+  String get tokenRequired;
+
+  /// No description provided for @newPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPasswordLabel;
+
+  /// No description provided for @enterNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter new password'**
+  String get enterNewPassword;
+
+  /// No description provided for @newPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'New password is required'**
+  String get newPasswordRequired;
+
+  /// No description provided for @confirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPasswordLabel;
+
+  /// No description provided for @confirmPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter new password'**
+  String get confirmPasswordHint;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @resetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Resetting...'**
+  String get resetting;
+
+  /// No description provided for @setNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set New Password'**
+  String get setNewPassword;
+
+  /// No description provided for @passwordResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset successfully. Please sign in.'**
+  String get passwordResetSuccess;
 
   /// No description provided for @verifyYourAccount.
   ///
@@ -749,7 +833,7 @@ abstract class AppLocalizations {
   /// No description provided for @universityIdExample.
   ///
   /// In en, this message translates to:
-  /// **'e.g. CS2021001'**
+  /// **'CS2021001'**
   String get universityIdExample;
 
   /// No description provided for @universityIdRequired.
@@ -779,7 +863,7 @@ abstract class AppLocalizations {
   /// No description provided for @stageYearExample.
   ///
   /// In en, this message translates to:
-  /// **'e.g. 3rd Year'**
+  /// **'3rd Year'**
   String get stageYearExample;
 
   /// No description provided for @stageRequired.
@@ -1589,7 +1673,7 @@ abstract class AppLocalizations {
   /// No description provided for @projectTitleHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. Smart Irrigation System'**
+  /// **'Smart Irrigation System'**
   String get projectTitleHint;
 
   /// No description provided for @projectTitleRequired.
@@ -1625,7 +1709,7 @@ abstract class AppLocalizations {
   /// No description provided for @techStackHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. Flutter, Firebase, Python'**
+  /// **'Flutter, Firebase, Python'**
   String get techStackHint;
 
   /// No description provided for @repositoryUrl.
@@ -1841,7 +1925,7 @@ abstract class AppLocalizations {
   /// No description provided for @teamNameHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. The Innovators'**
+  /// **'The Innovators'**
   String get teamNameHint;
 
   /// No description provided for @teamNameRequired.
@@ -1991,19 +2075,19 @@ abstract class AppLocalizations {
   /// No description provided for @studentEmailExample.
   ///
   /// In en, this message translates to:
-  /// **'e.g. 5920220096@student.uokufa.edu.iq'**
+  /// **'5920220096@student.uokufa.edu.iq'**
   String get studentEmailExample;
 
   /// No description provided for @iAmTeacher.
   ///
   /// In en, this message translates to:
-  /// **'I am a Teacher / Supervisor'**
+  /// **'I am a Professor / Supervisor'**
   String get iAmTeacher;
 
   /// No description provided for @teacherEmailExample.
   ///
   /// In en, this message translates to:
-  /// **'e.g. ahmedh.almajidy@uokufa.edu.iq'**
+  /// **'ahmedh.almajidy@uokufa.edu.iq'**
   String get teacherEmailExample;
 
   /// No description provided for @studentEmailDomainError.
@@ -2021,7 +2105,7 @@ abstract class AppLocalizations {
   /// No description provided for @teacherEmailNotStudent.
   ///
   /// In en, this message translates to:
-  /// **'Teacher email cannot be a student email'**
+  /// **'Professor email cannot be a student email'**
   String get teacherEmailNotStudent;
 
   /// No description provided for @supervisorEmail.
@@ -2063,8 +2147,14 @@ abstract class AppLocalizations {
   /// No description provided for @teacherVerified.
   ///
   /// In en, this message translates to:
-  /// **'Teacher Verified'**
+  /// **'Professor Verified'**
   String get teacherVerified;
+
+  /// No description provided for @telegramVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified via Telegram'**
+  String get telegramVerified;
 }
 
 class _AppLocalizationsDelegate

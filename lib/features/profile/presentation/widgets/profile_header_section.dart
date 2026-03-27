@@ -11,6 +11,9 @@ import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/verified_badge.dart';
 
+// Official Telegram brand color used for the Telegram-verified card.
+const _telegramBlue = Color(0xFF2CA5E0);
+
 /// The top section of the profile page: avatar, name, role, and edit button.
 /// Uses a clean card-style layout with a subtle gradient avatar ring.
 class ProfileHeaderSection extends StatelessWidget {
@@ -27,21 +30,9 @@ class ProfileHeaderSection extends StatelessWidget {
         final roles = profile?.roles ?? [];
         final identifiers = profile?.identifiers ?? [];
 
-        // Determine verified role label and color for the card outside the
-        // header padding so it can use AppSpacing.pagePadding to match the
-        // settings section below.
-        final String? verifiedLabel;
-        final Color? verifiedColor;
-        if (roles.contains('participant')) {
-          verifiedLabel = AppLocalizations.of(context)!.studentVerified;
-          verifiedColor = context.colors.success;
-        } else if (roles.contains('supervisor')) {
-          verifiedLabel = AppLocalizations.of(context)!.teacherVerified;
-          verifiedColor = context.colors.primary;
-        } else {
-          verifiedLabel = null;
-          verifiedColor = null;
-        }
+        // Determine the label and accent color for the verification card.
+        // Priority: participant > supervisor > telegram login > none.
+        final l10n = AppLocalizations.of(context)!;
 
         final telegramId =
             identifiers.where((i) => i.type == 'telegram').firstOrNull;
@@ -49,6 +40,29 @@ class ProfileHeaderSection extends StatelessWidget {
             .where((i) =>
                 i.type == 'institutional_email' || i.type == 'email')
             .firstOrNull;
+
+        final String? verifiedLabel;
+        final Color? verifiedColor;
+        if (roles.contains('participant')) {
+          verifiedLabel = l10n.studentVerified;
+          verifiedColor = context.colors.success;
+        } else if (roles.contains('supervisor')) {
+          verifiedLabel = l10n.teacherVerified;
+          verifiedColor = context.colors.primary;
+        } else if (telegramId != null) {
+          // User signed in via Telegram but has not yet obtained a role.
+          // Show a Telegram-verified card so they know their account is linked.
+          verifiedLabel = l10n.telegramVerified;
+          verifiedColor = _telegramBlue;
+        } else if (emailId != null) {
+          // User signed in with email. Show their email on the profile card
+          // so they can confirm which account is active.
+          verifiedLabel = l10n.email;
+          verifiedColor = context.colors.primary;
+        } else {
+          verifiedLabel = null;
+          verifiedColor = null;
+        }
 
         return Column(
           children: [

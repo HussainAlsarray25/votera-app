@@ -47,15 +47,6 @@ class ProfileActionsSection extends StatelessWidget {
                   final l10n = AppLocalizations.of(context)!;
                   return Column(
                     children: [
-                      if (isVisitor) ...[
-                        _buildActionTile(
-                          context: context,
-                          icon: Icons.verified_user_outlined,
-                          label: l10n.verifyAccount,
-                          onTap: () => context.push('/verify-account'),
-                        ),
-                        Divider(height: 1, color: context.colors.divider),
-                      ],
                       _buildThemeToggle(context, l10n),
                       Divider(height: 1, color: context.colors.divider),
                       _buildLanguageTile(context, l10n),
@@ -282,4 +273,5 @@ class ProfileActionsSection extends StatelessWidget {
       ),
     );
   }
+
 }
