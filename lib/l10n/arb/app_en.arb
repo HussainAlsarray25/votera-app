@@ -201,6 +201,9 @@
   },
   "rateThisProject": "Rate this project",
   "tapStarToRate": "Tap a star to share your rating",
+  "writeYourReview": "Write your review (optional)",
+  "selectStarFirst": "Please select a star rating before submitting.",
+  "loadMoreComments": "Load more comments",
   "comments": "Comments",
   "addComment": "Add a comment...",
   "noCommentsYet": "No comments yet. Be the first!",
@@ -463,6 +466,9 @@
 
   "noProjectsYet": "No projects yet",
   "noProjectsDesc": "There are no projects submitted for this event yet.",
+
+  "noProjectsInCategory": "No projects in this category",
+  "noProjectsInCategoryDesc": "No projects have been tagged with this category yet.",
 
   "noProjectsFound": "No projects found",
   "noProjectsFoundDesc": "No projects matched your search. Try a different title.",

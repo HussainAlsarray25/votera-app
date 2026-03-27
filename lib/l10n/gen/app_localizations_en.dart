@@ -509,6 +509,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tapStarToRate => 'Tap a star to share your rating';
 
   @override
+  String get writeYourReview => 'Write your review (optional)';
+
+  @override
+  String get selectStarFirst =>
+      'Please select a star rating before submitting.';
+
+  @override
+  String get loadMoreComments => 'Load more comments';
+
+  @override
   String get comments => 'Comments';
 
   @override
@@ -1015,6 +1025,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noProjectsDesc =>
       'There are no projects submitted for this event yet.';
+
+  @override
+  String get noProjectsInCategory => 'No projects in this category';
+
+  @override
+  String get noProjectsInCategoryDesc =>
+      'No projects have been tagged with this category yet.';
 
   @override
   String get noProjectsFound => 'No projects found';

@@ -174,7 +174,7 @@ class _ProjectDetailsView extends StatelessWidget {
           _buildSectionDivider(context, AppLocalizations.of(context)!.communityFeedback),
           SizedBox(height: AppSpacing.md),
           ProjectCommentsSection(projectId: projectId),
-          const SizedBox(height: 100),
+          SizedBox(height: AppSpacing.lg),
         ],
       ),
     );

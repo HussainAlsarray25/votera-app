@@ -4,12 +4,13 @@ import 'package:votera/features/projects/data/models/project_model.dart';
 import 'package:votera/features/projects/data/models/upload_url_model.dart';
 
 abstract class ProjectRemoteDataSource {
-  /// GET /v1/events/{event_id}/projects?page&size&title
+  /// GET /v1/events/{event_id}/projects?page&size&title&category_id
   Future<Map<String, dynamic>> getProjects({
     required String eventId,
     required int page,
     required int size,
     String? title,
+    String? categoryId,
   });
 
   /// GET /v1/events/{event_id}/projects/{id}
@@ -98,9 +99,11 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     required int page,
     required int size,
     String? title,
+    String? categoryId,
   }) async {
     final query = <String, dynamic>{'page': page, 'size': size};
     if (title != null && title.isNotEmpty) query['title'] = title;
+    if (categoryId != null) query['category_id'] = categoryId;
 
     final response = await apiClient.get<Map<String, dynamic>>(
       ProjectEndpoints.projects(eventId),

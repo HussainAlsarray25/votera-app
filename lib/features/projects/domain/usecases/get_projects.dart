@@ -21,6 +21,7 @@ class GetProjects
       page: params.page,
       size: params.size,
       title: params.title,
+      categoryId: params.categoryId,
     );
   }
 }
@@ -31,6 +32,7 @@ class GetProjectsParams extends Equatable {
     required this.page,
     required this.size,
     this.title,
+    this.categoryId,
   });
 
   final String eventId;
@@ -40,6 +42,9 @@ class GetProjectsParams extends Equatable {
   /// When set, filters projects by title partial match.
   final String? title;
 
+  /// When set, filters projects to those tagged with this category.
+  final String? categoryId;
+
   @override
-  List<Object?> get props => [eventId, page, size, title];
+  List<Object?> get props => [eventId, page, size, title, categoryId];
 }

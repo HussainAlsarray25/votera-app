@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/categories/domain/entities/category_entity.dart';
 import 'package:votera/features/categories/presentation/cubit/categories_cubit.dart';
@@ -131,9 +132,16 @@ class _CategoriesBodyState extends State<CategoriesBody> {
       ),
       itemCount: categories.length,
       itemBuilder: (context, index) {
-        return _CategoryCard(
-          category: categories[index],
-          colors: _categoryGradients[index % _categoryGradients.length],
+        final category = categories[index];
+        return GestureDetector(
+          onTap: () => context.push(
+            '/exhibition/${widget.eventId}/category/${category.id}',
+            extra: category.name,
+          ),
+          child: _CategoryCard(
+            category: category,
+            colors: _categoryGradients[index % _categoryGradients.length],
+          ),
         );
       },
     );

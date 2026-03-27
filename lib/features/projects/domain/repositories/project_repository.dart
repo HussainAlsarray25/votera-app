@@ -6,11 +6,13 @@ import 'package:votera/features/projects/domain/entities/upload_url_entity.dart'
 
 abstract class ProjectRepository {
   /// Fetches a paginated list of projects for the given event.
+  /// Pass [categoryId] to filter results to a single category.
   Future<Either<Failure, PaginatedResponse<ProjectEntity>>> getProjects({
     required String eventId,
     required int page,
     required int size,
     String? title,
+    String? categoryId,
   });
 
   /// Fetches a single project by its ID within an event.

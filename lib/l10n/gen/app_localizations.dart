@@ -1052,6 +1052,24 @@ abstract class AppLocalizations {
   /// **'Tap a star to share your rating'**
   String get tapStarToRate;
 
+  /// No description provided for @writeYourReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your review (optional)'**
+  String get writeYourReview;
+
+  /// No description provided for @selectStarFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a star rating before submitting.'**
+  String get selectStarFirst;
+
+  /// No description provided for @loadMoreComments.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more comments'**
+  String get loadMoreComments;
+
   /// No description provided for @comments.
   ///
   /// In en, this message translates to:
@@ -1969,6 +1987,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'There are no projects submitted for this event yet.'**
   String get noProjectsDesc;
+
+  /// No description provided for @noProjectsInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No projects in this category'**
+  String get noProjectsInCategory;
+
+  /// No description provided for @noProjectsInCategoryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'No projects have been tagged with this category yet.'**
+  String get noProjectsInCategoryDesc;
 
   /// No description provided for @noProjectsFound.
   ///

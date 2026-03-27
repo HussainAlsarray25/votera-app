@@ -58,6 +58,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
     int page = 1,
     int size = 20,
     String? title,
+    String? categoryId,
   }) async {
     emit(const ProjectsLoading());
     final result = await getProjects(
@@ -66,6 +67,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
         page: page,
         size: size,
         title: title,
+        categoryId: categoryId,
       ),
     );
     result.fold(
@@ -75,6 +77,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
           projects: paginated.items,
           hasNextPage: paginated.hasNextPage,
           currentPage: paginated.page,
+          total: paginated.total,
         ),
       ),
     );
@@ -88,6 +91,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
     required int nextPage,
     int size = 20,
     String? title,
+    String? categoryId,
   }) async {
     if (_isLoadingMore) return;
     _isLoadingMore = true;
@@ -97,6 +101,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
         page: nextPage,
         size: size,
         title: title,
+        categoryId: categoryId,
       ),
     );
     _isLoadingMore = false;
@@ -107,6 +112,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
           projects: [...existingProjects, ...paginated.items],
           hasNextPage: paginated.hasNextPage,
           currentPage: paginated.page,
+          total: paginated.total,
         ),
       ),
     );

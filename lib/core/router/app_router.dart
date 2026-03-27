@@ -21,6 +21,8 @@ import 'package:votera/features/onboarding/presentation/pages/onboarding_page.da
 import 'package:votera/features/profile/presentation/pages/profile_page.dart';
 import 'package:votera/features/project_details/presentation/pages/project_details_page.dart';
 import 'package:votera/features/splash/presentation/pages/splash_page.dart';
+import 'package:votera/features/categories/presentation/pages/category_projects_page.dart';
+import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
 import 'package:votera/features/teams/presentation/pages/team_detail_page.dart';
 import 'package:votera/features/teams/presentation/pages/teams_page.dart';
 
@@ -138,6 +140,26 @@ class AppRouter {
           return ProjectDetailsPage(
             eventId: eventId,
             projectId: projectId,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/exhibition/:eventId/category/:categoryId',
+        builder: (context, state) {
+          final eventId = state.pathParameters['eventId'] ?? '';
+          final categoryId = state.pathParameters['categoryId'] ?? '';
+          final categoryName = state.extra as String? ?? '';
+          return BlocProvider(
+            create: (_) => sl<ProjectsCubit>()
+              ..loadProjects(
+                eventId: eventId,
+                categoryId: categoryId,
+              ),
+            child: CategoryProjectsPage(
+              eventId: eventId,
+              categoryId: categoryId,
+              categoryName: categoryName,
+            ),
           );
         },
       ),

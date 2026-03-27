@@ -21,6 +21,7 @@ class ProjectsLoaded extends ProjectsState {
     required this.projects,
     required this.hasNextPage,
     required this.currentPage,
+    required this.total,
   });
 
   final List<ProjectEntity> projects;
@@ -30,8 +31,14 @@ class ProjectsLoaded extends ProjectsState {
 
   final int currentPage;
 
+  /// Total number of projects across all pages.
+  final int total;
+
+  /// Computes total page count for a given page size.
+  int totalPages(int size) => size > 0 ? (total / size).ceil() : 1;
+
   @override
-  List<Object?> get props => [projects, hasNextPage, currentPage];
+  List<Object?> get props => [projects, hasNextPage, currentPage, total];
 }
 
 /// Emitted when a single project has been fetched or created/updated.

@@ -373,7 +373,11 @@ class _MyTeamTabState extends State<_MyTeamTab> {
   }
 
   void _openTeam(TeamEntity team) {
-    context.push('/teams/${team.id}');
+    // Refresh the list when the user returns from the detail page so any
+    // delete, leave, or member-removal is immediately reflected here.
+    context.push('/teams/${team.id}').then((_) {
+      if (mounted) _refresh();
+    });
   }
 
   // -- Actions -----------------------------------------------------------------

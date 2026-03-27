@@ -181,6 +181,9 @@
   "ratingCount": "{totalRatings} تقييم",
   "rateThisProject": "قيّم هذا المشروع",
   "tapStarToRate": "اضغط على نجمة لمشاركة تقييمك",
+  "writeYourReview": "اكتب مراجعتك (اختياري)",
+  "selectStarFirst": "يرجى اختيار تقييم بالنجوم قبل الإرسال.",
+  "loadMoreComments": "تحميل المزيد من التعليقات",
   "comments": "التعليقات",
   "addComment": "أضف تعليقًا...",
   "noCommentsYet": "لا توجد تعليقات بعد. كن أول من يعلّق!",
@@ -357,6 +360,9 @@
 
   "noProjectsYet": "لا توجد مشاريع بعد",
   "noProjectsDesc": "لا توجد مشاريع مقدمة لهذه الفعالية بعد.",
+
+  "noProjectsInCategory": "لا توجد مشاريع في هذا التصنيف",
+  "noProjectsInCategoryDesc": "لم يتم تصنيف أي مشاريع ضمن هذا التصنيف بعد.",
 
   "noProjectsFound": "لم يتم العثور على مشاريع",
   "noProjectsFoundDesc": "لا توجد مشاريع تطابق بحثك. جرّب عنواناً مختلفاً.",

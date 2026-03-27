@@ -504,6 +504,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tapStarToRate => 'اضغط على نجمة لمشاركة تقييمك';
 
   @override
+  String get writeYourReview => 'اكتب مراجعتك (اختياري)';
+
+  @override
+  String get selectStarFirst => 'يرجى اختيار تقييم بالنجوم قبل الإرسال.';
+
+  @override
+  String get loadMoreComments => 'تحميل المزيد من التعليقات';
+
+  @override
   String get comments => 'التعليقات';
 
   @override
@@ -1004,6 +1013,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noProjectsDesc => 'لا توجد مشاريع مقدمة لهذه الفعالية بعد.';
+
+  @override
+  String get noProjectsInCategory => 'لا توجد مشاريع في هذا التصنيف';
+
+  @override
+  String get noProjectsInCategoryDesc =>
+      'لم يتم تصنيف أي مشاريع ضمن هذا التصنيف بعد.';
 
   @override
   String get noProjectsFound => 'لم يتم العثور على مشاريع';
