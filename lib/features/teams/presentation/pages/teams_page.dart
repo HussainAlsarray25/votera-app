@@ -39,10 +39,15 @@ class _TeamsPageState extends State<TeamsPage>
   late final TeamsCubit _invitationCubit;
   late final TeamsCubit _searchCubit;
 
+  // Tracks whether the FAB should be visible (My Team tab + no teams yet).
+  bool _hasTeams = true; // default true to avoid a flash on first load
+  int _tabIndex = 0;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_onTabChanged);
     _teamCubit = sl<TeamsCubit>();
     _invitationCubit = sl<TeamsCubit>();
     _searchCubit = sl<TeamsCubit>();
@@ -53,11 +58,27 @@ class _TeamsPageState extends State<TeamsPage>
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     unawaited(_teamCubit.close());
     unawaited(_invitationCubit.close());
     unawaited(_searchCubit.close());
     super.dispose();
+  }
+
+  void _onTabChanged() {
+    if (_tabController.index != _tabIndex) {
+      setState(() => _tabIndex = _tabController.index);
+    }
+  }
+
+  void _onTeamCubitState(TeamsState state) {
+    if (state is MyTeamsLoaded) {
+      setState(() => _hasTeams = state.teams.isNotEmpty);
+    } else if (state is TeamsActionSuccess || state is TeamLoaded) {
+      // After creating a team, reload to update FAB visibility.
+      unawaited(_teamCubit.loadMyTeam());
+    }
   }
 
   String? get _currentUserId {
@@ -68,30 +89,54 @@ class _TeamsPageState extends State<TeamsPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.colors.background,
-      appBar: _buildAppBar(context),
-      body: CenteredContent(
-        child: Column(
-          children: [
-            _buildTabBar(context),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _MyTeamTab(
-                    teamCubit: _teamCubit,
-                    invitationCubit: _invitationCubit,
-                    currentUserId: _currentUserId,
-                    onSwitchToBrowse: () => _tabController.animateTo(1),
-                  ),
-                  _BrowseTab(searchCubit: _searchCubit),
-                ],
+    final l10n = AppLocalizations.of(context)!;
+    final showFab = _tabIndex == 0 && _hasTeams;
+
+    return BlocListener<TeamsCubit, TeamsState>(
+      bloc: _teamCubit,
+      listener: (_, state) => _onTeamCubitState(state),
+      child: Scaffold(
+        backgroundColor: context.colors.background,
+        appBar: _buildAppBar(context),
+        floatingActionButton: showFab
+            ? FloatingActionButton.extended(
+                onPressed: () => _createTeam(context),
+                backgroundColor: context.colors.primary,
+                foregroundColor: context.colors.textOnPrimary,
+                icon: const Icon(Icons.add_rounded),
+                label: Text(l10n.createATeam),
+              )
+            : null,
+        body: CenteredContent(
+          child: Column(
+            children: [
+              _buildTabBar(context),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _MyTeamTab(
+                      teamCubit: _teamCubit,
+                      invitationCubit: _invitationCubit,
+                      currentUserId: _currentUserId,
+                      onSwitchToBrowse: () => _tabController.animateTo(1),
+                    ),
+                    _BrowseTab(searchCubit: _searchCubit),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Future<void> _createTeam(BuildContext context) async {
+    final result = await showCreateEditTeamSheet(context);
+    if (result == null || !mounted) return;
+    unawaited(
+      _teamCubit.create(name: result.name, description: result.description),
     );
   }
 

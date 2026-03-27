@@ -574,7 +574,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inviteMember => 'Invite Member';
 
   @override
-  String get enterUserIdToInvite => 'Enter email address to invite';
+  String get enterUserIdToInvite => 'Enter user ID to invite';
 
   @override
   String get sendInvite => 'Send Invite';
@@ -1115,4 +1115,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get telegramVerified => 'Verified via Telegram';
+
+  @override
+  String get requestToJoin => 'Request to Join';
+
+  @override
+  String get joinRequestSent => 'Your request to join has been sent.';
+
+  @override
+  String get joinRequestMessage => 'Message (optional)';
+
+  @override
+  String get joinRequestMessageHint =>
+      'Introduce yourself or explain why you want to join...';
+
+  @override
+  String get joinRequests => 'Join Requests';
+
+  @override
+  String get noJoinRequests => 'No pending join requests.';
+
+  @override
+  String get approveRequest => 'Approve';
+
+  @override
+  String get declineRequest => 'Decline';
 }

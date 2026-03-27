@@ -2,18 +2,23 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/usecases/usecase.dart';
 import 'package:votera/features/teams/domain/entities/invitation_entity.dart';
+import 'package:votera/features/teams/domain/entities/join_request_entity.dart';
 import 'package:votera/features/teams/domain/entities/team_entity.dart';
+import 'package:votera/features/teams/domain/usecases/cancel_invitation.dart';
 import 'package:votera/features/teams/domain/usecases/create_team.dart';
 import 'package:votera/features/teams/domain/usecases/delete_team.dart';
+import 'package:votera/features/teams/domain/usecases/delete_team_image.dart';
+import 'package:votera/features/teams/domain/usecases/get_join_requests.dart';
 import 'package:votera/features/teams/domain/usecases/get_my_invitations.dart';
 import 'package:votera/features/teams/domain/usecases/get_my_team.dart';
 import 'package:votera/features/teams/domain/usecases/get_team.dart';
 import 'package:votera/features/teams/domain/usecases/invite_member.dart';
 import 'package:votera/features/teams/domain/usecases/leave_team.dart';
 import 'package:votera/features/teams/domain/usecases/remove_member.dart';
-import 'package:votera/features/teams/domain/usecases/cancel_invitation.dart';
+import 'package:votera/features/teams/domain/usecases/respond_join_request.dart';
 import 'package:votera/features/teams/domain/usecases/respond_to_invitation.dart';
 import 'package:votera/features/teams/domain/usecases/search_teams.dart' show ListTeams, ListTeamsParams;
+import 'package:votera/features/teams/domain/usecases/send_join_request.dart';
 import 'package:votera/features/teams/domain/usecases/transfer_leadership.dart';
 import 'package:votera/features/teams/domain/usecases/update_team.dart';
 
@@ -35,6 +40,10 @@ class TeamsCubit extends Cubit<TeamsState> {
     required this.transferLeadership,
     required this.listTeams,
     required this.cancelInvitation,
+    required this.sendJoinRequest,
+    required this.getJoinRequests,
+    required this.respondJoinRequest,
+    required this.deleteTeamImage,
   }) : super(const TeamsInitial());
 
   final CreateTeam createTeam;
@@ -50,6 +59,10 @@ class TeamsCubit extends Cubit<TeamsState> {
   final TransferLeadership transferLeadership;
   final ListTeams listTeams;
   final CancelInvitation cancelInvitation;
+  final SendJoinRequest sendJoinRequest;
+  final GetJoinRequests getJoinRequests;
+  final RespondJoinRequest respondJoinRequest;
+  final DeleteTeamImage deleteTeamImage;
 
   Future<void> create({required String name, String? description}) async {
     emit(const TeamsLoading());
@@ -113,11 +126,16 @@ class TeamsCubit extends Cubit<TeamsState> {
 
   Future<void> invite({
     required String teamId,
-    required String inviteeEmail,
+    required String inviteeHandle,
+    String? message,
   }) async {
     emit(const TeamsLoading());
     final result = await inviteMember(
-      InviteMemberParams(teamId: teamId, inviteeEmail: inviteeEmail),
+      InviteMemberParams(
+        teamId: teamId,
+        inviteeHandle: inviteeHandle,
+        message: message,
+      ),
     );
     if (isClosed) return;
     result.fold(
@@ -200,6 +218,8 @@ class TeamsCubit extends Cubit<TeamsState> {
     String? userId,
     String? userHandle,
     String? userName,
+    int? page,
+    int? size,
   }) async {
     emit(const TeamsLoading());
     final result = await listTeams(
@@ -210,22 +230,86 @@ class TeamsCubit extends Cubit<TeamsState> {
         userId: userId,
         userHandle: userHandle,
         userName: userName,
+        page: page,
+        size: size,
       ),
     );
     if (isClosed) return;
     result.fold(
       (failure) => emit(TeamsError(message: failure.message)),
-      (teams) => emit(TeamsSearchResults(teams: teams)),
+      (paginated) => emit(
+        TeamsSearchResults(
+          teams: paginated.items,
+          page: paginated.page,
+          total: paginated.total,
+          hasNextPage: paginated.hasNextPage,
+        ),
+      ),
     );
   }
 
   // Resets the cubit to its initial state (e.g. when the search query is cleared).
   void reset() => emit(const TeamsInitial());
 
-  Future<void> revokeInvitation({required String invitationId}) async {
+  Future<void> requestToJoin({required String teamId, String? message}) async {
+    emit(const TeamsLoading());
+    final result = await sendJoinRequest(
+      SendJoinRequestParams(teamId: teamId, message: message),
+    );
+    if (isClosed) return;
+    result.fold(
+      (failure) => emit(TeamsActionFailed(message: failure.message)),
+      (request) => emit(JoinRequestSent(request: request)),
+    );
+  }
+
+  Future<void> loadJoinRequests(String teamId) async {
+    emit(const TeamsLoading());
+    final result = await getJoinRequests(GetJoinRequestsParams(teamId: teamId));
+    if (isClosed) return;
+    result.fold(
+      (failure) => emit(TeamsError(message: failure.message)),
+      (requests) => emit(JoinRequestsLoaded(requests: requests)),
+    );
+  }
+
+  Future<void> respondToJoinRequest({
+    required String teamId,
+    required String requestId,
+    required bool approve,
+  }) async {
+    emit(const TeamsLoading());
+    final result = await respondJoinRequest(
+      RespondJoinRequestParams(
+        teamId: teamId,
+        requestId: requestId,
+        approve: approve,
+      ),
+    );
+    if (isClosed) return;
+    result.fold(
+      (failure) => emit(TeamsActionFailed(message: failure.message)),
+      (_) => emit(const TeamsActionSuccess()),
+    );
+  }
+
+  Future<void> removeTeamImage(String teamId) async {
+    emit(const TeamsLoading());
+    final result = await deleteTeamImage(DeleteTeamImageParams(teamId: teamId));
+    if (isClosed) return;
+    result.fold(
+      (failure) => emit(TeamsActionFailed(message: failure.message)),
+      (_) => emit(const TeamsActionSuccess()),
+    );
+  }
+
+  Future<void> revokeInvitation({
+    required String teamId,
+    required String invitationId,
+  }) async {
     emit(const TeamsLoading());
     final result = await cancelInvitation(
-      CancelInvitationParams(invitationId: invitationId),
+      CancelInvitationParams(teamId: teamId, invitationId: invitationId),
     );
     if (isClosed) return;
     result.fold(

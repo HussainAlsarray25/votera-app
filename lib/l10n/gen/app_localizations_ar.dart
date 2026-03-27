@@ -569,7 +569,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get inviteMember => 'دعوة عضو';
 
   @override
-  String get enterUserIdToInvite => 'أدخل البريد الإلكتروني للدعوة';
+  String get enterUserIdToInvite => 'أدخل معرّف المستخدم للدعوة';
 
   @override
   String get sendInvite => 'إرسال الدعوة';
@@ -1101,4 +1101,29 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get telegramVerified => 'موثق عبر تيليغرام';
+
+  @override
+  String get requestToJoin => 'طلب الانضمام';
+
+  @override
+  String get joinRequestSent => 'تم إرسال طلب انضمامك.';
+
+  @override
+  String get joinRequestMessage => 'رسالة (اختياري)';
+
+  @override
+  String get joinRequestMessageHint =>
+      'عرّف بنفسك أو اشرح سبب رغبتك في الانضمام...';
+
+  @override
+  String get joinRequests => 'طلبات الانضمام';
+
+  @override
+  String get noJoinRequests => 'لا توجد طلبات انضمام معلقة.';
+
+  @override
+  String get approveRequest => 'قبول';
+
+  @override
+  String get declineRequest => 'رفض';
 }

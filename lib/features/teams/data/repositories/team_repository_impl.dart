@@ -2,9 +2,12 @@ import 'package:dartz/dartz.dart';
 import 'package:votera/core/error/error_message_extractor.dart';
 import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/network/network_info.dart';
+import 'package:votera/core/network/paginated_response.dart';
 import 'package:votera/features/teams/data/datasources/remote/team_remote_data_source.dart';
 import 'package:votera/features/teams/domain/entities/invitation_entity.dart';
+import 'package:votera/features/teams/domain/entities/join_request_entity.dart';
 import 'package:votera/features/teams/domain/entities/team_entity.dart';
+import 'package:votera/features/teams/domain/entities/team_image_upload_url_entity.dart';
 import 'package:votera/features/teams/domain/repositories/team_repository.dart';
 
 class TeamRepositoryImpl implements TeamRepository {
@@ -95,13 +98,18 @@ class TeamRepositoryImpl implements TeamRepository {
   @override
   Future<Either<Failure, InvitationEntity>> inviteMember({
     required String teamId,
-    required String inviteeEmail,
+    required String inviteeHandle,
+    String? message,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
     try {
-      final result = await remote.inviteMember(teamId: teamId, inviteeEmail: inviteeEmail);
+      final result = await remote.inviteMember(
+        teamId: teamId,
+        inviteeHandle: inviteeHandle,
+        message: message,
+      );
       return Right(result);
     } on Exception catch (e) {
       return Left(ServerFailure(message: extractErrorMessage(e)));
@@ -183,13 +191,15 @@ class TeamRepositoryImpl implements TeamRepository {
   }
 
   @override
-  Future<Either<Failure, List<TeamEntity>>> listTeams({
+  Future<Either<Failure, PaginatedResponse<TeamEntity>>> listTeams({
     String? name,
     String? teamHandle,
     String? teamId,
     String? userId,
     String? userHandle,
     String? userName,
+    int? page,
+    int? size,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
@@ -202,6 +212,8 @@ class TeamRepositoryImpl implements TeamRepository {
         userId: userId,
         userHandle: userHandle,
         userName: userName,
+        page: page,
+        size: size,
       );
       return Right(result);
     } on Exception catch (e) {
@@ -211,13 +223,107 @@ class TeamRepositoryImpl implements TeamRepository {
 
   @override
   Future<Either<Failure, void>> cancelInvitation({
+    required String teamId,
     required String invitationId,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
     try {
-      await remote.cancelInvitation(invitationId: invitationId);
+      await remote.cancelInvitation(teamId: teamId, invitationId: invitationId);
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  // -- Join Requests -----------------------------------------------------------
+
+  @override
+  Future<Either<Failure, JoinRequestEntity>> sendJoinRequest({
+    required String teamId,
+    String? message,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final result = await remote.sendJoinRequest(teamId: teamId, message: message);
+      return Right(result);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<JoinRequestEntity>>> getJoinRequests({
+    required String teamId,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final result = await remote.getJoinRequests(teamId: teamId);
+      return Right(result);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> respondJoinRequest({
+    required String teamId,
+    required String requestId,
+    required bool approve,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      await remote.respondJoinRequest(
+        teamId: teamId,
+        requestId: requestId,
+        approve: approve,
+      );
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  // -- Team Image --------------------------------------------------------------
+
+  @override
+  Future<Either<Failure, TeamImageUploadUrlEntity>> getTeamImageUploadUrl({
+    required String teamId,
+    required String fileName,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final data = await remote.getTeamImageUploadUrl(
+        teamId: teamId,
+        fileName: fileName,
+      );
+      return Right(
+        TeamImageUploadUrlEntity(
+          uploadUrl: data['upload_url']!,
+          publicUrl: data['public_url']!,
+        ),
+      );
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteTeamImage({required String teamId}) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      await remote.deleteTeamImage(teamId: teamId);
       return const Right(null);
     } on Exception catch (e) {
       return Left(ServerFailure(message: extractErrorMessage(e)));

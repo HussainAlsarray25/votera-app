@@ -206,7 +206,7 @@
   "invitationSent": "تم إرسال الدعوة بنجاح.",
   "leaveTeam": "مغادرة الفريق",
   "inviteMember": "دعوة عضو",
-  "enterUserIdToInvite": "أدخل البريد الإلكتروني للدعوة",
+  "enterUserIdToInvite": "أدخل معرّف المستخدم للدعوة",
   "sendInvite": "إرسال الدعوة",
   "removeMember": "إزالة العضو",
   "removeMemberConfirm": "هل أنت متأكد من إزالة هذا العضو من فريقك؟",
@@ -393,5 +393,14 @@
   "supervisorAccountVerified": "تم توثيق الحساب! تم منح دور المشرف.",
   "studentVerified": "طالب موثق",
   "teacherVerified": "أستاذ موثق",
-  "telegramVerified": "موثق عبر تيليغرام"
+  "telegramVerified": "موثق عبر تيليغرام",
+
+  "requestToJoin": "طلب الانضمام",
+  "joinRequestSent": "تم إرسال طلب انضمامك.",
+  "joinRequestMessage": "رسالة (اختياري)",
+  "joinRequestMessageHint": "عرّف بنفسك أو اشرح سبب رغبتك في الانضمام...",
+  "joinRequests": "طلبات الانضمام",
+  "noJoinRequests": "لا توجد طلبات انضمام معلقة.",
+  "approveRequest": "قبول",
+  "declineRequest": "رفض"
 }

@@ -7,14 +7,18 @@ import 'package:votera/features/teams/domain/repositories/team_repository.dart';
 import 'package:votera/features/teams/domain/usecases/cancel_invitation.dart';
 import 'package:votera/features/teams/domain/usecases/create_team.dart';
 import 'package:votera/features/teams/domain/usecases/delete_team.dart';
+import 'package:votera/features/teams/domain/usecases/delete_team_image.dart';
+import 'package:votera/features/teams/domain/usecases/get_join_requests.dart';
 import 'package:votera/features/teams/domain/usecases/get_my_invitations.dart';
 import 'package:votera/features/teams/domain/usecases/get_my_team.dart';
 import 'package:votera/features/teams/domain/usecases/get_team.dart';
 import 'package:votera/features/teams/domain/usecases/invite_member.dart';
 import 'package:votera/features/teams/domain/usecases/leave_team.dart';
 import 'package:votera/features/teams/domain/usecases/remove_member.dart';
+import 'package:votera/features/teams/domain/usecases/respond_join_request.dart';
 import 'package:votera/features/teams/domain/usecases/respond_to_invitation.dart';
 import 'package:votera/features/teams/domain/usecases/search_teams.dart' show ListTeams;
+import 'package:votera/features/teams/domain/usecases/send_join_request.dart';
 import 'package:votera/features/teams/domain/usecases/transfer_leadership.dart';
 import 'package:votera/features/teams/domain/usecases/update_team.dart';
 import 'package:votera/features/teams/presentation/cubit/teams_cubit.dart';
@@ -38,6 +42,10 @@ void initTeamsFeature(GetIt sl) {
         transferLeadership: sl<TransferLeadership>(),
         listTeams: sl<ListTeams>(),
         cancelInvitation: sl<CancelInvitation>(),
+        sendJoinRequest: sl<SendJoinRequest>(),
+        getJoinRequests: sl<GetJoinRequests>(),
+        respondJoinRequest: sl<RespondJoinRequest>(),
+        deleteTeamImage: sl<DeleteTeamImage>(),
       ),
     )
     // Use cases
@@ -79,6 +87,18 @@ void initTeamsFeature(GetIt sl) {
     )
     ..registerLazySingleton<CancelInvitation>(
       () => CancelInvitation(sl<TeamRepository>()),
+    )
+    ..registerLazySingleton<SendJoinRequest>(
+      () => SendJoinRequest(sl<TeamRepository>()),
+    )
+    ..registerLazySingleton<GetJoinRequests>(
+      () => GetJoinRequests(sl<TeamRepository>()),
+    )
+    ..registerLazySingleton<RespondJoinRequest>(
+      () => RespondJoinRequest(sl<TeamRepository>()),
+    )
+    ..registerLazySingleton<DeleteTeamImage>(
+      () => DeleteTeamImage(sl<TeamRepository>()),
     )
     // Repositories
     ..registerLazySingleton<TeamRepository>(

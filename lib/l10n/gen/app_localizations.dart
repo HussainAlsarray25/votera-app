@@ -1181,7 +1181,7 @@ abstract class AppLocalizations {
   /// No description provided for @enterUserIdToInvite.
   ///
   /// In en, this message translates to:
-  /// **'Enter email address to invite'**
+  /// **'Enter user ID to invite'**
   String get enterUserIdToInvite;
 
   /// No description provided for @sendInvite.
@@ -2155,6 +2155,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Verified via Telegram'**
   String get telegramVerified;
+
+  /// No description provided for @requestToJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Request to Join'**
+  String get requestToJoin;
+
+  /// No description provided for @joinRequestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Your request to join has been sent.'**
+  String get joinRequestSent;
+
+  /// No description provided for @joinRequestMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message (optional)'**
+  String get joinRequestMessage;
+
+  /// No description provided for @joinRequestMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Introduce yourself or explain why you want to join...'**
+  String get joinRequestMessageHint;
+
+  /// No description provided for @joinRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Requests'**
+  String get joinRequests;
+
+  /// No description provided for @noJoinRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending join requests.'**
+  String get noJoinRequests;
+
+  /// No description provided for @approveRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get approveRequest;
+
+  /// No description provided for @declineRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get declineRequest;
 }
 
 class _AppLocalizationsDelegate

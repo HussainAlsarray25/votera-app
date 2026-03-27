@@ -105,7 +105,7 @@ class _InvitationHeader extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  AppLocalizations.of(context)!.teamLabel(invitation.teamId),
+                  invitation.teamName ?? invitation.teamId,
                   style: AppTypography.bodySmall.copyWith(
                     color: context.colors.textSecondary,
                   ),

@@ -7,6 +7,7 @@ class InvitationModel extends InvitationEntity {
     required super.inviteeId,
     required super.invitedBy,
     required super.status,
+    super.teamName,
     super.createdAt,
     super.respondedAt,
   });
@@ -15,6 +16,7 @@ class InvitationModel extends InvitationEntity {
     return InvitationModel(
       id: json['id']?.toString() ?? '',
       teamId: json['team_id']?.toString() ?? '',
+      teamName: json['team_name'] as String?,
       inviteeId: json['invitee_id']?.toString() ?? '',
       invitedBy: json['invited_by']?.toString() ?? '',
       status: invitationStatusFromString(json['status'] as String?) ??

@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:votera/features/teams/domain/entities/join_request_entity.dart';
 import 'package:votera/features/teams/domain/entities/team_entity.dart';
 import 'package:votera/features/teams/domain/entities/team_member_entity.dart';
 import 'package:votera/features/teams/presentation/cubit/teams_cubit.dart';
@@ -37,6 +38,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   late final TeamsCubit _actionCubit;
 
   TeamEntity? _team;
+  List<JoinRequestEntity> _joinRequests = [];
 
   @override
   void initState() {
@@ -70,6 +72,10 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   void _onLoadState(BuildContext context, TeamsState state) {
     if (state is TeamLoaded) {
       setState(() => _team = state.team);
+      // Once the team is loaded, fetch join requests if the current user is the leader.
+      if (_isLeader) {
+        unawaited(_actionCubit.loadJoinRequests(widget.teamId));
+      }
     } else if (state is TeamsError) {
       _showSnackBar(context, state.message);
     }
@@ -78,11 +84,20 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   void _onActionState(BuildContext context, TeamsState state) {
     switch (state) {
       case TeamsActionSuccess():
-        // Reload the team so the UI reflects the latest server state.
+        // Reload both the team and the join requests list.
         unawaited(_loadCubit.loadTeam(widget.teamId));
+        if (_isLeader) {
+          unawaited(_actionCubit.loadJoinRequests(widget.teamId));
+        }
 
       case TeamsActionFailed():
         _showSnackBar(context, state.message);
+
+      case JoinRequestsLoaded():
+        setState(() => _joinRequests = state.requests);
+
+      case JoinRequestSent():
+        _showSnackBar(context, AppLocalizations.of(context)!.joinRequestSent);
 
       default:
         break;
@@ -216,6 +231,44 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                     : null,
                 onInviteMember: _isLeader ? () => _inviteMember(context) : null,
               ),
+              // Leader only: show pending join requests below the members card.
+              if (_isLeader) ...[
+                SizedBox(height: AppSpacing.md),
+                _JoinRequestsCard(
+                  requests: _joinRequests,
+                  onApprove: (req) => unawaited(
+                    _actionCubit.respondToJoinRequest(
+                      teamId: team.id,
+                      requestId: req.id,
+                      approve: true,
+                    ),
+                  ),
+                  onDecline: (req) => unawaited(
+                    _actionCubit.respondToJoinRequest(
+                      teamId: team.id,
+                      requestId: req.id,
+                      approve: false,
+                    ),
+                  ),
+                ),
+              ],
+              // Non-member: show a request-to-join button.
+              if (!_isMember) ...[
+                SizedBox(height: AppSpacing.lg),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () => _requestToJoin(context),
+                    icon: Icon(Icons.person_add_outlined, size: AppSizes.iconSm),
+                    label: Text(l10n.requestToJoin),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: context.colors.secondary,
+                      foregroundColor: context.colors.textOnPrimary,
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                    ),
+                  ),
+                ),
+              ],
               // Regular member: show leave button at the bottom.
               if (!_isLeader && _isMember) ...[
                 SizedBox(height: AppSpacing.lg),
@@ -266,15 +319,34 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   Future<void> _inviteMember(BuildContext context) async {
     if (_team == null) return;
     final l10n = AppLocalizations.of(context)!;
-    final inviteeEmail = await _showInputDialog(
+    final inviteeHandle = await _showInputDialog(
       context,
       title: l10n.inviteMember,
       hint: l10n.enterUserIdToInvite,
       confirmLabel: l10n.sendInvite,
     );
-    if (inviteeEmail == null || !mounted) return;
+    if (inviteeHandle == null || inviteeHandle.isEmpty || !mounted) return;
     unawaited(
-      _actionCubit.invite(teamId: _team!.id, inviteeEmail: inviteeEmail),
+      _actionCubit.invite(teamId: _team!.id, inviteeHandle: inviteeHandle),
+    );
+  }
+
+  Future<void> _requestToJoin(BuildContext context) async {
+    if (_team == null) return;
+    final l10n = AppLocalizations.of(context)!;
+    final message = await _showInputDialog(
+      context,
+      title: l10n.requestToJoin,
+      hint: l10n.joinRequestMessageHint,
+      confirmLabel: l10n.requestToJoin,
+    );
+    // A null result means the user tapped Cancel — an empty string is valid (no message).
+    if (message == null || !mounted) return;
+    unawaited(
+      _actionCubit.requestToJoin(
+        teamId: _team!.id,
+        message: message.isEmpty ? null : message,
+      ),
     );
   }
 
@@ -785,6 +857,165 @@ class _MembersCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Card displayed to team leaders listing all pending join requests.
+/// Each row shows the requesting user's ID and approve/decline buttons.
+class _JoinRequestsCard extends StatelessWidget {
+  const _JoinRequestsCard({
+    required this.requests,
+    required this.onApprove,
+    required this.onDecline,
+  });
+
+  final List<JoinRequestEntity> requests;
+  final void Function(JoinRequestEntity) onApprove;
+  final void Function(JoinRequestEntity) onDecline;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              l10n.joinRequests,
+              style: AppTypography.labelLarge.copyWith(
+                color: context.colors.textPrimary,
+              ),
+            ),
+            if (requests.isNotEmpty) ...[
+              SizedBox(width: AppSpacing.xs),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: context.colors.secondary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                ),
+                child: Text(
+                  '${requests.length}',
+                  style: AppTypography.caption.copyWith(
+                    color: context.colors.secondary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        SizedBox(height: AppSpacing.sm),
+        if (requests.isEmpty)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            child: Text(
+              l10n.noJoinRequests,
+              style: AppTypography.bodySmall.copyWith(
+                color: context.colors.textHint,
+              ),
+            ),
+          )
+        else
+          ...requests.map(
+            (req) => Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.sm),
+              child: _JoinRequestTile(
+                request: req,
+                onApprove: () => onApprove(req),
+                onDecline: () => onDecline(req),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _JoinRequestTile extends StatelessWidget {
+  const _JoinRequestTile({
+    required this.request,
+    required this.onApprove,
+    required this.onDecline,
+  });
+
+  final JoinRequestEntity request;
+  final VoidCallback onApprove;
+  final VoidCallback onDecline;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: context.colors.border),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 18.r,
+            backgroundColor: context.colors.secondary.withValues(alpha: 0.12),
+            child: Icon(
+              Icons.person_outline_rounded,
+              size: AppSizes.iconSm,
+              color: context.colors.secondary,
+            ),
+          ),
+          SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  request.userId,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: context.colors.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (request.message != null && request.message!.isNotEmpty)
+                  Text(
+                    request.message!,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: context.colors.textSecondary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            ),
+          ),
+          SizedBox(width: AppSpacing.xs),
+          // Decline button
+          IconButton(
+            onPressed: onDecline,
+            icon: Icon(
+              Icons.close_rounded,
+              color: context.colors.error,
+              size: AppSizes.iconSm,
+            ),
+            tooltip: l10n.declineRequest,
+            visualDensity: VisualDensity.compact,
+          ),
+          // Approve button
+          IconButton(
+            onPressed: onApprove,
+            icon: Icon(
+              Icons.check_rounded,
+              color: context.colors.secondary,
+              size: AppSizes.iconSm,
+            ),
+            tooltip: l10n.approveRequest,
+            visualDensity: VisualDensity.compact,
+          ),
+        ],
+      ),
     );
   }
 }

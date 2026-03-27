@@ -231,7 +231,7 @@
   "invitationSent": "Invitation sent successfully.",
   "leaveTeam": "Leave Team",
   "inviteMember": "Invite Member",
-  "enterUserIdToInvite": "Enter email address to invite",
+  "enterUserIdToInvite": "Enter user ID to invite",
   "sendInvite": "Send Invite",
   "removeMember": "Remove Member",
   "removeMemberConfirm": "Are you sure you want to remove this member from your team?",
@@ -499,5 +499,14 @@
   "supervisorAccountVerified": "Account verified! Supervisor role granted.",
   "studentVerified": "Student Verified",
   "teacherVerified": "Professor Verified",
-  "telegramVerified": "Verified via Telegram"
+  "telegramVerified": "Verified via Telegram",
+
+  "requestToJoin": "Request to Join",
+  "joinRequestSent": "Your request to join has been sent.",
+  "joinRequestMessage": "Message (optional)",
+  "joinRequestMessageHint": "Introduce yourself or explain why you want to join...",
+  "joinRequests": "Join Requests",
+  "noJoinRequests": "No pending join requests.",
+  "approveRequest": "Approve",
+  "declineRequest": "Decline"
 }

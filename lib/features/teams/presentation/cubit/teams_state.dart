@@ -52,13 +52,42 @@ class InvitationsLoaded extends TeamsState {
 }
 
 /// Emitted when a team search returns results.
+/// Includes pagination metadata so the UI can implement load-more if needed.
 class TeamsSearchResults extends TeamsState {
-  const TeamsSearchResults({required this.teams});
+  const TeamsSearchResults({
+    required this.teams,
+    required this.page,
+    required this.total,
+    required this.hasNextPage,
+  });
 
   final List<TeamEntity> teams;
+  final int page;
+  final int total;
+  final bool hasNextPage;
 
   @override
-  List<Object?> get props => [teams];
+  List<Object?> get props => [teams, page, total, hasNextPage];
+}
+
+/// Emitted when join requests for a team are loaded (leader only).
+class JoinRequestsLoaded extends TeamsState {
+  const JoinRequestsLoaded({required this.requests});
+
+  final List<JoinRequestEntity> requests;
+
+  @override
+  List<Object?> get props => [requests];
+}
+
+/// Emitted after the current user successfully sends a join request.
+class JoinRequestSent extends TeamsState {
+  const JoinRequestSent({required this.request});
+
+  final JoinRequestEntity request;
+
+  @override
+  List<Object?> get props => [request];
 }
 
 /// Emitted after a successful void action (delete, leave, remove, respond, transfer).

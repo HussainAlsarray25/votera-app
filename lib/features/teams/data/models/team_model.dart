@@ -9,6 +9,7 @@ class TeamModel extends TeamEntity {
     required super.members,
     super.handle,
     super.description,
+    super.imageUrl,
     super.createdAt,
     super.updatedAt,
   });
@@ -24,6 +25,7 @@ class TeamModel extends TeamEntity {
       name: payload['name'] as String? ?? '',
       handle: payload['handle'] as String?,
       description: payload['description'] as String?,
+      imageUrl: payload['image_url'] as String?,
       leaderId: payload['leader_id']?.toString() ?? '',
       members: rawMembers
           .map((e) => TeamMemberModel.fromJson(e as Map<String, dynamic>))

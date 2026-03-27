@@ -22,6 +22,17 @@ class TeamEndpoints {
   static String transferLeadership(String teamId) =>
       'teams/$teamId/transfer-leadership';
 
-  static String cancelInvitation(String invitationId) =>
-      'teams/invitations/$invitationId/cancel';
+  // DELETE /v1/teams/{id}/invitations/{inv_id}
+  static String cancelInvitation(String teamId, String invitationId) =>
+      'teams/$teamId/invitations/$invitationId';
+
+  // Join requests
+  static String joinRequests(String teamId) => 'teams/$teamId/join-requests';
+  static String joinRequestById(String teamId, String requestId) =>
+      'teams/$teamId/join-requests/$requestId';
+
+  // Team image
+  static String teamImageUploadUrl(String teamId) =>
+      'teams/$teamId/image/upload-url';
+  static String teamImage(String teamId) => 'teams/$teamId/image';
 }
