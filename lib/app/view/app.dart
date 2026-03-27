@@ -41,10 +41,16 @@ class App extends StatelessWidget {
                 // or tablet. CenteredContent and AppBreakpoints handle the
                 // wider layout separately; this only affects token scaling.
                 final rawMq = MediaQuery.of(context);
+                // Cap the size ScreenUtil reads to the design dimensions so
+                // that tokens (.r/.w/.h/.sp) never scale larger than 1:1 on
+                // wide screens (tablet/web). Scaling down for small phones
+                // (< 375 px) is still allowed. Layout adaption for wide
+                // viewports is handled separately by CenteredContent and
+                // AppBreakpoints, not by token scaling.
                 final clampedMq = rawMq.copyWith(
                   size: Size(
-                    rawMq.size.width.clamp(0.0, 480.0),
-                    rawMq.size.height.clamp(0.0, 960.0),
+                    rawMq.size.width.clamp(0.0, 375.0),
+                    rawMq.size.height.clamp(0.0, 812.0),
                   ),
                 );
 
