@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/features/rankings/domain/entities/leaderboard_entity.dart';
+import 'package:votera/features/rankings/domain/entities/leaderboard_track.dart';
 import 'package:votera/features/rankings/domain/usecases/get_final_results.dart';
 import 'package:votera/features/rankings/domain/usecases/get_leaderboard.dart';
 
@@ -18,9 +19,15 @@ class RankingsCubit extends Cubit<RankingsState> {
   final GetFinalResults getFinalResults;
 
   /// Loads the live leaderboard for the given [eventId].
-  Future<void> loadLeaderboard(String eventId) async {
+  /// Pass [track] to filter by vote track (community | supervisor | all).
+  Future<void> loadLeaderboard(
+    String eventId, {
+    LeaderboardTrack track = LeaderboardTrack.all,
+  }) async {
     emit(const RankingsLoading());
-    final result = await getLeaderboard(GetLeaderboardParams(eventId: eventId));
+    final result = await getLeaderboard(
+      GetLeaderboardParams(eventId: eventId, track: track),
+    );
     result.fold(
       (failure) => emit(RankingsError(message: failure.message)),
       (leaderboard) => emit(RankingsLoaded(leaderboard: leaderboard)),

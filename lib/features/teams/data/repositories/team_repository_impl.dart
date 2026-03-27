@@ -294,27 +294,50 @@ class TeamRepositoryImpl implements TeamRepository {
   // -- Team Image --------------------------------------------------------------
 
   @override
-  Future<Either<Failure, TeamImageUploadUrlEntity>> getTeamImageUploadUrl({
+  Future<Either<Failure, void>> uploadTeamImage({
     required String teamId,
     required String fileName,
+    List<int>? bytes,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
+    if (bytes == null) {
+      return const Left(
+        ServerFailure(message: 'No file data provided for upload'),
+      );
+    }
     try {
-      final data = await remote.getTeamImageUploadUrl(
+      // Step 1: get the presigned S3 upload URL from the API.
+      final urlData = await remote.getTeamImageUploadUrl(
         teamId: teamId,
         fileName: fileName,
       );
-      return Right(
-        TeamImageUploadUrlEntity(
-          uploadUrl: data['upload_url']!,
-          publicUrl: data['public_url']!,
-        ),
+      final uploadUrl = urlData['upload_url']!;
+
+      // Step 2: PUT the bytes directly to S3 — no API auth headers required.
+      await remote.uploadFileToUrl(
+        url: uploadUrl,
+        bytes: bytes,
+        contentType: _contentTypeFromName(fileName),
       );
+
+      return const Right(null);
     } on Exception catch (e) {
       return Left(ServerFailure(message: extractErrorMessage(e)));
     }
+  }
+
+  /// Derive a MIME content type from the file extension.
+  String _contentTypeFromName(String name) {
+    final ext = name.split('.').last.toLowerCase();
+    return switch (ext) {
+      'jpg' || 'jpeg' => 'image/jpeg',
+      'png' => 'image/png',
+      'gif' => 'image/gif',
+      'webp' => 'image/webp',
+      _ => 'application/octet-stream',
+    };
   }
 
   @override

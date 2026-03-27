@@ -90,6 +90,12 @@ class JoinRequestSent extends TeamsState {
   List<Object?> get props => [request];
 }
 
+/// Emitted while the team image is being uploaded to S3.
+/// The UI should show a loading overlay on the avatar without wiping the page.
+class TeamsImageUploading extends TeamsState {
+  const TeamsImageUploading();
+}
+
 /// Emitted after a successful void action (delete, leave, remove, respond, transfer).
 class TeamsActionSuccess extends TeamsState {
   const TeamsActionSuccess();

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,6 +41,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   TeamEntity? _team;
   List<JoinRequestEntity> _joinRequests = [];
+  bool _isImageUploading = false;
 
   @override
   void initState() {
@@ -85,13 +88,18 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
     switch (state) {
       case TeamsActionSuccess():
         // Reload both the team and the join requests list.
+        setState(() => _isImageUploading = false);
         unawaited(_loadCubit.loadTeam(widget.teamId));
         if (_isLeader) {
           unawaited(_actionCubit.loadJoinRequests(widget.teamId));
         }
 
       case TeamsActionFailed():
+        setState(() => _isImageUploading = false);
         _showSnackBar(context, state.message);
+
+      case TeamsImageUploading():
+        setState(() => _isImageUploading = true);
 
       case JoinRequestsLoaded():
         setState(() => _joinRequests = state.requests);
@@ -240,6 +248,13 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                     isLeader: _isLeader,
                     isRoyal: isRoyal,
                     gradient: heroGradient,
+                    isImageUploading: _isImageUploading,
+                    onPickImage: _isLeader
+                        ? () => _pickAndUploadImage(context)
+                        : null,
+                    onDeleteImage: _isLeader && team.imageUrl != null
+                        ? () => _deleteImage(context)
+                        : null,
                   ),
                 ),
               ),
@@ -504,6 +519,39 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
     if (mounted) Navigator.of(context).pop();
   }
 
+  Future<void> _pickAndUploadImage(BuildContext context) async {
+    if (_team == null) return;
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      // withData ensures we get in-memory bytes on all platforms (web, mobile, desktop).
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty || !mounted) return;
+    final file = result.files.first;
+    if (file.bytes == null) return;
+    unawaited(
+      _actionCubit.uploadImage(
+        teamId: _team!.id,
+        fileName: file.name,
+        bytes: file.bytes!,
+      ),
+    );
+  }
+
+  Future<void> _deleteImage(BuildContext context) async {
+    if (_team == null) return;
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await _showConfirmDialog(
+      context,
+      title: l10n.deleteTeamImage,
+      message: l10n.deleteTeamImageConfirm,
+      confirmLabel: l10n.delete,
+      isDestructive: true,
+    );
+    if (confirmed != true || !mounted) return;
+    unawaited(_actionCubit.removeTeamImage(_team!.id));
+  }
+
   Future<void> _deleteTeam(BuildContext context) async {
     if (_team == null) return;
     final l10n = AppLocalizations.of(context)!;
@@ -594,12 +642,18 @@ class _TeamHeroBackground extends StatelessWidget {
     required this.isLeader,
     required this.isRoyal,
     required this.gradient,
+    this.isImageUploading = false,
+    this.onPickImage,
+    this.onDeleteImage,
   });
 
   final TeamEntity team;
   final bool isLeader;
   final bool isRoyal;
   final List<Color> gradient;
+  final bool isImageUploading;
+  final VoidCallback? onPickImage;
+  final VoidCallback? onDeleteImage;
 
   @override
   Widget build(BuildContext context) {
@@ -646,46 +700,109 @@ class _TeamHeroBackground extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Avatar circle.
-              Container(
-                width: 82.r,
-                height: 82.r,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.15),
-                  border: Border.all(
-                    color: isRoyal
-                        ? const Color(0xFFFFD700)
-                        : Colors.white.withValues(alpha: 0.5),
-                    width: 2.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.25),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
-                    ),
-                    if (isRoyal)
-                      BoxShadow(
-                        color: const Color(0xFFFFD700).withValues(alpha: 0.3),
-                        blurRadius: 24,
+              // Avatar circle — shows uploaded image, uploading spinner, or fallback initials/crown.
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Outer ring with border and shadow.
+                  Container(
+                    width: 82.r,
+                    height: 82.r,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.15),
+                      border: Border.all(
+                        color: isRoyal
+                            ? const Color(0xFFFFD700)
+                            : Colors.white.withValues(alpha: 0.5),
+                        width: 2.5,
                       ),
-                  ],
-                ),
-                child: Center(
-                  child: isRoyal
-                      // Crown emoji for the royal team — same as on the rankings podium.
-                      ? Text('\u{1F451}', style: TextStyle(fontSize: 38.sp))
-                      : Text(
-                          team.name.isNotEmpty
-                              ? team.name[0].toUpperCase()
-                              : '?',
-                          style: AppTypography.h2.copyWith(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          blurRadius: 20,
+                          offset: const Offset(0, 6),
+                        ),
+                        if (isRoyal)
+                          BoxShadow(
+                            color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+                            blurRadius: 24,
+                          ),
+                      ],
+                    ),
+                    child: ClipOval(
+                      child: isImageUploading
+                          // Show a spinner while the upload is in progress.
+                          ? const Center(child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : team.imageUrl != null
+                              ? CachedNetworkImage(
+                                  imageUrl: team.imageUrl!,
+                                  fit: BoxFit.cover,
+                                  placeholder: (_, __) => const Center(
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                  errorWidget: (_, __, ___) => _AvatarFallback(
+                                    team: team,
+                                    isRoyal: isRoyal,
+                                  ),
+                                )
+                              : _AvatarFallback(team: team, isRoyal: isRoyal),
+                    ),
+                  ),
+                  // Camera overlay — lets the leader tap to change the photo.
+                  if (onPickImage != null && !isImageUploading)
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: onPickImage,
+                        child: Container(
+                          padding: EdgeInsets.all(5.r),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.black.withValues(alpha: 0.55),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.7),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.edit_rounded,
+                            size: 14.r,
                             color: Colors.white,
-                            fontWeight: FontWeight.w800,
                           ),
                         ),
-                ),
+                      ),
+                    ),
+                  // Delete image button — shown when an image exists and not uploading.
+                  if (onDeleteImage != null && !isImageUploading)
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: onDeleteImage,
+                        child: Container(
+                          padding: EdgeInsets.all(4.r),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.red.withValues(alpha: 0.75),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.7),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.close_rounded,
+                            size: 12.r,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
               SizedBox(height: AppSpacing.sm),
               // Team name.
@@ -760,6 +877,31 @@ class _TeamHeroBackground extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// Fallback avatar content shown when no image has been uploaded.
+// Displays a crown emoji for the royal team or the team name's first letter.
+class _AvatarFallback extends StatelessWidget {
+  const _AvatarFallback({required this.team, required this.isRoyal});
+
+  final TeamEntity team;
+  final bool isRoyal;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: isRoyal
+          // Crown emoji for the royal team — same as on the rankings podium.
+          ? Text('\u{1F451}', style: TextStyle(fontSize: 38.sp))
+          : Text(
+              team.name.isNotEmpty ? team.name[0].toUpperCase() : '?',
+              style: AppTypography.h2.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
     );
   }
 }

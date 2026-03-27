@@ -90,10 +90,13 @@ abstract class TeamRepository {
 
   // -- Team Image --------------------------------------------------------------
 
-  /// Get a presigned S3 URL to upload the team avatar. Leader only.
-  Future<Either<Failure, TeamImageUploadUrlEntity>> getTeamImageUploadUrl({
+  /// Upload a new team avatar. Internally gets a presigned S3 URL then PUTs
+  /// the file bytes directly to S3. Leader only.
+  /// [bytes] must be provided (use file_picker with withData:true).
+  Future<Either<Failure, void>> uploadTeamImage({
     required String teamId,
     required String fileName,
+    List<int>? bytes,
   });
 
   /// Delete the team avatar. Leader only.

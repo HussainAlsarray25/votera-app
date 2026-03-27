@@ -8,6 +8,7 @@ import 'package:votera/features/teams/domain/usecases/cancel_invitation.dart';
 import 'package:votera/features/teams/domain/usecases/create_team.dart';
 import 'package:votera/features/teams/domain/usecases/delete_team.dart';
 import 'package:votera/features/teams/domain/usecases/delete_team_image.dart';
+import 'package:votera/features/teams/domain/usecases/upload_team_image.dart';
 import 'package:votera/features/teams/domain/usecases/get_join_requests.dart';
 import 'package:votera/features/teams/domain/usecases/get_my_invitations.dart';
 import 'package:votera/features/teams/domain/usecases/get_my_team.dart';
@@ -46,6 +47,7 @@ void initTeamsFeature(GetIt sl) {
         getJoinRequests: sl<GetJoinRequests>(),
         respondJoinRequest: sl<RespondJoinRequest>(),
         deleteTeamImage: sl<DeleteTeamImage>(),
+        uploadTeamImage: sl<UploadTeamImage>(),
       ),
     )
     // Use cases
@@ -99,6 +101,9 @@ void initTeamsFeature(GetIt sl) {
     )
     ..registerLazySingleton<DeleteTeamImage>(
       () => DeleteTeamImage(sl<TeamRepository>()),
+    )
+    ..registerLazySingleton<UploadTeamImage>(
+      () => UploadTeamImage(sl<TeamRepository>()),
     )
     // Repositories
     ..registerLazySingleton<TeamRepository>(

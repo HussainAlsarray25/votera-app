@@ -372,6 +372,9 @@
     }
   },
 
+  "rankingsCommunityTab": "Community",
+  "rankingsSupervisorTab": "Supervisor",
+
   "noRankingsYet": "No rankings yet",
   "rankingsWillAppear": "Rankings will appear once voting begins.",
   "rankingsLabel": "RANKINGS",
@@ -401,6 +404,9 @@
   "transferLeadershipTitle": "Transfer Leadership",
   "deleteTeamTitle": "Delete Team",
   "leaveTeamTitle": "Leave Team",
+  "delete": "Delete",
+  "deleteTeamImage": "Remove Team Photo",
+  "deleteTeamImageConfirm": "Are you sure you want to remove the team photo?",
 
   "needATeamFirst": "You need a team first",
   "needATeamDesc": "Create or join a team before you can submit a project to this event.",

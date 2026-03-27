@@ -797,6 +797,12 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get rankingsCommunityTab => 'المجتمع';
+
+  @override
+  String get rankingsSupervisorTab => 'المشرف';
+
+  @override
   String get noRankingsYet => 'لا توجد تصنيفات بعد';
 
   @override
@@ -844,6 +850,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get leaveTeamTitle => 'مغادرة الفريق';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get deleteTeamImage => 'إزالة صورة الفريق';
+
+  @override
+  String get deleteTeamImageConfirm => 'هل أنت متأكد من إزالة صورة الفريق؟';
 
   @override
   String get needATeamFirst => 'تحتاج إلى فريق أولاً';

@@ -276,6 +276,9 @@
   "hoursAgo": "منذ {count} س",
   "daysAgo": "منذ {count} يوم",
 
+  "rankingsCommunityTab": "المجتمع",
+  "rankingsSupervisorTab": "المشرف",
+
   "noRankingsYet": "لا توجد تصنيفات بعد",
   "rankingsWillAppear": "ستظهر التصنيفات عند بدء التصويت.",
   "rankingsLabel": "التصنيفات",
@@ -295,6 +298,9 @@
   "transferLeadershipTitle": "نقل القيادة",
   "deleteTeamTitle": "حذف الفريق",
   "leaveTeamTitle": "مغادرة الفريق",
+  "delete": "حذف",
+  "deleteTeamImage": "إزالة صورة الفريق",
+  "deleteTeamImageConfirm": "هل أنت متأكد من إزالة صورة الفريق؟",
 
   "needATeamFirst": "تحتاج إلى فريق أولاً",
   "needATeamDesc": "أنشئ فريقًا أو انضم إلى فريق قبل تقديم مشروعك في هذه الفعالية.",

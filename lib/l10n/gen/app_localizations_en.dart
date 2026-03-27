@@ -806,6 +806,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get rankingsCommunityTab => 'Community';
+
+  @override
+  String get rankingsSupervisorTab => 'Supervisor';
+
+  @override
   String get noRankingsYet => 'No rankings yet';
 
   @override
@@ -854,6 +860,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leaveTeamTitle => 'Leave Team';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get deleteTeamImage => 'Remove Team Photo';
+
+  @override
+  String get deleteTeamImageConfirm =>
+      'Are you sure you want to remove the team photo?';
 
   @override
   String get needATeamFirst => 'You need a team first';

@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/rankings/domain/entities/leaderboard_entry_entity.dart';
+import 'package:votera/features/rankings/domain/entities/leaderboard_track.dart';
 import 'package:votera/features/rankings/presentation/cubit/rankings_cubit.dart';
 import 'package:votera/features/rankings/presentation/widgets/rankings_list_item.dart';
 import 'package:votera/features/rankings/presentation/widgets/rankings_podium_section.dart';
@@ -11,32 +15,127 @@ import 'package:votera/shared/widgets/app_loading_indicator.dart';
 import 'package:votera/shared/widgets/empty_state.dart';
 
 /// Reusable body content for the Rankings display.
-/// Shows podium for top 3 and a scrollable list for the rest.
+/// Shows two tabs — Community and Supervisor — each filtered via the
+/// leaderboard `track` query parameter.
 /// Used inside ExhibitionDetailPage as a tab body.
-class RankingsBody extends StatefulWidget {
+class RankingsBody extends StatelessWidget {
   const RankingsBody({required this.eventId, super.key});
 
   final String eventId;
 
   @override
-  State<RankingsBody> createState() => _RankingsBodyState();
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          _RankingsTabBar(l10n: l10n),
+          Expanded(
+            child: TabBarView(
+              children: [
+                // Each tab gets its own BlocProvider so states are independent.
+                BlocProvider(
+                  create: (_) => GetIt.instance<RankingsCubit>(),
+                  child: _RankingsTab(
+                    eventId: eventId,
+                    track: LeaderboardTrack.community,
+                  ),
+                ),
+                BlocProvider(
+                  create: (_) => GetIt.instance<RankingsCubit>(),
+                  child: _RankingsTab(
+                    eventId: eventId,
+                    track: LeaderboardTrack.supervisor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _RankingsBodyState extends State<RankingsBody> {
+/// Tab bar with Community and Supervisor labels, styled to the design system.
+class _RankingsTabBar extends StatelessWidget {
+  const _RankingsTabBar({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+      ),
+      child: TabBar(
+        indicator: BoxDecoration(
+          color: context.colors.primary,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        labelColor: Colors.white,
+        unselectedLabelColor: context.colors.textSecondary,
+        labelStyle: AppTypography.labelMedium.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedLabelStyle: AppTypography.labelMedium,
+        tabs: [
+          Tab(text: l10n.rankingsCommunityTab),
+          Tab(text: l10n.rankingsSupervisorTab),
+        ],
+      ),
+    );
+  }
+}
+
+/// Content for a single rankings tab. Loads the leaderboard for the
+/// given [track] on first build and handles all display states.
+class _RankingsTab extends StatefulWidget {
+  const _RankingsTab({required this.eventId, required this.track});
+
+  final String eventId;
+  final LeaderboardTrack track;
+
+  @override
+  State<_RankingsTab> createState() => _RankingsTabState();
+}
+
+class _RankingsTabState extends State<_RankingsTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  // Keep each tab's scroll position and loaded state alive when switching tabs.
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
-    context.read<RankingsCubit>().loadLeaderboard(widget.eventId);
+    // Fire-and-forget; state updates arrive via BlocBuilder.
+    unawaited(
+      context.read<RankingsCubit>().loadLeaderboard(
+            widget.eventId,
+            track: widget.track,
+          ),
+    );
   }
 
   Future<void> _refresh() async {
-    await context
-        .read<RankingsCubit>()
-        .loadLeaderboard(widget.eventId);
+    await context.read<RankingsCubit>().loadLeaderboard(
+          widget.eventId,
+          track: widget.track,
+        );
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     return BlocBuilder<RankingsCubit, RankingsState>(
       builder: (context, state) {
         if (state is RankingsLoading || state is RankingsInitial) {
@@ -93,9 +192,7 @@ class _RankingsBodyState extends State<RankingsBody> {
           padding: EdgeInsets.symmetric(horizontal: 20.w),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return RankingsListItem(entry: remaining[index]);
-              },
+              (context, index) => RankingsListItem(entry: remaining[index]),
               childCount: remaining.length,
             ),
           ),
@@ -117,7 +214,6 @@ class _RankingsBodyState extends State<RankingsBody> {
           style: TextStyle(
             fontSize: 12.sp,
             fontWeight: FontWeight.w800,
-            // textHint is appropriate for a muted section label
             color: context.colors.textHint,
             letterSpacing: 1.5,
           ),
@@ -131,7 +227,11 @@ class _RankingsBodyState extends State<RankingsBody> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.error_outline, size: AppSizes.iconXxl, color: context.colors.error),
+          Icon(
+            Icons.error_outline,
+            size: AppSizes.iconXxl,
+            color: context.colors.error,
+          ),
           SizedBox(height: AppSpacing.md),
           Text(
             message,
@@ -141,8 +241,7 @@ class _RankingsBodyState extends State<RankingsBody> {
           ),
           SizedBox(height: AppSpacing.md),
           TextButton(
-            onPressed: () =>
-                context.read<RankingsCubit>().loadLeaderboard(widget.eventId),
+            onPressed: _refresh,
             child: Text(AppLocalizations.of(context)!.retry),
           ),
         ],

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:votera/core/network/api_client.dart';
 import 'package:votera/core/network/paginated_response.dart';
 import 'package:votera/features/teams/data/datasources/remote/team_endpoints.dart';
@@ -64,6 +65,13 @@ abstract class TeamRemoteDataSource {
   Future<Map<String, String>> getTeamImageUploadUrl({
     required String teamId,
     required String fileName,
+  });
+
+  /// PUT raw bytes directly to a presigned S3 URL — no auth headers required.
+  Future<void> uploadFileToUrl({
+    required String url,
+    required List<int> bytes,
+    required String contentType,
   });
 
   Future<void> deleteTeamImage({required String teamId});
@@ -287,6 +295,29 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
       'upload_url': data['upload_url']?.toString() ?? '',
       'public_url': data['public_url']?.toString() ?? '',
     };
+  }
+
+  @override
+  Future<void> uploadFileToUrl({
+    required String url,
+    required List<int> bytes,
+    required String contentType,
+  }) async {
+    // S3 presigned PUT does not accept the API auth headers, so use a
+    // plain Dio instance without any interceptors.
+    final dio = Dio();
+    await dio.put<void>(
+      url,
+      data: Stream.fromIterable([bytes]),
+      options: Options(
+        headers: {
+          'Content-Type': contentType,
+          'Content-Length': bytes.length,
+        },
+        sendTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 30),
+      ),
+    );
   }
 
   @override

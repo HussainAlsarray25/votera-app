@@ -8,6 +8,7 @@ import 'package:votera/features/teams/domain/usecases/cancel_invitation.dart';
 import 'package:votera/features/teams/domain/usecases/create_team.dart';
 import 'package:votera/features/teams/domain/usecases/delete_team.dart';
 import 'package:votera/features/teams/domain/usecases/delete_team_image.dart';
+import 'package:votera/features/teams/domain/usecases/upload_team_image.dart';
 import 'package:votera/features/teams/domain/usecases/get_join_requests.dart';
 import 'package:votera/features/teams/domain/usecases/get_my_invitations.dart';
 import 'package:votera/features/teams/domain/usecases/get_my_team.dart';
@@ -44,6 +45,7 @@ class TeamsCubit extends Cubit<TeamsState> {
     required this.getJoinRequests,
     required this.respondJoinRequest,
     required this.deleteTeamImage,
+    required this.uploadTeamImage,
   }) : super(const TeamsInitial());
 
   final CreateTeam createTeam;
@@ -63,6 +65,7 @@ class TeamsCubit extends Cubit<TeamsState> {
   final GetJoinRequests getJoinRequests;
   final RespondJoinRequest respondJoinRequest;
   final DeleteTeamImage deleteTeamImage;
+  final UploadTeamImage uploadTeamImage;
 
   Future<void> create({required String name, String? description}) async {
     emit(const TeamsLoading());
@@ -285,6 +288,24 @@ class TeamsCubit extends Cubit<TeamsState> {
         requestId: requestId,
         approve: approve,
       ),
+    );
+    if (isClosed) return;
+    result.fold(
+      (failure) => emit(TeamsActionFailed(message: failure.message)),
+      (_) => emit(const TeamsActionSuccess()),
+    );
+  }
+
+  /// Upload a new team avatar image. Emits [TeamsImageUploading] so the UI
+  /// can show a loading indicator on the avatar without disrupting the page.
+  Future<void> uploadImage({
+    required String teamId,
+    required String fileName,
+    required List<int> bytes,
+  }) async {
+    emit(const TeamsImageUploading());
+    final result = await uploadTeamImage(
+      UploadTeamImageParams(teamId: teamId, fileName: fileName, bytes: bytes),
     );
     if (isClosed) return;
     result.fold(

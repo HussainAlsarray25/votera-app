@@ -53,6 +53,14 @@ class ProjectsCubit extends Cubit<ProjectsState> {
   bool _isLoadingMore = false;
   bool get isLoadingMore => _isLoadingMore;
 
+  // Guard against emitting after the cubit is disposed. This can happen when
+  // an async request is in flight and the user navigates away before it resolves.
+  @override
+  void emit(ProjectsState state) {
+    if (isClosed) return;
+    super.emit(state);
+  }
+
   Future<void> loadProjects({
     required String eventId,
     int page = 1,

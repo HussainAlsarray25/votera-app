@@ -1568,6 +1568,18 @@ abstract class AppLocalizations {
   /// **'{count}d ago'**
   String daysAgo(int count);
 
+  /// No description provided for @rankingsCommunityTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Community'**
+  String get rankingsCommunityTab;
+
+  /// No description provided for @rankingsSupervisorTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervisor'**
+  String get rankingsSupervisorTab;
+
   /// No description provided for @noRankingsYet.
   ///
   /// In en, this message translates to:
@@ -1657,6 +1669,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Leave Team'**
   String get leaveTeamTitle;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @deleteTeamImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Team Photo'**
+  String get deleteTeamImage;
+
+  /// No description provided for @deleteTeamImageConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove the team photo?'**
+  String get deleteTeamImageConfirm;
 
   /// No description provided for @needATeamFirst.
   ///
