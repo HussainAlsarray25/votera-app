@@ -294,6 +294,30 @@ class TeamRepositoryImpl implements TeamRepository {
   // -- Team Image --------------------------------------------------------------
 
   @override
+  Future<Either<Failure, TeamImageUploadUrlEntity>> getTeamImageUploadUrl({
+    required String teamId,
+    required String fileName,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final urlData = await remote.getTeamImageUploadUrl(
+        teamId: teamId,
+        fileName: fileName,
+      );
+      return Right(
+        TeamImageUploadUrlEntity(
+          uploadUrl: urlData['upload_url']!,
+          publicUrl: urlData['public_url'] ?? '',
+        ),
+      );
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> uploadTeamImage({
     required String teamId,
     required String fileName,
