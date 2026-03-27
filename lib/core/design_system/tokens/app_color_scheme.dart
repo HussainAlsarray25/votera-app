@@ -71,29 +71,29 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
     end: Alignment.bottomRight,
   );
 
-  // -- Dark palette: Supabase-inspired near-black with green accent --
+  // -- Dark palette --
   static const AppColorScheme dark = AppColorScheme(
-    primary: Color(0xFF3ECF8E),
-    primaryLight: Color(0xFF6ADBA8),
-    primaryDark: Color(0xFF2AB578),
+    primary: Color(0xFF22C55E),
+    primaryLight: Color(0xFF4ADE80),
+    primaryDark: Color(0xFF16A34A),
     secondary: Color(0xFF3B82F6),
     secondaryLight: Color(0xFF60A5FA),
     secondaryDark: Color(0xFF1D4ED8),
     accent: Color(0xFFFBBF24),
     accentLight: Color(0xFFFDE68A),
-    success: Color(0xFF3ECF8E),
-    error: Color(0xFFF87171),
+    success: Color(0xFF22C55E),
+    error: Color(0xFFEF4444),
     warning: Color(0xFFFBBF24),
     info: Color(0xFF3B82F6),
-    background: Color(0xFF0F1117),
-    surface: Color(0xFF1C1C1C),
-    cardBackground: Color(0xFF171717),
-    textPrimary: Color(0xFFEDEDED),
-    textSecondary: Color(0xFF9B9B9B),
-    textHint: Color(0xFF666666),
-    textOnPrimary: Color(0xFF0F1117),
-    border: Color(0xFF2A2A2A),
-    divider: Color(0xFF1F1F1F),
+    background: Color(0xFF0B0F14),
+    surface: Color(0xFF121821),
+    cardBackground: Color(0xFF151B26),
+    textPrimary: Color(0xFFE5E7EB),
+    textSecondary: Color(0xFF9CA3AF),
+    textHint: Color(0xFF6B7280),
+    textOnPrimary: Color(0xFF052E16),
+    border: Color(0xFF1F2937),
+    divider: Color(0xFF18202A),
   );
 
   // -- Light palette: clean white surfaces with green accent --
