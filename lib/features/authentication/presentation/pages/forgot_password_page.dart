@@ -63,9 +63,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           }
         },
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: AppSpacing.pagePadding,
-            child: _emailSent ? _buildSuccessView() : _buildForm(),
+          child: CenteredContent(
+            maxWidth: AppBreakpoints.formPanelMax,
+            child: SingleChildScrollView(
+              padding: AppSpacing.pagePadding,
+              child: _emailSent ? _buildSuccessView() : _buildForm(),
+            ),
           ),
         ),
       ),

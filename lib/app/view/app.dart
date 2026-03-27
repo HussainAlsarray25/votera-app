@@ -36,38 +36,53 @@ class App extends StatelessWidget {
           builder: (context, locale) {
             return BlocBuilder<ThemeCubit, ThemeMode>(
               builder: (context, themeMode) {
-                return ScreenUtilInit(
-                  designSize: const Size(375, 812),
-                  minTextAdapt: true,
-                  splitScreenMode: true,
-                  useInheritedMediaQuery: true,
-                  builder: (context, child) {
-                    return MaterialApp.router(
-                      title: 'Votera',
-                      theme: AppTheme.lightTheme,
-                      darkTheme: AppTheme.darkTheme,
-                      themeMode: themeMode,
-                      locale: locale,
-                      localizationsDelegates:
-                          AppLocalizations.localizationsDelegates,
-                      supportedLocales: AppLocalizations.supportedLocales,
-                      debugShowCheckedModeBanner: false,
-                      routerConfig: appRouter.router,
-                      builder: (context, child) {
-                        return MediaQuery(
-                          data: MediaQuery.of(context).copyWith(
-                            textScaler: TextScaler.linear(
-                              MediaQuery.of(context)
-                                  .textScaler
-                                  .scale(1)
-                                  .clamp(0.8, 1.2),
+                // Clamp the MediaQuery that ScreenUtil reads to a max mobile
+                // width so that .r/.w/.h/.sp values don't over-scale on web
+                // or tablet. CenteredContent and AppBreakpoints handle the
+                // wider layout separately; this only affects token scaling.
+                final rawMq = MediaQuery.of(context);
+                final clampedMq = rawMq.copyWith(
+                  size: Size(
+                    rawMq.size.width.clamp(0.0, 480.0),
+                    rawMq.size.height.clamp(0.0, 960.0),
+                  ),
+                );
+
+                return MediaQuery(
+                  data: clampedMq,
+                  child: ScreenUtilInit(
+                    designSize: const Size(375, 812),
+                    minTextAdapt: true,
+                    splitScreenMode: true,
+                    useInheritedMediaQuery: true,
+                    builder: (context, child) {
+                      return MaterialApp.router(
+                        title: 'Votera',
+                        theme: AppTheme.lightTheme,
+                        darkTheme: AppTheme.darkTheme,
+                        themeMode: themeMode,
+                        locale: locale,
+                        localizationsDelegates:
+                            AppLocalizations.localizationsDelegates,
+                        supportedLocales: AppLocalizations.supportedLocales,
+                        debugShowCheckedModeBanner: false,
+                        routerConfig: appRouter.router,
+                        builder: (context, child) {
+                          return MediaQuery(
+                            data: MediaQuery.of(context).copyWith(
+                              textScaler: TextScaler.linear(
+                                MediaQuery.of(context)
+                                    .textScaler
+                                    .scale(1)
+                                    .clamp(0.8, 1.2),
+                              ),
                             ),
-                          ),
-                          child: child ?? const SizedBox.shrink(),
-                        );
-                      },
-                    );
-                  },
+                            child: child ?? const SizedBox.shrink(),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 );
               },
             );

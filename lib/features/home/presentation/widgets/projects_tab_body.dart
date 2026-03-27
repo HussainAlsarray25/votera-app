@@ -139,9 +139,10 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       behavior: HitTestBehavior.translucent,
-      child: RefreshIndicator(
-      onRefresh: _refresh,
-      child: CustomScrollView(
+      child: CenteredContent(
+        child: RefreshIndicator(
+        onRefresh: _refresh,
+        child: CustomScrollView(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
@@ -234,8 +235,9 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
             child: SizedBox(height: AppSpacing.xxl),
           ),
         ],
+        ),
       ),
-    ),
+      ),
     );
   }
 
