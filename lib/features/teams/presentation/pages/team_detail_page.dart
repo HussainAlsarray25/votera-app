@@ -192,48 +192,51 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
             ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async => _loadCubit.loadTeam(widget.teamId),
-        color: context.colors.secondary,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.all(AppSpacing.md),
-          children: [
-            _TeamHeaderCard(team: team, isLeader: _isLeader),
-            SizedBox(height: AppSpacing.md),
-            if (team.description != null && team.description!.isNotEmpty) ...[
-              _DescriptionCard(description: team.description!),
+      body: CenteredContent(
+        maxWidth: 900,
+        child: RefreshIndicator(
+          onRefresh: () async => _loadCubit.loadTeam(widget.teamId),
+          color: context.colors.secondary,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.all(AppSpacing.md),
+            children: [
+              _TeamHeaderCard(team: team, isLeader: _isLeader),
               SizedBox(height: AppSpacing.md),
-            ],
-            _MembersCard(
-              team: team,
-              currentUserId: _currentUserId,
-              isLeader: _isLeader,
-              onRemoveMember: _isMember
-                  ? (memberId) => _removeMember(context, memberId)
-                  : null,
-              onInviteMember: _isLeader ? () => _inviteMember(context) : null,
-            ),
-            // Regular member: show leave button at the bottom.
-            if (!_isLeader && _isMember) ...[
-              SizedBox(height: AppSpacing.lg),
-              Divider(color: context.colors.border),
-              SizedBox(height: AppSpacing.sm),
-              SizedBox(
-                width: double.infinity,
-                child: TextButton.icon(
-                  onPressed: () => _leaveTeam(context),
-                  icon: Icon(Icons.exit_to_app_rounded, size: AppSizes.iconSm),
-                  label: Text(l10n.leaveTeam),
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.colors.error,
-                    padding: EdgeInsets.symmetric(vertical: 14.h),
+              if (team.description != null && team.description!.isNotEmpty) ...[
+                _DescriptionCard(description: team.description!),
+                SizedBox(height: AppSpacing.md),
+              ],
+              _MembersCard(
+                team: team,
+                currentUserId: _currentUserId,
+                isLeader: _isLeader,
+                onRemoveMember: _isMember
+                    ? (memberId) => _removeMember(context, memberId)
+                    : null,
+                onInviteMember: _isLeader ? () => _inviteMember(context) : null,
+              ),
+              // Regular member: show leave button at the bottom.
+              if (!_isLeader && _isMember) ...[
+                SizedBox(height: AppSpacing.lg),
+                Divider(color: context.colors.border),
+                SizedBox(height: AppSpacing.sm),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton.icon(
+                    onPressed: () => _leaveTeam(context),
+                    icon: Icon(Icons.exit_to_app_rounded, size: AppSizes.iconSm),
+                    label: Text(l10n.leaveTeam),
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.colors.error,
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                    ),
                   ),
                 ),
-              ),
+              ],
+              SizedBox(height: AppSpacing.xxl),
             ],
-            SizedBox(height: AppSpacing.xxl),
-          ],
+          ),
         ),
       ),
     );

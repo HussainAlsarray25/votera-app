@@ -109,22 +109,16 @@ class _SupervisorEmailVerificationPageState
             );
           }
         },
-        child: SafeArea(
-          child: CenteredContent(
-            maxWidth: AppBreakpoints.formPanelMax,
-            child: SingleChildScrollView(
-              padding: AppSpacing.pagePadding,
-              child: BlocBuilder<FormsCubit, FormsState>(
-                builder: (context, state) {
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: state is FormsSupEmailOtpSent
-                        ? _buildOtpStep(state.email)
-                        : _buildEmailStep(),
-                  );
-                },
-              ),
-            ),
+        child: FormCardShell(
+          child: BlocBuilder<FormsCubit, FormsState>(
+            builder: (context, state) {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: state is FormsSupEmailOtpSent
+                    ? _buildOtpStep(state.email)
+                    : _buildEmailStep(),
+              );
+            },
           ),
         ),
       ),

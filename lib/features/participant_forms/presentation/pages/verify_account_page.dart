@@ -26,38 +26,33 @@ class VerifyAccountPage extends StatelessWidget {
         ),
       ),
       backgroundColor: context.colors.background,
-      body: SafeArea(
-        child: CenteredContent(
-          child: Padding(
-            padding: AppSpacing.pagePadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: AppSpacing.lg),
-                _buildHeader(context, l10n),
-                SizedBox(height: AppSpacing.xxl),
-                _buildMethodCard(
-                  context: context,
-                  icon: Icons.school_outlined,
-                  title: l10n.student,
-                  subtitle: l10n.studentEmailExample,
-                  badge: l10n.instant,
-                  badgeColor: context.colors.success,
-                  onTap: () => context.push('/verify-account/email'),
-                ),
-                SizedBox(height: AppSpacing.md),
-                _buildMethodCard(
-                  context: context,
-                  icon: Icons.person_outlined,
-                  title: l10n.professor,
-                  subtitle: l10n.teacherEmailExample,
-                  badge: l10n.instant,
-                  badgeColor: context.colors.primary,
-                  onTap: () => context.push('/verify-account/supervisor-email'),
-                ),
-              ],
+      body: FormCardShell(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(height: AppSpacing.lg),
+            _buildHeader(context, l10n),
+            SizedBox(height: AppSpacing.xxl),
+            _buildMethodCard(
+              context: context,
+              icon: Icons.school_outlined,
+              title: l10n.student,
+              subtitle: l10n.studentEmailExample,
+              badge: l10n.instant,
+              badgeColor: context.colors.success,
+              onTap: () => context.push('/verify-account/email'),
             ),
-          ),
+            SizedBox(height: AppSpacing.md),
+            _buildMethodCard(
+              context: context,
+              icon: Icons.person_outlined,
+              title: l10n.professor,
+              subtitle: l10n.teacherEmailExample,
+              badge: l10n.instant,
+              badgeColor: context.colors.primary,
+              onTap: () => context.push('/verify-account/supervisor-email'),
+            ),
+          ],
         ),
       ),
     );

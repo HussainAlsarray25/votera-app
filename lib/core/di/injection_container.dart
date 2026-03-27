@@ -74,7 +74,9 @@ Future<void> _initExternalDependencies(AppConfig config) async {
           baseUrl: config.apiBaseUrl,
           connectTimeout: const Duration(seconds: 30),
           receiveTimeout: const Duration(seconds: 30),
-          sendTimeout: const Duration(seconds: 30),
+          // sendTimeout only applies to requests with a body (POST/PUT/PATCH).
+          // On web, Dio warns if sendTimeout is set on bodyless requests (GET/HEAD),
+          // so it is omitted here and applied per-request when needed.
         );
 
       // Logger goes first so it captures both requests and error responses

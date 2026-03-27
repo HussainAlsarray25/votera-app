@@ -80,7 +80,9 @@ class _AuthPageState extends State<AuthPage> {
       },
       child: AppBreakpoints.isDesktop(context)
           ? _buildDesktopLayout(formContent)
-          : _buildMobileLayout(formContent),
+          : AppBreakpoints.isTablet(context)
+              ? _buildTabletLayout(formContent)
+              : _buildMobileLayout(formContent),
     );
 
     return body;
@@ -143,6 +145,37 @@ class _AuthPageState extends State<AuthPage> {
               textAlign: TextAlign.center,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // -- Section: Tablet layout — centered card, no branding panel --
+  Widget _buildTabletLayout(Widget formContent) {
+    return Scaffold(
+      backgroundColor: context.colors.background,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              vertical: AppSpacing.xxl,
+              horizontal: AppSpacing.xl,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppBreakpoints.formPanelMax + 40,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: context.colors.surface,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+                  border: Border.all(color: context.colors.border),
+                  boxShadow: AppShadows.card(Theme.of(context).brightness),
+                ),
+                child: formContent,
+              ),
+            ),
+          ),
         ),
       ),
     );

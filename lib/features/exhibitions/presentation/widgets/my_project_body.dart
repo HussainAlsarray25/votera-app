@@ -90,10 +90,12 @@ class _MyProjectViewState extends State<_MyProjectView> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        // When team resolves (initial load or after creation), load the project.
+        // When the team list resolves with at least one team, load the project.
+        // loadMyTeam emits MyTeamsLoaded; loadTeam/create emit TeamLoaded.
         BlocListener<TeamsCubit, TeamsState>(
-          listenWhen: (previous, current) =>
-              current is TeamLoaded && previous is! TeamLoaded,
+          listenWhen: (_, current) =>
+              (current is MyTeamsLoaded && current.teams.isNotEmpty) ||
+              current is TeamLoaded,
           listener: (ctx, _) {
             ctx
                 .read<ProjectsCubit>()
@@ -134,7 +136,10 @@ class _MyProjectViewState extends State<_MyProjectView> {
           }
 
           // No team found — show the create-team prompt.
-          if (teamState is TeamsError) {
+          // Either the API returned an error, or it returned an empty list.
+          final hasNoTeam = teamState is TeamsError ||
+              (teamState is MyTeamsLoaded && teamState.teams.isEmpty);
+          if (hasNoTeam) {
             return _NoTeamPrompt(onRefresh: _refresh);
           }
 

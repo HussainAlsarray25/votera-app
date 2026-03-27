@@ -131,11 +131,14 @@ class _GradientHeader extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.75),
                     ),
                     SizedBox(width: AppSpacing.xs),
-                    Text(
-                      _formatDateRange(),
-                      style: AppTypography.bodySmall.copyWith(
-                        color: Colors.white.withValues(alpha: 0.85),
-                        fontWeight: FontWeight.w500,
+                    Flexible(
+                      child: Text(
+                        _formatDateRange(),
+                        style: AppTypography.bodySmall.copyWith(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -315,21 +318,32 @@ class _MetadataRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _buildPhaseChip(context),
-        if (_hasTeamInfo()) ...[
-          _dot(context),
-          _buildTeamChip(context),
-        ],
-        if (event.status == EventStatus.voting &&
-            event.maxCommunityVotes != null) ...[
-          _dot(context),
-          _iconLabel(
-            context,
-            Icons.how_to_vote_outlined,
-            AppLocalizations.of(context)!.maxVotes(event.maxCommunityVotes!),
+        // Left group: phase + optional metadata. Expanded so it never
+        // overflows into the arrow button on narrow grid cells.
+        Expanded(
+          child: Row(
+            children: [
+              _buildPhaseChip(context),
+              if (_hasTeamInfo()) ...[
+                _dot(context),
+                Flexible(child: _buildTeamChip(context)),
+              ],
+              if (event.status == EventStatus.voting &&
+                  event.maxCommunityVotes != null) ...[
+                _dot(context),
+                Flexible(
+                  child: _iconLabel(
+                    context,
+                    Icons.how_to_vote_outlined,
+                    AppLocalizations.of(context)!
+                        .maxVotes(event.maxCommunityVotes!),
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
-        const Spacer(),
+        ),
+        SizedBox(width: AppSpacing.sm),
         Container(
           width: 28.r,
           height: 28.r,
@@ -354,11 +368,14 @@ class _MetadataRow extends StatelessWidget {
       children: [
         Icon(icon, size: AppSizes.iconXs, color: color),
         SizedBox(width: AppSpacing.xs),
-        Text(
-          label,
-          style: AppTypography.caption.copyWith(
-            color: color,
-            fontWeight: FontWeight.w600,
+        Flexible(
+          child: Text(
+            label,
+            style: AppTypography.caption.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -375,11 +392,14 @@ class _MetadataRow extends StatelessWidget {
       children: [
         Icon(icon, size: AppSizes.iconXs, color: context.colors.textHint),
         SizedBox(width: AppSpacing.xs),
-        Text(
-          label,
-          style: AppTypography.caption.copyWith(
-            color: context.colors.textSecondary,
-            fontWeight: FontWeight.w500,
+        Flexible(
+          child: Text(
+            label,
+            style: AppTypography.caption.copyWith(
+              color: context.colors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

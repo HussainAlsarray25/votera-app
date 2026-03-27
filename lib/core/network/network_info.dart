@@ -18,6 +18,12 @@ class NetworkInfoImpl implements NetworkInfo {
 
   @override
   Future<bool> get isConnected async {
+    // On web, cross-origin HEAD requests to external URLs (e.g. Google's
+    // generate_204) are blocked by the browser's CORS policy before they
+    // reach the network, making this check always return false.
+    // Skip the pre-check on web and let Dio surface real network errors.
+    if (kIsWeb) return true;
+
     try {
       final response = await _dio
           .head<void>(

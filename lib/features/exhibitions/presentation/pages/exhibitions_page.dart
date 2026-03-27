@@ -56,7 +56,8 @@ class ExhibitionsPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
+          Expanded(
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -66,6 +67,7 @@ class ExhibitionsPage extends StatelessWidget {
                   letterSpacing: -0.5,
                   color: context.colors.textPrimary,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
               SizedBox(height: 2.r),
               Text(
@@ -73,8 +75,10 @@ class ExhibitionsPage extends StatelessWidget {
                 style: AppTypography.bodyMedium.copyWith(
                   color: context.colors.textSecondary,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
             ],
+          ),
           ),
           const NotificationIconButton(),
         ],
@@ -124,9 +128,41 @@ class _EventsListSliver extends StatelessWidget {
             );
           }
 
+          final columns = AppBreakpoints.projectGridColumns(context);
+
+          // Mobile: a simple vertical list with natural card heights.
+          // Tablet/Desktop: a multi-column grid that fills the wider viewport.
+          // mainAxisExtent is sized to comfortably fit the gradient header
+          // (status badge, title up to 2 lines, date) plus the card body
+          // (description up to 2 lines and metadata row).
+          if (columns == 1) {
+            return SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 20.r),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final event = events[index];
+                    return ExhibitionCard(
+                      event: event,
+                      index: index,
+                      onTap: () => context.push('/exhibition/${event.id}'),
+                    );
+                  },
+                  childCount: events.length,
+                ),
+              ),
+            );
+          }
+
           return SliverPadding(
             padding: EdgeInsets.symmetric(horizontal: 20.r),
-            sliver: SliverList(
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                crossAxisSpacing: AppSpacing.md,
+                mainAxisSpacing: AppSpacing.md,
+                mainAxisExtent: 270,
+              ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   final event = events[index];

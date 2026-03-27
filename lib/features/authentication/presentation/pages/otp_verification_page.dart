@@ -102,23 +102,17 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
             );
           }
         },
-        child: SafeArea(
-          child: CenteredContent(
-            maxWidth: AppBreakpoints.formPanelMax,
-            child: SingleChildScrollView(
-              padding: AppSpacing.pagePadding,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(height: AppSpacing.xl),
-                  _buildHeader(),
-                  SizedBox(height: AppSpacing.xxl),
-                  _buildOtpBoxes(),
-                  SizedBox(height: AppSpacing.xxl),
-                  _buildSubmitButton(),
-                ],
-              ),
-            ),
+        child: FormCardShell(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: AppSpacing.xl),
+              _buildHeader(),
+              SizedBox(height: AppSpacing.xxl),
+              _buildOtpBoxes(),
+              SizedBox(height: AppSpacing.xxl),
+              _buildSubmitButton(),
+            ],
           ),
         ),
       ),

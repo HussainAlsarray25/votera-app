@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/theme/app_theme.dart';
+import 'package:votera/core/design_system/utils/real_viewport.dart';
 import 'package:votera/core/di/injection_container.dart' as di;
 import 'package:votera/core/router/app_router.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
@@ -36,31 +37,33 @@ class App extends StatelessWidget {
           builder: (context, locale) {
             return BlocBuilder<ThemeCubit, ThemeMode>(
               builder: (context, themeMode) {
-                // Clamp the MediaQuery that ScreenUtil reads to a max mobile
-                // width so that .r/.w/.h/.sp values don't over-scale on web
-                // or tablet. CenteredContent and AppBreakpoints handle the
-                // wider layout separately; this only affects token scaling.
+                // Store the real screen size so that AppBreakpoints and layout
+                // widgets (CenteredContent, FormCardShell, NavigationRail) can
+                // read the true viewport width for layout decisions.
+                //
+                // ScreenUtil 5.9.x reads the FlutterView directly via
+                // View.maybeOf(context), bypassing MediaQuery entirely, so
+                // MediaQuery clamping has no effect on token scaling.
+                // Instead we disable ScreenUtil's scaling via enableScaleWH
+                // and enableScaleText callbacks (both return false) so that
+                // all .r/.w/.h/.sp calls return raw design values (1× scale).
+                // AppBreakpoints reads from RealViewport, not MediaQuery, so
+                // breakpoint checks remain correct on all viewport sizes.
                 final rawMq = MediaQuery.of(context);
-                // Cap the size ScreenUtil reads to the design dimensions so
-                // that tokens (.r/.w/.h/.sp) never scale larger than 1:1 on
-                // wide screens (tablet/web). Scaling down for small phones
-                // (< 375 px) is still allowed. Layout adaption for wide
-                // viewports is handled separately by CenteredContent and
-                // AppBreakpoints, not by token scaling.
-                final clampedMq = rawMq.copyWith(
-                  size: Size(
-                    rawMq.size.width.clamp(0.0, 375.0),
-                    rawMq.size.height.clamp(0.0, 812.0),
-                  ),
-                );
 
-                return MediaQuery(
-                  data: clampedMq,
+                return RealViewport(
+                  size: rawMq.size,
                   child: ScreenUtilInit(
                     designSize: const Size(375, 812),
-                    minTextAdapt: true,
-                    splitScreenMode: true,
-                    useInheritedMediaQuery: true,
+                    // Disable ScreenUtil's adaptive scaling so tokens always
+                    // return their 1× design values regardless of viewport
+                    // width. Layout responsiveness is handled entirely by
+                    // AppBreakpoints + RealViewport, not by token scaling.
+                    enableScaleWH: () => false,
+                    enableScaleText: () => false,
+                    splitScreenMode: false,
+                    minTextAdapt: false,
+                    useInheritedMediaQuery: false,
                     builder: (context, child) {
                       return MaterialApp.router(
                         title: 'Votera',
@@ -74,6 +77,10 @@ class App extends StatelessWidget {
                         debugShowCheckedModeBanner: false,
                         routerConfig: appRouter.router,
                         builder: (context, child) {
+                          // Clamp system text scale so that device accessibility
+                          // font settings don't cause UI overflow. This is the
+                          // only MediaQuery adjustment needed since ScreenUtil
+                          // scaling is now fully disabled.
                           return MediaQuery(
                             data: MediaQuery.of(context).copyWith(
                               textScaler: TextScaler.linear(

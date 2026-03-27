@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:votera/core/design_system/utils/real_viewport.dart';
 
 /// Screen-width breakpoints for responsive layout decisions.
 /// Mobile < 600, Tablet 600-1024, Desktop > 1024.
+///
+/// All methods read from [RealViewport] instead of [MediaQuery] because the
+/// app clamps MediaQuery to a max of 375px for ScreenUtil token scaling.
+/// Without this, every breakpoint check would always return isMobile=true.
 class AppBreakpoints {
   AppBreakpoints._();
 
@@ -13,16 +18,16 @@ class AppBreakpoints {
   static const double formPanelMax = 480;
 
   static bool isMobile(BuildContext context) {
-    return MediaQuery.sizeOf(context).width < mobileMax;
+    return RealViewport.sizeOf(context).width < mobileMax;
   }
 
   static bool isTablet(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
+    final width = RealViewport.sizeOf(context).width;
     return width >= mobileMax && width <= tabletMax;
   }
 
   static bool isDesktop(BuildContext context) {
-    return MediaQuery.sizeOf(context).width > tabletMax;
+    return RealViewport.sizeOf(context).width > tabletMax;
   }
 
   /// Returns the number of columns for project grids:

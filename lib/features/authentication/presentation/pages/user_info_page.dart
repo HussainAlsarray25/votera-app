@@ -12,23 +12,17 @@ class UserInfoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: CenteredContent(
-          maxWidth: AppBreakpoints.formPanelMax,
-          child: SingleChildScrollView(
-            padding: AppSpacing.pagePadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: AppSpacing.xl),
-                _buildHeader(context),
-                SizedBox(height: AppSpacing.xl),
-                const RoleSelectorSection(),
-                SizedBox(height: AppSpacing.lg),
-                const UserInfoFormSection(),
-              ],
-            ),
-          ),
+      body: FormCardShell(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: AppSpacing.xl),
+            _buildHeader(context),
+            SizedBox(height: AppSpacing.xl),
+            const RoleSelectorSection(),
+            SizedBox(height: AppSpacing.lg),
+            const UserInfoFormSection(),
+          ],
         ),
       ),
     );

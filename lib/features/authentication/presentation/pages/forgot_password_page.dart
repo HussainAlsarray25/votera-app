@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
@@ -7,8 +8,7 @@ import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
 /// Allows the user to request a password-reset email.
-/// The backend sends an email with a reset link; no further action is needed
-/// in the app after submitting.
+/// The backend emails a hex token the user will paste on the next screen.
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
 
@@ -19,7 +19,6 @@ class ForgotPasswordPage extends StatefulWidget {
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  bool _emailSent = false;
 
   @override
   void dispose() {
@@ -52,7 +51,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthPasswordResetSent) {
-            setState(() => _emailSent = true);
+            // Navigate to the confirm-reset screen so the user can paste
+            // the token from their email and set a new password.
+            context.pushReplacement(
+              '/confirm-reset',
+              extra: {'email': _emailController.text.trim()},
+            );
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -62,14 +66,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             );
           }
         },
-        child: SafeArea(
-          child: CenteredContent(
-            maxWidth: AppBreakpoints.formPanelMax,
-            child: SingleChildScrollView(
-              padding: AppSpacing.pagePadding,
-              child: _emailSent ? _buildSuccessView() : _buildForm(),
-            ),
-          ),
+        child: FormCardShell(
+          child: _buildForm(),
         ),
       ),
     );
@@ -143,37 +141,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           onPressed: isLoading ? null : _handleSubmit,
         );
       },
-    );
-  }
-
-  // -- Section: Success confirmation --
-  Widget _buildSuccessView() {
-    final l10n = AppLocalizations.of(context)!;
-    final email = _emailController.text.trim();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SizedBox(height: AppSpacing.xxl),
-        Icon(
-          Icons.mark_email_read_outlined,
-          size: 72,
-          color: context.colors.primary,
-        ),
-        SizedBox(height: AppSpacing.xl),
-        Text(
-          l10n.checkYourEmail,
-          style: AppTypography.h1.copyWith(color: context.colors.textPrimary),
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(height: AppSpacing.sm),
-        Text(
-          l10n.resetLinkSent(email),
-          style: AppTypography.bodyMedium.copyWith(
-            color: context.colors.textSecondary,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
     );
   }
 }

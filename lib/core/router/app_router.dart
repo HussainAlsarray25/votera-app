@@ -5,6 +5,7 @@ import 'package:votera/app/view/shell_page.dart';
 import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/core/domain/services/auth_token_provider.dart';
 import 'package:votera/features/authentication/presentation/pages/auth_page.dart';
+import 'package:votera/features/authentication/presentation/pages/confirm_reset_page.dart';
 import 'package:votera/features/authentication/presentation/pages/forgot_password_page.dart';
 import 'package:votera/features/authentication/presentation/pages/otp_verification_page.dart';
 import 'package:votera/features/authentication/presentation/pages/user_info_page.dart';
@@ -59,6 +60,15 @@ class AppRouter {
       GoRoute(
         path: '/forgot-password',
         builder: (context, state) => const ForgotPasswordPage(),
+      ),
+      GoRoute(
+        path: '/confirm-reset',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          return ConfirmResetPage(
+            email: extra['email'] as String? ?? '',
+          );
+        },
       ),
       GoRoute(
         path: '/verify-account',
@@ -141,7 +151,7 @@ class AppRouter {
     final location = state.matchedLocation;
 
     // Allow splash, onboarding, auth, user-info, otp, and forgot-password without authentication.
-    const publicRoutes = {'/', '/onboarding', '/auth', '/user-info', '/otp', '/forgot-password'};
+    const publicRoutes = {'/', '/onboarding', '/auth', '/user-info', '/otp', '/forgot-password', '/confirm-reset'};
     if (publicRoutes.contains(location)) return null;
 
     final authProvider = sl<AuthTokenProvider>();

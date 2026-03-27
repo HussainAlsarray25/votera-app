@@ -40,7 +40,7 @@ class _LoginSectionState extends State<LoginSection> {
       child: Form(
         key: _formKey,
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
             SizedBox(height: AppSpacing.xxl),
             _buildHeader(l10n),
@@ -127,7 +127,7 @@ class _LoginSectionState extends State<LoginSection> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         TextButton(
-          onPressed: () => context.go('/forgot-password'),
+          onPressed: () => context.push('/forgot-password'),
           style: TextButton.styleFrom(
             padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
           ),
