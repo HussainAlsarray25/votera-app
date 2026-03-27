@@ -99,10 +99,7 @@ class _AuthPageState extends State<AuthPage> {
                   constraints: const BoxConstraints(
                     maxWidth: AppBreakpoints.formPanelMax,
                   ),
-                  child: SingleChildScrollView(
-                    padding: AppSpacing.pagePadding,
-                    child: formContent,
-                  ),
+                  child: formContent,
                 ),
               ),
             ),

@@ -116,17 +116,20 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           }
         },
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: AppSpacing.pagePadding,
-            child: BlocBuilder<FormsCubit, FormsState>(
-              builder: (context, state) {
-                return AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: state is FormsEmailOtpSent
-                      ? _buildOtpStep(state.email)
-                      : _buildEmailStep(),
-                );
-              },
+          child: CenteredContent(
+            maxWidth: AppBreakpoints.formPanelMax,
+            child: SingleChildScrollView(
+              padding: AppSpacing.pagePadding,
+              child: BlocBuilder<FormsCubit, FormsState>(
+                builder: (context, state) {
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: state is FormsEmailOtpSent
+                        ? _buildOtpStep(state.email)
+                        : _buildEmailStep(),
+                  );
+                },
+              ),
             ),
           ),
         ),

@@ -40,7 +40,8 @@ class _LoginSectionState extends State<LoginSection> {
       child: Form(
         key: _formKey,
         child: Column(
-          children: [
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
             SizedBox(height: AppSpacing.xxl),
             _buildHeader(l10n),
             SizedBox(height: AppSpacing.xxl),

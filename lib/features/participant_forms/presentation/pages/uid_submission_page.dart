@@ -119,17 +119,20 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
           }
         },
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: AppSpacing.pagePadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: AppSpacing.md),
-                _buildRequestsList(context),
-                SizedBox(height: AppSpacing.xl),
-                _buildSubmitForm(context),
-                SizedBox(height: AppSpacing.xxl),
-              ],
+          child: CenteredContent(
+            maxWidth: AppBreakpoints.formPanelMax,
+            child: SingleChildScrollView(
+              padding: AppSpacing.pagePadding,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: AppSpacing.md),
+                  _buildRequestsList(context),
+                  SizedBox(height: AppSpacing.xl),
+                  _buildSubmitForm(context),
+                  SizedBox(height: AppSpacing.xxl),
+                ],
+              ),
             ),
           ),
         ),
