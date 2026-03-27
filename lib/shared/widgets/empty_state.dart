@@ -67,12 +67,12 @@ class _EmptyStateState extends State<EmptyState>
     return FadeTransition(
       opacity: _fade,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildAnimatedIcon(context),
-            const SizedBox(height: AppSpacing.lg),
+            SizedBox(height: AppSpacing.lg),
             Text(
               widget.title,
               style: AppTypography.h3.copyWith(
@@ -80,7 +80,7 @@ class _EmptyStateState extends State<EmptyState>
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.sm),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 280),
               child: Text(
@@ -93,7 +93,7 @@ class _EmptyStateState extends State<EmptyState>
               ),
             ),
             if (widget.showRefreshHint) ...[
-              const SizedBox(height: AppSpacing.xl),
+              SizedBox(height: AppSpacing.xl),
               _buildPullHint(context),
             ]
           ],
@@ -117,8 +117,8 @@ class _EmptyStateState extends State<EmptyState>
 
   Widget _buildIconBubble(BuildContext context) {
     return Container(
-      width: 130,
-      height: 130,
+      width: AppSizes.emptyStateBubbleOuter,
+      height: AppSizes.emptyStateBubbleOuter,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
@@ -132,8 +132,8 @@ class _EmptyStateState extends State<EmptyState>
       ),
       child: Center(
         child: Container(
-          width: 88,
-          height: 88,
+          width: AppSizes.emptyStateBubbleInner,
+          height: AppSizes.emptyStateBubbleInner,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
@@ -159,7 +159,7 @@ class _EmptyStateState extends State<EmptyState>
               },
               child: Icon(
                 widget.icon,
-                size: 40,
+                size: AppSizes.emptyStateIconSize,
                 color: Colors.white,
               ),
             ),
@@ -176,10 +176,10 @@ class _EmptyStateState extends State<EmptyState>
       children: [
         Icon(
           Icons.arrow_downward_rounded,
-          size: 14,
+          size: AppSizes.emptyStatePullHintIcon,
           color: context.colors.textHint.withValues(alpha: 0.6),
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: AppSpacing.xs + 2),
         Text(
           AppLocalizations.of(context)!.pullToRefresh,
           style: AppTypography.caption.copyWith(

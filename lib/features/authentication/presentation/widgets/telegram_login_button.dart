@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:votera/core/design_system/design_system.dart';
@@ -53,7 +54,7 @@ class _TelegramLoginButtonState extends State<TelegramLoginButton>
     return Column(
       children: [
         _buildDivider(context),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         BlocConsumer<AuthCubit, AuthState>(
           listenWhen: (_, state) =>
               state is AuthTelegramAwaitingUser || state is AuthError,
@@ -134,7 +135,7 @@ class _TelegramLoginButtonState extends State<TelegramLoginButton>
       children: [
         const Expanded(child: Divider()),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Text(
             AppLocalizations.of(context)!.orContinueWith,
             style: AppTypography.bodySmall.copyWith(
@@ -155,7 +156,7 @@ class _TelegramLoginButtonState extends State<TelegramLoginButton>
   }) {
     return SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 52.h,
       child: OutlinedButton(
         onPressed: isDisabled ? null : onTap,
         style: OutlinedButton.styleFrom(
@@ -179,13 +180,13 @@ class _TelegramLoginButtonState extends State<TelegramLoginButton>
                     : _telegramBlue,
               ),
             ),
-            const SizedBox(width: AppSpacing.sm),
+            SizedBox(width: AppSpacing.sm),
             Opacity(
               opacity: isDisabled ? 0.4 : 1.0,
               child: SvgPicture.asset(
                 'assets/images/features/profile/telegram.svg',
-                width: 24,
-                height: 24,
+                width: AppSizes.iconLg,
+                height: AppSizes.iconLg,
               ),
             ),
           ],

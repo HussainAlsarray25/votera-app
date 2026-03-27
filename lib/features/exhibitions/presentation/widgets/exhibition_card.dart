@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/events/domain/entities/event_entity.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
@@ -37,7 +38,7 @@ class ExhibitionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.only(bottom: 20.r),
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
@@ -91,7 +92,7 @@ class _GradientHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+      padding: EdgeInsets.fromLTRB(20.r, 18.r, 20.r, 20.r),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -109,7 +110,7 @@ class _GradientHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _StatusBadge(status: event.status),
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.sm),
               Text(
                 event.title,
                 style: AppTypography.h3.copyWith(
@@ -121,15 +122,15 @@ class _GradientHeader extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               if (event.startAt != null) ...[
-                const SizedBox(height: 8),
+                SizedBox(height: AppSpacing.xs),
                 Row(
                   children: [
                     Icon(
                       Icons.calendar_today_rounded,
-                      size: 13,
+                      size: AppSizes.iconXs,
                       color: Colors.white.withValues(alpha: 0.75),
                     ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: AppSpacing.xs),
                     Text(
                       _formatDateRange(),
                       style: AppTypography.bodySmall.copyWith(
@@ -150,20 +151,20 @@ class _GradientHeader extends StatelessWidget {
   /// Semi-transparent decorative circles positioned at the top-right corner.
   List<Widget> _buildDecorations() {
     return [
-      const Positioned(
-        top: -18,
-        right: -12,
-        child: _Circle(size: 72, opacity: 0.08),
+      Positioned(
+        top: -18.r,
+        right: -12.r,
+        child: _Circle(size: 72.r, opacity: 0.08),
       ),
-      const Positioned(
-        top: 10,
-        right: 28,
-        child: _Circle(size: 40, opacity: 0.1),
+      Positioned(
+        top: 10.r,
+        right: 28.r,
+        child: _Circle(size: 40.r, opacity: 0.1),
       ),
-      const Positioned(
-        bottom: -10,
-        right: 60,
-        child: _Circle(size: 24, opacity: 0.06),
+      Positioned(
+        bottom: -10.r,
+        right: 60.r,
+        child: _Circle(size: 24.r, opacity: 0.06),
       ),
     ];
   }
@@ -217,7 +218,7 @@ class _StatusBadge extends StatelessWidget {
         status == EventStatus.open || status == EventStatus.voting;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 10.r, vertical: 4.r),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -230,19 +231,19 @@ class _StatusBadge extends StatelessWidget {
         children: [
           if (isActive) ...[
             Container(
-              width: 6,
-              height: 6,
+              width: 6.r,
+              height: 6.r,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: dotColor,
               ),
             ),
-            const SizedBox(width: 5),
+            SizedBox(width: 5.r),
           ],
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 11,
+            style: TextStyle(
+              fontSize: 11.sp,
               fontWeight: FontWeight.w700,
               color: Colors.white,
               letterSpacing: 0.3,
@@ -281,7 +282,7 @@ class _CardBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -294,7 +295,7 @@ class _CardBody extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: AppSpacing.sm),
           _MetadataRow(event: event),
         ],
       ),
@@ -330,15 +331,15 @@ class _MetadataRow extends StatelessWidget {
         ],
         const Spacer(),
         Container(
-          width: 28,
-          height: 28,
+          width: 28.r,
+          height: 28.r,
           decoration: BoxDecoration(
             color: context.colors.background,
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
           child: Icon(
             Icons.arrow_forward_rounded,
-            size: 16,
+            size: AppSizes.iconSm,
             color: context.colors.textSecondary,
           ),
         ),
@@ -351,8 +352,8 @@ class _MetadataRow extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: color),
-        const SizedBox(width: 4),
+        Icon(icon, size: AppSizes.iconXs, color: color),
+        SizedBox(width: AppSpacing.xs),
         Text(
           label,
           style: AppTypography.caption.copyWith(
@@ -372,8 +373,8 @@ class _MetadataRow extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: context.colors.textHint),
-        const SizedBox(width: 4),
+        Icon(icon, size: AppSizes.iconXs, color: context.colors.textHint),
+        SizedBox(width: AppSpacing.xs),
         Text(
           label,
           style: AppTypography.caption.copyWith(
@@ -388,10 +389,10 @@ class _MetadataRow extends StatelessWidget {
   /// Small separator dot between metadata items.
   Widget _dot(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       child: Container(
-        width: 3,
-        height: 3,
+        width: 3.r,
+        height: 3.r,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: context.colors.textHint,

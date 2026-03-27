@@ -61,7 +61,10 @@ class _VoteButtonState extends State<VoteButton>
           onTap: _handleTap,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl / 1.6,
+              vertical: AppSpacing.sm + 4,
+            ),
             decoration: BoxDecoration(
               gradient:
                   widget.hasVoted ? null : context.colors.primaryGradient,
@@ -77,9 +80,9 @@ class _VoteButtonState extends State<VoteButton>
                       ? Icons.check_circle
                       : Icons.how_to_vote_outlined,
                   color: Colors.white,
-                  size: 20,
+                  size: AppSizes.iconMd,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: AppSpacing.sm),
                 Text(
                   widget.hasVoted
                       ? AppLocalizations.of(context)!.voted
@@ -88,10 +91,12 @@ class _VoteButtonState extends State<VoteButton>
                     color: context.colors.textOnPrimary,
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: AppSpacing.sm),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xs / 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusFull),

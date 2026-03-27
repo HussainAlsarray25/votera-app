@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
@@ -32,11 +33,11 @@ class ProjectInfoSection extends StatelessWidget {
         if (project.description != null && project.description!.isNotEmpty)
           _buildDescription(context, l10n, project.description!),
         if (project.techStack != null && project.techStack!.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.lg),
           _buildTechStack(context, l10n, project.techStack!),
         ],
         if (_hasLinks(project)) ...[
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.lg),
           _buildLinks(context, l10n, project),
         ],
       ],
@@ -52,7 +53,7 @@ class ProjectInfoSection extends StatelessWidget {
             label: l10n.aboutProject,
             icon: Icons.info_outline_rounded,
           ),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.sm),
           Text(
             description,
             style: AppTypography.bodyMedium.copyWith(
@@ -80,10 +81,10 @@ class ProjectInfoSection extends StatelessWidget {
             label: l10n.techStack,
             icon: Icons.layers_outlined,
           ),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.sm),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: chips
                 .map((label) => _buildTechChip(context, label))
                 .toList(),
@@ -95,7 +96,7 @@ class ProjectInfoSection extends StatelessWidget {
 
   Widget _buildTechChip(BuildContext context, String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: context.colors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -122,7 +123,7 @@ class ProjectInfoSection extends StatelessWidget {
             label: l10n.projectLinks,
             icon: Icons.link_rounded,
           ),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.sm),
           if (project.repoUrl != null && project.repoUrl!.isNotEmpty)
             _LinkRow(
               icon: Icons.code_rounded,
@@ -131,7 +132,7 @@ class ProjectInfoSection extends StatelessWidget {
             ),
           if (project.demoUrl != null && project.demoUrl!.isNotEmpty) ...[
             if (project.repoUrl != null && project.repoUrl!.isNotEmpty)
-              const SizedBox(height: AppSpacing.sm),
+              SizedBox(height: AppSpacing.sm),
             _LinkRow(
               icon: Icons.open_in_new_rounded,
               label: l10n.liveDemo,
@@ -182,8 +183,8 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: context.colors.primary),
-        const SizedBox(width: 6),
+        Icon(icon, size: AppSizes.iconSm, color: context.colors.primary),
+        SizedBox(width: 6.w),
         Text(
           label,
           style: AppTypography.labelLarge
@@ -215,14 +216,14 @@ class _LinkRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         onTap: () {},
         child: Padding(
-          padding: const EdgeInsets.symmetric(
+          padding: EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
             vertical: AppSpacing.sm,
           ),
           child: Row(
             children: [
-              Icon(icon, size: 18, color: context.colors.primary),
-              const SizedBox(width: AppSpacing.sm),
+              Icon(icon, size: AppSizes.iconSm, color: context.colors.primary),
+              SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,7 +242,7 @@ class _LinkRow extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                size: 18,
+                size: AppSizes.iconSm,
                 color: context.colors.textHint,
               ),
             ],

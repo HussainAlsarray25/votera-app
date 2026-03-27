@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
 
@@ -10,8 +11,8 @@ class HomeBannerSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(14),
+      margin: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.all(14.r),
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -29,7 +30,7 @@ class HomeBannerSection extends StatelessWidget {
       child: Row(
         children: [
           _buildEmojiBox(),
-          const SizedBox(width: 14),
+          SizedBox(width: 14.w),
           Expanded(child: _buildText(context)),
         ],
       ),
@@ -38,16 +39,16 @@ class HomeBannerSection extends StatelessWidget {
 
   Widget _buildEmojiBox() {
     return Container(
-      width: 50,
-      height: 50,
+      width: 50.r,
+      height: 50.r,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         gradient: const LinearGradient(
           colors: [Color(0xFFFEF3C7), Color(0xFFFDE68A)],
         ),
       ),
-      child: const Center(
-        child: Text('\u{1F44B}', style: TextStyle(fontSize: 28)),
+      child: Center(
+        child: Text('\u{1F44B}', style: TextStyle(fontSize: 28.sp)),
       ),
     );
   }
@@ -64,7 +65,7 @@ class HomeBannerSection extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 3),
+        SizedBox(height: 3.h),
         RichText(
           text: TextSpan(
             style: AppTypography.bodySmall.copyWith(

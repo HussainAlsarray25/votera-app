@@ -129,7 +129,7 @@ class _ErrorPlaceholder extends StatelessWidget {
       width: width,
       height: height,
       color: context.colors.border,
-      child: Icon(icon, color: context.colors.textSecondary, size: 24),
+      child: Icon(icon, color: context.colors.textSecondary, size: AppSizes.iconLg),
     );
   }
 }

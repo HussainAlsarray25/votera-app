@@ -41,18 +41,18 @@ class _LoginSectionState extends State<LoginSection> {
         key: _formKey,
         child: Column(
           children: [
-            const SizedBox(height: AppSpacing.xxl),
+            SizedBox(height: AppSpacing.xxl),
             _buildHeader(l10n),
-            const SizedBox(height: AppSpacing.xxl),
+            SizedBox(height: AppSpacing.xxl),
             _buildEmailField(l10n),
-            const SizedBox(height: AppSpacing.md),
+            SizedBox(height: AppSpacing.md),
             _buildPasswordField(l10n),
             _buildForgotPassword(l10n),
-            const SizedBox(height: AppSpacing.xl),
+            SizedBox(height: AppSpacing.xl),
             _buildSubmitButton(l10n),
-            const SizedBox(height: AppSpacing.md),
+            SizedBox(height: AppSpacing.md),
             const TelegramLoginButton(),
-            const SizedBox(height: AppSpacing.lg),
+            SizedBox(height: AppSpacing.lg),
             _buildSwitchLink(l10n),
           ],
         ),
@@ -68,7 +68,7 @@ class _LoginSectionState extends State<LoginSection> {
           l10n.welcomeBack,
           style: AppTypography.h1.copyWith(color: context.colors.textPrimary),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.sm),
         Text(
           l10n.signInToVote,
           style: AppTypography.bodyMedium.copyWith(
@@ -128,7 +128,7 @@ class _LoginSectionState extends State<LoginSection> {
         TextButton(
           onPressed: () => context.go('/forgot-password'),
           style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
           ),
           child: Text(
             l10n.forgotPassword,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
@@ -107,11 +108,11 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: AppSpacing.xl),
+                SizedBox(height: AppSpacing.xl),
                 _buildHeader(),
-                const SizedBox(height: AppSpacing.xxl),
+                SizedBox(height: AppSpacing.xxl),
                 _buildOtpBoxes(),
-                const SizedBox(height: AppSpacing.xxl),
+                SizedBox(height: AppSpacing.xxl),
                 _buildSubmitButton(),
               ],
             ),
@@ -135,7 +136,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
           style: AppTypography.h1.copyWith(color: context.colors.textPrimary),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.sm),
         Text(
           l10n.codeSentTo,
           style: AppTypography.bodyMedium.copyWith(
@@ -143,7 +144,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.xs),
+        SizedBox(height: AppSpacing.xs),
         Text(
           widget.identifier,
           style: AppTypography.labelMedium.copyWith(
@@ -161,10 +162,10 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(_otpLength, (index) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
+          padding: EdgeInsets.symmetric(horizontal: 6.r),
           child: SizedBox(
-            width: 48,
-            height: 56,
+            width: 48.r,
+            height: 56.r,
             child: TextField(
               controller: _controllers[index],
               focusNode: _focusNodes[index],
@@ -173,7 +174,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 22.sp,
                 fontWeight: FontWeight.bold,
                 color: context.colors.textPrimary,
                 height: 1,

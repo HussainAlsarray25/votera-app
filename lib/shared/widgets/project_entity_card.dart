@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
@@ -123,7 +124,7 @@ class ProjectEntityCard extends StatelessWidget {
       child: Text(
         initial,
         style: TextStyle(
-          fontSize: 120,
+          fontSize: 120.sp,
           fontWeight: FontWeight.w900,
           color: Colors.white.withValues(alpha: 0.1),
           letterSpacing: -6,
@@ -156,20 +157,25 @@ class ProjectEntityCard extends StatelessWidget {
   // Title + description + bottom row, all on top of the scrim
   Widget _buildContent(BuildContext context, List<Color> accent) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.sm + 4,
+        0,
+        AppSpacing.sm + 4,
+        AppSpacing.sm + 4,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             project.title,
-            style: const TextStyle(
-              fontSize: 13,
+            style: TextStyle(
+              fontSize: 13.sp,
               fontWeight: FontWeight.w700,
               color: Colors.white,
               height: 1.3,
               letterSpacing: -0.2,
-              shadows: [
+              shadows: const [
                 Shadow(
                   color: Colors.black54,
                   blurRadius: 8,
@@ -185,7 +191,7 @@ class ProjectEntityCard extends StatelessWidget {
             Text(
               project.description!,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 11.sp,
                 color: Colors.white.withValues(alpha: 0.65),
                 height: 1.4,
               ),
@@ -193,7 +199,7 @@ class ProjectEntityCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ],
-          const SizedBox(height: 10),
+          SizedBox(height: AppSpacing.sm),
           _buildBottomRow(accent),
         ],
       ),
@@ -213,7 +219,10 @@ class ProjectEntityCard extends StatelessWidget {
           // Frosted tech pill
           Container(
             constraints: const BoxConstraints(maxWidth: 96),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xs,
+            ),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -223,8 +232,8 @@ class ProjectEntityCard extends StatelessWidget {
             ),
             child: Text(
               firstTag,
-              style: const TextStyle(
-                fontSize: 10,
+              style: TextStyle(
+                fontSize: 10.sp,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
                 letterSpacing: 0.2,
@@ -236,8 +245,8 @@ class ProjectEntityCard extends StatelessWidget {
         const Spacer(),
         // Accent arrow circle
         Container(
-          width: 26,
-          height: 26,
+          width: AppSizes.iconLg + 2,
+          height: AppSizes.iconLg + 2,
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.2),
             shape: BoxShape.circle,
@@ -245,9 +254,9 @@ class ProjectEntityCard extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.35),
             ),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.arrow_forward_ios_rounded,
-            size: 11,
+            size: AppSizes.iconXs,
             color: Colors.white,
           ),
         ),

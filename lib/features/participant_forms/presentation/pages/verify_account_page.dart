@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
@@ -32,9 +33,9 @@ class VerifyAccountPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: AppSpacing.lg),
+                SizedBox(height: AppSpacing.lg),
                 _buildHeader(context, l10n),
-                const SizedBox(height: AppSpacing.xxl),
+                SizedBox(height: AppSpacing.xxl),
                 _buildMethodCard(
                   context: context,
                   icon: Icons.school_outlined,
@@ -44,7 +45,7 @@ class VerifyAccountPage extends StatelessWidget {
                   badgeColor: context.colors.success,
                   onTap: () => context.push('/verify-account/email'),
                 ),
-                const SizedBox(height: AppSpacing.md),
+                SizedBox(height: AppSpacing.md),
                 _buildMethodCard(
                   context: context,
                   icon: Icons.person_outlined,
@@ -72,7 +73,7 @@ class VerifyAccountPage extends StatelessWidget {
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.sm),
         Text(
           l10n.verificationUnlocks,
           style: AppTypography.bodyMedium.copyWith(
@@ -97,7 +98,7 @@ class VerifyAccountPage extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -106,15 +107,15 @@ class VerifyAccountPage extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 52,
-              height: 52,
+              width: 52.r,
+              height: 52.r,
               decoration: BoxDecoration(
                 color: badgeColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
-              child: Icon(icon, color: badgeColor, size: 28),
+              child: Icon(icon, color: badgeColor, size: AppSizes.iconLg),
             ),
-            const SizedBox(width: AppSpacing.md),
+            SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,13 +131,13 @@ class VerifyAccountPage extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.sm),
+                      SizedBox(width: AppSpacing.sm),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: badgeColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(20.r),
                         ),
                         child: Text(
                           badge,
@@ -148,7 +149,7 @@ class VerifyAccountPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: AppSpacing.xs),
                   Text(
                     subtitle,
                     style: AppTypography.bodySmall.copyWith(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/ratings/presentation/cubit/ratings_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
@@ -48,8 +49,8 @@ class ProjectRatingSection extends StatelessWidget {
             children: [
               // Large score number with gradient background
               Container(
-                width: 72,
-                height: 72,
+                width: 72.r,
+                height: 72.r,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [AppColors.accent, Color(0xFFF59E0B)],
@@ -60,10 +61,10 @@ class ProjectRatingSection extends StatelessWidget {
                 ),
                 child: Center(
                   child: isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
+                      ? SizedBox(
+                          width: AppSizes.iconLg,
+                          height: AppSizes.iconLg,
+                          child: const CircularProgressIndicator(
                             strokeWidth: 2,
                             color: Colors.white,
                           ),
@@ -72,13 +73,13 @@ class ProjectRatingSection extends StatelessWidget {
                           averageScore.toStringAsFixed(1),
                           style: AppTypography.h1.copyWith(
                             color: Colors.white,
-                            fontSize: 28,
+                            fontSize: 28.sp,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.md),
+              SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,13 +90,13 @@ class ProjectRatingSection extends StatelessWidget {
                         color: context.colors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6.h),
                     AnimatedStarRating(
                       rating: isLoading ? 0 : averageScore.round(),
-                      size: 20,
+                      size: AppSizes.iconMd,
                       isInteractive: false,
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: AppSpacing.xs),
                     Text(
                       isLoading
                           ? l10n.loading
@@ -131,7 +132,7 @@ class ProjectRatingSection extends StatelessWidget {
                     color: context.colors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: AppSpacing.xs),
                 Text(
                   l10n.tapStarToRate,
                   style: AppTypography.caption.copyWith(
@@ -142,7 +143,7 @@ class ProjectRatingSection extends StatelessWidget {
             ),
           ),
           AnimatedStarRating(
-            size: 32,
+            size: 32.r,
             onRatingChanged: (rating) {
               context
                   .read<RatingsCubit>()

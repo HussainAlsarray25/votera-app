@@ -34,7 +34,7 @@ class _RoleSelectorSectionState extends State<RoleSelectorSection> {
             color: context.colors.textPrimary,
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         Row(
           children: List.generate(roles.length, (index) {
             final role = roles[index];
@@ -80,7 +80,7 @@ class _RoleSelectorSectionState extends State<RoleSelectorSection> {
                   ? context.colors.primary
                   : context.colors.textHint,
             ),
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.sm),
             Text(
               role.label,
               style: AppTypography.labelMedium.copyWith(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 
 /// Horizontal scrollable row of category filter chips.
@@ -18,17 +19,17 @@ class CategoryFilterSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 56,
+      height: 56.h,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+        padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 10.h),
         itemCount: categories.length,
         itemBuilder: (context, index) {
           final category = categories[index];
           final isActive = selectedCategory == category;
 
           return Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            padding: EdgeInsets.only(right: AppSpacing.sm),
             child: _buildChip(context, category, isActive: isActive),
           );
         },
@@ -43,7 +44,7 @@ class CategoryFilterSection extends StatelessWidget {
       onTap: () => onCategorySelected(category),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
         decoration: BoxDecoration(
           color: isActive ? activeColor : context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
@@ -64,7 +65,7 @@ class CategoryFilterSection extends StatelessWidget {
         child: Text(
           category,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 13.sp,
             fontWeight: FontWeight.w600,
             color: isActive ? Colors.white : context.colors.textSecondary,
           ),

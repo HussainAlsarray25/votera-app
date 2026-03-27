@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
 
@@ -52,12 +53,12 @@ class CategoriesPage extends StatelessWidget {
       body: SafeArea(
         child: CenteredContent(
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20.r),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(context),
-                const SizedBox(height: AppSpacing.lg),
+                SizedBox(height: AppSpacing.lg),
                 Expanded(child: _buildGrid()),
               ],
             ),
@@ -80,7 +81,7 @@ class CategoriesPage extends StatelessWidget {
             color: context.colors.textPrimary,
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: AppSpacing.xs),
         Text(
           l10n.browseByCategory,
           style: AppTypography.bodyMedium.copyWith(
@@ -131,7 +132,7 @@ class _CategoryCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: context.colors.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
@@ -144,7 +145,7 @@ class _CategoryCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _buildIcon(),
-          const SizedBox(height: 10),
+          SizedBox(height: AppSpacing.sm),
           Text(
             category.name,
             style: AppTypography.labelMedium.copyWith(
@@ -152,7 +153,7 @@ class _CategoryCard extends StatelessWidget {
               color: context.colors.textPrimary,
             ),
           ),
-          const SizedBox(height: 2),
+          SizedBox(height: 2.r),
           Text(
             AppLocalizations.of(context)!.projectCount(category.count),
             style: AppTypography.bodySmall.copyWith(
@@ -166,8 +167,8 @@ class _CategoryCard extends StatelessWidget {
 
   Widget _buildIcon() {
     return Container(
-      width: 52,
-      height: 52,
+      width: 52.r,
+      height: 52.r,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(colors: category.colors),
@@ -175,7 +176,7 @@ class _CategoryCard extends StatelessWidget {
       child: Center(
         child: Text(
           category.emoji,
-          style: const TextStyle(fontSize: 24),
+          style: TextStyle(fontSize: 24.sp),
         ),
       ),
     );

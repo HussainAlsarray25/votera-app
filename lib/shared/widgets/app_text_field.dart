@@ -40,7 +40,7 @@ class AppTextField extends StatelessWidget {
             color: context.colors.textPrimary,
           ),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.sm),
         TextFormField(
           controller: controller,
           obscureText: obscureText,

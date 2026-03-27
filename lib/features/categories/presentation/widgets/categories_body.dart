@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/categories/domain/entities/category_entity.dart';
 import 'package:votera/features/categories/presentation/cubit/categories_cubit.dart';
@@ -39,12 +40,12 @@ class _CategoriesBodyState extends State<CategoriesBody> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.r),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(context),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.lg),
           Expanded(child: _buildContent(context)),
         ],
       ),
@@ -64,7 +65,7 @@ class _CategoriesBodyState extends State<CategoriesBody> {
             color: context.colors.textPrimary,
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: AppSpacing.xs),
         Text(
           l10n.browseByCategory,
           style: AppTypography.bodyMedium.copyWith(
@@ -99,7 +100,7 @@ class _CategoriesBodyState extends State<CategoriesBody> {
               onRefresh: _refresh,
               child: ListView(
                 children: [
-                  const SizedBox(height: 80),
+                  SizedBox(height: 80.r),
                   EmptyState(
                     icon: Icons.category_outlined,
                     title: AppLocalizations.of(context)!.noCategoriesYet,
@@ -143,15 +144,15 @@ class _CategoriesBodyState extends State<CategoriesBody> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.error_outline, size: 48, color: context.colors.error),
-          const SizedBox(height: AppSpacing.md),
+          Icon(Icons.error_outline, size: AppSizes.iconXxl, color: context.colors.error),
+          SizedBox(height: AppSpacing.md),
           Text(
             message,
             style: AppTypography.bodyMedium.copyWith(
               color: context.colors.textSecondary,
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
           TextButton(
             onPressed: () => context
                 .read<CategoriesCubit>()
@@ -178,7 +179,7 @@ class _CategoryCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: context.colors.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
@@ -191,9 +192,9 @@ class _CategoryCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _buildIcon(initial),
-          const SizedBox(height: 10),
+          SizedBox(height: AppSpacing.sm),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
             child: Text(
               category.name,
               style: AppTypography.labelMedium.copyWith(
@@ -206,9 +207,9 @@ class _CategoryCard extends StatelessWidget {
             ),
           ),
           if (category.description.isNotEmpty) ...[
-            const SizedBox(height: 2),
+            SizedBox(height: 2.r),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               child: Text(
                 category.description,
                 style: AppTypography.bodySmall.copyWith(
@@ -227,8 +228,8 @@ class _CategoryCard extends StatelessWidget {
 
   Widget _buildIcon(String initial) {
     return Container(
-      width: 52,
-      height: 52,
+      width: 52.r,
+      height: 52.r,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(colors: colors),
@@ -236,8 +237,8 @@ class _CategoryCard extends StatelessWidget {
       child: Center(
         child: Text(
           initial,
-          style: const TextStyle(
-            fontSize: 24,
+          style: TextStyle(
+            fontSize: 24.sp,
             fontWeight: FontWeight.w700,
             color: Colors.white,
           ),

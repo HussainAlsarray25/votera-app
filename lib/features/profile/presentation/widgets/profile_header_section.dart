@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/profile/domain/entities/user_profile.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
@@ -52,11 +53,11 @@ class ProfileHeaderSection extends StatelessWidget {
         return Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, AppSpacing.lg, 20, 0),
+              padding: EdgeInsets.fromLTRB(20.w, AppSpacing.lg, 20.w, 0),
               child: Column(
                 children: [
                   _buildAvatar(context),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   _buildNameAndRole(
                     context: context,
                     name: name,
@@ -67,7 +68,7 @@ class ProfileHeaderSection extends StatelessWidget {
               ),
             ),
             if (verifiedLabel != null && verifiedColor != null) ...[
-              const SizedBox(height: 14),
+              SizedBox(height: 14.h),
               Padding(
                 padding: AppSpacing.pagePadding,
                 child: _buildVerificationCard(
@@ -98,8 +99,8 @@ class ProfileHeaderSection extends StatelessWidget {
             clipBehavior: Clip.none,
             children: [
               Container(
-                width: 140,
-                height: 140,
+                width: 140.r,
+                height: 140.r,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: context.colors.primaryGradient,
@@ -123,24 +124,24 @@ class ProfileHeaderSection extends StatelessWidget {
                     child: avatarUrl != null && avatarUrl.isNotEmpty
                         ? CachedNetworkImage(
                             imageUrl: avatarUrl,
-                            width: 134,
-                            height: 134,
+                            width: 134.r,
+                            height: 134.r,
                             fit: BoxFit.cover,
                             placeholder: (_, __) => Container(
-                              width: 134,
-                              height: 134,
+                              width: 134.r,
+                              height: 134.r,
                               color: context.colors.border,
                             ),
                             errorWidget: (_, __, ___) => Icon(
                               Icons.person_rounded,
-                              size: 64,
+                              size: 64.r,
                               color: context.colors.primary,
                             ),
                           )
                         : Center(
                             child: Icon(
                               Icons.person_rounded,
-                              size: 64,
+                              size: 64.r,
                               color: context.colors.primary,
                             ),
                           ),
@@ -155,8 +156,8 @@ class ProfileHeaderSection extends StatelessWidget {
                 bottom: 6,
                 right: 6,
                 child: Container(
-                  width: 32,
-                  height: 32,
+                  width: AppSizes.avatarSm,
+                  height: AppSizes.avatarSm,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: context.colors.primary,
@@ -167,7 +168,7 @@ class ProfileHeaderSection extends StatelessWidget {
                   ),
                   child: isUploading
                       ? Padding(
-                          padding: const EdgeInsets.all(8),
+                          padding: EdgeInsets.all(8.r),
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             color: context.colors.surface,
@@ -175,7 +176,7 @@ class ProfileHeaderSection extends StatelessWidget {
                         )
                       : Icon(
                           Icons.edit_rounded,
-                          size: 16,
+                          size: AppSizes.iconSm,
                           color: context.colors.surface,
                         ),
                 ),
@@ -221,17 +222,17 @@ class ProfileHeaderSection extends StatelessWidget {
       return Column(
         children: [
           Container(
-            width: 140,
-            height: 20,
+            width: 140.w,
+            height: 20.h,
             decoration: BoxDecoration(
               color: context.colors.border,
               borderRadius: BorderRadius.circular(4),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Container(
-            width: 180,
-            height: 14,
+            width: 180.w,
+            height: 14.h,
             decoration: BoxDecoration(
               color: context.colors.border,
               borderRadius: BorderRadius.circular(4),
@@ -256,16 +257,16 @@ class ProfileHeaderSection extends StatelessWidget {
                 color: context.colors.textPrimary,
               ),
             ),
-            const SizedBox(width: 6),
+            SizedBox(width: 6.w),
             const VerifiedBadge(size: 20),
           ],
         ),
         if (handle != null && handle.isNotEmpty) ...[
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           GestureDetector(
             onTap: () => _copyHandle(context, handle),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
               decoration: BoxDecoration(
                 color: context.colors.background,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -276,10 +277,10 @@ class ProfileHeaderSection extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.tag_rounded,
-                    size: 16,
+                    size: AppSizes.iconSm,
                     color: context.colors.textHint,
                   ),
-                  const SizedBox(width: 5),
+                  SizedBox(width: 5.w),
                   Text(
                     handle,
                     style: AppTypography.bodySmall.copyWith(
@@ -288,10 +289,10 @@ class ProfileHeaderSection extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8.w),
                   Icon(
                     Icons.copy_rounded,
-                    size: 16,
+                    size: AppSizes.iconSm,
                     color: context.colors.textHint,
                   ),
                 ],
@@ -312,7 +313,7 @@ class ProfileHeaderSection extends StatelessWidget {
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -328,14 +329,14 @@ class ProfileHeaderSection extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: EdgeInsets.all(6.r),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.verified_rounded, size: 14, color: color),
+                child: Icon(Icons.verified_rounded, size: AppSizes.iconXs, color: color),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: AppSpacing.sm),
               Text(
                 label,
                 style: AppTypography.labelMedium.copyWith(
@@ -345,31 +346,31 @@ class ProfileHeaderSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14.h),
           Divider(height: 1, color: context.colors.divider),
-          const SizedBox(height: 14),
+          SizedBox(height: 14.h),
           // Telegram row — uses the real Telegram SVG logo asset.
           if (telegramId != null)
             _buildIdentifierRow(
               context: context,
               iconWidget: SvgPicture.asset(
                 'assets/images/features/profile/telegram.svg',
-                width: 28,
-                height: 28,
+                width: AppSizes.iconLg,
+                height: AppSizes.iconLg,
               ),
               label: 'Telegram',
               labelColor: context.colors.textPrimary,
             ),
           if (telegramId != null && emailId != null)
-            const SizedBox(height: 10),
+            SizedBox(height: 10.h),
           // Email row — uses a custom red circle SVG matching the email icon style.
           if (emailId != null)
             _buildIdentifierRow(
               context: context,
               iconWidget: SvgPicture.asset(
                 'assets/images/features/profile/email.svg',
-                width: 22,
-                height: 22,
+                width: AppSizes.iconMd,
+                height: AppSizes.iconMd,
               ),
               label: emailId.value,
               labelColor: context.colors.textSecondary,
@@ -387,8 +388,8 @@ class ProfileHeaderSection extends StatelessWidget {
   }) {
     return Row(
       children: [
-        SizedBox(width: 32, child: Center(child: iconWidget)),
-        const SizedBox(width: AppSpacing.sm),
+        SizedBox(width: AppSizes.avatarSm, child: Center(child: iconWidget)),
+        SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
             label,

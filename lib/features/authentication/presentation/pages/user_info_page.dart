@@ -20,11 +20,11 @@ class UserInfoPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: AppSpacing.xl),
+                SizedBox(height: AppSpacing.xl),
                 _buildHeader(context),
-                const SizedBox(height: AppSpacing.xl),
+                SizedBox(height: AppSpacing.xl),
                 const RoleSelectorSection(),
-                const SizedBox(height: AppSpacing.lg),
+                SizedBox(height: AppSpacing.lg),
                 const UserInfoFormSection(),
               ],
             ),
@@ -41,7 +41,7 @@ class UserInfoPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(l10n.tellUsAboutYou, style: AppTypography.h1),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.sm),
         Text(
           l10n.personalizeExperience,
           style: AppTypography.bodyMedium,

@@ -95,11 +95,11 @@ class _ProjectCardState extends State<ProjectCard>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildImage(context),
-                  const SizedBox(height: AppSpacing.md),
+                  SizedBox(height: AppSpacing.md),
                   _buildTitleRow(context),
-                  const SizedBox(height: AppSpacing.xs),
+                  SizedBox(height: AppSpacing.xs),
                   _buildAuthorRow(context),
-                  const SizedBox(height: AppSpacing.sm),
+                  SizedBox(height: AppSpacing.sm),
                   _buildFooter(context),
                 ],
               ),
@@ -116,7 +116,7 @@ class _ProjectCardState extends State<ProjectCard>
       children: [
         CachedImage(
           url: widget.imageUrl,
-          height: 160,
+          height: AppSizes.cardImageHeight,
           width: double.infinity,
           fit: BoxFit.cover,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -130,10 +130,13 @@ class _ProjectCardState extends State<ProjectCard>
 
   Widget _buildTrendingBadge(BuildContext context) {
     return Positioned(
-      top: 8,
-      left: 8,
+      top: AppSpacing.sm,
+      left: AppSpacing.sm,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm + 2,
+          vertical: AppSpacing.xs,
+        ),
         decoration: BoxDecoration(
           color: context.colors.error,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -141,11 +144,15 @@ class _ProjectCardState extends State<ProjectCard>
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.local_fire_department, size: 14, color: Colors.white),
-            const SizedBox(width: 4),
+            Icon(
+              Icons.local_fire_department,
+              size: AppSizes.iconXs,
+              color: Colors.white,
+            ),
+            SizedBox(width: AppSpacing.xs),
             Text(
               AppLocalizations.of(context)!.trending,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -159,11 +166,14 @@ class _ProjectCardState extends State<ProjectCard>
 
   Widget _buildWinnerBadge() {
     return Positioned(
-      top: 8,
-      right: 8,
+      top: AppSpacing.sm,
+      right: AppSpacing.sm,
       child: Builder(
         builder: (context) => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm + 2,
+            vertical: AppSpacing.xs,
+          ),
           decoration: BoxDecoration(
             gradient: AppColorScheme.goldGradient,
             borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -171,8 +181,12 @@ class _ProjectCardState extends State<ProjectCard>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.emoji_events, size: 14, color: Colors.white),
-              const SizedBox(width: 4),
+              Icon(
+                Icons.emoji_events,
+                size: AppSizes.iconXs,
+                color: Colors.white,
+              ),
+              SizedBox(width: AppSpacing.xs),
               Text(
                 AppLocalizations.of(context)!.winner,
                 style: const TextStyle(
@@ -211,8 +225,8 @@ class _ProjectCardState extends State<ProjectCard>
           ),
         ),
         if (widget.isVerifiedAuthor) ...[
-          const SizedBox(width: 4),
-          const VerifiedBadge(size: 14),
+          SizedBox(width: AppSpacing.xs),
+          const VerifiedBadge(),
         ],
       ],
     );
@@ -224,16 +238,16 @@ class _ProjectCardState extends State<ProjectCard>
       children: [
         AnimatedStarRating(
           rating: widget.rating,
-          size: 18,
+          size: AppSizes.iconSm,
           isInteractive: false,
         ),
         const Spacer(),
         Icon(
           Icons.how_to_vote_outlined,
-          size: 16,
+          size: AppSizes.iconSm,
           color: context.colors.primary,
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: AppSpacing.xs),
         Text(
           AppLocalizations.of(context)!.voteCount(widget.voteCount),
           style: AppTypography.caption.copyWith(color: context.colors.primary),

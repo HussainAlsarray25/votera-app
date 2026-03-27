@@ -89,12 +89,12 @@ class _ProjectDetailsView extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.error_outline,
-                        size: 48,
+                        size: AppSizes.iconXxl,
                         color: context.colors.error,
                       ),
-                      const SizedBox(height: AppSpacing.md),
+                      SizedBox(height: AppSpacing.md),
                       Text(state.message, style: AppTypography.bodyMedium.copyWith(color: context.colors.textPrimary)),
-                      const SizedBox(height: AppSpacing.md),
+                      SizedBox(height: AppSpacing.md),
                       TextButton(
                         onPressed: () => context
                             .read<ProjectsCubit>()
@@ -156,7 +156,7 @@ class _ProjectDetailsView extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, {required bool showInlineVote}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.lg,
       ),
@@ -164,15 +164,15 @@ class _ProjectDetailsView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ProjectInfoSection(projectId: projectId),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.lg),
           ProjectRatingSection(projectId: projectId),
           if (showInlineVote) ...[
-            const SizedBox(height: AppSpacing.lg),
+            SizedBox(height: AppSpacing.lg),
             _buildVoteButton(context),
           ],
-          const SizedBox(height: AppSpacing.xl),
+          SizedBox(height: AppSpacing.xl),
           _buildSectionDivider(context, AppLocalizations.of(context)!.communityFeedback),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
           ProjectCommentsSection(projectId: projectId),
           const SizedBox(height: 100),
         ],
@@ -187,7 +187,7 @@ class _ProjectDetailsView extends StatelessWidget {
           label,
           style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
         ),
-        const SizedBox(width: AppSpacing.md),
+        SizedBox(width: AppSpacing.md),
         Expanded(child: Divider(color: context.colors.border)),
       ],
     );
@@ -217,7 +217,7 @@ class _ProjectDetailsView extends StatelessWidget {
 
   Widget? _buildBottomBar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: context.colors.surface,
         boxShadow: [

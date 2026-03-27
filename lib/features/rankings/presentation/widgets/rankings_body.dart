@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/rankings/domain/entities/leaderboard_entry_entity.dart';
 import 'package:votera/features/rankings/presentation/cubit/rankings_cubit.dart';
@@ -54,7 +55,7 @@ class _RankingsBodyState extends State<RankingsBody> {
               onRefresh: _refresh,
               child: ListView(
                 children: [
-                  const SizedBox(height: 80),
+                  SizedBox(height: 80.h),
                   EmptyState(
                     icon: Icons.leaderboard_outlined,
                     title: l10n.noRankingsYet,
@@ -81,15 +82,15 @@ class _RankingsBodyState extends State<RankingsBody> {
 
     return CustomScrollView(
       slivers: [
-        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
+        SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
         SliverToBoxAdapter(
           child: RankingsPodiumSection(topThree: topThree),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
+        SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
         SliverToBoxAdapter(child: _buildRankingsLabel()),
-        const SliverToBoxAdapter(child: SizedBox(height: 12)),
+        SliverToBoxAdapter(child: SizedBox(height: 12.h)),
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
@@ -99,7 +100,7 @@ class _RankingsBodyState extends State<RankingsBody> {
             ),
           ),
         ),
-        const SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: SizedBox(height: AppSpacing.xxl),
         ),
       ],
@@ -108,13 +109,13 @@ class _RankingsBodyState extends State<RankingsBody> {
 
   Widget _buildRankingsLabel() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Align(
         alignment: AlignmentDirectional.centerStart,
         child: Text(
           AppLocalizations.of(context)!.rankingsLabel,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w800,
             // textHint is appropriate for a muted section label
             color: context.colors.textHint,
@@ -130,15 +131,15 @@ class _RankingsBodyState extends State<RankingsBody> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.error_outline, size: 48, color: context.colors.error),
-          const SizedBox(height: AppSpacing.md),
+          Icon(Icons.error_outline, size: AppSizes.iconXxl, color: context.colors.error),
+          SizedBox(height: AppSpacing.md),
           Text(
             message,
             style: AppTypography.bodyMedium.copyWith(
               color: context.colors.textSecondary,
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
           TextButton(
             onPressed: () =>
                 context.read<RankingsCubit>().loadLeaderboard(widget.eventId),

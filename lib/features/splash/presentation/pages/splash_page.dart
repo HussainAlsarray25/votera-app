@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
@@ -73,11 +74,11 @@ class _SplashPageState extends State<SplashPage>
             children: [
               // App icon
               Container(
-                width: 100,
-                height: 100,
+                width: 100.r,
+                height: 100.r,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(24.r),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.15),
@@ -90,24 +91,24 @@ class _SplashPageState extends State<SplashPage>
                   child: Text(
                     'V',
                     style: AppTypography.h1.copyWith(
-                      fontSize: 48,
+                      fontSize: 48.sp,
                       color: AppColors.primary,
                       height: 1,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              SizedBox(height: AppSpacing.lg),
               // App name
               Text(
                 l10n.appTitle,
                 style: AppTypography.h1.copyWith(
-                  fontSize: 36,
+                  fontSize: 36.sp,
                   color: Colors.white,
                   letterSpacing: 1.2,
                 ),
               ),
-              const SizedBox(height: AppSpacing.sm),
+              SizedBox(height: AppSpacing.sm),
               Text(
                 l10n.appMotto,
                 style: AppTypography.bodyMedium.copyWith(
@@ -115,11 +116,11 @@ class _SplashPageState extends State<SplashPage>
                   letterSpacing: 0.5,
                 ),
               ),
-              const SizedBox(height: 60),
-              const SizedBox(
-                width: 28,
-                height: 28,
-                child: CircularProgressIndicator(
+              SizedBox(height: 60.h),
+              SizedBox(
+                width: 28.r,
+                height: 28.r,
+                child: const CircularProgressIndicator(
                   strokeWidth: 2.5,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),

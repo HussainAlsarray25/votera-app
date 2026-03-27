@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
@@ -87,14 +88,14 @@ class ProjectHeaderSection extends StatelessWidget {
           ),
 
         // Decorative floating icon
-        const Positioned(
+        Positioned(
           right: 24,
           top: 70,
           child: Opacity(
             opacity: 0.15,
             child: Icon(
               Icons.code_rounded,
-              size: 120,
+              size: 120.r,
               color: Colors.white,
             ),
           ),
@@ -119,7 +120,7 @@ class ProjectHeaderSection extends StatelessWidget {
       children: [
         // Status badge shown below the flexible space background.
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
           decoration: BoxDecoration(
             color: statusConfig.color.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -130,8 +131,8 @@ class ProjectHeaderSection extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(statusConfig.icon, size: 11, color: statusConfig.color),
-              const SizedBox(width: 4),
+              Icon(statusConfig.icon, size: AppSizes.iconXs, color: statusConfig.color),
+              SizedBox(width: AppSpacing.xs),
               Text(
                 statusConfig.label,
                 style: AppTypography.caption.copyWith(
@@ -143,7 +144,7 @@ class ProjectHeaderSection extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: AppSpacing.sm),
         // Project title
         Text(
           project.title,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/notification/domain/entities/notification_entity.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
@@ -23,7 +24,7 @@ class NotificationListTile extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       child: Container(
-        padding: const EdgeInsets.symmetric(
+        padding: EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.md,
         ),
@@ -50,8 +51,8 @@ class NotificationListTile extends StatelessWidget {
           children: [
             // Icon container
             Container(
-              width: 44,
-              height: 44,
+              width: AppSizes.avatarMd,
+              height: AppSizes.avatarMd,
               decoration: BoxDecoration(
                 color: isUnread
                     ? context.colors.primary.withValues(alpha: 0.12)
@@ -65,13 +66,13 @@ class NotificationListTile extends StatelessWidget {
               ),
               child: Icon(
                 Icons.notifications_outlined,
-                size: 20,
+                size: AppSizes.iconMd,
                 color: isUnread
                     ? context.colors.primary
                     : context.colors.textHint,
               ),
             ),
-            const SizedBox(width: AppSpacing.md),
+            SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,7 +91,7 @@ class NotificationListTile extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.sm),
+                      SizedBox(width: AppSpacing.sm),
                       Text(
                         timeLabel,
                         style: AppTypography.caption.copyWith(
@@ -100,7 +101,7 @@ class NotificationListTile extends StatelessWidget {
                     ],
                   ),
                   if (notification.body.isNotEmpty) ...[
-                    const SizedBox(height: AppSpacing.xs),
+                    SizedBox(height: AppSpacing.xs),
                     Text(
                       notification.body,
                       style: AppTypography.bodySmall.copyWith(
@@ -116,10 +117,10 @@ class NotificationListTile extends StatelessWidget {
             // Unread dot
             if (isUnread)
               Padding(
-                padding: const EdgeInsets.only(top: 6, left: AppSpacing.xs),
+                padding: EdgeInsets.only(top: 6.r, left: AppSpacing.xs),
                 child: Container(
-                  width: 8,
-                  height: 8,
+                  width: 8.r,
+                  height: 8.r,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: context.colors.primary,

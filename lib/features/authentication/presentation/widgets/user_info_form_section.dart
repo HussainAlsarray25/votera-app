@@ -36,7 +36,7 @@ class _UserInfoFormSectionState extends State<UserInfoFormSection> {
           hint: l10n.departmentHint,
           prefixIcon: Icons.apartment,
         ),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         AppTextField(
           label: l10n.universityIdOptional,
           controller: _universityIdController,
@@ -44,7 +44,7 @@ class _UserInfoFormSectionState extends State<UserInfoFormSection> {
           prefixIcon: Icons.badge_outlined,
           keyboardType: TextInputType.number,
         ),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         AppTextField(
           label: l10n.phoneOptional,
           controller: _phoneController,
@@ -52,7 +52,7 @@ class _UserInfoFormSectionState extends State<UserInfoFormSection> {
           prefixIcon: Icons.phone_outlined,
           keyboardType: TextInputType.phone,
         ),
-        const SizedBox(height: AppSpacing.xl),
+        SizedBox(height: AppSpacing.xl),
         GradientButton(
           text: l10n.continueButton,
           onPressed: () {

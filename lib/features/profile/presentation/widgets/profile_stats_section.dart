@@ -21,7 +21,7 @@ class ProfileStatsSection extends StatelessWidget {
             Icons.how_to_vote,
             context.colors.primary,
           ),
-          const SizedBox(width: AppSpacing.sm),
+          SizedBox(width: AppSpacing.sm),
           _buildStatCard(
             context,
             l10n.rated,
@@ -29,7 +29,7 @@ class ProfileStatsSection extends StatelessWidget {
             Icons.star,
             context.colors.accent,
           ),
-          const SizedBox(width: AppSpacing.sm),
+          SizedBox(width: AppSpacing.sm),
           _buildStatCard(
             context,
             l10n.comments,
@@ -51,7 +51,7 @@ class ProfileStatsSection extends StatelessWidget {
   ) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -59,10 +59,10 @@ class ProfileStatsSection extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: AppSpacing.sm),
+            Icon(icon, color: color, size: AppSizes.iconLg),
+            SizedBox(height: AppSpacing.sm),
             Text(value, style: AppTypography.h3.copyWith(color: color)),
-            const SizedBox(height: 2),
+            SizedBox(height: 2),
             Text(
               label,
               style: AppTypography.caption.copyWith(

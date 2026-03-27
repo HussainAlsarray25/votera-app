@@ -10,7 +10,7 @@ import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Settings and account actions at the bottom of the profile page.
 class ProfileActionsSection extends StatelessWidget {
-const ProfileActionsSection({super.key});
+  const ProfileActionsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -94,14 +94,14 @@ const ProfileActionsSection({super.key});
       builder: (context, mode) {
         final isDark = mode == ThemeMode.dark;
         return SwitchListTile(
-          contentPadding: const EdgeInsets.symmetric(
+          contentPadding: EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
             vertical: AppSpacing.xs,
           ),
           secondary: Icon(
             isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
             color: context.colors.primary,
-            size: 22,
+            size: AppSizes.iconMd,
           ),
           title: Text(
             l10n.darkMode,
@@ -126,14 +126,14 @@ const ProfileActionsSection({super.key});
         final currentLanguageName = isArabic ? l10n.arabic : l10n.english;
 
         return ListTile(
-          contentPadding: const EdgeInsets.symmetric(
+          contentPadding: EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
             vertical: AppSpacing.xs,
           ),
           leading: Icon(
             Icons.language,
             color: context.colors.primary,
-            size: 22,
+            size: AppSizes.iconMd,
           ),
           title: Text(
             l10n.language,
@@ -148,7 +148,7 @@ const ProfileActionsSection({super.key});
                 style: AppTypography.bodyMedium
                     .copyWith(color: context.colors.textHint),
               ),
-              const SizedBox(width: AppSpacing.xs),
+              SizedBox(width: AppSpacing.xs),
               Icon(Icons.chevron_right, color: context.colors.textHint),
             ],
           ),
@@ -168,7 +168,7 @@ const ProfileActionsSection({super.key});
   ) {
     showModalBottomSheet<void>(
       context: context,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusLg),
         ),
@@ -176,7 +176,7 @@ const ProfileActionsSection({super.key});
       builder: (sheetContext) {
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -184,7 +184,7 @@ const ProfileActionsSection({super.key});
                 Container(
                   width: 40,
                   height: 4,
-                  margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                  margin: EdgeInsets.only(bottom: AppSpacing.md),
                   decoration: BoxDecoration(
                     color: context.colors.divider,
                     borderRadius: BorderRadius.circular(2),
@@ -195,7 +195,7 @@ const ProfileActionsSection({super.key});
                   style: AppTypography.h3
                       .copyWith(color: context.colors.textPrimary),
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                SizedBox(height: AppSpacing.sm),
                 _buildLanguageOption(
                   context: context,
                   label: l10n.english,
@@ -256,15 +256,15 @@ const ProfileActionsSection({super.key});
         isDestructive ? context.colors.error : context.colors.textPrimary;
 
     return ListTile(
-      leading: Icon(icon, color: color, size: 22),
+      leading: Icon(icon, color: color, size: AppSizes.iconMd),
       title: Text(
         label,
         style: AppTypography.bodyLarge.copyWith(color: color),
       ),
       trailing: isLoading
           ? SizedBox(
-              width: 20,
-              height: 20,
+              width: AppSizes.iconMd,
+              height: AppSizes.iconMd,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 color: color,

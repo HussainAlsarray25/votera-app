@@ -58,9 +58,9 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
           _buildCommentInput(),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
           _buildCommentsList(),
         ],
       ),
@@ -78,9 +78,9 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
             color: context.colors.textPrimary,
           ),
         ),
-        const SizedBox(width: AppSpacing.sm),
+        SizedBox(width: AppSpacing.sm),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
           decoration: BoxDecoration(
             color: context.colors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -100,7 +100,7 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
   // -- Section: New comment input --
   Widget _buildCommentInput() {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -109,15 +109,15 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
       child: Row(
         children: [
           CircleAvatar(
-            radius: 16,
+            radius: AppSizes.avatarSm / 2,
             backgroundColor: context.colors.primaryLight,
             child: Icon(
               Icons.person,
-              size: 16,
+              size: AppSizes.iconSm,
               color: context.colors.primary,
             ),
           ),
-          const SizedBox(width: AppSpacing.sm),
+          SizedBox(width: AppSpacing.sm),
           Expanded(
             child: TextField(
               controller: _commentController,
@@ -133,12 +133,12 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.send, color: context.colors.primary, size: 20),
+            icon: Icon(Icons.send, color: context.colors.primary, size: AppSizes.iconMd),
             onPressed: _handleSend,
           ),
         ],
       ),
-);
+    );
   }
 
   // -- Section: Comments list --
@@ -147,15 +147,15 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
       return BlocBuilder<CommentsCubit, CommentsState>(
         builder: (context, state) {
           if (state is CommentsLoading) {
-            return const Padding(
+            return Padding(
               padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
-              child: Center(
+              child: const Center(
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
             );
           }
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
             child: Center(
               child: Text(
                 AppLocalizations.of(context)!.noCommentsYet,
@@ -184,7 +184,7 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
         : '';
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: EdgeInsets.only(bottom: AppSpacing.md),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -193,7 +193,7 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
             url: comment.authorAvatarUrl,
             initial: initial,
           ),
-          const SizedBox(width: AppSpacing.sm),
+          SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,7 +246,7 @@ class _ProjectCommentsSectionState extends State<ProjectCommentsSection> {
       children: List.generate(5, (index) {
         return Icon(
           index < score ? Icons.star_rounded : Icons.star_outline_rounded,
-          size: 14,
+          size: AppSizes.iconXs,
           color: index < score ? Colors.amber : context.colors.textSecondary,
         );
       }),

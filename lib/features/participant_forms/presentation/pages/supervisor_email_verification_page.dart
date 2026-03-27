@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/participant_forms/presentation/cubit/forms_cubit.dart';
@@ -136,7 +137,7 @@ class _SupervisorEmailVerificationPageState
         key: const ValueKey('supervisor-email-step'),
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: AppSpacing.xl),
+          SizedBox(height: AppSpacing.xl),
           Text(
             l10n.enterSupervisorEmail,
             style: AppTypography.h1.copyWith(
@@ -144,7 +145,7 @@ class _SupervisorEmailVerificationPageState
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.sm),
           Text(
             l10n.supervisorEmailDesc,
             style: AppTypography.bodyMedium.copyWith(
@@ -152,7 +153,7 @@ class _SupervisorEmailVerificationPageState
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppSpacing.xxl),
+          SizedBox(height: AppSpacing.xxl),
           AppTextField(
             label: l10n.supervisorEmail,
             controller: _emailController,
@@ -173,7 +174,7 @@ class _SupervisorEmailVerificationPageState
               return null;
             },
           ),
-          const SizedBox(height: AppSpacing.xl),
+          SizedBox(height: AppSpacing.xl),
           BlocBuilder<FormsCubit, FormsState>(
             builder: (context, state) {
               final isLoading = state is FormsLoading;
@@ -195,7 +196,7 @@ class _SupervisorEmailVerificationPageState
       key: const ValueKey('supervisor-otp-step'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: AppSpacing.xl),
+        SizedBox(height: AppSpacing.xl),
         Text(
           l10n.enterVerificationCode,
           style: AppTypography.h1.copyWith(
@@ -203,7 +204,7 @@ class _SupervisorEmailVerificationPageState
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.sm),
         Text(
           l10n.codeSentTo,
           style: AppTypography.bodyMedium.copyWith(
@@ -211,7 +212,7 @@ class _SupervisorEmailVerificationPageState
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.xs),
+        SizedBox(height: AppSpacing.xs),
         Text(
           email,
           style: AppTypography.labelMedium.copyWith(
@@ -219,9 +220,9 @@ class _SupervisorEmailVerificationPageState
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.xxl),
+        SizedBox(height: AppSpacing.xxl),
         _buildOtpBoxes(),
-        const SizedBox(height: AppSpacing.xxl),
+        SizedBox(height: AppSpacing.xxl),
         BlocBuilder<FormsCubit, FormsState>(
           builder: (context, state) {
             final isLoading = state is FormsLoading;
@@ -241,10 +242,10 @@ class _SupervisorEmailVerificationPageState
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(_otpLength, (index) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           child: SizedBox(
-            width: 48,
-            height: 56,
+            width: 48.w,
+            height: 56.h,
             child: TextField(
               controller: _otpControllers[index],
               focusNode: _otpFocusNodes[index],
@@ -253,7 +254,7 @@ class _SupervisorEmailVerificationPageState
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 22.sp,
                 fontWeight: FontWeight.bold,
                 color: context.colors.textPrimary,
                 height: 1,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/teams/domain/entities/team_entity.dart';
 
@@ -29,7 +30,7 @@ class TeamCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: EdgeInsets.only(bottom: AppSpacing.md),
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
@@ -78,7 +79,7 @@ class _TeamCardHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+      padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 20.h),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -89,28 +90,28 @@ class _TeamCardHeader extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          const Positioned(
+          Positioned(
             top: -18,
             right: -12,
-            child: _Circle(size: 72, opacity: 0.08),
+            child: _Circle(size: 72.r, opacity: 0.08),
           ),
-          const Positioned(
+          Positioned(
             top: 10,
             right: 28,
-            child: _Circle(size: 40, opacity: 0.1),
+            child: _Circle(size: 40.r, opacity: 0.1),
           ),
-          const Positioned(
+          Positioned(
             bottom: -10,
             right: 60,
-            child: _Circle(size: 24, opacity: 0.06),
+            child: _Circle(size: 24.r, opacity: 0.06),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Team icon badge
               Container(
-                width: 44,
-                height: 44,
+                width: 44.r,
+                height: 44.r,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -118,13 +119,13 @@ class _TeamCardHeader extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.3),
                   ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.group_rounded,
                   color: Colors.white,
-                  size: 22,
+                  size: AppSizes.iconMd,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               Text(
                 team.name,
                 style: AppTypography.h3.copyWith(
@@ -153,7 +154,7 @@ class _TeamCardBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -167,16 +168,16 @@ class _TeamCardBody extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
           ],
           Row(
             children: [
               Icon(
                 Icons.group_outlined,
-                size: 14,
+                size: AppSizes.iconXs,
                 color: context.colors.textHint,
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: AppSpacing.xs),
               Text(
                 '${team.members.length} '
                 '${team.members.length == 1 ? 'member' : 'members'}',
@@ -187,15 +188,15 @@ class _TeamCardBody extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                width: 28,
-                height: 28,
+                width: 28.r,
+                height: 28.r,
                 decoration: BoxDecoration(
                   color: context.colors.background,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
                 child: Icon(
                   Icons.arrow_forward_rounded,
-                  size: 16,
+                  size: AppSizes.iconSm,
                   color: context.colors.textSecondary,
                 ),
               ),

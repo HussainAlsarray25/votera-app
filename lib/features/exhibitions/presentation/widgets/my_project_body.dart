@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
@@ -191,8 +192,8 @@ class _MyProjectViewState extends State<_MyProjectView> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 48, color: context.colors.error),
-            const SizedBox(height: AppSpacing.md),
+            Icon(Icons.error_outline, size: AppSizes.iconXxl, color: context.colors.error),
+            SizedBox(height: AppSpacing.md),
             Text(
               message,
               style: AppTypography.bodyMedium.copyWith(
@@ -200,7 +201,7 @@ class _MyProjectViewState extends State<_MyProjectView> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSpacing.md),
+            SizedBox(height: AppSpacing.md),
             TextButton(onPressed: onRetry, child: Text(AppLocalizations.of(context)!.retry)),
           ],
         ),
@@ -237,7 +238,7 @@ class _NoTeamPrompt extends StatelessWidget {
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: SizedBox(
-          height: 440,
+          height: 440.r,
           child: Center(
             child: Padding(
               padding: AppSpacing.pagePadding,
@@ -248,7 +249,7 @@ class _NoTeamPrompt extends StatelessWidget {
                     icon: Icons.group_add_outlined,
                     color: context.colors.secondary,
                   ),
-                  const SizedBox(height: AppSpacing.md),
+                  SizedBox(height: AppSpacing.md),
                   Text(
                     AppLocalizations.of(context)!.needATeamFirst,
                     style: AppTypography.h3.copyWith(
@@ -256,7 +257,7 @@ class _NoTeamPrompt extends StatelessWidget {
                       color: context.colors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
+                  SizedBox(height: AppSpacing.sm),
                   Text(
                     AppLocalizations.of(context)!.needATeamDesc,
                     style: AppTypography.bodyMedium.copyWith(
@@ -264,7 +265,7 @@ class _NoTeamPrompt extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: AppSpacing.xl),
+                  SizedBox(height: AppSpacing.xl),
                   BlocBuilder<TeamsCubit, TeamsState>(
                     builder: (ctx, state) => GradientButton(
                       text: AppLocalizations.of(context)!.createATeam,
@@ -364,14 +365,14 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
                   color: context.colors.textPrimary,
                 ),
               ),
-              const SizedBox(height: AppSpacing.xs),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 AppLocalizations.of(context)!.submitYourProjectDesc,
                 style: AppTypography.bodyMedium.copyWith(
                   color: context.colors.textSecondary,
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              SizedBox(height: AppSpacing.lg),
               Builder(
                 builder: (context) {
                   final l10n = AppLocalizations.of(context)!;
@@ -392,7 +393,7 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
                   );
                 },
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
               Builder(
                 builder: (context) {
                   final l10n = AppLocalizations.of(context)!;
@@ -405,7 +406,7 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
                   );
                 },
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
               Builder(
                 builder: (context) {
                   final l10n = AppLocalizations.of(context)!;
@@ -417,7 +418,7 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
                   );
                 },
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
               Builder(
                 builder: (context) {
                   final l10n = AppLocalizations.of(context)!;
@@ -430,7 +431,7 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
                   );
                 },
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
               Builder(
                 builder: (context) {
                   final l10n = AppLocalizations.of(context)!;
@@ -443,7 +444,7 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
                   );
                 },
               ),
-              const SizedBox(height: AppSpacing.xl),
+              SizedBox(height: AppSpacing.xl),
               BlocBuilder<ProjectsCubit, ProjectsState>(
                 builder: (ctx, state) => GradientButton(
                   text: AppLocalizations.of(ctx)!.submitProject,
@@ -486,13 +487,13 @@ class _ProjectView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _StatusBanner(status: project.status),
-            const SizedBox(height: AppSpacing.lg),
+            SizedBox(height: AppSpacing.lg),
             _ProjectDetailsCard(
               project: project,
               onViewDetails: () =>
                   context.push('/project/$eventId/${project.id}'),
             ),
-            const SizedBox(height: AppSpacing.lg),
+            SizedBox(height: AppSpacing.lg),
             _ProjectActionsRow(project: project, eventId: eventId),
           ],
         ),
@@ -526,12 +527,12 @@ class _ProjectActionsRow extends StatelessWidget {
                 project.status == ProjectStatus.submitted)
               OutlinedButton.icon(
                 onPressed: isLoading ? null : () => _openEditSheet(ctx),
-                icon: const Icon(Icons.edit_outlined, size: 18),
+                icon: Icon(Icons.edit_outlined, size: AppSizes.iconSm),
                 label: Text(AppLocalizations.of(ctx)!.editProjectButton),
               ),
 
             if (project.status == ProjectStatus.draft) ...[
-              const SizedBox(height: AppSpacing.sm),
+              SizedBox(height: AppSpacing.sm),
               GradientButton(
                 text: AppLocalizations.of(ctx)!.submitForReview,
                 isLoading: isLoading,
@@ -540,14 +541,14 @@ class _ProjectActionsRow extends StatelessWidget {
             ],
 
             if (project.status == ProjectStatus.submitted) ...[
-              const SizedBox(height: AppSpacing.sm),
+              SizedBox(height: AppSpacing.sm),
               OutlinedButton.icon(
                 onPressed: isLoading ? null : () => _confirmCancel(ctx),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: ctx.colors.error,
                   side: BorderSide(color: ctx.colors.error),
                 ),
-                icon: const Icon(Icons.cancel_outlined, size: 18),
+                icon: Icon(Icons.cancel_outlined, size: AppSizes.iconSm),
                 label: Text(AppLocalizations.of(ctx)!.cancelSubmission),
               ),
             ],
@@ -667,7 +668,7 @@ class _StatusBanner extends StatelessWidget {
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm + 4,
       ),
@@ -678,8 +679,8 @@ class _StatusBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: color),
-          const SizedBox(width: AppSpacing.sm),
+          Icon(icon, size: AppSizes.iconMd, color: color),
+          SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               label,
@@ -731,7 +732,7 @@ class _ProjectDetailsCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
+              SizedBox(width: AppSpacing.sm),
               TextButton(
                 onPressed: onViewDetails,
                 child: Text(AppLocalizations.of(context)!.viewProject),
@@ -741,7 +742,7 @@ class _ProjectDetailsCard extends StatelessWidget {
 
           if (project.description != null &&
               project.description!.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.sm),
             Text(
               project.description!,
               style: AppTypography.bodyMedium.copyWith(
@@ -754,15 +755,15 @@ class _ProjectDetailsCard extends StatelessWidget {
 
           if (project.techStack != null &&
               project.techStack!.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.sm),
             Row(
               children: [
                 Icon(
                   Icons.layers_outlined,
-                  size: 14,
+                  size: AppSizes.iconXs,
                   color: context.colors.textHint,
                 ),
-                const SizedBox(width: AppSpacing.xs),
+                SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
                     project.techStack!,
@@ -777,14 +778,14 @@ class _ProjectDetailsCard extends StatelessWidget {
             ),
           ],
 
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
           Divider(color: context.colors.border),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.sm),
 
           _buildLinks(context),
 
           if (project.createdAt != null) ...[
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.sm),
             _buildMeta(
               context: context,
               icon: Icons.calendar_today_outlined,
@@ -834,8 +835,8 @@ class _ProjectDetailsCard extends StatelessWidget {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: context.colors.textHint),
-        const SizedBox(width: AppSpacing.xs),
+        Icon(icon, size: AppSizes.iconXs, color: context.colors.textHint),
+        SizedBox(width: AppSpacing.xs),
         Text(
           '$label: ',
           style: AppTypography.caption.copyWith(color: context.colors.textHint),
@@ -943,7 +944,7 @@ class _EditProjectSheetState extends State<_EditProjectSheet> {
       ),
       decoration: BoxDecoration(
         color: context.colors.surface,
-        borderRadius: const BorderRadius.vertical(
+        borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),
         ),
       ),
@@ -957,9 +958,9 @@ class _EditProjectSheetState extends State<_EditProjectSheet> {
               // Drag handle
               Center(
                 child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                  width: 40.r,
+                  height: 4.r,
+                  margin: EdgeInsets.only(bottom: AppSpacing.lg),
                   decoration: BoxDecoration(
                     color: context.colors.border,
                     borderRadius:
@@ -973,14 +974,14 @@ class _EditProjectSheetState extends State<_EditProjectSheet> {
                   color: context.colors.textPrimary,
                 ),
               ),
-              const SizedBox(height: AppSpacing.xs),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 AppLocalizations.of(context)!.editProjectDesc,
                 style: AppTypography.bodyMedium.copyWith(
                   color: context.colors.textSecondary,
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              SizedBox(height: AppSpacing.lg),
               Builder(
                 builder: (context) {
                   final l10n = AppLocalizations.of(context)!;
@@ -1000,7 +1001,7 @@ class _EditProjectSheetState extends State<_EditProjectSheet> {
                   );
                 },
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
               Builder(
                 builder: (context) {
                   final l10n = AppLocalizations.of(context)!;
@@ -1012,7 +1013,7 @@ class _EditProjectSheetState extends State<_EditProjectSheet> {
                   );
                 },
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
               Builder(
                 builder: (context) {
                   final l10n = AppLocalizations.of(context)!;
@@ -1024,7 +1025,7 @@ class _EditProjectSheetState extends State<_EditProjectSheet> {
                   );
                 },
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
               Builder(
                 builder: (context) {
                   final l10n = AppLocalizations.of(context)!;
@@ -1036,7 +1037,7 @@ class _EditProjectSheetState extends State<_EditProjectSheet> {
                   );
                 },
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
               Builder(
                 builder: (context) {
                   final l10n = AppLocalizations.of(context)!;
@@ -1048,12 +1049,12 @@ class _EditProjectSheetState extends State<_EditProjectSheet> {
                   );
                 },
               ),
-              const SizedBox(height: AppSpacing.xl),
+              SizedBox(height: AppSpacing.xl),
               GradientButton(
                 text: AppLocalizations.of(context)!.saveChanges,
                 onPressed: _save,
               ),
-              const SizedBox(height: AppSpacing.sm),
+              SizedBox(height: AppSpacing.sm),
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
@@ -1091,13 +1092,13 @@ class _CircleIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 72,
-      height: 72,
+      width: 72.r,
+      height: 72.r,
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
         shape: BoxShape.circle,
       ),
-      child: Icon(icon, size: 36, color: color),
+      child: Icon(icon, size: AppSizes.iconXl, color: color),
     );
   }
 }
@@ -1112,7 +1113,7 @@ class _LinkChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: AppSpacing.sm + 2,
         vertical: AppSpacing.xs + 2,
       ),
@@ -1126,8 +1127,8 @@ class _LinkChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: context.colors.primary),
-          const SizedBox(width: AppSpacing.xs),
+          Icon(icon, size: AppSizes.iconXs, color: context.colors.primary),
+          SizedBox(width: AppSpacing.xs),
           Text(
             label,
             style: AppTypography.caption.copyWith(

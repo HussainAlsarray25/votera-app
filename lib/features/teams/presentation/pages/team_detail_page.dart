@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
@@ -196,13 +197,13 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
         color: context.colors.secondary,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: EdgeInsets.all(AppSpacing.md),
           children: [
             _TeamHeaderCard(team: team, isLeader: _isLeader),
-            const SizedBox(height: AppSpacing.md),
+            SizedBox(height: AppSpacing.md),
             if (team.description != null && team.description!.isNotEmpty) ...[
               _DescriptionCard(description: team.description!),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
             ],
             _MembersCard(
               team: team,
@@ -215,23 +216,23 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
             ),
             // Regular member: show leave button at the bottom.
             if (!_isLeader && _isMember) ...[
-              const SizedBox(height: AppSpacing.lg),
+              SizedBox(height: AppSpacing.lg),
               Divider(color: context.colors.border),
-              const SizedBox(height: AppSpacing.sm),
+              SizedBox(height: AppSpacing.sm),
               SizedBox(
                 width: double.infinity,
                 child: TextButton.icon(
                   onPressed: () => _leaveTeam(context),
-                  icon: const Icon(Icons.exit_to_app_rounded, size: 18),
+                  icon: Icon(Icons.exit_to_app_rounded, size: AppSizes.iconSm),
                   label: Text(l10n.leaveTeam),
                   style: TextButton.styleFrom(
                     foregroundColor: context.colors.error,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
                   ),
                 ),
               ),
             ],
-            const SizedBox(height: AppSpacing.xxl),
+            SizedBox(height: AppSpacing.xxl),
           ],
         ),
       ),
@@ -399,16 +400,16 @@ class _ErrorView extends StatelessWidget {
       appBar: AppBar(backgroundColor: context.colors.surface),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
+          padding: EdgeInsets.all(AppSpacing.xl),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 Icons.error_outline_rounded,
-                size: 52,
+                size: AppSizes.iconXxl,
                 color: context.colors.error,
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
               Text(
                 message,
                 style: AppTypography.bodyMedium.copyWith(
@@ -416,7 +417,7 @@ class _ErrorView extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
               TextButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_rounded),
@@ -447,7 +448,7 @@ class _TeamHeaderCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.lg,
       ),
@@ -460,8 +461,8 @@ class _TeamHeaderCard extends StatelessWidget {
         children: [
           // Avatar + name + badge — identity block.
           Container(
-            width: 100,
-            height: 100,
+            width: 100.r,
+            height: 100.r,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
@@ -483,12 +484,12 @@ class _TeamHeaderCard extends StatelessWidget {
                 style: AppTypography.h3.copyWith(
                   color: context.colors.secondary,
                   fontWeight: FontWeight.w800,
-                  fontSize: 38,
+                  fontSize: 38.sp,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
           Text(
             team.name,
             style: AppTypography.h3.copyWith(
@@ -500,9 +501,9 @@ class _TeamHeaderCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           if (isLeader) ...[
-            const SizedBox(height: AppSpacing.xs),
+            SizedBox(height: AppSpacing.xs),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
               decoration: BoxDecoration(
                 color: context.colors.accent.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -511,8 +512,8 @@ class _TeamHeaderCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.workspace_premium_rounded,
-                      size: 12, color: context.colors.accent),
-                  const SizedBox(width: 4),
+                      size: AppSizes.iconXs, color: context.colors.accent),
+                  SizedBox(width: AppSpacing.xs),
                   Text(
                     l10n.leader,
                     style: AppTypography.caption.copyWith(
@@ -525,9 +526,9 @@ class _TeamHeaderCard extends StatelessWidget {
             ),
           ],
 
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
           Divider(color: context.colors.border, height: 1),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
 
           // Stats block — each stat in its own equal-width cell.
           IntrinsicHeight(
@@ -558,17 +559,16 @@ class _TeamHeaderCard extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
           Divider(color: context.colors.border, height: 1),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.sm),
 
           // Handle chip — centered, tappable to copy.
           if (team.handle != null || team.id.isNotEmpty)
             GestureDetector(
               onTap: () => _copyId(context, team.handle ?? team.id),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                 decoration: BoxDecoration(
                   color: context.colors.background,
                   borderRadius:
@@ -579,8 +579,8 @@ class _TeamHeaderCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.tag_rounded,
-                        size: 16, color: context.colors.textHint),
-                    const SizedBox(width: 5),
+                        size: AppSizes.iconSm, color: context.colors.textHint),
+                    SizedBox(width: 5.w),
                     Text(
                       team.handle ?? team.id,
                       style: AppTypography.bodySmall.copyWith(
@@ -589,9 +589,9 @@ class _TeamHeaderCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     Icon(Icons.copy_rounded,
-                        size: 16, color: context.colors.textHint),
+                        size: AppSizes.iconSm, color: context.colors.textHint),
                   ],
                 ),
               ),
@@ -637,8 +637,8 @@ class _MenuRow extends StatelessWidget {
     final effectiveColor = color ?? context.colors.textPrimary;
     return Row(
       children: [
-        Icon(icon, size: 18, color: effectiveColor),
-        const SizedBox(width: AppSpacing.sm),
+        Icon(icon, size: AppSizes.iconSm, color: effectiveColor),
+        SizedBox(width: AppSpacing.sm),
         Text(
           label,
           style: AppTypography.bodyMedium.copyWith(color: effectiveColor),
@@ -666,8 +666,8 @@ class _StatCell extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 18, color: context.colors.secondary),
-        const SizedBox(height: 4),
+        Icon(icon, size: AppSizes.iconSm, color: context.colors.secondary),
+        SizedBox(height: AppSpacing.xs),
         Text(
           value,
           style: AppTypography.labelMedium.copyWith(
@@ -675,7 +675,7 @@ class _StatCell extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: 2),
         Text(
           label,
           style: AppTypography.caption.copyWith(
@@ -696,7 +696,7 @@ class _DescriptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -711,7 +711,7 @@ class _DescriptionCard extends StatelessWidget {
               color: context.colors.textPrimary,
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.sm),
           Text(
             description,
             style: AppTypography.bodyMedium.copyWith(
@@ -758,7 +758,7 @@ class _MembersCard extends StatelessWidget {
             if (onInviteMember != null)
               TextButton.icon(
                 onPressed: onInviteMember,
-                icon: const Icon(Icons.person_add_rounded, size: 16),
+                icon: Icon(Icons.person_add_rounded, size: AppSizes.iconSm),
                 label: Text(l10n.invite),
                 style: TextButton.styleFrom(
                   foregroundColor: context.colors.secondary,
@@ -767,10 +767,10 @@ class _MembersCard extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.sm),
         ...team.members.map(
           (member) => Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            padding: EdgeInsets.only(bottom: AppSpacing.sm),
             child: TeamMemberTile(
               member: member,
               isLeader: member.userId == team.leaderId,
@@ -865,7 +865,7 @@ Future<String?> _showMemberPickerSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Theme.of(context).extension<AppColorScheme>()!.surface,
-    shape: const RoundedRectangleBorder(
+    shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(AppSpacing.radiusXl),
       ),
@@ -875,7 +875,7 @@ Future<String?> _showMemberPickerSheet(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.sm),
             Container(
               width: 40,
               height: 4,
@@ -887,7 +887,7 @@ Future<String?> _showMemberPickerSheet(
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -899,7 +899,7 @@ Future<String?> _showMemberPickerSheet(
                           .textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: AppSpacing.xs),
                   Text(
                     subtitle,
                     style: AppTypography.bodySmall.copyWith(
@@ -940,7 +940,7 @@ Future<String?> _showMemberPickerSheet(
                 );
               },
             ),
-            const SizedBox(height: AppSpacing.md),
+            SizedBox(height: AppSpacing.md),
           ],
         ),
       );

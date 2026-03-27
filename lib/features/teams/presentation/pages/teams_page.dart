@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/app/view/shell_page.dart';
 import 'package:votera/core/design_system/design_system.dart';
@@ -307,11 +308,11 @@ class _MyTeamTabState extends State<_MyTeamTab> {
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    padding: EdgeInsets.only(bottom: AppSpacing.md),
                     child: _TeamListTile(
                       team: _teams[index],
                       onTap: () => _openTeam(_teams[index]),
@@ -364,7 +365,7 @@ class _TeamListTile extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: context.colors.surface,
           borderRadius: BorderRadius.circular(14),
@@ -377,8 +378,8 @@ class _TeamListTile extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  width: 52,
-                  height: 52,
+                  width: 52.r,
+                  height: 52.r,
                   decoration: BoxDecoration(
                     color: context.colors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
@@ -393,7 +394,7 @@ class _TeamListTile extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: AppSpacing.md),
+                SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
                     team.name,
@@ -414,7 +415,7 @@ class _TeamListTile extends StatelessWidget {
 
             // Description snippet.
             if (hasDescription) ...[
-              const SizedBox(height: AppSpacing.sm),
+              SizedBox(height: AppSpacing.sm),
               Text(
                 team.description!,
                 style: AppTypography.bodySmall.copyWith(
@@ -425,19 +426,19 @@ class _TeamListTile extends StatelessWidget {
               ),
             ],
 
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.sm),
             Divider(color: context.colors.border, height: 1),
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.sm),
 
             // Footer row: member count and creation date.
             Row(
               children: [
                 Icon(
                   Icons.group_outlined,
-                  size: 14,
+                  size: AppSizes.iconXs,
                   color: context.colors.textHint,
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: AppSpacing.xs),
                 Text(
                   l10n.memberCount(team.members.length),
                   style: AppTypography.bodySmall.copyWith(
@@ -445,13 +446,13 @@ class _TeamListTile extends StatelessWidget {
                   ),
                 ),
                 if (team.createdAt != null) ...[
-                  const SizedBox(width: AppSpacing.md),
+                  SizedBox(width: AppSpacing.md),
                   Icon(
                     Icons.calendar_today_outlined,
-                    size: 14,
+                    size: AppSizes.iconXs,
                     color: context.colors.textHint,
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: AppSpacing.xs),
                   Text(
                     _formatDate(team.createdAt!),
                     style: AppTypography.bodySmall.copyWith(
@@ -504,17 +505,17 @@ class _NoTeamView extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.all(AppSpacing.md),
       child: Column(
         children: [
-          const SizedBox(height: AppSpacing.xl),
+          SizedBox(height: AppSpacing.xl),
           _buildEmptyIllustration(context),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.lg),
           Text(
             AppLocalizations.of(context)!.notInTeamYet,
             style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
           ),
-          const SizedBox(height: AppSpacing.xs),
+          SizedBox(height: AppSpacing.xs),
           Text(
             AppLocalizations.of(context)!.createOrJoinTeam,
             style: AppTypography.bodyMedium.copyWith(
@@ -522,12 +523,12 @@ class _NoTeamView extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppSpacing.xl),
+          SizedBox(height: AppSpacing.xl),
           GradientButton(
             text: AppLocalizations.of(context)!.createATeam,
             onPressed: onCreateTeam,
           ),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.sm),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
@@ -535,7 +536,7 @@ class _NoTeamView extends StatelessWidget {
               style: OutlinedButton.styleFrom(
                 foregroundColor: context.colors.secondary,
                 side: BorderSide(color: context.colors.secondary),
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: EdgeInsets.symmetric(vertical: 14.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
@@ -545,7 +546,7 @@ class _NoTeamView extends StatelessWidget {
           ),
           // Show pending invitations even when there's no team.
           if (invitations.isNotEmpty || isInvitationLoading) ...[
-            const SizedBox(height: AppSpacing.xl),
+            SizedBox(height: AppSpacing.xl),
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Text(
@@ -555,10 +556,10 @@ class _NoTeamView extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.sm),
             ...invitations.map(
               (inv) => Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                padding: EdgeInsets.only(bottom: AppSpacing.sm),
                 child: InvitationCard(
                   invitation: inv,
                   onAccept: () => onAcceptInvitation(inv.id),
@@ -567,7 +568,7 @@ class _NoTeamView extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: AppSpacing.xxl),
+          SizedBox(height: AppSpacing.xxl),
         ],
       ),
     );
@@ -575,8 +576,8 @@ class _NoTeamView extends StatelessWidget {
 
   Widget _buildEmptyIllustration(BuildContext context) {
     return Container(
-      width: 120,
-      height: 120,
+      width: 120.r,
+      height: 120.r,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
@@ -590,8 +591,8 @@ class _NoTeamView extends StatelessWidget {
       ),
       child: Center(
         child: Container(
-          width: 80,
-          height: 80,
+          width: 80.r,
+          height: 80.r,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
@@ -605,7 +606,7 @@ class _NoTeamView extends StatelessWidget {
           ),
           child: Icon(
             Icons.group_add_rounded,
-            size: 36,
+            size: AppSizes.iconXl,
             color: context.colors.secondary,
           ),
         ),
@@ -703,7 +704,7 @@ class _BrowseTabState extends State<_BrowseTab> {
       children: [
         // Search field + filter button row (matches SearchBarSection style).
         Padding(
-          padding: const EdgeInsets.fromLTRB(
+          padding: EdgeInsets.fromLTRB(
             AppSpacing.md,
             AppSpacing.md,
             AppSpacing.md,
@@ -712,7 +713,7 @@ class _BrowseTabState extends State<_BrowseTab> {
           child: Row(
             children: [
               Expanded(child: _buildSearchField(context)),
-              const SizedBox(width: 10),
+              SizedBox(width: 10.w),
               _buildFilterButton(context, isFilterActive),
             ],
           ),
@@ -754,7 +755,7 @@ class _BrowseTabState extends State<_BrowseTab> {
 
   Widget _buildSearchField(BuildContext context) {
     return Container(
-      height: 48,
+      height: 48.h,
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(14),
@@ -781,7 +782,7 @@ class _BrowseTabState extends State<_BrowseTab> {
           prefixIcon: Icon(
             Icons.search_rounded,
             color: context.colors.textHint,
-            size: 20,
+            size: AppSizes.iconMd,
           ),
           suffixIcon: _hasText
               ? GestureDetector(
@@ -789,12 +790,12 @@ class _BrowseTabState extends State<_BrowseTab> {
                   child: Icon(
                     Icons.close_rounded,
                     color: context.colors.textHint,
-                    size: 18,
+                    size: AppSizes.iconSm,
                   ),
                 )
               : null,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+          contentPadding: EdgeInsets.symmetric(vertical: 14.h),
         ),
       ),
     );
@@ -805,8 +806,8 @@ class _BrowseTabState extends State<_BrowseTab> {
       onTap: () => setState(() => _showFilters = !_showFilters),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 48,
-        height: 48,
+        width: 48.r,
+        height: 48.r,
         decoration: BoxDecoration(
           color: isActive || _showFilters
               ? context.colors.primary
@@ -831,7 +832,7 @@ class _BrowseTabState extends State<_BrowseTab> {
               color: isActive || _showFilters
                   ? Colors.white
                   : context.colors.textSecondary,
-              size: 20,
+              size: AppSizes.iconMd,
             ),
             // Dot badge when a non-default filter is active.
             if (isActive)
@@ -874,21 +875,21 @@ class _BrowseTabState extends State<_BrowseTab> {
     final query = _searchController.text.trim();
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.group_off_rounded,
-              size: 52,
+              size: AppSizes.iconXxl,
               color: context.colors.textHint,
             ),
-            const SizedBox(height: AppSpacing.md),
+            SizedBox(height: AppSpacing.md),
             Text(
               AppLocalizations.of(context)!.noTeamsFound,
               style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
             ),
-            const SizedBox(height: AppSpacing.xs),
+            SizedBox(height: AppSpacing.xs),
             Text(
               query.isEmpty
                   ? 'No teams available.'
@@ -906,12 +907,12 @@ class _BrowseTabState extends State<_BrowseTab> {
 
   Widget _buildResults(List<TeamEntity> teams) {
     return ListView.builder(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.all(AppSpacing.md),
       itemCount: teams.length,
       itemBuilder: (context, index) {
         final team = teams[index];
         return Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+          padding: EdgeInsets.only(bottom: AppSpacing.md),
           child: TeamCard(
             team: team,
             index: index,
@@ -925,16 +926,16 @@ class _BrowseTabState extends State<_BrowseTab> {
   Widget _buildError(BuildContext context, String message) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.error_outline_rounded,
-              size: 48,
+              size: AppSizes.iconXxl,
               color: context.colors.error,
             ),
-            const SizedBox(height: AppSpacing.md),
+            SizedBox(height: AppSpacing.md),
             Text(
               message,
               style: AppTypography.bodyMedium.copyWith(
@@ -991,7 +992,7 @@ class _FilterChipsBar extends StatelessWidget {
       onTap: () => onSelected(filter),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
         decoration: BoxDecoration(
           color: isActive ? context.colors.primary : context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
@@ -1025,10 +1026,10 @@ class _FilterChipsBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 56,
+      height: 56.h,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.md,
           AppSpacing.sm,
           AppSpacing.md,
@@ -1038,7 +1039,7 @@ class _FilterChipsBar extends StatelessWidget {
         itemBuilder: (context, index) {
           final filter = _TeamFilter.values[index];
           return Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            padding: EdgeInsets.only(right: AppSpacing.sm),
             child: _buildChip(
               context,
               filter,

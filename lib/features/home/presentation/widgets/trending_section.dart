@@ -22,7 +22,7 @@ class TrendingSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(context),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.sm),
         // Use LayoutBuilder so the card width and height exactly match the
         // 2-column grid (same padding, spacing, and aspect ratio).
         LayoutBuilder(
@@ -53,7 +53,7 @@ class TrendingSection extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
       ],
     );
   }

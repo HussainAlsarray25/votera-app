@@ -3,6 +3,7 @@ export 'theme/app_theme.dart';
 export 'tokens/app_color_scheme.dart';
 export 'tokens/app_colors.dart';
 export 'tokens/app_shadows.dart';
+export 'tokens/app_sizes.dart';
 export 'tokens/app_spacing.dart';
 export 'tokens/app_typography.dart';
 export 'utils/app_breakpoints.dart';

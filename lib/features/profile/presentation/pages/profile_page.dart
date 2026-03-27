@@ -41,13 +41,13 @@ class _ProfilePageState extends State<ProfilePage> {
         child: RefreshIndicator(
           onRefresh: () => context.read<ProfileCubit>().forceRefresh(),
           color: context.colors.primary,
-          child: const SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
-                ProfileHeaderSection(),
+                const ProfileHeaderSection(),
                 SizedBox(height: AppSpacing.lg),
-                ProfileActionsSection(),
+                const ProfileActionsSection(),
                 SizedBox(height: AppSpacing.xxl),
               ],
             ),
@@ -65,8 +65,8 @@ class _ProfilePageState extends State<ProfilePage> {
           child: RefreshIndicator(
             onRefresh: () => context.read<ProfileCubit>().forceRefresh(),
             color: context.colors.primary,
-            child: const SingleChildScrollView(
-              physics: AlwaysScrollableScrollPhysics(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.all(AppSpacing.lg),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,7 +74,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   // Left column: header + stats
                   SizedBox(
                     width: 360,
-                    child: Column(
+                    child: const Column(
                       children: [
                         ProfileHeaderSection(),
                       ],
@@ -85,7 +85,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Expanded(
                     child: Column(
                       children: [
-                        ProfileActionsSection(),
+                        const ProfileActionsSection(),
                         SizedBox(height: AppSpacing.xxl),
                       ],
                     ),

@@ -128,7 +128,7 @@ class _AuthPageState extends State<AuthPage> {
               size: 96,
               color: Colors.white,
             ),
-            const SizedBox(height: AppSpacing.lg),
+            SizedBox(height: AppSpacing.lg),
             Text(
               l10n.appTitle,
               style: AppTypography.h1.copyWith(
@@ -137,7 +137,7 @@ class _AuthPageState extends State<AuthPage> {
                 letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.sm),
             Text(
               l10n.appTagline,
               style: AppTypography.bodyLarge.copyWith(

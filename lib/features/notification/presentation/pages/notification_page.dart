@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart' as di;
 import 'package:votera/features/notification/domain/entities/notification_entity.dart';
@@ -81,10 +82,10 @@ class _NotificationView extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.error_outline,
-                        size: 48,
+                        size: AppSizes.iconXxl,
                         color: context.colors.error,
                       ),
-                      const SizedBox(height: AppSpacing.md),
+                      SizedBox(height: AppSpacing.md),
                       Text(
                         state.message,
                         textAlign: TextAlign.center,
@@ -92,7 +93,7 @@ class _NotificationView extends StatelessWidget {
                           color: context.colors.textSecondary,
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.md),
+                      SizedBox(height: AppSpacing.md),
                       TextButton(
                         onPressed: () =>
                             context.read<NotificationCubit>().loadNotifications(),
@@ -125,26 +126,26 @@ class _NotificationView extends StatelessWidget {
   Widget _buildEmpty(BuildContext context) {
     return ListView(
       children: [
-        const SizedBox(height: 120),
+        SizedBox(height: 120.r),
         Center(
           child: Padding(
             padding: AppSpacing.pagePadding,
             child: Column(
               children: [
                 Container(
-                  width: 72,
-                  height: 72,
+                  width: 72.r,
+                  height: 72.r,
                   decoration: BoxDecoration(
                     color: context.colors.primary.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.notifications_none_outlined,
-                    size: 36,
+                    size: AppSizes.iconXl,
                     color: context.colors.primary,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.md),
+                SizedBox(height: AppSpacing.md),
                 Text(
                   AppLocalizations.of(context)!.noNotificationsYet,
                   style: AppTypography.h3.copyWith(
@@ -152,7 +153,7 @@ class _NotificationView extends StatelessWidget {
                     color: context.colors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.xs),
+                SizedBox(height: AppSpacing.xs),
                 Text(
                   AppLocalizations.of(context)!.noNotificationsDesc,
                   style: AppTypography.bodyMedium.copyWith(
@@ -198,19 +199,19 @@ class _NotificationView extends StatelessWidget {
       children: [
         if (todayItems.isNotEmpty) ...[
           _SectionHeader(label: AppLocalizations.of(context)!.today),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.sm),
           ..._buildTiles(context, todayItems),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.lg),
         ],
         if (yesterdayItems.isNotEmpty) ...[
           _SectionHeader(label: AppLocalizations.of(context)!.yesterday),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.sm),
           ..._buildTiles(context, yesterdayItems),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.lg),
         ],
         if (earlierItems.isNotEmpty) ...[
           _SectionHeader(label: AppLocalizations.of(context)!.earlier),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.sm),
           ..._buildTiles(context, earlierItems),
         ],
       ],
@@ -234,7 +235,7 @@ class _NotificationView extends StatelessWidget {
             }
           },
         ),
-        if (i < items.length - 1) const SizedBox(height: AppSpacing.sm),
+        if (i < items.length - 1) SizedBox(height: AppSpacing.sm),
       ],
     ];
   }

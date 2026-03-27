@@ -55,7 +55,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         _buildSkipButton(l10n),
         Expanded(child: _buildPageView(slides)),
         _buildBottomSection(l10n, slides),
-        const SizedBox(height: AppSpacing.xl),
+        SizedBox(height: AppSpacing.xl),
       ],
     );
 
@@ -93,7 +93,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     return Align(
       alignment: AlignmentDirectional.centerEnd,
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.md),
         child: TextButton(
           onPressed: _goToAuth,
           child: Text(
@@ -131,7 +131,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             count: slides.length,
             currentIndex: _currentPage,
           ),
-          const SizedBox(height: AppSpacing.xl),
+          SizedBox(height: AppSpacing.xl),
           GradientButton(
             text: isLastPage ? l10n.getStarted : l10n.next,
             onPressed: () {

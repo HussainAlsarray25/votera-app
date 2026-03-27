@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/home/presentation/widgets/home_banner_section.dart';
 import 'package:votera/features/home/presentation/widgets/project_list_section.dart';
@@ -158,7 +159,7 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 12.h),
                 child: Row(
                   children: [
                     Expanded(
@@ -171,9 +172,9 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 4.h,
                       ),
                       decoration: BoxDecoration(
                         color: context.colors.primary.withValues(alpha: 0.12),
@@ -184,7 +185,7 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
                       child: Text(
                         '${state.projects.length}',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w700,
                           color: context.colors.primary,
                         ),
@@ -201,7 +202,7 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
           ] else
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.only(top: 40),
+                padding: EdgeInsets.only(top: 40.h),
                 child: _searchQuery.isEmpty
                     ? EmptyState(
                         icon: Icons.folder_outlined,
@@ -221,7 +222,7 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
           if (state.hasNextPage)
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
                 child: Center(
                   child: cubit.isLoadingMore
                       ? const AppLoadingIndicator()
@@ -229,7 +230,7 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
                 ),
               ),
             ),
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: SizedBox(height: AppSpacing.xxl),
           ),
         ],
@@ -243,15 +244,15 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.error_outline, size: 48, color: context.colors.error),
-          const SizedBox(height: AppSpacing.md),
+          Icon(Icons.error_outline, size: AppSizes.iconXxl, color: context.colors.error),
+          SizedBox(height: AppSpacing.md),
           Text(
             message,
             style: AppTypography.bodyMedium.copyWith(
               color: context.colors.textSecondary,
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
           TextButton(
             onPressed: () => context
                 .read<ProjectsCubit>()
@@ -263,4 +264,3 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
     );
   }
 }
-

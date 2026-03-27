@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
@@ -10,7 +11,7 @@ class HomeHeaderSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, AppSpacing.md, 20, 0),
+      padding: EdgeInsets.fromLTRB(20.w, AppSpacing.md, 20.w, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,7 +36,7 @@ class HomeHeaderSection extends StatelessWidget {
             letterSpacing: -0.5,
           ),
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: 2.h),
         Text(
           l10n.appMotto,
           style: AppTypography.bodySmall.copyWith(
@@ -50,8 +51,8 @@ class HomeHeaderSection extends StatelessWidget {
     return GestureDetector(
       onTap: () => context.push('/notifications'),
       child: Container(
-        width: 42,
-        height: 42,
+        width: 42.r,
+        height: 42.r,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: context.colors.primaryGradient,
@@ -63,10 +64,10 @@ class HomeHeaderSection extends StatelessWidget {
             ),
           ],
         ),
-        child: const Icon(
+        child: Icon(
           Icons.notifications_rounded,
           color: Colors.white,
-          size: 20,
+          size: AppSizes.iconMd,
         ),
       ),
     );

@@ -83,7 +83,7 @@ class _CreateEditTeamSheetState extends State<_CreateEditTeamSheet> {
       ),
       decoration: BoxDecoration(
         color: context.colors.surface,
-        borderRadius: const BorderRadius.vertical(
+        borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),
         ),
       ),
@@ -99,7 +99,7 @@ class _CreateEditTeamSheetState extends State<_CreateEditTeamSheet> {
               child: Container(
                 width: 40,
                 height: 4,
-                margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                margin: EdgeInsets.only(bottom: AppSpacing.lg),
                 decoration: BoxDecoration(
                   color: context.colors.border,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -110,14 +110,14 @@ class _CreateEditTeamSheetState extends State<_CreateEditTeamSheet> {
               _isEditing ? l10n.editTeamTitle : l10n.createATeam,
               style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
             ),
-            const SizedBox(height: AppSpacing.xs),
+            SizedBox(height: AppSpacing.xs),
             Text(
               _isEditing ? l10n.editTeamDesc : l10n.createTeamDesc,
               style: AppTypography.bodyMedium.copyWith(
                 color: context.colors.textSecondary,
               ),
             ),
-            const SizedBox(height: AppSpacing.lg),
+            SizedBox(height: AppSpacing.lg),
             AppTextField(
               label: l10n.teamName,
               controller: _nameController,
@@ -133,7 +133,7 @@ class _CreateEditTeamSheetState extends State<_CreateEditTeamSheet> {
                 return null;
               },
             ),
-            const SizedBox(height: AppSpacing.md),
+            SizedBox(height: AppSpacing.md),
             AppTextField(
               label: l10n.teamDescriptionOptional,
               controller: _descController,
@@ -142,12 +142,12 @@ class _CreateEditTeamSheetState extends State<_CreateEditTeamSheet> {
               maxLines: 3,
               keyboardType: TextInputType.multiline,
             ),
-            const SizedBox(height: AppSpacing.xl),
+            SizedBox(height: AppSpacing.xl),
             GradientButton(
               text: _isEditing ? l10n.saveChanges : l10n.createTeamButton,
               onPressed: _save,
             ),
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.sm),
             SizedBox(
               width: double.infinity,
               child: TextButton(

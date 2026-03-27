@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/participant_forms/domain/entities/participant_request.dart';
 import 'package:votera/features/participant_forms/presentation/cubit/forms_cubit.dart';
@@ -123,11 +124,11 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: AppSpacing.md),
+                SizedBox(height: AppSpacing.md),
                 _buildRequestsList(context),
-                const SizedBox(height: AppSpacing.xl),
+                SizedBox(height: AppSpacing.xl),
                 _buildSubmitForm(context),
-                const SizedBox(height: AppSpacing.xxl),
+                SizedBox(height: AppSpacing.xxl),
               ],
             ),
           ),
@@ -158,11 +159,11 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
                 color: context.colors.textPrimary,
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            SizedBox(height: AppSpacing.md),
             ...state.requests.map(
               (r) => _buildRequestCard(context, r),
             ),
-            const SizedBox(height: AppSpacing.md),
+            SizedBox(height: AppSpacing.md),
             Divider(color: context.colors.divider),
           ],
         );
@@ -179,8 +180,8 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
     };
 
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      margin: EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -204,7 +205,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                 decoration: BoxDecoration(
                   color: chipColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
                   chipLabel,
@@ -216,7 +217,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: AppSpacing.xs),
           Text(
             '${request.department} • ${request.stage}',
             style: AppTypography.bodySmall.copyWith(
@@ -224,7 +225,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
             ),
           ),
           if (request.isRejected && request.reviewNote != null) ...[
-            const SizedBox(height: 6),
+            SizedBox(height: AppSpacing.xs),
             Text(
               AppLocalizations.of(context)!.noteLabel(request.reviewNote!),
               style: AppTypography.bodySmall.copyWith(
@@ -249,14 +250,14 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
             color: context.colors.textPrimary,
           ),
         ),
-        const SizedBox(height: AppSpacing.xs),
+        SizedBox(height: AppSpacing.xs),
         Text(
           l10n.fillIdForm,
           style: AppTypography.bodySmall.copyWith(
             color: context.colors.textSecondary,
           ),
         ),
-        const SizedBox(height: AppSpacing.lg),
+        SizedBox(height: AppSpacing.lg),
         Form(
           key: _formKey,
           child: Column(
@@ -269,7 +270,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
                 validator: (v) =>
                     (v == null || v.isEmpty) ? l10n.nameRequired : null,
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
               AppTextField(
                 label: l10n.universityId,
                 controller: _universityIdController,
@@ -281,7 +282,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
                   return null;
                 },
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
               AppTextField(
                 label: l10n.department,
                 controller: _departmentController,
@@ -290,7 +291,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
                 validator: (v) =>
                     (v == null || v.isEmpty) ? l10n.departmentRequired : null,
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
               AppTextField(
                 label: l10n.stageYear,
                 controller: _stageController,
@@ -299,12 +300,12 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
                 validator: (v) =>
                     (v == null || v.isEmpty) ? l10n.stageRequired : null,
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: AppSpacing.md),
               _buildDocumentField(context),
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.xl),
+        SizedBox(height: AppSpacing.xl),
         BlocBuilder<FormsCubit, FormsState>(
           builder: (context, state) {
             final l10n = AppLocalizations.of(context)!;
@@ -324,7 +325,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
       onTap: _pickAndUploadDocument,
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       child: Container(
-        padding: const EdgeInsets.symmetric(
+        padding: EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.md,
         ),
@@ -343,7 +344,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
                   ? context.colors.success
                   : context.colors.textHint,
             ),
-            const SizedBox(width: AppSpacing.sm),
+            SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 _documentFileName ?? AppLocalizations.of(context)!.tapToUploadId,
