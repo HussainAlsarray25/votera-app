@@ -179,6 +179,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
     String? repoUrl,
     String? demoUrl,
     String? techStack,
+    List<String>? categoryIds,
   }) async {
     emit(const ProjectsLoading());
     final result = await submitProject(
@@ -190,6 +191,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
         repoUrl: repoUrl,
         demoUrl: demoUrl,
         techStack: techStack,
+        categoryIds: categoryIds,
       ),
     );
     result.fold(
@@ -238,12 +240,13 @@ class ProjectsCubit extends Cubit<ProjectsState> {
   }
 
   /// Tags a project with a category.
+  /// Does not emit ProjectsLoading — category add/remove is a fast silent
+  /// operation and a full-page spinner would disrupt the picker UI.
   Future<void> addCategory({
     required String eventId,
     required String projectId,
     required String categoryId,
   }) async {
-    emit(const ProjectsLoading());
     final result = await addProjectCategory(
       AddProjectCategoryParams(
         eventId: eventId,
@@ -252,18 +255,20 @@ class ProjectsCubit extends Cubit<ProjectsState> {
       ),
     );
     result.fold(
-      (failure) => emit(ProjectsError(message: failure.message)),
+      // Use ProjectActionFailed so the UI shows a snackbar rather than
+      // replacing the whole view with an error screen (e.g. 409 conflict).
+      (failure) => emit(ProjectActionFailed(message: failure.message)),
       (_) => emit(const ProjectCategoryUpdated()),
     );
   }
 
   /// Removes a category tag from a project.
+  /// Does not emit ProjectsLoading — same reasoning as addCategory.
   Future<void> removeCategory({
     required String eventId,
     required String projectId,
     required String categoryId,
   }) async {
-    emit(const ProjectsLoading());
     final result = await removeProjectCategory(
       RemoveProjectCategoryParams(
         eventId: eventId,
@@ -272,7 +277,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
       ),
     );
     result.fold(
-      (failure) => emit(ProjectsError(message: failure.message)),
+      (failure) => emit(ProjectActionFailed(message: failure.message)),
       (_) => emit(const ProjectCategoryUpdated()),
     );
   }

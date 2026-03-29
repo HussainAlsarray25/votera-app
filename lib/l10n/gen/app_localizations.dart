@@ -2342,6 +2342,114 @@ abstract class AppLocalizations {
   /// **'This event has been archived and is no longer active.'**
   String get eventArchivedDesc;
 
+  /// No description provided for @basicInfoCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Info'**
+  String get basicInfoCard;
+
+  /// No description provided for @techLinksCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Tech & Links'**
+  String get techLinksCard;
+
+  /// No description provided for @categoriesCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get categoriesCard;
+
+  /// No description provided for @categoriesCardDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Select 1 to 3 categories that best describe your project.'**
+  String get categoriesCardDesc;
+
+  /// No description provided for @selectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a Category'**
+  String get selectCategory;
+
+  /// No description provided for @addCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Category'**
+  String get addCategory;
+
+  /// No description provided for @categoryAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Category added'**
+  String get categoryAdded;
+
+  /// No description provided for @categoryRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Category removed'**
+  String get categoryRemoved;
+
+  /// No description provided for @maxCategoriesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can select up to 3 categories.'**
+  String get maxCategoriesHint;
+
+  /// No description provided for @noCategoriesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories available'**
+  String get noCategoriesAvailable;
+
+  /// No description provided for @projectImagesCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Images'**
+  String get projectImagesCard;
+
+  /// No description provided for @coverImageFormHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a cover image to make your project stand out.'**
+  String get coverImageFormHint;
+
+  /// No description provided for @tapToAddCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to add cover image'**
+  String get tapToAddCover;
+
+  /// No description provided for @extraImagesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can add more images after submitting.'**
+  String get extraImagesNote;
+
+  /// No description provided for @editProjectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Project'**
+  String get editProjectTitle;
+
+  /// No description provided for @editProjectSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update your project details, images, and categories.'**
+  String get editProjectSubtitle;
+
+  /// No description provided for @saveProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveProject;
+
+  /// No description provided for @projectGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Gallery'**
+  String get projectGallery;
+
   /// No description provided for @projectImages.
   ///
   /// In en, this message translates to:

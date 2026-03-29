@@ -76,6 +76,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
     String? repoUrl,
     String? demoUrl,
     String? techStack,
+    List<String>? categoryIds,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
@@ -89,6 +90,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
         repoUrl: repoUrl,
         demoUrl: demoUrl,
         techStack: techStack,
+        categoryIds: categoryIds,
       );
       return Right(project);
     } on Exception catch (e) {

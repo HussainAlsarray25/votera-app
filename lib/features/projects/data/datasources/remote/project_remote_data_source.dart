@@ -29,6 +29,7 @@ abstract class ProjectRemoteDataSource {
     String? repoUrl,
     String? demoUrl,
     String? techStack,
+    List<String>? categoryIds,
   });
 
   /// PUT /v1/events/{event_id}/projects/{id}
@@ -154,6 +155,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     String? repoUrl,
     String? demoUrl,
     String? techStack,
+    List<String>? categoryIds,
   }) async {
     // Only include optional fields when provided — the API ignores null keys.
     final body = <String, dynamic>{'title': title};
@@ -162,6 +164,9 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     if (repoUrl != null) body['repo_url'] = repoUrl;
     if (demoUrl != null) body['demo_url'] = demoUrl;
     if (techStack != null) body['tech_stack'] = techStack;
+    if (categoryIds != null && categoryIds.isNotEmpty) {
+      body['category_ids'] = categoryIds;
+    }
 
     final response = await apiClient.post<Map<String, dynamic>>(
       ProjectEndpoints.projects(eventId),

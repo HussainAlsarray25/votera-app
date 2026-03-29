@@ -7,6 +7,7 @@ import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/features/comments/presentation/cubit/comments_cubit.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_comments_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_header_section.dart';
+import 'package:votera/features/project_details/presentation/widgets/project_images_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_info_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_rating_section.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
@@ -167,6 +168,8 @@ class _ProjectDetailsView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ProjectInfoSection(projectId: projectId),
+          SizedBox(height: AppSpacing.lg),
+          const ProjectImagesSection(),
           SizedBox(height: AppSpacing.lg),
           ProjectRatingSection(projectId: projectId),
           if (showInlineVote) ...[

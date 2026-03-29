@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:votera/features/categories/domain/entities/category_entity.dart';
 import 'package:votera/features/projects/domain/entities/extra_image_entity.dart';
 
 /// Lifecycle status of a project submission.
@@ -34,6 +35,7 @@ class ProjectEntity extends Equatable {
     required this.title,
     required this.status,
     required this.images,
+    required this.categories,
     this.coverUrl,
     this.createdAt,
     this.updatedAt,
@@ -69,6 +71,9 @@ class ProjectEntity extends Equatable {
   /// Extra images attached to this project (max 6).
   final List<ExtraImageEntity> images;
 
+  /// Categories this project belongs to (max 3).
+  final List<CategoryEntity> categories;
+
   /// QR scan token for looking up this project.
   final String? barcodeToken;
 
@@ -88,6 +93,7 @@ class ProjectEntity extends Equatable {
         status,
         coverUrl,
         images,
+        categories,
         barcodeToken,
         createdAt,
         updatedAt,

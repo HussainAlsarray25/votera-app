@@ -20,6 +20,7 @@ class SubmitProject extends UseCase<ProjectEntity, SubmitProjectParams> {
       repoUrl: params.repoUrl,
       demoUrl: params.demoUrl,
       techStack: params.techStack,
+      categoryIds: params.categoryIds,
     );
   }
 }
@@ -33,6 +34,7 @@ class SubmitProjectParams extends Equatable {
     this.repoUrl,
     this.demoUrl,
     this.techStack,
+    this.categoryIds,
   });
 
   final String eventId;
@@ -46,6 +48,9 @@ class SubmitProjectParams extends Equatable {
   final String? demoUrl;
   final String? techStack;
 
+  /// Optional list of category IDs to tag the project with (max 3).
+  final List<String>? categoryIds;
+
   @override
   List<Object?> get props => [
         eventId,
@@ -55,5 +60,6 @@ class SubmitProjectParams extends Equatable {
         repoUrl,
         demoUrl,
         techStack,
+        categoryIds,
       ];
 }

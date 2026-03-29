@@ -1202,6 +1202,60 @@ class AppLocalizationsAr extends AppLocalizations {
   String get eventArchivedDesc => 'تم أرشفة هذا الحدث وهو لم يعد نشطاً.';
 
   @override
+  String get basicInfoCard => 'المعلومات الأساسية';
+
+  @override
+  String get techLinksCard => 'التقنيات والروابط';
+
+  @override
+  String get categoriesCard => 'التصنيفات';
+
+  @override
+  String get categoriesCardDesc => 'اختر من 1 إلى 3 تصنيفات تصف مشروعك.';
+
+  @override
+  String get selectCategory => 'اختر تصنيفاً';
+
+  @override
+  String get addCategory => 'إضافة تصنيف';
+
+  @override
+  String get categoryAdded => 'تمت إضافة التصنيف';
+
+  @override
+  String get categoryRemoved => 'تمت إزالة التصنيف';
+
+  @override
+  String get maxCategoriesHint => 'يمكنك اختيار 3 تصنيفات كحد أقصى.';
+
+  @override
+  String get noCategoriesAvailable => 'لا توجد تصنيفات متاحة';
+
+  @override
+  String get projectImagesCard => 'صور المشروع';
+
+  @override
+  String get coverImageFormHint => 'أضف صورة غلاف لإبراز مشروعك.';
+
+  @override
+  String get tapToAddCover => 'اضغط لإضافة صورة غلاف';
+
+  @override
+  String get extraImagesNote => 'يمكنك إضافة المزيد من الصور بعد الإرسال.';
+
+  @override
+  String get editProjectTitle => 'تعديل المشروع';
+
+  @override
+  String get editProjectSubtitle => 'حدّث تفاصيل مشروعك وصوره وتصنيفاته.';
+
+  @override
+  String get saveProject => 'حفظ التغييرات';
+
+  @override
+  String get projectGallery => 'معرض المشروع';
+
+  @override
   String get projectImages => 'صور المشروع';
 
   @override

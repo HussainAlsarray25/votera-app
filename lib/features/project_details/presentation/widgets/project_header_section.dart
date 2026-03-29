@@ -9,6 +9,7 @@ import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/cached_image.dart';
 
 /// Collapsible app bar with a gradient hero background, project title,
 /// status badge, back button, and share action.
@@ -50,37 +51,60 @@ class ProjectHeaderSection extends StatelessWidget {
   }
 
   Widget _buildBackground(ProjectEntity? project) {
+    final coverUrl = project?.coverUrl;
+    final hasCover = coverUrl != null && coverUrl.isNotEmpty;
+
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Gradient hero background
-        Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                AppColors.primaryDark,
-                AppColors.secondary,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        // Background: cover photo when available, gradient otherwise
+        if (hasCover)
+          CachedImage(url: coverUrl!, fit: BoxFit.cover)
+        else ...[
+          // Gradient hero background (fallback when no cover)
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primaryDark,
+                  AppColors.secondary,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
           ),
-        ),
 
-        // Subtle pattern overlay
-        Opacity(
-          opacity: 0.07,
-          child: CustomPaint(painter: _DotGridPainter()),
-        ),
+          // Subtle dot-grid pattern overlay
+          Opacity(
+            opacity: 0.07,
+            child: CustomPaint(painter: _DotGridPainter()),
+          ),
 
-        // Bottom gradient so text stays readable
+          // Decorative floating icon
+          Positioned(
+            right: 24,
+            top: 70,
+            child: Opacity(
+              opacity: 0.15,
+              child: Icon(
+                Icons.code_rounded,
+                size: 120.r,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+
+        // Dark scrim at the bottom so the title text stays legible on
+        // any background — gradient or photo.
         Align(
           alignment: Alignment.bottomCenter,
           child: Container(
-            height: 130,
+            height: 160,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.transparent, Colors.black54],
+                colors: [Colors.transparent, Colors.black87],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -88,7 +112,7 @@ class ProjectHeaderSection extends StatelessWidget {
           ),
         ),
 
-        // Project title + status at the bottom
+        // Project title + status badge
         if (project != null)
           Positioned(
             left: 20,
@@ -96,20 +120,6 @@ class ProjectHeaderSection extends StatelessWidget {
             bottom: 24,
             child: _buildProjectInfo(project),
           ),
-
-        // Decorative floating icon
-        Positioned(
-          right: 24,
-          top: 70,
-          child: Opacity(
-            opacity: 0.15,
-            child: Icon(
-              Icons.code_rounded,
-              size: 120.r,
-              color: Colors.white,
-            ),
-          ),
-        ),
       ],
     );
   }

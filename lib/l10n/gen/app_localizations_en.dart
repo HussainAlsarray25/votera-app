@@ -1220,6 +1220,63 @@ class AppLocalizationsEn extends AppLocalizations {
       'This event has been archived and is no longer active.';
 
   @override
+  String get basicInfoCard => 'Basic Info';
+
+  @override
+  String get techLinksCard => 'Tech & Links';
+
+  @override
+  String get categoriesCard => 'Categories';
+
+  @override
+  String get categoriesCardDesc =>
+      'Select 1 to 3 categories that best describe your project.';
+
+  @override
+  String get selectCategory => 'Select a Category';
+
+  @override
+  String get addCategory => 'Add Category';
+
+  @override
+  String get categoryAdded => 'Category added';
+
+  @override
+  String get categoryRemoved => 'Category removed';
+
+  @override
+  String get maxCategoriesHint => 'You can select up to 3 categories.';
+
+  @override
+  String get noCategoriesAvailable => 'No categories available';
+
+  @override
+  String get projectImagesCard => 'Project Images';
+
+  @override
+  String get coverImageFormHint =>
+      'Add a cover image to make your project stand out.';
+
+  @override
+  String get tapToAddCover => 'Tap to add cover image';
+
+  @override
+  String get extraImagesNote => 'You can add more images after submitting.';
+
+  @override
+  String get editProjectTitle => 'Edit Project';
+
+  @override
+  String get editProjectSubtitle =>
+      'Update your project details, images, and categories.';
+
+  @override
+  String get saveProject => 'Save Changes';
+
+  @override
+  String get projectGallery => 'Project Gallery';
+
+  @override
   String get projectImages => 'Project Images';
 
   @override

@@ -1,3 +1,4 @@
+import 'package:votera/features/categories/data/models/category_model.dart';
 import 'package:votera/features/projects/data/models/extra_image_model.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 
@@ -11,6 +12,7 @@ class ProjectModel extends ProjectEntity {
     required super.title,
     required super.status,
     required super.images,
+    required super.categories,
     super.coverUrl,
     super.createdAt,
     super.updatedAt,
@@ -30,6 +32,7 @@ class ProjectModel extends ProjectEntity {
         : json;
 
     final rawImages = payload['images'] as List<dynamic>? ?? [];
+    final rawCategories = payload['categories'] as List<dynamic>? ?? [];
 
     return ProjectModel(
       id: payload['id']?.toString() ?? '',
@@ -45,6 +48,9 @@ class ProjectModel extends ProjectEntity {
       coverUrl: payload['cover_url'] as String?,
       images: rawImages
           .map((e) => ExtraImageModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      categories: rawCategories
+          .map((e) => CategoryModel.fromJson(e as Map<String, dynamic>))
           .toList(),
       createdAt: payload['created_at'] != null
           ? DateTime.tryParse(payload['created_at'].toString())

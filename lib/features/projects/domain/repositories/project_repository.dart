@@ -24,6 +24,7 @@ abstract class ProjectRepository {
   /// Creates a new project submission under the given event.
   /// Pass [teamId] when the user belongs to multiple teams and must choose one.
   /// If omitted the backend uses the user's first team.
+  /// Pass [categoryIds] to tag the project with up to 3 categories on creation.
   Future<Either<Failure, ProjectEntity>> submitProject({
     required String eventId,
     required String title,
@@ -32,6 +33,7 @@ abstract class ProjectRepository {
     String? repoUrl,
     String? demoUrl,
     String? techStack,
+    List<String>? categoryIds,
   });
 
   /// Updates an existing project's details.
