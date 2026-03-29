@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
@@ -40,7 +41,11 @@ class TeamMemberTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _MemberAvatar(displayName: member.displayName, isLeader: isLeader),
+          _MemberAvatar(
+            displayName: member.displayName,
+            isLeader: isLeader,
+            avatarUrl: member.profilePictureUrl,
+          ),
           SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
@@ -110,13 +115,23 @@ class TeamMemberTile extends StatelessWidget {
 
 // -- Avatar -------------------------------------------------------------------
 
-/// Round avatar showing up to two initials of the user ID.
-/// Gold gradient for the leader; subtle secondary/primary for members.
+/// Round avatar for a team member.
+///
+/// Shows [avatarUrl] as a circular photo when available. The gradient
+/// background (gold for leaders, subtle for members) acts as both the visual
+/// identity and the loading/error placeholder. Leaders always get the crown
+/// badge overlay regardless of whether a photo is shown.
 class _MemberAvatar extends StatelessWidget {
-  const _MemberAvatar({required this.displayName, required this.isLeader});
+  const _MemberAvatar({
+    required this.displayName,
+    required this.isLeader,
+    this.avatarUrl,
+  });
 
   final String displayName;
   final bool isLeader;
+  // Remote URL of the member's profile picture. Null falls back to initials.
+  final String? avatarUrl;
 
   String get _initials {
     final parts = displayName.trim().split(' ');
@@ -129,6 +144,8 @@ class _MemberAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasImage = avatarUrl != null && avatarUrl!.isNotEmpty;
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -148,18 +165,30 @@ class _MemberAvatar extends StatelessWidget {
               end: Alignment.bottomRight,
             ),
           ),
-          child: Center(
-            child: Text(
-              _initials,
-              style: TextStyle(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-                color: isLeader ? Colors.white : context.colors.secondary,
-              ),
-            ),
-          ),
+          // Show network photo when available; otherwise show initials.
+          child: hasImage
+              ? ClipOval(
+                  child: CachedNetworkImage(
+                    imageUrl: avatarUrl!,
+                    width: 44.r,
+                    height: 44.r,
+                    fit: BoxFit.cover,
+                    // On error the gradient + initials stay visible underneath.
+                    errorWidget: (_, __, ___) => const SizedBox.shrink(),
+                  ),
+                )
+              : Center(
+                  child: Text(
+                    _initials,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w700,
+                      color: isLeader ? Colors.white : context.colors.secondary,
+                    ),
+                  ),
+                ),
         ),
-        // Crown overlay for the leader
+        // Crown badge for the team leader — always shown on top.
         if (isLeader)
           Positioned(
             right: -2,

@@ -66,7 +66,9 @@ class _EmptyStateState extends State<EmptyState>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _fade,
-      child: Padding(
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: Padding(
         padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -95,8 +97,9 @@ class _EmptyStateState extends State<EmptyState>
             if (widget.showRefreshHint) ...[
               SizedBox(height: AppSpacing.xl),
               _buildPullHint(context),
-            ]
+            ],
           ],
+        ),
         ),
       ),
     );

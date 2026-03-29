@@ -305,6 +305,10 @@
   "needATeamFirst": "تحتاج إلى فريق أولاً",
   "needATeamDesc": "أنشئ فريقًا أو انضم إلى فريق قبل تقديم مشروعك في هذه الفعالية.",
 
+  "selectTeamTitle": "اختر فريقاً",
+  "selectTeamDesc": "أنت عضو في أكثر من فريق. اختر الفريق الذي سيقدّم هذا المشروع.",
+  "submittingAsTeam": "التقديم باسم",
+
   "submitYourProject": "أرسل مشروعك",
   "submitYourProjectDesc": "أدخل التفاصيل أدناه لتسجيل مشروعك في هذه الفعالية.",
   "projectTitle": "عنوان المشروع *",
@@ -414,5 +418,7 @@
   "joinRequests": "طلبات الانضمام",
   "noJoinRequests": "لا توجد طلبات انضمام معلقة.",
   "approveRequest": "قبول",
-  "declineRequest": "رفض"
+  "declineRequest": "رفض",
+  "shareProjectSubject": "شاهد هذا المشروع على Votera!",
+  "shareProjectMessage": "وجدت مشروعاً مثيراً للاهتمام على Votera. اضغط الرابط لعرضه:"
 }

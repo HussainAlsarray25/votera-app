@@ -112,7 +112,10 @@ class _ProjectDetailsView extends StatelessWidget {
               if (state is ProjectDetailLoaded) {
                 return CustomScrollView(
                   slivers: [
-                    const ProjectHeaderSection(),
+                    ProjectHeaderSection(
+                      eventId: eventId,
+                      projectId: projectId,
+                    ),
                     SliverToBoxAdapter(
                       child: _buildBody(
                         context,

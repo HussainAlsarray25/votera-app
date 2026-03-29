@@ -45,8 +45,11 @@ class ProjectEntityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = _accentFor(project.title);
-    final firstMedia = project.media.isNotEmpty ? project.media.first : null;
-    final hasImage = firstMedia != null && firstMedia.url.isNotEmpty;
+    // Prefer the cover image; fall back to the first extra image if no cover.
+    final imageUrl = (project.coverUrl ?? '').isNotEmpty
+        ? project.coverUrl!
+        : (project.images.isNotEmpty ? project.images.first.url : null);
+    final hasImage = imageUrl != null && imageUrl.isNotEmpty;
 
     return GestureDetector(
       onTap: () => context.push('/project/$eventId/${project.id}'),
@@ -70,7 +73,7 @@ class ProjectEntityCard extends StatelessWidget {
               // -- Layer 1: background (image or gradient) --
               if (hasImage)
                 CachedImage(
-                  url: firstMedia.url,
+                  url: imageUrl,
                   width: double.infinity,
                   errorIcon: Icons.code,
                 )

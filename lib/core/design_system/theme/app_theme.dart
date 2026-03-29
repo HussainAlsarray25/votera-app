@@ -14,7 +14,7 @@ class AppTheme {
 
   static ThemeData get lightTheme => _build(AppColorScheme.light, Brightness.light);
 
-  static ThemeData _build(AppColorScheme colors, Brightness brightness) {
+static ThemeData _build(AppColorScheme colors, Brightness brightness) {
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,

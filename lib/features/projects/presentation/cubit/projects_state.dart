@@ -61,24 +61,47 @@ class ProjectSaved extends ProjectsState {
   List<Object?> get props => [project];
 }
 
-/// Emitted when the upload URL has been retrieved successfully.
-class UploadUrlReady extends ProjectsState {
-  const UploadUrlReady({required this.uploadUrl});
+/// Emitted after a cover image is uploaded successfully.
+/// [uploadResponse] contains the image ID and public URL.
+class ProjectCoverUploaded extends ProjectsState {
+  const ProjectCoverUploaded({required this.uploadResponse});
 
-  final UploadUrlEntity uploadUrl;
+  final MediaUploadResponseEntity uploadResponse;
 
   @override
-  List<Object?> get props => [uploadUrl];
+  List<Object?> get props => [uploadResponse];
+}
+
+/// Emitted after the project cover image is deleted.
+class ProjectCoverDeleted extends ProjectsState {
+  const ProjectCoverDeleted();
+}
+
+/// Emitted after an extra image is uploaded successfully.
+/// [uploadResponse] contains the image ID and public URL.
+class ProjectExtraImageUploaded extends ProjectsState {
+  const ProjectExtraImageUploaded({required this.uploadResponse});
+
+  final MediaUploadResponseEntity uploadResponse;
+
+  @override
+  List<Object?> get props => [uploadResponse];
+}
+
+/// Emitted after a specific extra image is deleted.
+/// [imageId] identifies which image was removed so the UI can update its list.
+class ProjectExtraImageDeleted extends ProjectsState {
+  const ProjectExtraImageDeleted({required this.imageId});
+
+  final String imageId;
+
+  @override
+  List<Object?> get props => [imageId];
 }
 
 /// Emitted after a project category is added or removed.
 class ProjectCategoryUpdated extends ProjectsState {
   const ProjectCategoryUpdated();
-}
-
-/// Emitted after a media attachment is deleted from a project.
-class ProjectMediaDeleted extends ProjectsState {
-  const ProjectMediaDeleted();
 }
 
 /// Emitted when the current user's own project for an event has been loaded.

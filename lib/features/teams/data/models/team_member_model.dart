@@ -6,6 +6,7 @@ class TeamMemberModel extends TeamMemberEntity {
     super.fullName,
     super.email,
     super.joinedAt,
+    super.profilePictureUrl,
   });
 
   factory TeamMemberModel.fromJson(Map<String, dynamic> json) {
@@ -16,6 +17,7 @@ class TeamMemberModel extends TeamMemberEntity {
       joinedAt: json['joined_at'] != null
           ? DateTime.tryParse(json['joined_at'].toString())
           : null,
+      profilePictureUrl: json['profile_picture_url']?.toString(),
     );
   }
 }

@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/network/paginated_response.dart';
+import 'package:votera/features/projects/domain/entities/media_upload_response_entity.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
-import 'package:votera/features/projects/domain/entities/upload_url_entity.dart';
 
 abstract class ProjectRepository {
   /// Fetches a paginated list of projects for the given event.
@@ -22,9 +22,12 @@ abstract class ProjectRepository {
   });
 
   /// Creates a new project submission under the given event.
+  /// Pass [teamId] when the user belongs to multiple teams and must choose one.
+  /// If omitted the backend uses the user's first team.
   Future<Either<Failure, ProjectEntity>> submitProject({
     required String eventId,
     required String title,
+    String? teamId,
     String? description,
     String? repoUrl,
     String? demoUrl,
@@ -40,14 +43,6 @@ abstract class ProjectRepository {
     String? repoUrl,
     String? demoUrl,
     String? techStack,
-  });
-
-  /// Requests a pre-signed upload URL for attaching media to a project.
-  Future<Either<Failure, UploadUrlEntity>> getUploadUrl({
-    required String eventId,
-    required String projectId,
-    required String fileName,
-    String? fileType,
   });
 
   /// Looks up a project by its QR barcode token.
@@ -79,16 +74,42 @@ abstract class ProjectRepository {
     required String projectId,
   });
 
-  /// Deletes a media attachment from a project.
-  Future<Either<Failure, void>> deleteProjectMedia({
-    required String eventId,
-    required String projectId,
-    required String mediaId,
-  });
-
   /// Fetches the authenticated user's own project for the given event.
-  /// Returns a [NotFoundFailure] when the user has no project in this event.
+  /// Pass [teamId] when the user belongs to multiple teams.
+  /// Returns a [ServerFailure] with statusCode 404 when the user has no
+  /// project in this event.
   Future<Either<Failure, ProjectEntity>> getMyProject({
     required String eventId,
+    String? teamId,
+  });
+
+  /// Uploads raw image bytes as the project cover.
+  /// If a cover already exists it is automatically replaced.
+  Future<Either<Failure, MediaUploadResponseEntity>> uploadCover({
+    required String eventId,
+    required String projectId,
+    required List<int> bytes,
+    required String contentType,
+  });
+
+  /// Deletes the project cover image.
+  Future<Either<Failure, void>> deleteCover({
+    required String eventId,
+    required String projectId,
+  });
+
+  /// Uploads raw image bytes as an extra image (max 6 per project).
+  Future<Either<Failure, MediaUploadResponseEntity>> uploadExtraImage({
+    required String eventId,
+    required String projectId,
+    required List<int> bytes,
+    required String contentType,
+  });
+
+  /// Deletes a specific extra image by its ID.
+  Future<Either<Failure, void>> deleteExtraImage({
+    required String eventId,
+    required String projectId,
+    required String imageId,
   });
 }

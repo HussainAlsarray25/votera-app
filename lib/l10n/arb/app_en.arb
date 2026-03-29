@@ -411,6 +411,10 @@
   "needATeamFirst": "You need a team first",
   "needATeamDesc": "Create or join a team before you can submit a project to this event.",
 
+  "selectTeamTitle": "Select a Team",
+  "selectTeamDesc": "You are a member of multiple teams. Choose which team will submit this project.",
+  "submittingAsTeam": "Submitting as",
+
   "submitYourProject": "Submit Your Project",
   "submitYourProjectDesc": "Fill in the details below to register your project for this event.",
   "projectTitle": "Project Title *",
@@ -520,5 +524,7 @@
   "joinRequests": "Join Requests",
   "noJoinRequests": "No pending join requests.",
   "approveRequest": "Approve",
-  "declineRequest": "Decline"
+  "declineRequest": "Decline",
+  "shareProjectSubject": "Check out this project on Votera!",
+  "shareProjectMessage": "I found an interesting project on Votera. Tap the link to view it:"
 }

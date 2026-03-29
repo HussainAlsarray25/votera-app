@@ -868,6 +868,16 @@ class AppLocalizationsAr extends AppLocalizations {
       'أنشئ فريقًا أو انضم إلى فريق قبل تقديم مشروعك في هذه الفعالية.';
 
   @override
+  String get selectTeamTitle => 'اختر فريقاً';
+
+  @override
+  String get selectTeamDesc =>
+      'أنت عضو في أكثر من فريق. اختر الفريق الذي سيقدّم هذا المشروع.';
+
+  @override
+  String get submittingAsTeam => 'التقديم باسم';
+
+  @override
   String get submitYourProject => 'أرسل مشروعك';
 
   @override
@@ -1157,4 +1167,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get declineRequest => 'رفض';
+
+  @override
+  String get shareProjectSubject => 'شاهد هذا المشروع على Votera!';
+
+  @override
+  String get shareProjectMessage =>
+      'وجدت مشروعاً مثيراً للاهتمام على Votera. اضغط الرابط لعرضه:';
 }

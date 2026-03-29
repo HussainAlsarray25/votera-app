@@ -15,6 +15,7 @@ class SubmitProject extends UseCase<ProjectEntity, SubmitProjectParams> {
     return repository.submitProject(
       eventId: params.eventId,
       title: params.title,
+      teamId: params.teamId,
       description: params.description,
       repoUrl: params.repoUrl,
       demoUrl: params.demoUrl,
@@ -27,6 +28,7 @@ class SubmitProjectParams extends Equatable {
   const SubmitProjectParams({
     required this.eventId,
     required this.title,
+    this.teamId,
     this.description,
     this.repoUrl,
     this.demoUrl,
@@ -35,11 +37,23 @@ class SubmitProjectParams extends Equatable {
 
   final String eventId;
   final String title;
+
+  /// The team that will own this project submission.
+  /// If null, the backend falls back to the user's first team.
+  final String? teamId;
   final String? description;
   final String? repoUrl;
   final String? demoUrl;
   final String? techStack;
 
   @override
-  List<Object?> get props => [eventId, title, description, repoUrl, demoUrl, techStack];
+  List<Object?> get props => [
+        eventId,
+        title,
+        teamId,
+        description,
+        repoUrl,
+        demoUrl,
+        techStack,
+      ];
 }

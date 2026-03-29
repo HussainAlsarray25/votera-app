@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
+import 'package:votera/features/teams/domain/entities/team_entity.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
 import 'package:votera/features/teams/presentation/cubit/teams_cubit.dart';
@@ -69,6 +70,26 @@ class _MyProjectView extends StatefulWidget {
 }
 
 class _MyProjectViewState extends State<_MyProjectView> {
+  // The team chosen by the user. Null means we are still waiting for the user
+  // to pick (only relevant when the user belongs to more than one team).
+  TeamEntity? _selectedTeam;
+
+  void _selectTeam(TeamEntity team) {
+    setState(() => _selectedTeam = team);
+    context.read<ProjectsCubit>().loadMyProject(
+          eventId: widget.eventId,
+          teamId: team.id,
+        );
+  }
+
+  void _loadMyProject() {
+    if (_selectedTeam == null) return;
+    context.read<ProjectsCubit>().loadMyProject(
+          eventId: widget.eventId,
+          teamId: _selectedTeam!.id,
+        );
+  }
+
   Future<void> _refresh() async {
     // Reloading the team will trigger the TeamLoaded listener, which in turn
     // reloads the project. This covers all refresh scenarios.
@@ -90,16 +111,34 @@ class _MyProjectViewState extends State<_MyProjectView> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        // When the team list resolves with at least one team, load the project.
-        // loadMyTeam emits MyTeamsLoaded; loadTeam/create emit TeamLoaded.
+        // When the team list resolves, auto-select if there is only one team
+        // and immediately load the project. For multiple teams we wait for the
+        // user to pick — the picker calls _selectTeam which triggers the load.
         BlocListener<TeamsCubit, TeamsState>(
           listenWhen: (_, current) =>
-              (current is MyTeamsLoaded && current.teams.isNotEmpty) ||
-              current is TeamLoaded,
-          listener: (ctx, _) {
-            ctx
-                .read<ProjectsCubit>()
-                .loadMyProject(eventId: widget.eventId);
+              current is MyTeamsLoaded || current is TeamLoaded,
+          listener: (ctx, state) {
+            List<TeamEntity> teams = [];
+            if (state is MyTeamsLoaded) teams = state.teams;
+            if (state is TeamLoaded) teams = [state.team];
+
+            if (teams.isEmpty) return;
+
+            if (teams.length == 1) {
+              // Single team — select it automatically and load project.
+              setState(() => _selectedTeam = teams.first);
+              ctx.read<ProjectsCubit>().loadMyProject(
+                    eventId: widget.eventId,
+                    teamId: teams.first.id,
+                  );
+            } else if (_selectedTeam != null) {
+              // Multiple teams, user already picked one — reload project.
+              ctx.read<ProjectsCubit>().loadMyProject(
+                    eventId: widget.eventId,
+                    teamId: _selectedTeam!.id,
+                  );
+            }
+            // else: multiple teams, no selection yet — show the picker below.
           },
         ),
         // Team action errors (e.g. create team rejected) → snackbar.
@@ -110,45 +149,47 @@ class _MyProjectViewState extends State<_MyProjectView> {
           },
         ),
         // Project action errors (create, edit, finalize, cancel) → snackbar.
-        // The view is preserved so the user can see the error and retry.
         BlocListener<ProjectsCubit, ProjectsState>(
           listenWhen: (_, current) => current is ProjectActionFailed,
           listener: (ctx, state) {
             _showSnackBar(ctx, (state as ProjectActionFailed).message);
           },
         ),
-        // After any successful project mutation, reload to settle back
-        // into the MyProjectLoaded state with the latest server data.
+        // After any successful project mutation, reload the project.
         BlocListener<ProjectsCubit, ProjectsState>(
           listenWhen: (_, current) => current is ProjectSaved,
-          listener: (ctx, _) {
-            ctx
-                .read<ProjectsCubit>()
-                .loadMyProject(eventId: widget.eventId);
-          },
+          listener: (ctx, _) => _loadMyProject(),
         ),
       ],
       child: BlocBuilder<TeamsCubit, TeamsState>(
         builder: (context, teamState) {
-          // While the team is being fetched, show a full-tab spinner.
+          // While the team list is being fetched, show a full-tab spinner.
           if (teamState is TeamsInitial || teamState is TeamsLoading) {
             return const Center(child: AppLoadingIndicator());
           }
 
           // No team found — show the create-team prompt.
-          // Either the API returned an error, or it returned an empty list.
           final hasNoTeam = teamState is TeamsError ||
               (teamState is MyTeamsLoaded && teamState.teams.isEmpty);
           if (hasNoTeam) {
             return _NoTeamPrompt(onRefresh: _refresh);
           }
 
-          // Team is confirmed. Now check the project state.
+          // Multiple teams but user hasn't chosen one yet — show full-screen
+          // team picker before attempting any project API calls.
+          final teams = teamState is MyTeamsLoaded ? teamState.teams : <TeamEntity>[];
+          if (teams.length > 1 && _selectedTeam == null) {
+            return _TeamSelectionGate(
+              teams: teams,
+              onTeamSelected: _selectTeam,
+            );
+          }
+
+          // Team confirmed. Now check the project state.
           return BlocBuilder<ProjectsCubit, ProjectsState>(
             builder: (context, projectState) {
               if (projectState is ProjectsInitial ||
                   projectState is ProjectsLoading ||
-                  // ProjectSaved is a transient state before the re-load lands.
                   projectState is ProjectSaved) {
                 return const Center(child: AppLoadingIndicator());
               }
@@ -157,15 +198,15 @@ class _MyProjectViewState extends State<_MyProjectView> {
                 return _buildLoadError(
                   context,
                   message: projectState.message,
-                  onRetry: () => context
-                      .read<ProjectsCubit>()
-                      .loadMyProject(eventId: widget.eventId),
+                  onRetry: _loadMyProject,
                 );
               }
 
               if (projectState is MyProjectNotFound) {
                 return _CreateProjectForm(
                   eventId: widget.eventId,
+                  teams: teams,
+                  initialTeam: _selectedTeam,
                   onRefresh: _refresh,
                 );
               }
@@ -295,10 +336,21 @@ class _NoTeamPrompt extends StatelessWidget {
 class _CreateProjectForm extends StatefulWidget {
   const _CreateProjectForm({
     required this.eventId,
+    required this.teams,
     required this.onRefresh,
+    this.initialTeam,
   });
 
   final String eventId;
+
+  /// All teams the current user belongs to. When this list contains more than
+  /// one entry a team-picker is shown so the user can choose which team submits.
+  final List<TeamEntity> teams;
+
+  /// The team already chosen at the parent level (via [_TeamSelectionGate]).
+  /// Pre-fills the picker so the user doesn't have to pick again.
+  final TeamEntity? initialTeam;
+
   final Future<void> Function() onRefresh;
 
   @override
@@ -313,6 +365,10 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
   late final TextEditingController _repoUrlController;
   late final TextEditingController _demoUrlController;
 
+  // The team that will own this project submission.
+  // Defaults to the first team; updated when the user taps a different option.
+  late TeamEntity _selectedTeam;
+
   @override
   void initState() {
     super.initState();
@@ -321,6 +377,7 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
     _techStackController = TextEditingController();
     _repoUrlController = TextEditingController();
     _demoUrlController = TextEditingController();
+    _selectedTeam = widget.initialTeam ?? widget.teams.first;
   }
 
   @override
@@ -342,6 +399,7 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
     if (!_formKey.currentState!.validate()) return;
     context.read<ProjectsCubit>().createProject(
           eventId: widget.eventId,
+          teamId: _selectedTeam.id,
           title: _titleController.text.trim(),
           description: _nullIfEmpty(_descriptionController.text),
           techStack: _nullIfEmpty(_techStackController.text),
@@ -378,6 +436,15 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
                 ),
               ),
               SizedBox(height: AppSpacing.lg),
+              // Team picker — only shown when the user belongs to 2+ teams.
+              if (widget.teams.length > 1) ...[
+                _TeamPicker(
+                  teams: widget.teams,
+                  selected: _selectedTeam,
+                  onChanged: (team) => setState(() => _selectedTeam = team),
+                ),
+                SizedBox(height: AppSpacing.lg),
+              ],
               Builder(
                 builder: (context) {
                   final l10n = AppLocalizations.of(context)!;
@@ -1104,6 +1171,216 @@ class _CircleIcon extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       child: Icon(icon, size: AppSizes.iconXl, color: color),
+    );
+  }
+}
+
+// =============================================================================
+// Team selection gate — shown before loading project when user has 2+ teams
+// =============================================================================
+
+/// Full-tab screen shown when the user belongs to more than one team and we
+/// don't yet know which team's project to load. Once the user taps a team,
+/// [onTeamSelected] fires and the parent triggers [loadMyProject].
+class _TeamSelectionGate extends StatelessWidget {
+  const _TeamSelectionGate({
+    required this.teams,
+    required this.onTeamSelected,
+  });
+
+  final List<TeamEntity> teams;
+  final ValueChanged<TeamEntity> onTeamSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return SingleChildScrollView(
+      padding: AppSpacing.pagePadding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: AppSpacing.xl),
+          Text(
+            l10n.selectTeamTitle,
+            style: AppTypography.h2.copyWith(
+              color: context.colors.textPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n.selectTeamDesc,
+            style: AppTypography.bodyMedium.copyWith(
+              color: context.colors.textSecondary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.xl),
+          ...teams.map(
+            (team) => _TeamTile(
+              team: team,
+              isSelected: false,
+              onTap: () => onTeamSelected(team),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Team selector shown in the project creation form when the user belongs to
+/// more than one team. Displays all teams as tappable tiles; the currently
+/// selected one is highlighted.
+class _TeamPicker extends StatelessWidget {
+  const _TeamPicker({
+    required this.teams,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final List<TeamEntity> teams;
+  final TeamEntity selected;
+  final ValueChanged<TeamEntity> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.selectTeamTitle,
+          style: AppTypography.labelMedium.copyWith(
+            color: context.colors.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        SizedBox(height: AppSpacing.xs),
+        Text(
+          l10n.selectTeamDesc,
+          style: AppTypography.bodySmall.copyWith(
+            color: context.colors.textSecondary,
+          ),
+        ),
+        SizedBox(height: AppSpacing.sm),
+        ...teams.map((team) => _TeamTile(
+              team: team,
+              isSelected: team.id == selected.id,
+              onTap: () => onChanged(team),
+            )),
+      ],
+    );
+  }
+}
+
+/// Single selectable team tile used inside [_TeamPicker].
+class _TeamTile extends StatelessWidget {
+  const _TeamTile({
+    required this.team,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final TeamEntity team;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = context.colors.primary;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        margin: EdgeInsets.only(bottom: AppSpacing.sm),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm + 2,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? primary.withValues(alpha: 0.08)
+              : context.colors.surface,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          border: Border.all(
+            color: isSelected
+                ? primary.withValues(alpha: 0.5)
+                : context.colors.border,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            // Team avatar or fallback initial circle
+            Container(
+              width: 36.r,
+              height: 36.r,
+              decoration: BoxDecoration(
+                color: primary.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: team.imageUrl != null
+                  ? ClipOval(
+                      child: Image.network(
+                        team.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _initialIcon(context),
+                      ),
+                    )
+                  : _initialIcon(context),
+            ),
+            SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    team.name,
+                    style: AppTypography.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isSelected
+                          ? primary
+                          : context.colors.textPrimary,
+                    ),
+                  ),
+                  if (team.handle != null) ...[
+                    SizedBox(height: 2.r),
+                    Text(
+                      '@${team.handle}',
+                      style: AppTypography.caption.copyWith(
+                        color: context.colors.textHint,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle_rounded,
+                size: AppSizes.iconMd,
+                color: primary,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _initialIcon(BuildContext context) {
+    final initial =
+        team.name.isNotEmpty ? team.name[0].toUpperCase() : '?';
+    return Center(
+      child: Text(
+        initial,
+        style: AppTypography.labelMedium.copyWith(
+          color: context.colors.primary,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 }

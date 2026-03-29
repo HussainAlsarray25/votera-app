@@ -1700,6 +1700,24 @@ abstract class AppLocalizations {
   /// **'Create or join a team before you can submit a project to this event.'**
   String get needATeamDesc;
 
+  /// No description provided for @selectTeamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a Team'**
+  String get selectTeamTitle;
+
+  /// No description provided for @selectTeamDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You are a member of multiple teams. Choose which team will submit this project.'**
+  String get selectTeamDesc;
+
+  /// No description provided for @submittingAsTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting as'**
+  String get submittingAsTeam;
+
   /// No description provided for @submitYourProject.
   ///
   /// In en, this message translates to:
@@ -2263,6 +2281,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Decline'**
   String get declineRequest;
+
+  /// No description provided for @shareProjectSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out this project on Votera!'**
+  String get shareProjectSubject;
+
+  /// No description provided for @shareProjectMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'I found an interesting project on Votera. Tap the link to view it:'**
+  String get shareProjectMessage;
 }
 
 class _AppLocalizationsDelegate

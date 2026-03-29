@@ -116,13 +116,19 @@ Future<void> _setupDeepLinks() async {
 }
 
 /// Routes an incoming deep link URI to the correct app screen.
-/// Currently handles: votera://home
+/// Handles: votera://home, votera://project/{eventId}/{projectId}
 void _handleDeepLink(Uri uri, AppRouter appRouter) {
   if (uri.scheme != 'votera') return;
 
   switch (uri.host) {
     case 'home':
       appRouter.router.go('/home');
+    case 'project':
+      // Expected format: votera://project/{eventId}/{projectId}
+      final segments = uri.pathSegments;
+      if (segments.length == 2) {
+        appRouter.router.go('/project/${segments[0]}/${segments[1]}');
+      }
   }
 }
 

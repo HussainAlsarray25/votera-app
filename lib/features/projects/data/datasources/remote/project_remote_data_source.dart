@@ -1,7 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:votera/core/network/api_client.dart';
 import 'package:votera/features/projects/data/datasources/remote/project_endpoints.dart';
+import 'package:votera/features/projects/data/models/media_upload_response_model.dart';
 import 'package:votera/features/projects/data/models/project_model.dart';
-import 'package:votera/features/projects/data/models/upload_url_model.dart';
 
 abstract class ProjectRemoteDataSource {
   /// GET /v1/events/{event_id}/projects?page&size&title&category_id
@@ -23,6 +24,7 @@ abstract class ProjectRemoteDataSource {
   Future<ProjectModel> submitProject({
     required String eventId,
     required String title,
+    String? teamId,
     String? description,
     String? repoUrl,
     String? demoUrl,
@@ -38,14 +40,6 @@ abstract class ProjectRemoteDataSource {
     String? repoUrl,
     String? demoUrl,
     String? techStack,
-  });
-
-  /// POST /v1/events/{event_id}/projects/{id}/media/upload-url
-  Future<UploadUrlModel> getUploadUrl({
-    required String eventId,
-    required String projectId,
-    required String fileName,
-    String? fileType,
   });
 
   /// GET /v1/scan/{token}
@@ -77,15 +71,43 @@ abstract class ProjectRemoteDataSource {
     required String projectId,
   });
 
-  /// DELETE /v1/events/{event_id}/projects/{id}/media/{media_id}
-  Future<void> deleteProjectMedia({
+  /// GET /v1/events/{event_id}/projects/my
+  /// Pass [teamId] when the user belongs to multiple teams.
+  Future<ProjectModel> getMyProject({
     required String eventId,
-    required String projectId,
-    required String mediaId,
+    String? teamId,
   });
 
-  /// GET /v1/events/{event_id}/projects/my
-  Future<ProjectModel> getMyProject({required String eventId});
+  /// POST /v1/events/{event_id}/projects/{id}/cover
+  /// Sends raw image bytes. If a cover already exists it is replaced.
+  Future<MediaUploadResponseModel> uploadCover({
+    required String eventId,
+    required String projectId,
+    required List<int> bytes,
+    required String contentType,
+  });
+
+  /// DELETE /v1/events/{event_id}/projects/{id}/cover
+  Future<void> deleteCover({
+    required String eventId,
+    required String projectId,
+  });
+
+  /// POST /v1/events/{event_id}/projects/{id}/images
+  /// Sends raw image bytes. Returns 409 when the 6-image limit is reached.
+  Future<MediaUploadResponseModel> uploadExtraImage({
+    required String eventId,
+    required String projectId,
+    required List<int> bytes,
+    required String contentType,
+  });
+
+  /// DELETE /v1/events/{event_id}/projects/{id}/images/{image_id}
+  Future<void> deleteExtraImage({
+    required String eventId,
+    required String projectId,
+    required String imageId,
+  });
 }
 
 class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
@@ -127,6 +149,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
   Future<ProjectModel> submitProject({
     required String eventId,
     required String title,
+    String? teamId,
     String? description,
     String? repoUrl,
     String? demoUrl,
@@ -134,6 +157,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
   }) async {
     // Only include optional fields when provided — the API ignores null keys.
     final body = <String, dynamic>{'title': title};
+    if (teamId != null) body['team_id'] = teamId;
     if (description != null) body['description'] = description;
     if (repoUrl != null) body['repo_url'] = repoUrl;
     if (demoUrl != null) body['demo_url'] = demoUrl;
@@ -169,23 +193,6 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
       data: body,
     );
     return ProjectModel.fromJson(response.data!);
-  }
-
-  @override
-  Future<UploadUrlModel> getUploadUrl({
-    required String eventId,
-    required String projectId,
-    required String fileName,
-    String? fileType,
-  }) async {
-    final body = <String, dynamic>{'file_name': fileName};
-    if (fileType != null) body['file_type'] = fileType;
-
-    final response = await apiClient.post<Map<String, dynamic>>(
-      ProjectEndpoints.mediaUploadUrl(eventId, projectId),
-      data: body,
-    );
-    return UploadUrlModel.fromJson(response.data!);
   }
 
   @override
@@ -241,21 +248,76 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
   }
 
   @override
-  Future<void> deleteProjectMedia({
+  Future<ProjectModel> getMyProject({
+    required String eventId,
+    String? teamId,
+  }) async {
+    final query = teamId != null ? <String, dynamic>{'team_id': teamId} : null;
+    final response = await apiClient.get<Map<String, dynamic>>(
+      ProjectEndpoints.myProject(eventId),
+      queryParameters: query,
+    );
+    return ProjectModel.fromJson(response.data!);
+  }
+
+  @override
+  Future<MediaUploadResponseModel> uploadCover({
     required String eventId,
     required String projectId,
-    required String mediaId,
+    required List<int> bytes,
+    required String contentType,
+  }) async {
+    // Send image bytes as the raw request body. The auth interceptor adds the
+    // Bearer token; we override Content-Type to the image MIME type so the
+    // server can validate the format before saving.
+    final response = await apiClient.post<Map<String, dynamic>>(
+      ProjectEndpoints.coverImage(eventId, projectId),
+      data: Stream.fromIterable([bytes]),
+      options: Options(
+        contentType: contentType,
+        headers: {'Content-Length': bytes.length},
+      ),
+    );
+    return MediaUploadResponseModel.fromJson(response.data!);
+  }
+
+  @override
+  Future<void> deleteCover({
+    required String eventId,
+    required String projectId,
   }) async {
     await apiClient.delete<void>(
-      ProjectEndpoints.projectMedia(eventId, projectId, mediaId),
+      ProjectEndpoints.coverImage(eventId, projectId),
     );
   }
 
   @override
-  Future<ProjectModel> getMyProject({required String eventId}) async {
-    final response = await apiClient.get<Map<String, dynamic>>(
-      ProjectEndpoints.myProject(eventId),
+  Future<MediaUploadResponseModel> uploadExtraImage({
+    required String eventId,
+    required String projectId,
+    required List<int> bytes,
+    required String contentType,
+  }) async {
+    // Same raw-bytes pattern as cover upload.
+    final response = await apiClient.post<Map<String, dynamic>>(
+      ProjectEndpoints.extraImages(eventId, projectId),
+      data: Stream.fromIterable([bytes]),
+      options: Options(
+        contentType: contentType,
+        headers: {'Content-Length': bytes.length},
+      ),
     );
-    return ProjectModel.fromJson(response.data!);
+    return MediaUploadResponseModel.fromJson(response.data!);
+  }
+
+  @override
+  Future<void> deleteExtraImage({
+    required String eventId,
+    required String projectId,
+    required String imageId,
+  }) async {
+    await apiClient.delete<void>(
+      ProjectEndpoints.extraImage(eventId, projectId, imageId),
+    );
   }
 }

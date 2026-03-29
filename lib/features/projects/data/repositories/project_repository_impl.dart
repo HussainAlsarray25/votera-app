@@ -6,8 +6,8 @@ import 'package:votera/core/network/network_info.dart';
 import 'package:votera/core/network/paginated_response.dart';
 import 'package:votera/features/projects/data/datasources/remote/project_remote_data_source.dart';
 import 'package:votera/features/projects/data/models/project_model.dart';
+import 'package:votera/features/projects/domain/entities/media_upload_response_entity.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
-import 'package:votera/features/projects/domain/entities/upload_url_entity.dart';
 import 'package:votera/features/projects/domain/repositories/project_repository.dart';
 
 class ProjectRepositoryImpl implements ProjectRepository {
@@ -71,6 +71,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   Future<Either<Failure, ProjectEntity>> submitProject({
     required String eventId,
     required String title,
+    String? teamId,
     String? description,
     String? repoUrl,
     String? demoUrl,
@@ -83,6 +84,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
       final project = await remoteDataSource.submitProject(
         eventId: eventId,
         title: title,
+        teamId: teamId,
         description: description,
         repoUrl: repoUrl,
         demoUrl: demoUrl,
@@ -118,29 +120,6 @@ class ProjectRepositoryImpl implements ProjectRepository {
         techStack: techStack,
       );
       return Right(project);
-    } on Exception catch (e) {
-      return Left(ServerFailure(message: extractErrorMessage(e)));
-    }
-  }
-
-  @override
-  Future<Either<Failure, UploadUrlEntity>> getUploadUrl({
-    required String eventId,
-    required String projectId,
-    required String fileName,
-    String? fileType,
-  }) async {
-    if (!await networkInfo.isConnected) {
-      return const Left(NetworkFailure(message: 'No internet connection'));
-    }
-    try {
-      final uploadUrl = await remoteDataSource.getUploadUrl(
-        eventId: eventId,
-        projectId: projectId,
-        fileName: fileName,
-        fileType: fileType,
-      );
-      return Right(uploadUrl);
     } on Exception catch (e) {
       return Left(ServerFailure(message: extractErrorMessage(e)));
     }
@@ -240,19 +219,68 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<Either<Failure, void>> deleteProjectMedia({
+  Future<Either<Failure, ProjectEntity>> getMyProject({
     required String eventId,
-    required String projectId,
-    required String mediaId,
+    String? teamId,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
     try {
-      await remoteDataSource.deleteProjectMedia(
+      final project = await remoteDataSource.getMyProject(
+        eventId: eventId,
+        teamId: teamId,
+      );
+      return Right(project);
+    } on DioException catch (e) {
+      // Preserve the HTTP status code so callers (e.g. the cubit) can
+      // distinguish a 404 "no project yet" from a real server error.
+      return Left(
+        ServerFailure(
+          message: extractErrorMessage(e),
+          statusCode: e.response?.statusCode,
+        ),
+      );
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, MediaUploadResponseEntity>> uploadCover({
+    required String eventId,
+    required String projectId,
+    required List<int> bytes,
+    required String contentType,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final result = await remoteDataSource.uploadCover(
         eventId: eventId,
         projectId: projectId,
-        mediaId: mediaId,
+        bytes: bytes,
+        contentType: contentType,
+      );
+      return Right(result);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteCover({
+    required String eventId,
+    required String projectId,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      await remoteDataSource.deleteCover(
+        eventId: eventId,
+        projectId: projectId,
       );
       return const Right(null);
     } on Exception catch (e) {
@@ -261,22 +289,44 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<Either<Failure, ProjectEntity>> getMyProject({
+  Future<Either<Failure, MediaUploadResponseEntity>> uploadExtraImage({
     required String eventId,
+    required String projectId,
+    required List<int> bytes,
+    required String contentType,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
     try {
-      final project = await remoteDataSource.getMyProject(eventId: eventId);
-      return Right(project);
-    } on DioException catch (e) {
-      // Preserve the HTTP status code so callers (e.g. the cubit) can
-      // distinguish a 404 "no project yet" from a real server error.
-      return Left(ServerFailure(
-        message: extractErrorMessage(e),
-        statusCode: e.response?.statusCode,
-      ));
+      final result = await remoteDataSource.uploadExtraImage(
+        eventId: eventId,
+        projectId: projectId,
+        bytes: bytes,
+        contentType: contentType,
+      );
+      return Right(result);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteExtraImage({
+    required String eventId,
+    required String projectId,
+    required String imageId,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      await remoteDataSource.deleteExtraImage(
+        eventId: eventId,
+        projectId: projectId,
+        imageId: imageId,
+      );
+      return const Right(null);
     } on Exception catch (e) {
       return Left(ServerFailure(message: extractErrorMessage(e)));
     }

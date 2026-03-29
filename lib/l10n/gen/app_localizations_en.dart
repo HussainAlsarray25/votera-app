@@ -879,6 +879,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create or join a team before you can submit a project to this event.';
 
   @override
+  String get selectTeamTitle => 'Select a Team';
+
+  @override
+  String get selectTeamDesc =>
+      'You are a member of multiple teams. Choose which team will submit this project.';
+
+  @override
+  String get submittingAsTeam => 'Submitting as';
+
+  @override
   String get submitYourProject => 'Submit Your Project';
 
   @override
@@ -1173,4 +1183,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get declineRequest => 'Decline';
+
+  @override
+  String get shareProjectSubject => 'Check out this project on Votera!';
+
+  @override
+  String get shareProjectMessage =>
+      'I found an interesting project on Votera. Tap the link to view it:';
 }

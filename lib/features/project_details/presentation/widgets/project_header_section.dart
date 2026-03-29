@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
@@ -10,7 +13,14 @@ import 'package:votera/l10n/gen/app_localizations.dart';
 /// Collapsible app bar with a gradient hero background, project title,
 /// status badge, back button, and share action.
 class ProjectHeaderSection extends StatelessWidget {
-  const ProjectHeaderSection({super.key});
+  const ProjectHeaderSection({
+    required this.eventId,
+    required this.projectId,
+    super.key,
+  });
+
+  final String eventId;
+  final String projectId;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +35,7 @@ class ProjectHeaderSection extends StatelessWidget {
       shadowColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       leading: _buildBackButton(context),
-      actions: [_buildShareButton()],
+      actions: [_buildShareButton(context)],
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.pin,
         background: BlocBuilder<ProjectsCubit, ProjectsState>(
@@ -172,10 +182,29 @@ class ProjectHeaderSection extends StatelessWidget {
     );
   }
 
-  Widget _buildShareButton() {
+  Widget _buildShareButton(BuildContext context) {
     return IconButton(
       icon: const Icon(Icons.share, color: Colors.white),
-      onPressed: () {},
+      onPressed: () => _shareProject(context),
+    );
+  }
+
+  /// Triggers the native share sheet with a votera:// deep link.
+  ///
+  /// The custom scheme is shared as a URI (not plain text) so messaging
+  /// apps treat it as a tappable link. Tapping it opens the Votera app
+  /// directly on this project page — no browser involved.
+  void _shareProject(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final link = Uri.parse('votera://project/$eventId/$projectId');
+
+    unawaited(
+      SharePlus.instance.share(
+        ShareParams(
+          uri: link,
+          subject: l10n.shareProjectSubject,
+        ),
+      ),
     );
   }
 
