@@ -5,6 +5,7 @@ import 'package:votera/features/projects/domain/entities/media_upload_response_e
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 import 'package:votera/features/projects/domain/usecases/add_project_category.dart';
 import 'package:votera/features/projects/domain/usecases/cancel_project.dart';
+import 'package:votera/features/projects/domain/usecases/delete_project.dart';
 import 'package:votera/features/projects/domain/usecases/delete_project_cover.dart';
 import 'package:votera/features/projects/domain/usecases/delete_project_extra_image.dart';
 import 'package:votera/features/projects/domain/usecases/finalize_project.dart';
@@ -38,6 +39,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
     required this.removeProjectCategory,
     required this.finalizeProject,
     required this.cancelProject,
+    required this.deleteProject,
   }) : super(const ProjectsInitial());
 
   final GetProjects getProjects;
@@ -54,6 +56,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
   final RemoveProjectCategory removeProjectCategory;
   final FinalizeProject finalizeProject;
   final CancelProject cancelProject;
+  final DeleteProject deleteProject;
 
   // Prevents concurrent pagination requests.
   bool _isLoadingMore = false;
@@ -153,6 +156,24 @@ class ProjectsCubit extends Cubit<ProjectsState> {
     String? teamId,
   }) async {
     emit(const ProjectsLoading());
+    await _fetchMyProject(eventId: eventId, teamId: teamId);
+  }
+
+  /// Reloads the current user's project without emitting [ProjectsLoading].
+  /// Use this after image/category operations to refresh data silently,
+  /// so the UI does not flash a full-page spinner.
+  Future<void> reloadMyProjectSilent({
+    required String eventId,
+    String? teamId,
+  }) async {
+    await _fetchMyProject(eventId: eventId, teamId: teamId);
+  }
+
+  /// Shared fetch logic used by [loadMyProject] and [reloadMyProjectSilent].
+  Future<void> _fetchMyProject({
+    required String eventId,
+    String? teamId,
+  }) async {
     final result = await getMyProject(
       GetMyProjectParams(eventId: eventId, teamId: teamId),
     );
@@ -314,15 +335,30 @@ class ProjectsCubit extends Cubit<ProjectsState> {
     );
   }
 
+  /// Permanently deletes a draft project.
+  Future<void> delete({
+    required String eventId,
+    required String projectId,
+  }) async {
+    emit(const ProjectsLoading());
+    final result = await deleteProject(
+      DeleteProjectParams(eventId: eventId, projectId: projectId),
+    );
+    result.fold(
+      (failure) => emit(ProjectActionFailed(message: failure.message)),
+      (_) => emit(const ProjectDeleted()),
+    );
+  }
+
   /// Uploads raw image bytes as the project cover.
-  /// Only allowed while the project is in draft status.
+  /// Does not emit [ProjectsLoading] — the caller uses a local loading state
+  /// so the rest of the project view stays visible during the upload.
   Future<void> uploadCover({
     required String eventId,
     required String projectId,
     required List<int> bytes,
     required String contentType,
   }) async {
-    emit(const ProjectsLoading());
     final result = await uploadProjectCover(
       UploadProjectCoverParams(
         eventId: eventId,
@@ -332,35 +368,34 @@ class ProjectsCubit extends Cubit<ProjectsState> {
       ),
     );
     result.fold(
-      (failure) => emit(ProjectsError(message: failure.message)),
+      (failure) => emit(ProjectActionFailed(message: failure.message)),
       (response) => emit(ProjectCoverUploaded(uploadResponse: response)),
     );
   }
 
   /// Deletes the project cover image.
+  /// Does not emit [ProjectsLoading] — same reasoning as [uploadCover].
   Future<void> removeCover({
     required String eventId,
     required String projectId,
   }) async {
-    emit(const ProjectsLoading());
     final result = await deleteProjectCover(
       DeleteProjectCoverParams(eventId: eventId, projectId: projectId),
     );
     result.fold(
-      (failure) => emit(ProjectsError(message: failure.message)),
+      (failure) => emit(ProjectActionFailed(message: failure.message)),
       (_) => emit(const ProjectCoverDeleted()),
     );
   }
 
   /// Uploads raw image bytes as an extra project image (max 6 per project).
-  /// Only allowed while the project is in draft status.
+  /// Does not emit [ProjectsLoading] — same reasoning as [uploadCover].
   Future<void> uploadExtraImage({
     required String eventId,
     required String projectId,
     required List<int> bytes,
     required String contentType,
   }) async {
-    emit(const ProjectsLoading());
     final result = await uploadProjectExtraImage(
       UploadProjectExtraImageParams(
         eventId: eventId,
@@ -370,18 +405,18 @@ class ProjectsCubit extends Cubit<ProjectsState> {
       ),
     );
     result.fold(
-      (failure) => emit(ProjectsError(message: failure.message)),
+      (failure) => emit(ProjectActionFailed(message: failure.message)),
       (response) => emit(ProjectExtraImageUploaded(uploadResponse: response)),
     );
   }
 
   /// Deletes a specific extra image by its ID.
+  /// Does not emit [ProjectsLoading] — same reasoning as [uploadCover].
   Future<void> removeExtraImage({
     required String eventId,
     required String projectId,
     required String imageId,
   }) async {
-    emit(const ProjectsLoading());
     final result = await deleteProjectExtraImage(
       DeleteProjectExtraImageParams(
         eventId: eventId,
@@ -390,7 +425,7 @@ class ProjectsCubit extends Cubit<ProjectsState> {
       ),
     );
     result.fold(
-      (failure) => emit(ProjectsError(message: failure.message)),
+      (failure) => emit(ProjectActionFailed(message: failure.message)),
       (_) => emit(ProjectExtraImageDeleted(imageId: imageId)),
     );
   }

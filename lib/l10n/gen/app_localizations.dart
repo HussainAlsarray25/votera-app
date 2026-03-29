@@ -1712,6 +1712,12 @@ abstract class AppLocalizations {
   /// **'You are a member of multiple teams. Choose which team will submit this project.'**
   String get selectTeamDesc;
 
+  /// No description provided for @changeTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get changeTeam;
+
   /// No description provided for @submittingAsTeam.
   ///
   /// In en, this message translates to:
@@ -2402,6 +2408,12 @@ abstract class AppLocalizations {
   /// **'No categories available'**
   String get noCategoriesAvailable;
 
+  /// No description provided for @noCategoriesSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories selected yet'**
+  String get noCategoriesSelected;
+
   /// No description provided for @projectImagesCard.
   ///
   /// In en, this message translates to:
@@ -2515,6 +2527,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This image will be permanently deleted.'**
   String get confirmRemoveImageDesc;
+
+  /// No description provided for @deleteProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Project'**
+  String get deleteProject;
+
+  /// No description provided for @confirmDeleteProjectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Project?'**
+  String get confirmDeleteProjectTitle;
+
+  /// No description provided for @confirmDeleteProjectDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete your project and all its images. This action cannot be undone.'**
+  String get confirmDeleteProjectDesc;
 }
 
 class _AppLocalizationsDelegate

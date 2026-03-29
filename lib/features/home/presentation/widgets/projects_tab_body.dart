@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
-import 'package:votera/features/home/presentation/widgets/home_banner_section.dart';
 import 'package:votera/features/home/presentation/widgets/project_list_section.dart';
 import 'package:votera/features/home/presentation/widgets/search_bar_section.dart';
 import 'package:votera/features/home/presentation/widgets/trending_section.dart';
@@ -140,7 +139,15 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
       onTap: () => FocusScope.of(context).unfocus(),
       behavior: HitTestBehavior.translucent,
       child: CenteredContent(
-        child: RefreshIndicator(
+        // LayoutBuilder measures the actual available width after CenteredContent
+        // has applied its constraint. This is the real content area width,
+        // accounting for any NavigationRail or other chrome.
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final availableWidth = constraints.maxWidth;
+            final int columns = availableWidth > AppBreakpoints.tabletMax ? 3 : 2;
+
+            return RefreshIndicator(
         onRefresh: _refresh,
         child: CustomScrollView(
         controller: _scrollController,
@@ -149,7 +156,6 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
           SliverToBoxAdapter(
             child: SearchBarSection(onSearchChanged: _onSearchChanged),
           ),
-          const SliverToBoxAdapter(child: HomeBannerSection()),
 
           if (state.projects.isNotEmpty) ...[
             SliverToBoxAdapter(
@@ -199,6 +205,7 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
             ProjectListSection(
               projects: state.projects,
               eventId: widget.eventId,
+              columns: columns,
             ),
           ] else
             SliverToBoxAdapter(
@@ -236,7 +243,9 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
           ),
         ],
         ),
-      ),
+      );
+          },
+        ),
       ),
     );
   }

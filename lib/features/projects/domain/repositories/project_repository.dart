@@ -114,4 +114,10 @@ abstract class ProjectRepository {
     required String projectId,
     required String imageId,
   });
+
+  /// Permanently deletes a draft project.
+  Future<Either<Failure, void>> deleteProject({
+    required String eventId,
+    required String projectId,
+  });
 }

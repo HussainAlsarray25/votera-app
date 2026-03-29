@@ -333,4 +333,23 @@ class ProjectRepositoryImpl implements ProjectRepository {
       return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> deleteProject({
+    required String eventId,
+    required String projectId,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      await remoteDataSource.deleteProject(
+        eventId: eventId,
+        projectId: projectId,
+      );
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
 }

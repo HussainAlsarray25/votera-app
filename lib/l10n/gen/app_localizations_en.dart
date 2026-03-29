@@ -886,6 +886,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'You are a member of multiple teams. Choose which team will submit this project.';
 
   @override
+  String get changeTeam => 'Change';
+
+  @override
   String get submittingAsTeam => 'Submitting as';
 
   @override
@@ -1251,6 +1254,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noCategoriesAvailable => 'No categories available';
 
   @override
+  String get noCategoriesSelected => 'No categories selected yet';
+
+  @override
   String get projectImagesCard => 'Project Images';
 
   @override
@@ -1310,4 +1316,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get confirmRemoveImageDesc =>
       'This image will be permanently deleted.';
+
+  @override
+  String get deleteProject => 'Delete Project';
+
+  @override
+  String get confirmDeleteProjectTitle => 'Delete Project?';
+
+  @override
+  String get confirmDeleteProjectDesc =>
+      'This will permanently delete your project and all its images. This action cannot be undone.';
 }

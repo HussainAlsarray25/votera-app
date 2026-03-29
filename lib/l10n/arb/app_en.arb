@@ -413,6 +413,7 @@
 
   "selectTeamTitle": "Select a Team",
   "selectTeamDesc": "You are a member of multiple teams. Choose which team will submit this project.",
+  "changeTeam": "Change",
   "submittingAsTeam": "Submitting as",
 
   "submitYourProject": "Submit Your Project",
@@ -547,6 +548,7 @@
   "categoryRemoved": "Category removed",
   "maxCategoriesHint": "You can select up to 3 categories.",
   "noCategoriesAvailable": "No categories available",
+  "noCategoriesSelected": "No categories selected yet",
   "projectImagesCard": "Project Images",
   "coverImageFormHint": "Add a cover image to make your project stand out.",
   "tapToAddCover": "Tap to add cover image",
@@ -566,5 +568,8 @@
   "confirmRemoveCoverTitle": "Remove Cover Image?",
   "confirmRemoveCoverDesc": "The cover image will be permanently deleted.",
   "confirmRemoveImageTitle": "Remove Image?",
-  "confirmRemoveImageDesc": "This image will be permanently deleted."
+  "confirmRemoveImageDesc": "This image will be permanently deleted.",
+  "deleteProject": "Delete Project",
+  "confirmDeleteProjectTitle": "Delete Project?",
+  "confirmDeleteProjectDesc": "This will permanently delete your project and all its images. This action cannot be undone."
 }

@@ -6,6 +6,7 @@ import 'package:votera/features/projects/data/repositories/project_repository_im
 import 'package:votera/features/projects/domain/repositories/project_repository.dart';
 import 'package:votera/features/projects/domain/usecases/add_project_category.dart';
 import 'package:votera/features/projects/domain/usecases/cancel_project.dart';
+import 'package:votera/features/projects/domain/usecases/delete_project.dart';
 import 'package:votera/features/projects/domain/usecases/delete_project_cover.dart';
 import 'package:votera/features/projects/domain/usecases/delete_project_extra_image.dart';
 import 'package:votera/features/projects/domain/usecases/finalize_project.dart';
@@ -39,6 +40,7 @@ void initProjectsFeature(GetIt sl) {
         removeProjectCategory: sl<RemoveProjectCategory>(),
         finalizeProject: sl<FinalizeProject>(),
         cancelProject: sl<CancelProject>(),
+        deleteProject: sl<DeleteProject>(),
       ),
     )
     // Use cases
@@ -83,6 +85,9 @@ void initProjectsFeature(GetIt sl) {
     )
     ..registerLazySingleton<CancelProject>(
       () => CancelProject(sl<ProjectRepository>()),
+    )
+    ..registerLazySingleton<DeleteProject>(
+      () => DeleteProject(sl<ProjectRepository>()),
     )
     // Repositories
     ..registerLazySingleton<ProjectRepository>(

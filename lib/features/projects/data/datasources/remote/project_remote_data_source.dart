@@ -109,6 +109,12 @@ abstract class ProjectRemoteDataSource {
     required String projectId,
     required String imageId,
   });
+
+  /// DELETE /v1/events/{event_id}/projects/{id}
+  Future<void> deleteProject({
+    required String eventId,
+    required String projectId,
+  });
 }
 
 class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
@@ -323,6 +329,16 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
   }) async {
     await apiClient.delete<void>(
       ProjectEndpoints.extraImage(eventId, projectId, imageId),
+    );
+  }
+
+  @override
+  Future<void> deleteProject({
+    required String eventId,
+    required String projectId,
+  }) async {
+    await apiClient.delete<void>(
+      ProjectEndpoints.projectById(eventId, projectId),
     );
   }
 }

@@ -875,6 +875,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'أنت عضو في أكثر من فريق. اختر الفريق الذي سيقدّم هذا المشروع.';
 
   @override
+  String get changeTeam => 'تغيير';
+
+  @override
   String get submittingAsTeam => 'التقديم باسم';
 
   @override
@@ -1232,6 +1235,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noCategoriesAvailable => 'لا توجد تصنيفات متاحة';
 
   @override
+  String get noCategoriesSelected => 'لم يتم اختيار أي تصنيف بعد';
+
+  @override
   String get projectImagesCard => 'صور المشروع';
 
   @override
@@ -1287,4 +1293,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get confirmRemoveImageDesc => 'سيتم حذف هذه الصورة نهائياً.';
+
+  @override
+  String get deleteProject => 'حذف المشروع';
+
+  @override
+  String get confirmDeleteProjectTitle => 'حذف المشروع؟';
+
+  @override
+  String get confirmDeleteProjectDesc =>
+      'سيتم حذف مشروعك وجميع صوره نهائياً. لا يمكن التراجع عن هذا الإجراء.';
 }

@@ -69,7 +69,12 @@ class _CategoryProjectsPageState extends State<CategoryProjectsPage> {
   /// Wraps all states in a single scrollable view so the SliverAppBar
   /// (and its back button) is always present regardless of load state.
   Widget _buildScrollView(BuildContext context, ProjectsState state) {
-    return CustomScrollView(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        final int columns = availableWidth > AppBreakpoints.tabletMax ? 3 : 2;
+
+        return CustomScrollView(
       slivers: [
         SliverAppBar(
           backgroundColor: context.colors.surface,
@@ -94,6 +99,7 @@ class _CategoryProjectsPageState extends State<CategoryProjectsPage> {
           ProjectListSection(
             projects: state.projects,
             eventId: widget.eventId,
+            columns: columns,
           ),
           if (_totalPages > 1)
             SliverToBoxAdapter(
@@ -108,6 +114,8 @@ class _CategoryProjectsPageState extends State<CategoryProjectsPage> {
           SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
         ],
       ],
+        );
+      },
     );
   }
 

@@ -307,6 +307,7 @@
 
   "selectTeamTitle": "اختر فريقاً",
   "selectTeamDesc": "أنت عضو في أكثر من فريق. اختر الفريق الذي سيقدّم هذا المشروع.",
+  "changeTeam": "تغيير",
   "submittingAsTeam": "التقديم باسم",
 
   "submitYourProject": "أرسل مشروعك",
@@ -441,6 +442,7 @@
   "categoryRemoved": "تمت إزالة التصنيف",
   "maxCategoriesHint": "يمكنك اختيار 3 تصنيفات كحد أقصى.",
   "noCategoriesAvailable": "لا توجد تصنيفات متاحة",
+  "noCategoriesSelected": "لم يتم اختيار أي تصنيف بعد",
   "projectImagesCard": "صور المشروع",
   "coverImageFormHint": "أضف صورة غلاف لإبراز مشروعك.",
   "tapToAddCover": "اضغط لإضافة صورة غلاف",
@@ -460,5 +462,8 @@
   "confirmRemoveCoverTitle": "حذف صورة الغلاف؟",
   "confirmRemoveCoverDesc": "سيتم حذف صورة الغلاف نهائياً.",
   "confirmRemoveImageTitle": "حذف الصورة؟",
-  "confirmRemoveImageDesc": "سيتم حذف هذه الصورة نهائياً."
+  "confirmRemoveImageDesc": "سيتم حذف هذه الصورة نهائياً.",
+  "deleteProject": "حذف المشروع",
+  "confirmDeleteProjectTitle": "حذف المشروع؟",
+  "confirmDeleteProjectDesc": "سيتم حذف مشروعك وجميع صوره نهائياً. لا يمكن التراجع عن هذا الإجراء."
 }

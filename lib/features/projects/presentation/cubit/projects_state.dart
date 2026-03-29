@@ -104,6 +104,11 @@ class ProjectCategoryUpdated extends ProjectsState {
   const ProjectCategoryUpdated();
 }
 
+/// Emitted after a draft project is permanently deleted.
+class ProjectDeleted extends ProjectsState {
+  const ProjectDeleted();
+}
+
 /// Emitted when the current user's own project for an event has been loaded.
 class MyProjectLoaded extends ProjectsState {
   const MyProjectLoaded({required this.project});

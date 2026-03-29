@@ -168,6 +168,17 @@ class _MyProjectViewState extends State<_MyProjectView> {
         );
   }
 
+  /// Reloads the project without emitting a loading state.
+  /// Used after image/category operations so the project view stays visible
+  /// while the data refreshes in the background.
+  void _silentReloadMyProject() {
+    if (_selectedTeam == null) return;
+    context.read<ProjectsCubit>().reloadMyProjectSilent(
+          eventId: widget.eventId,
+          teamId: _selectedTeam!.id,
+        );
+  }
+
   Future<void> _refresh() async {
     // Reloading the team will trigger the TeamLoaded listener, which in turn
     // reloads the project. This covers all refresh scenarios.
@@ -246,8 +257,15 @@ class _MyProjectViewState extends State<_MyProjectView> {
             _loadMyProject();
           },
         ),
-        // After any image upload/deletion or category change, reload the
-        // project so the UI reflects the latest server state.
+        // After deletion the project no longer exists — reload to show the
+        // create-project form (backend will return 404 → MyProjectNotFound).
+        BlocListener<ProjectsCubit, ProjectsState>(
+          listenWhen: (_, current) => current is ProjectDeleted,
+          listener: (ctx, _) => _loadMyProject(),
+        ),
+        // After any image upload/deletion or category change, silently reload
+        // the project so the UI reflects the latest server state without
+        // showing a full-page loading spinner.
         BlocListener<ProjectsCubit, ProjectsState>(
           listenWhen: (_, current) =>
               current is ProjectCoverUploaded ||
@@ -255,7 +273,7 @@ class _MyProjectViewState extends State<_MyProjectView> {
               current is ProjectExtraImageUploaded ||
               current is ProjectExtraImageDeleted ||
               current is ProjectCategoryUpdated,
-          listener: (ctx, _) => _loadMyProject(),
+          listener: (ctx, _) => _silentReloadMyProject(),
         ),
       ],
       child: BlocBuilder<TeamsCubit, TeamsState>(
@@ -284,17 +302,27 @@ class _MyProjectViewState extends State<_MyProjectView> {
 
           // Team confirmed. Now check the project state.
           return BlocBuilder<ProjectsCubit, ProjectsState>(
-            // ProjectActionFailed is handled by BlocListener (snackbar).
-            // Exclude it from the builder so the current view stays visible.
-            buildWhen: (_, current) => current is! ProjectActionFailed,
+            // States handled silently by BlocListeners — exclude them from
+            // the builder so the current view stays visible:
+            //   ProjectActionFailed    → snackbar
+            //   ProjectDeleted         → triggers _loadMyProject (full reload)
+            //   ProjectCoverUploaded   → triggers _silentReloadMyProject
+            //   ProjectCoverDeleted    → triggers _silentReloadMyProject
+            //   ProjectExtraImageUploaded → triggers _silentReloadMyProject
+            //   ProjectExtraImageDeleted  → triggers _silentReloadMyProject
+            //   ProjectCategoryUpdated    → triggers _silentReloadMyProject
+            buildWhen: (_, current) =>
+                current is! ProjectActionFailed &&
+                current is! ProjectDeleted &&
+                current is! ProjectCoverUploaded &&
+                current is! ProjectCoverDeleted &&
+                current is! ProjectExtraImageUploaded &&
+                current is! ProjectExtraImageDeleted &&
+                current is! ProjectCategoryUpdated,
             builder: (context, projectState) {
               if (projectState is ProjectsInitial ||
                   projectState is ProjectsLoading ||
-                  projectState is ProjectSaved ||
-                  projectState is ProjectCoverUploaded ||
-                  projectState is ProjectCoverDeleted ||
-                  projectState is ProjectExtraImageUploaded ||
-                  projectState is ProjectExtraImageDeleted) {
+                  projectState is ProjectSaved) {
                 return const Center(child: AppLoadingIndicator());
               }
 
@@ -481,6 +509,12 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
   // Categories selected by the user (max 3).
   final List<CategoryEntity> _selectedCategories = [];
 
+  // Owned directly by this state so it can be accessed without context.
+  // Avoids the issue where build(context) returns the BlocProvider as a child,
+  // making context.read<CategoriesCubit>() look in the wrong direction (up the
+  // tree instead of down).
+  late final CategoriesCubit _categoriesCubit;
+
   @override
   void initState() {
     super.initState();
@@ -490,6 +524,7 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
     _repoUrlController = TextEditingController();
     _demoUrlController = TextEditingController();
     _selectedTeam = widget.initialTeam ?? widget.teams.first;
+    _categoriesCubit = sl<CategoriesCubit>()..loadCategories(page: 1, size: 100);
   }
 
   @override
@@ -499,6 +534,7 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
     _techStackController.dispose();
     _repoUrlController.dispose();
     _demoUrlController.dispose();
+    _categoriesCubit.close();
     super.dispose();
   }
 
@@ -534,6 +570,38 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
         );
   }
 
+  // Opens the category picker sheet and appends the newly chosen categories
+  // to the local _selectedCategories list. Uses _categoriesCubit directly
+  // (field) to avoid looking up the tree with context.read.
+  Future<void> _openCategoryPicker(BuildContext context) async {
+    final remaining = 3 - _selectedCategories.length;
+    if (remaining <= 0) return;
+
+    final alreadySelectedIds = _selectedCategories.map((c) => c.id).toSet();
+
+    final newIds = await showModalBottomSheet<List<String>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => BlocProvider.value(
+        value: _categoriesCubit,
+        child: _CategoryPickerSheet(
+          alreadySelectedIds: alreadySelectedIds,
+          maxSelectable: remaining,
+        ),
+      ),
+    );
+
+    if (newIds == null || newIds.isEmpty || !mounted) return;
+
+    // Map returned IDs back to CategoryEntity objects using the loaded list.
+    final allCategories = _categoriesCubit.state is CategoriesLoaded
+        ? (_categoriesCubit.state as CategoriesLoaded).response.items
+        : <CategoryEntity>[];
+    final toAdd = allCategories.where((c) => newIds.contains(c.id)).toList();
+    setState(() => _selectedCategories.addAll(toAdd));
+  }
+
   // Called from the BlocListener in _MyProjectViewState when ProjectSaved fires.
   // Uploads the pending cover using the newly created project ID.
   void uploadPendingCoverIfAny(String projectId) {
@@ -551,8 +619,8 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return BlocProvider<CategoriesCubit>(
-      create: (_) => sl<CategoriesCubit>()..loadCategories(page: 1, size: 100),
+    return BlocProvider.value(
+      value: _categoriesCubit,
       child: RefreshIndicator(
         onRefresh: widget.onRefresh,
         child: SingleChildScrollView(
@@ -590,15 +658,46 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
                   SizedBox(height: AppSpacing.lg),
                 ],
 
-                // Card 1: Cover image
-                _FormSectionCard(
-                  icon: Icons.image_outlined,
-                  title: l10n.projectImagesCard,
-                  subtitle: l10n.coverImageFormHint,
-                  child: _LocalCoverSlot(
-                    file: _pendingCover,
-                    onPick: _pickCover,
-                    onRemove: _removePendingCover,
+                // Card 1: Cover image — header on top, image full-bleed below.
+                Container(
+                  width: double.infinity,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    color: context.colors.surface,
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusLg),
+                    border: Border.all(color: context.colors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: AppSpacing.cardPadding
+                            .copyWith(bottom: AppSpacing.sm),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.image_outlined,
+                              size: AppSizes.iconSm,
+                              color: context.colors.primary,
+                            ),
+                            SizedBox(width: AppSpacing.sm),
+                            Text(
+                              l10n.projectImagesCard,
+                              style: AppTypography.labelLarge.copyWith(
+                                color: context.colors.textPrimary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      _LocalCoverSlot(
+                        file: _pendingCover,
+                        onPick: _pickCover,
+                        onRemove: _removePendingCover,
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(height: AppSpacing.md),
@@ -675,14 +774,99 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
                   icon: Icons.category_outlined,
                   title: l10n.categoriesCard,
                   subtitle: l10n.categoriesCardDesc,
-                  child: _InlineCategoryPicker(
-                    selectedCategories: _selectedCategories,
-                    onChanged: (updated) =>
-                        setState(() {
-                          _selectedCategories
-                            ..clear()
-                            ..addAll(updated);
-                        }),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Show selected categories as removable chips.
+                      if (_selectedCategories.isNotEmpty) ...[
+                        Wrap(
+                          spacing: AppSpacing.sm,
+                          runSpacing: AppSpacing.sm,
+                          children: _selectedCategories.map((cat) {
+                            return _RemovableCategoryChip(
+                              category: cat,
+                              onRemove: () => setState(() =>
+                                  _selectedCategories.removeWhere(
+                                      (c) => c.id == cat.id)),
+                            );
+                          }).toList(),
+                        ),
+                        SizedBox(height: AppSpacing.sm),
+                      ],
+
+                      // Empty state when nothing is selected yet.
+                      if (_selectedCategories.isEmpty) ...[
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(
+                            vertical: AppSpacing.md,
+                            horizontal: AppSpacing.sm,
+                          ),
+                          decoration: BoxDecoration(
+                            color: context.colors.background,
+                            borderRadius:
+                                BorderRadius.circular(AppSpacing.radiusMd),
+                            border:
+                                Border.all(color: context.colors.border),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.label_outline_rounded,
+                                size: AppSizes.iconSm,
+                                color: context.colors.textHint,
+                              ),
+                              SizedBox(width: AppSpacing.sm),
+                              Text(
+                                l10n.noCategoriesSelected,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: context.colors.textHint,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: AppSpacing.sm),
+                      ],
+
+                      // Add button — hidden when the 3-category limit is reached.
+                      if (_selectedCategories.length < 3)
+                        TextButton.icon(
+                          onPressed: () => _openCategoryPicker(context),
+                          icon: Icon(
+                            Icons.add_circle_outline_rounded,
+                            size: AppSizes.iconSm,
+                          ),
+                          label: Text(l10n.addCategory),
+                          style: TextButton.styleFrom(
+                            foregroundColor: context.colors.primary,
+                            padding: EdgeInsets.zero,
+                            textStyle: AppTypography.labelMedium.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+
+                      // Max reached hint.
+                      if (_selectedCategories.length >= 3) ...[
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline_rounded,
+                              size: 13.r,
+                              color: context.colors.textHint,
+                            ),
+                            SizedBox(width: AppSpacing.xs),
+                            Text(
+                              l10n.maxCategoriesHint,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: context.colors.textHint,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 SizedBox(height: AppSpacing.xl),
@@ -740,15 +924,6 @@ class _ProjectView extends StatelessWidget {
             if (project.status == ProjectStatus.draft) ...[
               SizedBox(height: AppSpacing.lg),
               _ImageSection(project: project, eventId: eventId),
-              SizedBox(height: AppSpacing.lg),
-              BlocProvider<CategoriesCubit>(
-                create: (_) =>
-                    sl<CategoriesCubit>()..loadCategories(page: 1, size: 100),
-                child: _CategorySection(
-                  project: project,
-                  eventId: eventId,
-                ),
-              ),
             ],
             SizedBox(height: AppSpacing.lg),
             _ProjectActionsRow(project: project, eventId: eventId),
@@ -809,6 +984,20 @@ class _ProjectActionsRow extends StatelessWidget {
                 label: Text(AppLocalizations.of(ctx)!.cancelSubmission),
               ),
             ],
+
+            // Delete is only available for draft projects.
+            if (project.status == ProjectStatus.draft) ...[
+              SizedBox(height: AppSpacing.sm),
+              OutlinedButton.icon(
+                onPressed: isLoading ? null : () => _confirmDelete(ctx),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: ctx.colors.error,
+                  side: BorderSide(color: ctx.colors.error),
+                ),
+                icon: Icon(Icons.delete_outline, size: AppSizes.iconSm),
+                label: Text(AppLocalizations.of(ctx)!.deleteProject),
+              ),
+            ],
           ],
         );
       },
@@ -862,6 +1051,23 @@ class _ProjectActionsRow extends StatelessWidget {
     if (confirmed != true) return;
     if (!context.mounted) return;
     context.read<ProjectsCubit>().cancel(
+          eventId: eventId,
+          projectId: project.id,
+        );
+  }
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showAppConfirmDialog(
+      context,
+      title: l10n.confirmDeleteProjectTitle,
+      message: l10n.confirmDeleteProjectDesc,
+      confirmLabel: l10n.deleteProject,
+      isDestructive: true,
+    );
+    if (confirmed != true) return;
+    if (!context.mounted) return;
+    context.read<ProjectsCubit>().delete(
           eventId: eventId,
           projectId: project.id,
         );
@@ -1392,8 +1598,8 @@ class _TeamSelectionGate extends StatelessWidget {
 }
 
 /// Team selector shown in the project creation form when the user belongs to
-/// more than one team. Displays all teams as tappable tiles; the currently
-/// selected one is highlighted.
+/// more than one team. Shows only the currently selected team as a compact card;
+/// a "Change" button opens a bottom sheet to switch teams.
 class _TeamPicker extends StatelessWidget {
   const _TeamPicker({
     required this.teams,
@@ -1405,34 +1611,172 @@ class _TeamPicker extends StatelessWidget {
   final TeamEntity selected;
   final ValueChanged<TeamEntity> onChanged;
 
+  Future<void> _openSheet(BuildContext context) async {
+    final picked = await showModalBottomSheet<TeamEntity>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _TeamPickerSheet(teams: teams, currentSelected: selected),
+    );
+    if (picked != null) onChanged(picked);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final primary = context.colors.primary;
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: context.colors.border),
+      ),
+      child: Row(
+        children: [
+          // Team avatar — image or initial letter fallback.
+          Container(
+            width: 40.r,
+            height: 40.r,
+            decoration: BoxDecoration(
+              color: primary.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: selected.imageUrl != null
+                ? ClipOval(
+                    child: Image.network(
+                      selected.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          _teamInitial(context, selected),
+                    ),
+                  )
+                : _teamInitial(context, selected),
+          ),
+          SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  selected.name,
+                  style: AppTypography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: context.colors.textPrimary,
+                  ),
+                ),
+                if (selected.description != null &&
+                    selected.description!.isNotEmpty)
+                  Text(
+                    selected.description!,
+                    style: AppTypography.caption.copyWith(
+                      color: context.colors.textHint,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            ),
+          ),
+          // Opens the sheet to switch teams.
+          TextButton(
+            onPressed: () => _openSheet(context),
+            child: Text(l10n.changeTeam),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _teamInitial(BuildContext context, TeamEntity team) {
+    final primary = context.colors.primary;
+    final letter =
+        team.name.isNotEmpty ? team.name[0].toUpperCase() : '?';
+    return Center(
+      child: Text(
+        letter,
+        style: AppTypography.labelLarge.copyWith(
+          color: primary,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+/// Bottom sheet listing all teams so the user can change their selection.
+class _TeamPickerSheet extends StatelessWidget {
+  const _TeamPickerSheet({
+    required this.teams,
+    required this.currentSelected,
+  });
+
+  final List<TeamEntity> teams;
+  final TeamEntity currentSelected;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.selectTeamTitle,
-          style: AppTypography.labelMedium.copyWith(
-            color: context.colors.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md + MediaQuery.of(context).viewInsets.bottom,
+      ),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusXl),
         ),
-        SizedBox(height: AppSpacing.xs),
-        Text(
-          l10n.selectTeamDesc,
-          style: AppTypography.bodySmall.copyWith(
-            color: context.colors.textSecondary,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Drag handle
+          Center(
+            child: Container(
+              width: 40.r,
+              height: 4.r,
+              margin: EdgeInsets.only(bottom: AppSpacing.md),
+              decoration: BoxDecoration(
+                color: context.colors.border,
+                borderRadius:
+                    BorderRadius.circular(AppSpacing.radiusFull),
+              ),
+            ),
           ),
-        ),
-        SizedBox(height: AppSpacing.sm),
-        ...teams.map((team) => _TeamTile(
+          Text(
+            l10n.selectTeamTitle,
+            style: AppTypography.h3.copyWith(
+              color: context.colors.textPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n.selectTeamDesc,
+            style: AppTypography.bodyMedium.copyWith(
+              color: context.colors.textSecondary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.lg),
+          ...teams.map(
+            (team) => _TeamTile(
               team: team,
-              isSelected: team.id == selected.id,
-              onTap: () => onChanged(team),
-            )),
-      ],
+              isSelected: team.id == currentSelected.id,
+              onTap: () => Navigator.of(context).pop(team),
+            ),
+          ),
+          SizedBox(height: AppSpacing.md),
+        ],
+      ),
     );
   }
 }
@@ -1596,27 +1940,77 @@ class _CategorySection extends StatelessWidget {
                   )
                   .toList(),
             ),
-          if (project.categories.isNotEmpty && canAdd)
+
+          // Empty state — shown when no categories are attached yet.
+          if (project.categories.isEmpty && canAdd) ...[
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(
+                vertical: AppSpacing.md,
+                horizontal: AppSpacing.sm,
+              ),
+              decoration: BoxDecoration(
+                color: context.colors.background,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                border: Border.all(
+                  color: context.colors.border,
+                  strokeAlign: BorderSide.strokeAlignInside,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.label_outline_rounded,
+                    size: AppSizes.iconSm,
+                    color: context.colors.textHint,
+                  ),
+                  SizedBox(width: AppSpacing.sm),
+                  Text(
+                    l10n.noCategoriesSelected,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: context.colors.textHint,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          // "Max reached" note — shown when all 3 slots are filled.
+          if (!canAdd && project.categories.isNotEmpty) ...[
             SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 13.r,
+                  color: context.colors.textHint,
+                ),
+                SizedBox(width: AppSpacing.xs),
+                Text(
+                  l10n.maxCategoriesHint,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: context.colors.textHint,
+                  ),
+                ),
+              ],
+            ),
+          ],
+
+          if (canAdd) SizedBox(height: AppSpacing.sm),
 
           // Add button opens the picker sheet.
           if (canAdd)
             TextButton.icon(
-              onPressed: () =>
-                  _openCategoryPicker(context),
-              icon: Icon(Icons.add_rounded, size: AppSizes.iconSm),
+              onPressed: () => _openCategoryPicker(context),
+              icon: Icon(Icons.add_circle_outline_rounded, size: AppSizes.iconSm),
               label: Text(l10n.addCategory),
               style: TextButton.styleFrom(
                 foregroundColor: context.colors.primary,
                 padding: EdgeInsets.zero,
-              ),
-            ),
-
-          if (project.categories.isEmpty && !canAdd)
-            Text(
-              l10n.maxCategoriesHint,
-              style: AppTypography.bodySmall.copyWith(
-                color: context.colors.textHint,
+                textStyle: AppTypography.labelMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
         ],
@@ -1661,7 +2055,8 @@ class _CategorySection extends StatelessWidget {
   }
 }
 
-/// A chip that displays a category name with a remove button.
+/// A chip that displays an already-attached category with a remove button.
+/// Uses a solid primary background to distinguish it from selectable chips.
 class _RemovableCategoryChip extends StatelessWidget {
   const _RemovableCategoryChip({
     required this.category,
@@ -1674,30 +2069,46 @@ class _RemovableCategoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = context.colors.primary;
+    final onPrimary = context.colors.textOnPrimary;
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs + 2,
+      padding: EdgeInsets.only(
+        left: AppSpacing.sm,
+        right: AppSpacing.xs,
+        top: AppSpacing.xs + 2,
+        bottom: AppSpacing.xs + 2,
       ),
       decoration: BoxDecoration(
-        color: primary.withValues(alpha: 0.10),
+        color: primary,
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-        border: Border.all(color: primary.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Icon(
+            Icons.label_rounded,
+            size: 12.r,
+            color: onPrimary.withValues(alpha: 0.75),
+          ),
+          SizedBox(width: AppSpacing.xs),
           Text(
             category.name,
             style: AppTypography.bodySmall.copyWith(
-              color: primary,
+              color: onPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
           SizedBox(width: AppSpacing.xs),
+          // Remove button wrapped in a translucent circle for a pill-chip look.
           GestureDetector(
             onTap: onRemove,
-            child: Icon(Icons.close_rounded, size: 14.r, color: primary),
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: onPrimary.withValues(alpha: 0.20),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.close_rounded, size: 11.r, color: onPrimary),
+            ),
           ),
         ],
       ),
@@ -1977,68 +2388,92 @@ class _LocalCoverSlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final primary = context.colors.primary;
 
     if (file == null) {
-      return GestureDetector(
-        onTap: onPick,
-        child: Container(
-          height: 140.r,
-          decoration: BoxDecoration(
-            color: context.colors.background,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            border: Border.all(color: context.colors.border, width: 1.5),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.add_photo_alternate_outlined,
-                size: AppSizes.iconXl,
-                color: context.colors.textHint,
-              ),
-              SizedBox(height: AppSpacing.sm),
-              Text(
-                l10n.tapToAddCover,
-                style: AppTypography.bodySmall.copyWith(
-                  color: context.colors.textHint,
+      // Empty state: tap anywhere to pick a cover image.
+      // Material provides the background color AND the ink surface so the
+      // ripple is rendered on top of the color and remains visible.
+      return Material(
+        color: primary.withValues(alpha: 0.05),
+        child: InkWell(
+          onTap: onPick,
+          child: SizedBox(
+            width: double.infinity,
+            height: 180.r,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 52.r,
+                  height: 52.r,
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: 0.10),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.add_photo_alternate_outlined,
+                    size: AppSizes.iconLg,
+                    color: primary,
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: AppSpacing.sm),
+                Text(
+                  l10n.tapToAddCover,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: context.colors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.xs),
+                Text(
+                  l10n.coverImageFormHint,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: context.colors.textHint,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
-    // Show the locally picked image with a remove button.
+    // Selected local image — no ClipRRect; the parent card handles clipping.
     return Stack(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          child: file!.bytes != null
-              ? Image.memory(
-                  file!.bytes!,
-                  width: double.infinity,
-                  height: 140.r,
-                  fit: BoxFit.cover,
-                )
-              : Container(
-                  height: 140.r,
-                  color: context.colors.border,
-                ),
-        ),
+        file!.bytes != null
+            ? Image.memory(
+                file!.bytes!,
+                width: double.infinity,
+                height: 180.r,
+                fit: BoxFit.cover,
+              )
+            : Container(
+                width: double.infinity,
+                height: 180.r,
+                color: context.colors.border,
+              ),
+
+        // Floating icon buttons in the top-right corner.
         Positioned(
           top: AppSpacing.sm,
           right: AppSpacing.sm,
-          child: GestureDetector(
-            onTap: onRemove,
-            child: Container(
-              padding: EdgeInsets.all(AppSpacing.xs),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.6),
-                shape: BoxShape.circle,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _FloatingIconButton(
+                icon: Icons.edit_outlined,
+                onTap: onPick,
               ),
-              child: Icon(Icons.close_rounded, size: 16.r, color: Colors.white),
-            ),
+              SizedBox(width: AppSpacing.xs),
+              _FloatingIconButton(
+                icon: Icons.delete_outline,
+                onTap: onRemove,
+                isDestructive: true,
+              ),
+            ],
           ),
         ),
       ],
@@ -2046,98 +2481,8 @@ class _LocalCoverSlot extends StatelessWidget {
   }
 }
 
-// =============================================================================
-// Inline category picker — shown inside the create form and edit page
-// =============================================================================
-
-/// Renders all available categories as selectable chips.
-/// Selected categories are highlighted in the primary color.
-/// Enforces the 3-category maximum.
-class _InlineCategoryPicker extends StatelessWidget {
-  const _InlineCategoryPicker({
-    required this.selectedCategories,
-    required this.onChanged,
-  });
-
-  final List<CategoryEntity> selectedCategories;
-  final ValueChanged<List<CategoryEntity>> onChanged;
-
-  static const int _maxCategories = 3;
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<CategoriesCubit, CategoriesState>(
-      builder: (context, state) {
-        if (state is CategoriesLoading || state is CategoriesInitial) {
-          return Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: SizedBox(
-                height: 20.r,
-                width: 20.r,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor:
-                      AlwaysStoppedAnimation(context.colors.primary),
-                ),
-              ),
-            ),
-          );
-        }
-
-        if (state is CategoriesLoaded) {
-          final categories = state.response.items;
-          if (categories.isEmpty) {
-            return Text(
-              AppLocalizations.of(context)!.noCategoriesAvailable,
-              style: AppTypography.bodySmall.copyWith(
-                color: context.colors.textHint,
-              ),
-            );
-          }
-          return Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: categories.map((category) {
-              final isSelected =
-                  selectedCategories.any((c) => c.id == category.id);
-              return _CategoryChip(
-                category: category,
-                isSelected: isSelected,
-                onTap: () => _toggle(context, category),
-              );
-            }).toList(),
-          );
-        }
-
-        return const SizedBox.shrink();
-      },
-    );
-  }
-
-  void _toggle(BuildContext context, CategoryEntity category) {
-    final updated = List<CategoryEntity>.from(selectedCategories);
-    final idx = updated.indexWhere((c) => c.id == category.id);
-    if (idx >= 0) {
-      updated.removeAt(idx);
-    } else {
-      if (updated.length >= _maxCategories) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(
-            content:
-                Text(AppLocalizations.of(context)!.maxCategoriesHint),
-            behavior: SnackBarBehavior.floating,
-          ));
-        return;
-      }
-      updated.add(category);
-    }
-    onChanged(updated);
-  }
-}
-
 /// Single selectable chip for a category.
+/// Shows a filled primary background when selected to give clear visual feedback.
 class _CategoryChip extends StatelessWidget {
   const _CategoryChip({
     required this.category,
@@ -2152,39 +2497,49 @@ class _CategoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = context.colors.primary;
+    final onPrimary = context.colors.textOnPrimary;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+        duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.xs + 2,
         ),
         decoration: BoxDecoration(
-          color: isSelected
-              ? primary.withValues(alpha: 0.12)
-              : context.colors.background,
+          color: isSelected ? primary : Colors.transparent,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           border: Border.all(
-            color: isSelected
-                ? primary.withValues(alpha: 0.6)
-                : context.colors.border,
-            width: isSelected ? 1.5 : 1,
+            color: isSelected ? primary : context.colors.border,
+            width: 1.5,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (isSelected) ...[
-              Icon(Icons.check_rounded, size: 14.r, color: primary),
-              SizedBox(width: AppSpacing.xs),
-            ],
+            // Icon swaps between tag and checkmark based on selection state.
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: isSelected
+                  ? Icon(
+                      Icons.check_rounded,
+                      size: 13.r,
+                      color: onPrimary,
+                      key: const ValueKey('check'),
+                    )
+                  : Icon(
+                      Icons.label_outline_rounded,
+                      size: 13.r,
+                      color: context.colors.textHint,
+                      key: const ValueKey('label'),
+                    ),
+            ),
+            SizedBox(width: AppSpacing.xs),
             Text(
               category.name,
               style: AppTypography.bodySmall.copyWith(
-                color: isSelected ? primary : context.colors.textSecondary,
-                fontWeight:
-                    isSelected ? FontWeight.w600 : FontWeight.normal,
+                color: isSelected ? onPrimary : context.colors.textSecondary,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
           ],
@@ -2312,60 +2667,87 @@ class _ImageSectionState extends State<_ImageSection> {
     final project = widget.project;
     final extraImages = project.images;
     final canAddMore = extraImages.length < _maxExtraImages;
+    final radius = AppSpacing.radiusLg;
 
-    return _FormSectionCard(
-      icon: Icons.photo_library_outlined,
-      title: l10n.projectImages,
+    // Build the card manually so the cover image can be full-bleed at the top.
+    // clipBehavior ensures the image respects the card's rounded corners.
+    return Container(
+      width: double.infinity,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: context.colors.border),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        // stretch forces the cover image to fill the card's full width.
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // -- Cover image --
-          Row(
-            children: [
-              Text(
-                l10n.coverImage,
-                style: AppTypography.labelMedium.copyWith(
-                  color: context.colors.textSecondary,
-                  fontWeight: FontWeight.w600,
+          // Section header at the top with standard padding.
+          Padding(
+            padding: AppSpacing.cardPadding.copyWith(bottom: AppSpacing.sm),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.photo_library_outlined,
+                  size: AppSizes.iconSm,
+                  color: context.colors.primary,
                 ),
-              ),
-            ],
+                SizedBox(width: AppSpacing.sm),
+                Text(
+                  l10n.projectImages,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: context.colors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
           ),
-          SizedBox(height: AppSpacing.sm),
+
+          // Cover image — full-bleed, no inner border radius.
           _CoverImageSlot(
             coverUrl: project.coverUrl,
             onUpload: _pickAndUploadCover,
             onRemove: _confirmAndRemoveCover,
             onReplace: _pickAndUploadCover,
+            innerRadius: 0,
           ),
 
-          SizedBox(height: AppSpacing.lg),
-
-          // -- Extra images --
-          Row(
-            children: [
-              Text(
-                l10n.extraImages,
-                style: AppTypography.labelMedium.copyWith(
-                  color: context.colors.textSecondary,
-                  fontWeight: FontWeight.w600,
+          // Extra images section with standard padding.
+          Padding(
+            padding: AppSpacing.cardPadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: AppSpacing.xs),
+                Row(
+                  children: [
+                    Text(
+                      l10n.extraImages,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: context.colors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.xs),
+                    Text(
+                      '${extraImages.length}/$_maxExtraImages',
+                      style: AppTypography.caption.copyWith(
+                        color: context.colors.textHint,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(width: AppSpacing.xs),
-              Text(
-                '${extraImages.length}/$_maxExtraImages',
-                style: AppTypography.caption.copyWith(
-                  color: context.colors.textHint,
+                SizedBox(height: AppSpacing.sm),
+                _ExtraImagesRow(
+                  images: extraImages,
+                  canAddMore: canAddMore,
+                  onAdd: _pickAndUploadExtraImage,
+                  onRemove: _confirmAndRemoveExtraImage,
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: AppSpacing.sm),
-          _ExtraImagesRow(
-            images: extraImages,
-            canAddMore: canAddMore,
-            onAdd: _pickAndUploadExtraImage,
-            onRemove: _confirmAndRemoveExtraImage,
+              ],
+            ),
           ),
         ],
       ),
@@ -2381,6 +2763,9 @@ class _CoverImageSlot extends StatelessWidget {
     required this.onUpload,
     required this.onRemove,
     required this.onReplace,
+    // When the parent container already clips (full-bleed mode), pass 0 so
+    // the slot does not add its own inner border radius and cause a mismatch.
+    this.innerRadius,
   });
 
   final String? coverUrl;
@@ -2388,101 +2773,114 @@ class _CoverImageSlot extends StatelessWidget {
   final VoidCallback onRemove;
   final VoidCallback onReplace;
 
+  /// Border radius applied to the slot itself. Defaults to [AppSpacing.radiusMd].
+  /// Pass `0` when the parent card handles clipping (full-bleed layout).
+  final double? innerRadius;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final primary = context.colors.primary;
+    final radius = innerRadius ?? AppSpacing.radiusMd;
+    final borderRadius = BorderRadius.circular(radius);
 
     if (coverUrl == null || coverUrl!.isEmpty) {
       // Empty state — tap to upload.
-      return GestureDetector(
-        onTap: onUpload,
-        child: Container(
-          height: 160.r,
-          decoration: BoxDecoration(
-            color: context.colors.background,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            border: Border.all(
-              color: context.colors.border,
-              width: 1.5,
-              strokeAlign: BorderSide.strokeAlignInside,
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.add_photo_alternate_outlined,
-                size: AppSizes.iconXl,
-                color: context.colors.textHint,
-              ),
-              SizedBox(height: AppSpacing.sm),
-              Text(
-                l10n.addCoverImage,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: context.colors.textHint,
+      // Material provides the background and ink surface so the ripple shows.
+      return Material(
+        color: primary.withValues(alpha: 0.05),
+        borderRadius: radius > 0 ? borderRadius : null,
+        child: InkWell(
+          onTap: onUpload,
+          borderRadius: radius > 0 ? borderRadius : null,
+          child: Container(
+            width: double.infinity,
+            height: 180.r,
+            decoration: radius > 0
+                ? BoxDecoration(
+                    borderRadius: borderRadius,
+                    border: Border.all(
+                      color: primary.withValues(alpha: 0.25),
+                      width: 1.5,
+                    ),
+                  )
+                : null,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 52.r,
+                  height: 52.r,
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: 0.10),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.add_photo_alternate_outlined,
+                    size: AppSizes.iconLg,
+                    color: primary,
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: AppSpacing.sm),
+                Text(
+                  l10n.addCoverImage,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: context.colors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.xs),
+                Text(
+                  l10n.coverImageFormHint,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: context.colors.textHint,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
-    // Has a cover — show the image with change and remove controls.
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      child: Stack(
-        children: [
-          CachedImage(
-            url: coverUrl!,
-            width: double.infinity,
-            height: 160.r,
-            fit: BoxFit.cover,
-          ),
-          // Gradient scrim for button readability.
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 60.r,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.7),
-                    Colors.transparent,
-                  ],
-                ),
+    // Has a cover — show the image with floating action buttons.
+    // When radius == 0 the parent card handles clipping, so no ClipRRect needed.
+    final imageStack = Stack(
+      children: [
+        CachedImage(
+          url: coverUrl!,
+          width: double.infinity,
+          height: 180.r,
+          fit: BoxFit.cover,
+        ),
+        // Floating icon buttons in the top-right corner.
+        Positioned(
+          top: AppSpacing.sm,
+          right: AppSpacing.sm,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _FloatingIconButton(
+                icon: Icons.edit_outlined,
+                onTap: onReplace,
               ),
-            ),
+              SizedBox(width: AppSpacing.xs),
+              _FloatingIconButton(
+                icon: Icons.delete_outline,
+                onTap: onRemove,
+                isDestructive: true,
+              ),
+            ],
           ),
-          // Action buttons over the scrim.
-          Positioned(
-            bottom: AppSpacing.sm,
-            right: AppSpacing.sm,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _ImageActionButton(
-                  label: l10n.changeCoverImage,
-                  icon: Icons.edit_outlined,
-                  onTap: onReplace,
-                ),
-                SizedBox(width: AppSpacing.xs),
-                _ImageActionButton(
-                  label: l10n.removeImage,
-                  icon: Icons.delete_outline,
-                  onTap: onRemove,
-                  isDestructive: true,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
+
+    if (radius > 0) {
+      return ClipRRect(borderRadius: borderRadius, child: imageStack);
+    }
+    return imageStack;
   }
 }
 
@@ -2616,50 +3014,36 @@ class _ExtraImageTile extends StatelessWidget {
   }
 }
 
-// -- Small overlay button used on the cover image --
+// -- Floating icon button used as an overlay on cover images --
 
-class _ImageActionButton extends StatelessWidget {
-  const _ImageActionButton({
-    required this.label,
+/// A compact circular icon button with a semi-transparent backdrop.
+/// Used for change/remove actions overlaid on the cover image.
+class _FloatingIconButton extends StatelessWidget {
+  const _FloatingIconButton({
     required this.icon,
     required this.onTap,
     this.isDestructive = false,
   });
 
-  final String label;
   final IconData icon;
   final VoidCallback onTap;
   final bool isDestructive;
 
   @override
   Widget build(BuildContext context) {
-    final color = isDestructive ? context.colors.error : Colors.white;
+    final color =
+        isDestructive ? context.colors.error : Colors.white;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs,
-        ),
+        width: 34.r,
+        height: 34.r,
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+          color: Colors.black.withValues(alpha: 0.55),
+          shape: BoxShape.circle,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 12.r, color: color),
-            SizedBox(width: 4.r),
-            Text(
-              label,
-              style: AppTypography.caption.copyWith(
-                color: color,
-                fontSize: 11,
-              ),
-            ),
-          ],
-        ),
+        child: Icon(icon, size: 16.r, color: color),
       ),
     );
   }
