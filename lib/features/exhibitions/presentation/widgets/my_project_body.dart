@@ -4,8 +4,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
+import 'package:votera/features/events/domain/entities/event_entity.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 import 'package:votera/features/teams/domain/entities/team_entity.dart';
+import 'package:votera/shared/widgets/empty_state.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
 import 'package:votera/features/teams/presentation/cubit/teams_cubit.dart';
@@ -26,7 +28,8 @@ typedef _ProjectFormResult = ({
 /// Tab body for the "My Project" tab in an exhibition.
 /// Only shown to authenticated non-visitor users.
 ///
-/// Handles three distinct cases:
+/// Handles four distinct cases:
+///   0. Event is not open (voting/closed/draft/archived) → locked empty state
 ///   1. User has no team       → prompt to create a team
 ///   2. User has a team but no project → inline form to submit a project
 ///   3. User has a project     → project card with edit / review actions
@@ -34,12 +37,26 @@ typedef _ProjectFormResult = ({
 /// Owns both a [TeamsCubit] and a [ProjectsCubit] so this tab's state is
 /// fully isolated from the rest of the exhibition page.
 class MyProjectBody extends StatelessWidget {
-  const MyProjectBody({required this.eventId, super.key});
+  const MyProjectBody({
+    required this.eventId,
+    required this.eventStatus,
+    super.key,
+  });
 
   final String eventId;
 
+  /// The lifecycle status of the event. When not [EventStatus.open],
+  /// submissions are blocked and a themed empty state is shown instead.
+  final EventStatus eventStatus;
+
   @override
   Widget build(BuildContext context) {
+    // If the event is not in the open phase, skip all API calls and show a
+    // status-specific locked state immediately.
+    if (eventStatus != EventStatus.open) {
+      return _EventNotOpenState(status: eventStatus);
+    }
+
     return MultiBlocProvider(
       providers: [
         // Team is loaded first; the project is loaded after the team state resolves.
@@ -52,6 +69,57 @@ class MyProjectBody extends StatelessWidget {
         ),
       ],
       child: _MyProjectView(eventId: eventId),
+    );
+  }
+}
+
+// =============================================================================
+// Case 0: Event is not open — submissions locked
+// =============================================================================
+
+/// Shown when the event status does not allow project submissions.
+/// Each lifecycle phase has its own icon and message so the user understands
+/// exactly why they cannot submit, without a generic error.
+class _EventNotOpenState extends StatelessWidget {
+  const _EventNotOpenState({required this.status});
+
+  final EventStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    final (icon, title, subtitle) = switch (status) {
+      EventStatus.voting => (
+          Icons.how_to_vote_outlined,
+          l10n.votingPhaseTitle,
+          l10n.votingPhaseDesc,
+        ),
+      EventStatus.closed => (
+          Icons.event_busy_outlined,
+          l10n.eventClosedTitle,
+          l10n.eventClosedDesc,
+        ),
+      EventStatus.archived => (
+          Icons.inventory_2_outlined,
+          l10n.eventArchivedTitle,
+          l10n.eventArchivedDesc,
+        ),
+      // draft — event exists but submissions window hasn't opened yet.
+      _ => (
+          Icons.schedule_outlined,
+          l10n.eventNotStartedTitle,
+          l10n.eventNotStartedDesc,
+        ),
+    };
+
+    return Center(
+      child: EmptyState(
+        icon: icon,
+        title: title,
+        subtitle: subtitle,
+        showRefreshHint: false,
+      ),
     );
   }
 }

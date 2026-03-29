@@ -1190,4 +1190,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get shareProjectMessage =>
       'I found an interesting project on Votera. Tap the link to view it:';
+
+  @override
+  String get votingPhaseTitle => 'Voting is Live';
+
+  @override
+  String get votingPhaseDesc =>
+      'Project submissions are closed. The community is now voting.';
+
+  @override
+  String get eventClosedTitle => 'Event Has Ended';
+
+  @override
+  String get eventClosedDesc =>
+      'This event is closed and no longer accepting project submissions.';
+
+  @override
+  String get eventNotStartedTitle => 'Event Not Started Yet';
+
+  @override
+  String get eventNotStartedDesc =>
+      'This event hasn\'t opened for submissions yet. Check back soon.';
+
+  @override
+  String get eventArchivedTitle => 'Event Archived';
+
+  @override
+  String get eventArchivedDesc =>
+      'This event has been archived and is no longer active.';
 }

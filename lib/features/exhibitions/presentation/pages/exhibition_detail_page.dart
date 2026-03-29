@@ -11,6 +11,7 @@ import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
 import 'package:votera/features/rankings/presentation/cubit/rankings_cubit.dart';
 import 'package:votera/features/rankings/presentation/widgets/rankings_body.dart';
+import 'package:votera/features/events/domain/entities/event_entity.dart';
 import 'package:votera/features/voting/presentation/cubit/voting_cubit.dart';
 
 /// Detail page for a single exhibition, shown after tapping an exhibition card.
@@ -19,9 +20,16 @@ import 'package:votera/features/voting/presentation/cubit/voting_cubit.dart';
 /// Participants (non-visitor roles) also see a "My Project" tab at the end
 /// that shows their own project submission for this event.
 class ExhibitionDetailPage extends StatefulWidget {
-  const ExhibitionDetailPage({required this.exhibitionId, super.key});
+  const ExhibitionDetailPage({
+    required this.exhibitionId,
+    required this.eventStatus,
+    super.key,
+  });
 
   final String exhibitionId;
+
+  /// The lifecycle status of the event, used to gate the My Project tab.
+  final EventStatus eventStatus;
 
   @override
   State<ExhibitionDetailPage> createState() => _ExhibitionDetailPageState();
@@ -112,7 +120,10 @@ class _ExhibitionDetailPageState extends State<ExhibitionDetailPage>
                 CategoriesBody(eventId: widget.exhibitionId),
                 RankingsBody(eventId: widget.exhibitionId),
                 if (_canViewMyProject)
-                  MyProjectBody(eventId: widget.exhibitionId),
+                  MyProjectBody(
+                    eventId: widget.exhibitionId,
+                    eventStatus: widget.eventStatus,
+                  ),
               ],
             ),
           ),

@@ -526,5 +526,14 @@
   "approveRequest": "Approve",
   "declineRequest": "Decline",
   "shareProjectSubject": "Check out this project on Votera!",
-  "shareProjectMessage": "I found an interesting project on Votera. Tap the link to view it:"
+  "shareProjectMessage": "I found an interesting project on Votera. Tap the link to view it:",
+
+  "votingPhaseTitle": "Voting is Live",
+  "votingPhaseDesc": "Project submissions are closed. The community is now voting.",
+  "eventClosedTitle": "Event Has Ended",
+  "eventClosedDesc": "This event is closed and no longer accepting project submissions.",
+  "eventNotStartedTitle": "Event Not Started Yet",
+  "eventNotStartedDesc": "This event hasn't opened for submissions yet. Check back soon.",
+  "eventArchivedTitle": "Event Archived",
+  "eventArchivedDesc": "This event has been archived and is no longer active."
 }

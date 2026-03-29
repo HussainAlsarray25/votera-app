@@ -23,6 +23,7 @@ import 'package:votera/features/project_details/presentation/pages/project_detai
 import 'package:votera/features/splash/presentation/pages/splash_page.dart';
 import 'package:votera/features/categories/presentation/pages/category_projects_page.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
+import 'package:votera/features/events/domain/entities/event_entity.dart';
 import 'package:votera/features/teams/presentation/pages/team_detail_page.dart';
 import 'package:votera/features/teams/presentation/pages/teams_page.dart';
 
@@ -129,7 +130,17 @@ class AppRouter {
         path: '/exhibition/:id',
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return ExhibitionDetailPage(exhibitionId: id);
+          // EventStatus is passed as extra when navigating from the exhibitions
+          // list (where the full EventEntity is already available). For deep
+          // links where extra is absent, default to open so the normal flow
+          // is preserved.
+          final eventStatus = state.extra is EventStatus
+              ? state.extra as EventStatus
+              : EventStatus.open;
+          return ExhibitionDetailPage(
+            exhibitionId: id,
+            eventStatus: eventStatus,
+          );
         },
       ),
       GoRoute(

@@ -145,7 +145,10 @@ class _EventsListSliver extends StatelessWidget {
                     return ExhibitionCard(
                       event: event,
                       index: index,
-                      onTap: () => context.push('/exhibition/${event.id}'),
+                      onTap: () => context.push(
+                        '/exhibition/${event.id}',
+                        extra: event.status,
+                      ),
                     );
                   },
                   childCount: events.length,
@@ -169,7 +172,10 @@ class _EventsListSliver extends StatelessWidget {
                   return ExhibitionCard(
                     event: event,
                     index: index,
-                    onTap: () => context.push('/exhibition/${event.id}'),
+                    onTap: () => context.push(
+                        '/exhibition/${event.id}',
+                        extra: event.status,
+                      ),
                   );
                 },
                 childCount: events.length,

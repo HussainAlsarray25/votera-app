@@ -420,5 +420,14 @@
   "approveRequest": "قبول",
   "declineRequest": "رفض",
   "shareProjectSubject": "شاهد هذا المشروع على Votera!",
-  "shareProjectMessage": "وجدت مشروعاً مثيراً للاهتمام على Votera. اضغط الرابط لعرضه:"
+  "shareProjectMessage": "وجدت مشروعاً مثيراً للاهتمام على Votera. اضغط الرابط لعرضه:",
+
+  "votingPhaseTitle": "التصويت جارٍ",
+  "votingPhaseDesc": "انتهى وقت تقديم المشاريع. المجتمع يصوّت الآن.",
+  "eventClosedTitle": "انتهى الحدث",
+  "eventClosedDesc": "هذا الحدث مغلق ولا يقبل تقديم المشاريع بعد الآن.",
+  "eventNotStartedTitle": "لم يبدأ الحدث بعد",
+  "eventNotStartedDesc": "لم يُفتح باب التقديم لهذا الحدث بعد. تحقق لاحقاً.",
+  "eventArchivedTitle": "تم أرشفة الحدث",
+  "eventArchivedDesc": "تم أرشفة هذا الحدث وهو لم يعد نشطاً."
 }

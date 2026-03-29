@@ -1174,4 +1174,30 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get shareProjectMessage =>
       'وجدت مشروعاً مثيراً للاهتمام على Votera. اضغط الرابط لعرضه:';
+
+  @override
+  String get votingPhaseTitle => 'التصويت جارٍ';
+
+  @override
+  String get votingPhaseDesc => 'انتهى وقت تقديم المشاريع. المجتمع يصوّت الآن.';
+
+  @override
+  String get eventClosedTitle => 'انتهى الحدث';
+
+  @override
+  String get eventClosedDesc =>
+      'هذا الحدث مغلق ولا يقبل تقديم المشاريع بعد الآن.';
+
+  @override
+  String get eventNotStartedTitle => 'لم يبدأ الحدث بعد';
+
+  @override
+  String get eventNotStartedDesc =>
+      'لم يُفتح باب التقديم لهذا الحدث بعد. تحقق لاحقاً.';
+
+  @override
+  String get eventArchivedTitle => 'تم أرشفة الحدث';
+
+  @override
+  String get eventArchivedDesc => 'تم أرشفة هذا الحدث وهو لم يعد نشطاً.';
 }

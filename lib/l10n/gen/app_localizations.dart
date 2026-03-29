@@ -2293,6 +2293,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I found an interesting project on Votera. Tap the link to view it:'**
   String get shareProjectMessage;
+
+  /// No description provided for @votingPhaseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Voting is Live'**
+  String get votingPhaseTitle;
+
+  /// No description provided for @votingPhaseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Project submissions are closed. The community is now voting.'**
+  String get votingPhaseDesc;
+
+  /// No description provided for @eventClosedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Has Ended'**
+  String get eventClosedTitle;
+
+  /// No description provided for @eventClosedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This event is closed and no longer accepting project submissions.'**
+  String get eventClosedDesc;
+
+  /// No description provided for @eventNotStartedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Not Started Yet'**
+  String get eventNotStartedTitle;
+
+  /// No description provided for @eventNotStartedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This event hasn\'t opened for submissions yet. Check back soon.'**
+  String get eventNotStartedDesc;
+
+  /// No description provided for @eventArchivedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Archived'**
+  String get eventArchivedTitle;
+
+  /// No description provided for @eventArchivedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This event has been archived and is no longer active.'**
+  String get eventArchivedDesc;
 }
 
 class _AppLocalizationsDelegate
