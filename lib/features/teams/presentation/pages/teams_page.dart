@@ -351,7 +351,20 @@ class _MyTeamTabState extends State<_MyTeamTab> {
                 ),
               ),
             )
-          else
+          else ...[
+            // Show pending invitations above the team list so the user can
+            // respond to them even when they already belong to a team.
+            if (_invitations.isNotEmpty)
+              SliverToBoxAdapter(
+                child: _PendingInvitationsSection(
+                  invitations: _invitations,
+                  isLoading: _isInvitationLoading,
+                  onAccept: (id) =>
+                      widget.invitationCubit.respond(invitationId: id, accept: true),
+                  onDecline: (id) =>
+                      widget.invitationCubit.respond(invitationId: id, accept: false),
+                ),
+              ),
             SliverPadding(
               padding: EdgeInsets.all(AppSpacing.md),
               sliver: SliverList(
@@ -367,6 +380,7 @@ class _MyTeamTabState extends State<_MyTeamTab> {
                 ),
               ),
             ),
+          ],
         ],
       ),
     );
@@ -647,7 +661,7 @@ class _NoTeamView extends StatelessWidget {
             ),
           ),
           // Show pending invitations even when there's no team.
-          if (invitations.isNotEmpty || isInvitationLoading) ...[
+          if (invitations.isNotEmpty) ...[
             SizedBox(height: AppSpacing.xl),
             Align(
               alignment: AlignmentDirectional.centerStart,
@@ -712,6 +726,112 @@ class _NoTeamView extends StatelessWidget {
             color: context.colors.secondary,
           ),
         ),
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Pending invitations section — shown above the team list
+// =============================================================================
+
+/// Displayed at the top of the "My Team" tab when the user has pending
+/// invitations but already belongs to at least one team.
+///
+/// Without this section, users who are already in a team would have no way
+/// to see or respond to new invitations.
+class _PendingInvitationsSection extends StatelessWidget {
+  const _PendingInvitationsSection({
+    required this.invitations,
+    required this.isLoading,
+    required this.onAccept,
+    required this.onDecline,
+  });
+
+  final List<InvitationEntity> invitations;
+  final bool isLoading;
+  final void Function(String id) onAccept;
+  final void Function(String id) onDecline;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+        0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header with icon
+          Row(
+            children: [
+              Container(
+                width: 28.r,
+                height: 28.r,
+                decoration: BoxDecoration(
+                  color: context.colors.warning.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                ),
+                child: Icon(
+                  Icons.mail_outline_rounded,
+                  size: AppSizes.iconSm,
+                  color: context.colors.warning,
+                ),
+              ),
+              SizedBox(width: AppSpacing.sm),
+              Text(
+                l10n.pendingInvitations,
+                style: AppTypography.labelLarge.copyWith(
+                  color: context.colors.textPrimary,
+                ),
+              ),
+              SizedBox(width: AppSpacing.xs),
+              // Badge showing the count
+              if (invitations.isNotEmpty)
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 7.w,
+                    vertical: 2.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: context.colors.warning,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                  ),
+                  child: Text(
+                    '${invitations.length}',
+                    style: AppTypography.caption.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 10.sp,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.sm),
+          // Invitation cards
+          ...invitations.map(
+            (inv) => Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.sm),
+              child: InvitationCard(
+                invitation: inv,
+                isLoading: isLoading,
+                onAccept: () => onAccept(inv.id),
+                onDecline: () => onDecline(inv.id),
+              ),
+            ),
+          ),
+          Divider(
+            height: AppSpacing.xl,
+            thickness: 1,
+            color: context.colors.divider,
+          ),
+        ],
       ),
     );
   }
@@ -958,51 +1078,41 @@ class _BrowseTabState extends State<_BrowseTab> {
     );
   }
 
+  // Returns the human-readable label for the currently selected filter.
+  String _filterLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return switch (_selectedFilter) {
+      _TeamFilter.name => l10n.teamName,
+      _TeamFilter.teamHandle => l10n.teamHandle,
+      _TeamFilter.memberName => l10n.memberName,
+      _TeamFilter.userId => l10n.userId,
+    };
+  }
+
   Widget _buildSearchPrompt(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return ClipRect(
-      child: Center(
-        child: EmptyState(
-          icon: Icons.group_outlined,
-          title: l10n.browse,
-          subtitle: l10n.searchTeamsByName,
-          showRefreshHint: false,
-        ),
+    return Center(
+      child: EmptyState(
+        icon: Icons.group_outlined,
+        title: l10n.browse,
+        subtitle: l10n.searchTeamsByName,
+        showRefreshHint: false,
       ),
     );
   }
 
-
   Widget _buildNoResults(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final query = _searchController.text.trim();
+    final filterLabel = _filterLabel(context);
     return Center(
-      child: Padding(
-        padding: EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.group_off_rounded,
-              size: AppSizes.iconXxl,
-              color: context.colors.textHint,
-            ),
-            SizedBox(height: AppSpacing.md),
-            Text(
-              AppLocalizations.of(context)!.noTeamsFound,
-              style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
-            ),
-            SizedBox(height: AppSpacing.xs),
-            Text(
-              query.isEmpty
-                  ? 'No teams available.'
-                  : AppLocalizations.of(context)!.noTeamsMatchedQuery(query),
-              style: AppTypography.bodyMedium.copyWith(
-                color: context.colors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+      child: EmptyState(
+        icon: Icons.group_off_rounded,
+        title: l10n.noTeamsFound,
+        subtitle: query.isEmpty
+            ? l10n.searchTeamsByName
+            : l10n.noTeamsMatchedQuery('"$query" — $filterLabel'),
+        showRefreshHint: false,
       ),
     );
   }
@@ -1026,27 +1136,17 @@ class _BrowseTabState extends State<_BrowseTab> {
   }
 
   Widget _buildError(BuildContext context, String message) {
+    final l10n = AppLocalizations.of(context)!;
+    final filterLabel = _filterLabel(context);
+    final query = _searchController.text.trim();
     return Center(
-      child: Padding(
-        padding: EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: AppSizes.iconXxl,
-              color: context.colors.error,
-            ),
-            SizedBox(height: AppSpacing.md),
-            Text(
-              message,
-              style: AppTypography.bodyMedium.copyWith(
-                color: context.colors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+      child: EmptyState(
+        icon: Icons.wifi_off_rounded,
+        title: l10n.noTeamsFound,
+        subtitle: query.isEmpty
+            ? message
+            : '$message\n"$query" — $filterLabel',
+        showRefreshHint: false,
       ),
     );
   }

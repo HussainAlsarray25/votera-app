@@ -5,6 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
+import 'package:votera/features/categories/domain/entities/category_entity.dart';
+import 'package:votera/features/categories/presentation/cubit/categories_cubit.dart';
 import 'package:votera/features/events/domain/entities/event_entity.dart';
 import 'package:votera/features/projects/domain/entities/extra_image_entity.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
@@ -15,6 +17,7 @@ import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
 import 'package:votera/features/teams/presentation/cubit/teams_cubit.dart';
 import 'package:votera/features/teams/presentation/widgets/create_edit_team_sheet.dart';
+import 'package:votera/shared/widgets/app_dialog.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
@@ -145,11 +148,9 @@ class _MyProjectViewState extends State<_MyProjectView> {
   // to pick (only relevant when the user belongs to more than one team).
   TeamEntity? _selectedTeam;
 
-  // Locally cached cover URL set from [ProjectCoverUploaded].
-  // Used as a fallback when the backend's GET response returns null for
-  // cover_url even though an upload just succeeded. Cleared when the cover
-  // is deleted or when a reload returns a real URL from the server.
-  String? _coverUrlOverride;
+  // Key used to call into the create form state and upload a pending cover
+  // after the project has been saved and its ID is available.
+  final _createFormKey = GlobalKey<_CreateProjectFormState>();
 
   void _selectTeam(TeamEntity team) {
     setState(() => _selectedTeam = team);
@@ -233,18 +234,27 @@ class _MyProjectViewState extends State<_MyProjectView> {
           },
         ),
         // After any successful project mutation, reload the project.
+        // If the form had a pending cover image, upload it now that we have
+        // the project ID from the saved project.
         BlocListener<ProjectsCubit, ProjectsState>(
           listenWhen: (_, current) => current is ProjectSaved,
-          listener: (ctx, _) => _loadMyProject(),
+          listener: (ctx, state) {
+            if (state is ProjectSaved) {
+              _createFormKey.currentState
+                  ?.uploadPendingCoverIfAny(state.project.id);
+            }
+            _loadMyProject();
+          },
         ),
-        // After any image upload or deletion, reload the project so the
-        // cover and extra images list reflect the new state immediately.
+        // After any image upload/deletion or category change, reload the
+        // project so the UI reflects the latest server state.
         BlocListener<ProjectsCubit, ProjectsState>(
           listenWhen: (_, current) =>
               current is ProjectCoverUploaded ||
               current is ProjectCoverDeleted ||
               current is ProjectExtraImageUploaded ||
-              current is ProjectExtraImageDeleted,
+              current is ProjectExtraImageDeleted ||
+              current is ProjectCategoryUpdated,
           listener: (ctx, _) => _loadMyProject(),
         ),
       ],
@@ -274,6 +284,9 @@ class _MyProjectViewState extends State<_MyProjectView> {
 
           // Team confirmed. Now check the project state.
           return BlocBuilder<ProjectsCubit, ProjectsState>(
+            // ProjectActionFailed is handled by BlocListener (snackbar).
+            // Exclude it from the builder so the current view stays visible.
+            buildWhen: (_, current) => current is! ProjectActionFailed,
             builder: (context, projectState) {
               if (projectState is ProjectsInitial ||
                   projectState is ProjectsLoading ||
@@ -295,6 +308,7 @@ class _MyProjectViewState extends State<_MyProjectView> {
 
               if (projectState is MyProjectNotFound) {
                 return _CreateProjectForm(
+                  key: _createFormKey,
                   eventId: widget.eventId,
                   teams: teams,
                   initialTeam: _selectedTeam,
@@ -426,6 +440,7 @@ class _NoTeamPrompt extends StatelessWidget {
 
 class _CreateProjectForm extends StatefulWidget {
   const _CreateProjectForm({
+    super.key,
     required this.eventId,
     required this.teams,
     required this.onRefresh,
@@ -457,8 +472,14 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
   late final TextEditingController _demoUrlController;
 
   // The team that will own this project submission.
-  // Defaults to the first team; updated when the user taps a different option.
   late TeamEntity _selectedTeam;
+
+  // Cover image picked locally before project creation.
+  // Uploaded immediately after the project is saved and the ID is available.
+  PlatformFile? _pendingCover;
+
+  // Categories selected by the user (max 3).
+  final List<CategoryEntity> _selectedCategories = [];
 
   @override
   void initState() {
@@ -486,6 +507,17 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
     return trimmed.isEmpty ? null : trimmed;
   }
 
+  Future<void> _pickCover() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty) return;
+    setState(() => _pendingCover = result.files.first);
+  }
+
+  void _removePendingCover() => setState(() => _pendingCover = null);
+
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     context.read<ProjectsCubit>().createProject(
@@ -496,126 +528,174 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
           techStack: _nullIfEmpty(_techStackController.text),
           repoUrl: _nullIfEmpty(_repoUrlController.text),
           demoUrl: _nullIfEmpty(_demoUrlController.text),
+          categoryIds: _selectedCategories.isEmpty
+              ? null
+              : _selectedCategories.map((c) => c.id).toList(),
+        );
+  }
+
+  // Called from the BlocListener in _MyProjectViewState when ProjectSaved fires.
+  // Uploads the pending cover using the newly created project ID.
+  void uploadPendingCoverIfAny(String projectId) {
+    final cover = _pendingCover;
+    if (cover == null || cover.bytes == null) return;
+    context.read<ProjectsCubit>().uploadCover(
+          eventId: widget.eventId,
+          projectId: projectId,
+          bytes: cover.bytes!,
+          contentType: _contentTypeFromFileName(cover.name),
         );
   }
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: widget.onRefresh,
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: AppSpacing.pagePadding
-            .copyWith(top: AppSpacing.lg, bottom: AppSpacing.xxl),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.submitYourProject,
-                style: AppTypography.h3.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.textPrimary,
+    final l10n = AppLocalizations.of(context)!;
+
+    return BlocProvider<CategoriesCubit>(
+      create: (_) => sl<CategoriesCubit>()..loadCategories(page: 1, size: 100),
+      child: RefreshIndicator(
+        onRefresh: widget.onRefresh,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: AppSpacing.pagePadding
+              .copyWith(top: AppSpacing.lg, bottom: AppSpacing.xxl),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.submitYourProject,
+                  style: AppTypography.h3.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.textPrimary,
+                  ),
                 ),
-              ),
-              SizedBox(height: AppSpacing.xs),
-              Text(
-                AppLocalizations.of(context)!.submitYourProjectDesc,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: context.colors.textSecondary,
-                ),
-              ),
-              SizedBox(height: AppSpacing.lg),
-              // Team picker — only shown when the user belongs to 2+ teams.
-              if (widget.teams.length > 1) ...[
-                _TeamPicker(
-                  teams: widget.teams,
-                  selected: _selectedTeam,
-                  onChanged: (team) => setState(() => _selectedTeam = team),
+                SizedBox(height: AppSpacing.xs),
+                Text(
+                  l10n.submitYourProjectDesc,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: context.colors.textSecondary,
+                  ),
                 ),
                 SizedBox(height: AppSpacing.lg),
-              ],
-              Builder(
-                builder: (context) {
-                  final l10n = AppLocalizations.of(context)!;
-                  return AppTextField(
-                    label: l10n.projectTitle,
-                    controller: _titleController,
-                    hint: l10n.projectTitleHint,
-                    prefixIcon: Icons.title_rounded,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return l10n.projectTitleRequired;
-                      }
-                      if (value.trim().length < 3) {
-                        return l10n.projectTitleTooShort;
-                      }
-                      return null;
-                    },
-                  );
-                },
-              ),
-              SizedBox(height: AppSpacing.md),
-              Builder(
-                builder: (context) {
-                  final l10n = AppLocalizations.of(context)!;
-                  return AppTextField(
-                    label: l10n.descriptionLabel,
-                    controller: _descriptionController,
-                    hint: l10n.descriptionHint,
-                    maxLines: 4,
-                    keyboardType: TextInputType.multiline,
-                  );
-                },
-              ),
-              SizedBox(height: AppSpacing.md),
-              Builder(
-                builder: (context) {
-                  final l10n = AppLocalizations.of(context)!;
-                  return AppTextField(
-                    label: l10n.techStackLabel,
-                    controller: _techStackController,
-                    hint: l10n.techStackHint,
-                    prefixIcon: Icons.layers_outlined,
-                  );
-                },
-              ),
-              SizedBox(height: AppSpacing.md),
-              Builder(
-                builder: (context) {
-                  final l10n = AppLocalizations.of(context)!;
-                  return AppTextField(
-                    label: l10n.repositoryUrl,
-                    controller: _repoUrlController,
-                    hint: l10n.repositoryUrlHint,
-                    prefixIcon: Icons.code_outlined,
-                    keyboardType: TextInputType.url,
-                  );
-                },
-              ),
-              SizedBox(height: AppSpacing.md),
-              Builder(
-                builder: (context) {
-                  final l10n = AppLocalizations.of(context)!;
-                  return AppTextField(
-                    label: l10n.demoUrl,
-                    controller: _demoUrlController,
-                    hint: l10n.demoUrlHint,
-                    prefixIcon: Icons.open_in_new_outlined,
-                    keyboardType: TextInputType.url,
-                  );
-                },
-              ),
-              SizedBox(height: AppSpacing.xl),
-              BlocBuilder<ProjectsCubit, ProjectsState>(
-                builder: (ctx, state) => GradientButton(
-                  text: AppLocalizations.of(ctx)!.submitProject,
-                  isLoading: state is ProjectsLoading,
-                  onPressed: _submit,
+
+                // Team picker — only shown when the user belongs to 2+ teams.
+                if (widget.teams.length > 1) ...[
+                  _TeamPicker(
+                    teams: widget.teams,
+                    selected: _selectedTeam,
+                    onChanged: (team) => setState(() => _selectedTeam = team),
+                  ),
+                  SizedBox(height: AppSpacing.lg),
+                ],
+
+                // Card 1: Cover image
+                _FormSectionCard(
+                  icon: Icons.image_outlined,
+                  title: l10n.projectImagesCard,
+                  subtitle: l10n.coverImageFormHint,
+                  child: _LocalCoverSlot(
+                    file: _pendingCover,
+                    onPick: _pickCover,
+                    onRemove: _removePendingCover,
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: AppSpacing.md),
+
+                // Card 2: Basic info
+                _FormSectionCard(
+                  icon: Icons.edit_note_outlined,
+                  title: l10n.basicInfoCard,
+                  child: Column(
+                    children: [
+                      AppTextField(
+                        label: l10n.projectTitle,
+                        controller: _titleController,
+                        hint: l10n.projectTitleHint,
+                        prefixIcon: Icons.title_rounded,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return l10n.projectTitleRequired;
+                          }
+                          if (value.trim().length < 3) {
+                            return l10n.projectTitleTooShort;
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: AppSpacing.md),
+                      AppTextField(
+                        label: l10n.descriptionLabel,
+                        controller: _descriptionController,
+                        hint: l10n.descriptionHint,
+                        maxLines: 4,
+                        keyboardType: TextInputType.multiline,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: AppSpacing.md),
+
+                // Card 3: Tech & links
+                _FormSectionCard(
+                  icon: Icons.layers_outlined,
+                  title: l10n.techLinksCard,
+                  child: Column(
+                    children: [
+                      AppTextField(
+                        label: l10n.techStackLabel,
+                        controller: _techStackController,
+                        hint: l10n.techStackHint,
+                        prefixIcon: Icons.layers_outlined,
+                      ),
+                      SizedBox(height: AppSpacing.md),
+                      AppTextField(
+                        label: l10n.repositoryUrl,
+                        controller: _repoUrlController,
+                        hint: l10n.repositoryUrlHint,
+                        prefixIcon: Icons.code_outlined,
+                        keyboardType: TextInputType.url,
+                      ),
+                      SizedBox(height: AppSpacing.md),
+                      AppTextField(
+                        label: l10n.demoUrl,
+                        controller: _demoUrlController,
+                        hint: l10n.demoUrlHint,
+                        prefixIcon: Icons.open_in_new_outlined,
+                        keyboardType: TextInputType.url,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: AppSpacing.md),
+
+                // Card 4: Categories
+                _FormSectionCard(
+                  icon: Icons.category_outlined,
+                  title: l10n.categoriesCard,
+                  subtitle: l10n.categoriesCardDesc,
+                  child: _InlineCategoryPicker(
+                    selectedCategories: _selectedCategories,
+                    onChanged: (updated) =>
+                        setState(() {
+                          _selectedCategories
+                            ..clear()
+                            ..addAll(updated);
+                        }),
+                  ),
+                ),
+                SizedBox(height: AppSpacing.xl),
+
+                BlocBuilder<ProjectsCubit, ProjectsState>(
+                  builder: (ctx, state) => GradientButton(
+                    text: l10n.submitProject,
+                    isLoading: state is ProjectsLoading,
+                    onPressed: _submit,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -660,6 +740,15 @@ class _ProjectView extends StatelessWidget {
             if (project.status == ProjectStatus.draft) ...[
               SizedBox(height: AppSpacing.lg),
               _ImageSection(project: project, eventId: eventId),
+              SizedBox(height: AppSpacing.lg),
+              BlocProvider<CategoriesCubit>(
+                create: (_) =>
+                    sl<CategoriesCubit>()..loadCategories(page: 1, size: 100),
+                child: _CategorySection(
+                  project: project,
+                  eventId: eventId,
+                ),
+              ),
             ],
             SizedBox(height: AppSpacing.lg),
             _ProjectActionsRow(project: project, eventId: eventId),
@@ -694,7 +783,7 @@ class _ProjectActionsRow extends StatelessWidget {
             if (project.status == ProjectStatus.draft ||
                 project.status == ProjectStatus.submitted)
               OutlinedButton.icon(
-                onPressed: isLoading ? null : () => _openEditSheet(ctx),
+                onPressed: isLoading ? null : () => _openEditPage(ctx),
                 icon: Icon(Icons.edit_outlined, size: AppSizes.iconSm),
                 label: Text(AppLocalizations.of(ctx)!.editProjectButton),
               ),
@@ -726,42 +815,31 @@ class _ProjectActionsRow extends StatelessWidget {
     );
   }
 
-  Future<void> _openEditSheet(BuildContext context) async {
-    final result = await showEditProjectSheet(context, project);
-    if (result == null) return;
-    if (!context.mounted) return;
-    context.read<ProjectsCubit>().editProject(
-          eventId: eventId,
-          projectId: project.id,
-          title: result.title,
-          description: result.description,
-          techStack: result.techStack,
-          repoUrl: result.repoUrl,
-          demoUrl: result.demoUrl,
-        );
+  Future<void> _openEditPage(BuildContext context) async {
+    // Pass the cubit so the edit page can issue mutations without needing
+    // its own provider — we share the same cubit instance.
+    final cubit = context.read<ProjectsCubit>();
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => BlocProvider.value(
+          value: cubit,
+          child: EditProjectPage(
+            eventId: eventId,
+            project: project,
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _confirmFinalize(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: Text(l10n.submitForReviewTitle),
-        content: Text(l10n.submitForReviewDesc),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: Text(l10n.notYet),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(true),
-            child: Text(
-              l10n.submit,
-              style: TextStyle(color: context.colors.primary),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showAppConfirmDialog(
+      context,
+      title: l10n.submitForReviewTitle,
+      message: l10n.submitForReviewDesc,
+      confirmLabel: l10n.submit,
+      cancelLabel: l10n.notYet,
     );
     if (confirmed != true) return;
     if (!context.mounted) return;
@@ -773,25 +851,13 @@ class _ProjectActionsRow extends StatelessWidget {
 
   Future<void> _confirmCancel(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: Text(l10n.cancelSubmissionTitle),
-        content: Text(l10n.cancelSubmissionDesc),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: Text(l10n.keepSubmitted),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(true),
-            child: Text(
-              l10n.cancelSubmissionButton,
-              style: TextStyle(color: context.colors.error),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showAppConfirmDialog(
+      context,
+      title: l10n.cancelSubmissionTitle,
+      message: l10n.cancelSubmissionDesc,
+      confirmLabel: l10n.cancelSubmissionButton,
+      cancelLabel: l10n.keepSubmitted,
+      isDestructive: true,
     );
     if (confirmed != true) return;
     if (!context.mounted) return;
@@ -1482,6 +1548,653 @@ class _TeamTile extends StatelessWidget {
 }
 
 // =============================================================================
+// Category section — shown on existing draft projects
+// =============================================================================
+
+/// Displays the categories currently attached to the project and lets the
+/// user add more (up to 3) or remove existing ones.
+class _CategorySection extends StatelessWidget {
+  const _CategorySection({
+    required this.project,
+    required this.eventId,
+  });
+
+  final ProjectEntity project;
+  final String eventId;
+
+  static const int _maxCategories = 3;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final canAdd = project.categories.length < _maxCategories;
+
+    return _FormSectionCard(
+      icon: Icons.category_outlined,
+      title: l10n.categoriesCard,
+      subtitle: l10n.categoriesCardDesc,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Currently attached categories as removable chips.
+          if (project.categories.isNotEmpty)
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: project.categories
+                  .map(
+                    (cat) => _RemovableCategoryChip(
+                      category: cat,
+                      onRemove: () => context
+                          .read<ProjectsCubit>()
+                          .removeCategory(
+                            eventId: eventId,
+                            projectId: project.id,
+                            categoryId: cat.id,
+                          ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          if (project.categories.isNotEmpty && canAdd)
+            SizedBox(height: AppSpacing.sm),
+
+          // Add button opens the picker sheet.
+          if (canAdd)
+            TextButton.icon(
+              onPressed: () =>
+                  _openCategoryPicker(context),
+              icon: Icon(Icons.add_rounded, size: AppSizes.iconSm),
+              label: Text(l10n.addCategory),
+              style: TextButton.styleFrom(
+                foregroundColor: context.colors.primary,
+                padding: EdgeInsets.zero,
+              ),
+            ),
+
+          if (project.categories.isEmpty && !canAdd)
+            Text(
+              l10n.maxCategoriesHint,
+              style: AppTypography.bodySmall.copyWith(
+                color: context.colors.textHint,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openCategoryPicker(BuildContext context) async {
+    // The bottom sheet runs on a new route and loses access to the
+    // BlocProvider<CategoriesCubit> from the parent tree. Pass the
+    // existing cubit instance via BlocProvider.value so the picker
+    // can still read the already-loaded categories list.
+    final categoriesCubit = context.read<CategoriesCubit>();
+    final projectsCubit = context.read<ProjectsCubit>();
+    final alreadySelected = project.categories.map((c) => c.id).toSet();
+    // How many more categories the user is allowed to add.
+    final remaining = 3 - project.categories.length;
+
+    final selectedIds = await showModalBottomSheet<List<String>>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => BlocProvider.value(
+        value: categoriesCubit,
+        child: _CategoryPickerSheet(
+          alreadySelectedIds: alreadySelected,
+          maxSelectable: remaining,
+        ),
+      ),
+    );
+    if (selectedIds == null || selectedIds.isEmpty || !context.mounted) return;
+
+    // Fire one addCategory call per selected ID. The cubit no longer emits
+    // ProjectsLoading for these so the UI stays stable during the batch.
+    for (final id in selectedIds) {
+      projectsCubit.addCategory(
+        eventId: eventId,
+        projectId: project.id,
+        categoryId: id,
+      );
+    }
+  }
+}
+
+/// A chip that displays a category name with a remove button.
+class _RemovableCategoryChip extends StatelessWidget {
+  const _RemovableCategoryChip({
+    required this.category,
+    required this.onRemove,
+  });
+
+  final CategoryEntity category;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = context.colors.primary;
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs + 2,
+      ),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+        border: Border.all(color: primary.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            category.name,
+            style: AppTypography.bodySmall.copyWith(
+              color: primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(width: AppSpacing.xs),
+          GestureDetector(
+            onTap: onRemove,
+            child: Icon(Icons.close_rounded, size: 14.r, color: primary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Bottom sheet that lets the user pick one or more categories to add.
+/// Already-selected categories are excluded. The sheet stays open while the
+/// user toggles selections; tapping the "Add (n)" button confirms all at once.
+class _CategoryPickerSheet extends StatefulWidget {
+  const _CategoryPickerSheet({
+    required this.alreadySelectedIds,
+    required this.maxSelectable,
+  });
+
+  /// Category IDs already attached to the project — hidden from the list.
+  final Set<String> alreadySelectedIds;
+
+  /// How many more categories the user may add (3 minus current count).
+  final int maxSelectable;
+
+  @override
+  State<_CategoryPickerSheet> createState() => _CategoryPickerSheetState();
+}
+
+class _CategoryPickerSheetState extends State<_CategoryPickerSheet> {
+  final Set<String> _selected = {};
+
+  void _toggle(String id) {
+    setState(() {
+      if (_selected.contains(id)) {
+        _selected.remove(id);
+      } else if (_selected.length < widget.maxSelectable) {
+        _selected.add(id);
+      }
+      // If at the limit and row is not selected, tap is ignored — the
+      // greyed-out appearance communicates that it can't be added.
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md + bottomInset,
+      ),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusXl),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Drag handle
+          Center(
+            child: Container(
+              width: 40.r,
+              height: 4.r,
+              margin: EdgeInsets.only(bottom: AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: context.colors.border,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+              ),
+            ),
+          ),
+
+          // Title + confirm button on the same row
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.selectCategory,
+                  style: AppTypography.h3.copyWith(
+                    color: context.colors.textPrimary,
+                  ),
+                ),
+              ),
+              AnimatedOpacity(
+                opacity: _selected.isEmpty ? 0.4 : 1.0,
+                duration: const Duration(milliseconds: 150),
+                child: TextButton(
+                  onPressed: _selected.isEmpty
+                      ? null
+                      : () => Navigator.of(context).pop(_selected.toList()),
+                  child: Text(
+                    '${l10n.addCategory} (${_selected.length})',
+                    style: AppTypography.labelMedium.copyWith(
+                      color: context.colors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: AppSpacing.sm),
+
+          BlocBuilder<CategoriesCubit, CategoriesState>(
+            builder: (context, state) {
+              if (state is CategoriesLoading || state is CategoriesInitial) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                  child: const Center(child: AppLoadingIndicator()),
+                );
+              }
+              if (state is CategoriesLoaded) {
+                final available = state.response.items
+                    .where((c) => !widget.alreadySelectedIds.contains(c.id))
+                    .toList();
+                if (available.isEmpty) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                    child: Center(
+                      child: Text(
+                        l10n.noCategoriesAvailable,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: context.colors.textHint,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: available.length,
+                    separatorBuilder: (_, __) =>
+                        Divider(color: context.colors.divider, height: 1),
+                    itemBuilder: (context, index) {
+                      final cat = available[index];
+                      final isSelected = _selected.contains(cat.id);
+                      final atLimit = _selected.length >= widget.maxSelectable;
+                      final isDisabled = atLimit && !isSelected;
+
+                      return ListTile(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xs,
+                        ),
+                        title: Text(
+                          cat.name,
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: isDisabled
+                                ? context.colors.textHint
+                                : context.colors.textPrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: cat.description.isNotEmpty
+                            ? Text(
+                                cat.description,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: context.colors.textSecondary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              )
+                            : null,
+                        trailing: isSelected
+                            ? Icon(
+                                Icons.check_circle_rounded,
+                                color: context.colors.primary,
+                                size: AppSizes.iconMd,
+                              )
+                            : Icon(
+                                Icons.circle_outlined,
+                                color: isDisabled
+                                    ? context.colors.border
+                                    : context.colors.textHint,
+                                size: AppSizes.iconMd,
+                              ),
+                        onTap: isDisabled ? null : () => _toggle(cat.id),
+                      );
+                    },
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Shared form card — used in create form and edit page
+// =============================================================================
+
+/// A card container that groups related form fields with a labeled header.
+/// Mirrors the _SectionCard style from project_info_section.dart.
+class _FormSectionCard extends StatelessWidget {
+  const _FormSectionCard({
+    required this.icon,
+    required this.title,
+    required this.child,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: AppSpacing.cardPadding,
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: context.colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: AppSizes.iconSm, color: context.colors.primary),
+              SizedBox(width: AppSpacing.sm),
+              Text(
+                title,
+                style: AppTypography.labelLarge.copyWith(
+                  color: context.colors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          if (subtitle != null) ...[
+            SizedBox(height: AppSpacing.xs),
+            Text(
+              subtitle!,
+              style: AppTypography.bodySmall.copyWith(
+                color: context.colors.textSecondary,
+              ),
+            ),
+          ],
+          SizedBox(height: AppSpacing.md),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Local cover slot — used in create form before project ID exists
+// =============================================================================
+
+/// Shows a picked cover image (from local file) or an empty "tap to add" slot.
+/// No API call happens here — the bytes are held in state until project creation.
+class _LocalCoverSlot extends StatelessWidget {
+  const _LocalCoverSlot({
+    required this.file,
+    required this.onPick,
+    required this.onRemove,
+  });
+
+  final PlatformFile? file;
+  final VoidCallback onPick;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (file == null) {
+      return GestureDetector(
+        onTap: onPick,
+        child: Container(
+          height: 140.r,
+          decoration: BoxDecoration(
+            color: context.colors.background,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            border: Border.all(color: context.colors.border, width: 1.5),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.add_photo_alternate_outlined,
+                size: AppSizes.iconXl,
+                color: context.colors.textHint,
+              ),
+              SizedBox(height: AppSpacing.sm),
+              Text(
+                l10n.tapToAddCover,
+                style: AppTypography.bodySmall.copyWith(
+                  color: context.colors.textHint,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Show the locally picked image with a remove button.
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          child: file!.bytes != null
+              ? Image.memory(
+                  file!.bytes!,
+                  width: double.infinity,
+                  height: 140.r,
+                  fit: BoxFit.cover,
+                )
+              : Container(
+                  height: 140.r,
+                  color: context.colors.border,
+                ),
+        ),
+        Positioned(
+          top: AppSpacing.sm,
+          right: AppSpacing.sm,
+          child: GestureDetector(
+            onTap: onRemove,
+            child: Container(
+              padding: EdgeInsets.all(AppSpacing.xs),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.6),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.close_rounded, size: 16.r, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// =============================================================================
+// Inline category picker — shown inside the create form and edit page
+// =============================================================================
+
+/// Renders all available categories as selectable chips.
+/// Selected categories are highlighted in the primary color.
+/// Enforces the 3-category maximum.
+class _InlineCategoryPicker extends StatelessWidget {
+  const _InlineCategoryPicker({
+    required this.selectedCategories,
+    required this.onChanged,
+  });
+
+  final List<CategoryEntity> selectedCategories;
+  final ValueChanged<List<CategoryEntity>> onChanged;
+
+  static const int _maxCategories = 3;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CategoriesCubit, CategoriesState>(
+      builder: (context, state) {
+        if (state is CategoriesLoading || state is CategoriesInitial) {
+          return Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: SizedBox(
+                height: 20.r,
+                width: 20.r,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor:
+                      AlwaysStoppedAnimation(context.colors.primary),
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (state is CategoriesLoaded) {
+          final categories = state.response.items;
+          if (categories.isEmpty) {
+            return Text(
+              AppLocalizations.of(context)!.noCategoriesAvailable,
+              style: AppTypography.bodySmall.copyWith(
+                color: context.colors.textHint,
+              ),
+            );
+          }
+          return Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: categories.map((category) {
+              final isSelected =
+                  selectedCategories.any((c) => c.id == category.id);
+              return _CategoryChip(
+                category: category,
+                isSelected: isSelected,
+                onTap: () => _toggle(context, category),
+              );
+            }).toList(),
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  void _toggle(BuildContext context, CategoryEntity category) {
+    final updated = List<CategoryEntity>.from(selectedCategories);
+    final idx = updated.indexWhere((c) => c.id == category.id);
+    if (idx >= 0) {
+      updated.removeAt(idx);
+    } else {
+      if (updated.length >= _maxCategories) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.maxCategoriesHint),
+            behavior: SnackBarBehavior.floating,
+          ));
+        return;
+      }
+      updated.add(category);
+    }
+    onChanged(updated);
+  }
+}
+
+/// Single selectable chip for a category.
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({
+    required this.category,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final CategoryEntity category;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = context.colors.primary;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xs + 2,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? primary.withValues(alpha: 0.12)
+              : context.colors.background,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+          border: Border.all(
+            color: isSelected
+                ? primary.withValues(alpha: 0.6)
+                : context.colors.border,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isSelected) ...[
+              Icon(Icons.check_rounded, size: 14.r, color: primary),
+              SizedBox(width: AppSpacing.xs),
+            ],
+            Text(
+              category.name,
+              style: AppTypography.bodySmall.copyWith(
+                color: isSelected ? primary : context.colors.textSecondary,
+                fontWeight:
+                    isSelected ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// =============================================================================
 // Image management section — cover and extra images for draft projects
 // =============================================================================
 
@@ -1542,25 +2255,12 @@ class _ImageSectionState extends State<_ImageSection> {
 
   Future<void> _confirmAndRemoveCover() async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: Text(l10n.confirmRemoveCoverTitle),
-        content: Text(l10n.confirmRemoveCoverDesc),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(true),
-            child: Text(
-              l10n.removeImage,
-              style: TextStyle(color: context.colors.error),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showAppConfirmDialog(
+      context,
+      title: l10n.confirmRemoveCoverTitle,
+      message: l10n.confirmRemoveCoverDesc,
+      confirmLabel: l10n.removeImage,
+      isDestructive: true,
     );
     if (confirmed != true || !mounted) return;
     context.read<ProjectsCubit>().removeCover(
@@ -1591,25 +2291,12 @@ class _ImageSectionState extends State<_ImageSection> {
 
   Future<void> _confirmAndRemoveExtraImage(ExtraImageEntity image) async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: Text(l10n.confirmRemoveImageTitle),
-        content: Text(l10n.confirmRemoveImageDesc),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(true),
-            child: Text(
-              l10n.removeImage,
-              style: TextStyle(color: context.colors.error),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showAppConfirmDialog(
+      context,
+      title: l10n.confirmRemoveImageTitle,
+      message: l10n.confirmRemoveImageDesc,
+      confirmLabel: l10n.removeImage,
+      isDestructive: true,
     );
     if (confirmed != true || !mounted) return;
     context.read<ProjectsCubit>().removeExtraImage(
@@ -1626,31 +2313,23 @@ class _ImageSectionState extends State<_ImageSection> {
     final extraImages = project.images;
     final canAddMore = extraImages.length < _maxExtraImages;
 
-    return Container(
-      padding: AppSpacing.cardPadding,
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: context.colors.border),
-      ),
+    return _FormSectionCard(
+      icon: Icons.photo_library_outlined,
+      title: l10n.projectImages,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.projectImages,
-            style: AppTypography.labelLarge.copyWith(
-              color: context.colors.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          SizedBox(height: AppSpacing.lg),
-
           // -- Cover image --
-          Text(
-            l10n.coverImage,
-            style: AppTypography.labelMedium.copyWith(
-              color: context.colors.textSecondary,
-            ),
+          Row(
+            children: [
+              Text(
+                l10n.coverImage,
+                style: AppTypography.labelMedium.copyWith(
+                  color: context.colors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
           SizedBox(height: AppSpacing.sm),
           _CoverImageSlot(
@@ -1669,11 +2348,12 @@ class _ImageSectionState extends State<_ImageSection> {
                 l10n.extraImages,
                 style: AppTypography.labelMedium.copyWith(
                   color: context.colors.textSecondary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               SizedBox(width: AppSpacing.xs),
               Text(
-                '(${extraImages.length}/$_maxExtraImages)',
+                '${extraImages.length}/$_maxExtraImages',
                 style: AppTypography.caption.copyWith(
                   color: context.colors.textHint,
                 ),
@@ -2020,6 +2700,304 @@ class _LinkChip extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// =============================================================================
+// Edit project full page
+// =============================================================================
+
+/// Full-page editor for an existing project.
+/// Reuses the same card-based layout as the create form.
+class EditProjectPage extends StatefulWidget {
+  const EditProjectPage({
+    super.key,
+    required this.project,
+    required this.eventId,
+  });
+
+  final ProjectEntity project;
+  final String eventId;
+
+  @override
+  State<EditProjectPage> createState() => _EditProjectPageState();
+}
+
+class _EditProjectPageState extends State<EditProjectPage> {
+  late final TextEditingController _titleController;
+  late final TextEditingController _descriptionController;
+  late final TextEditingController _techStackController;
+  late final TextEditingController _repoUrlController;
+  late final TextEditingController _demoUrlController;
+
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final p = widget.project;
+    _titleController = TextEditingController(text: p.title);
+    _descriptionController = TextEditingController(text: p.description ?? '');
+    _techStackController = TextEditingController(text: p.techStack ?? '');
+    _repoUrlController = TextEditingController(text: p.repoUrl ?? '');
+    _demoUrlController = TextEditingController(text: p.demoUrl ?? '');
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _techStackController.dispose();
+    _repoUrlController.dispose();
+    _demoUrlController.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final title = _titleController.text.trim();
+    if (title.isEmpty) return;
+    setState(() => _isSaving = true);
+    context.read<ProjectsCubit>().editProject(
+          eventId: widget.eventId,
+          projectId: widget.project.id,
+          title: title,
+          description: _descriptionController.text.trim().isEmpty
+              ? null
+              : _descriptionController.text.trim(),
+          techStack: _techStackController.text.trim().isEmpty
+              ? null
+              : _techStackController.text.trim(),
+          repoUrl: _repoUrlController.text.trim().isEmpty
+              ? null
+              : _repoUrlController.text.trim(),
+          demoUrl: _demoUrlController.text.trim().isEmpty
+              ? null
+              : _demoUrlController.text.trim(),
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isDraft = widget.project.status == ProjectStatus.draft;
+
+    return BlocListener<ProjectsCubit, ProjectsState>(
+      listener: (context, state) {
+        if (state is ProjectSaved) {
+          setState(() => _isSaving = false);
+          Navigator.of(context).pop(state.project);
+        } else if (state is ProjectActionFailed) {
+          setState(() => _isSaving = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: context.colors.background,
+        appBar: AppBar(
+          backgroundColor: context.colors.surface,
+          elevation: 0,
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.editProjectTitle,
+                style: AppTypography.labelLarge.copyWith(
+                  color: context.colors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Text(
+                l10n.editProjectSubtitle,
+                style: AppTypography.caption.copyWith(
+                  color: context.colors.textPrimary.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            if (_isSaving)
+              Padding(
+                padding: EdgeInsets.only(right: AppSpacing.md),
+                child: SizedBox(
+                  width: AppSizes.iconSm,
+                  height: AppSizes.iconSm,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: context.colors.primary,
+                  ),
+                ),
+              )
+            else
+              TextButton(
+                onPressed: _save,
+                child: Text(
+                  l10n.saveProject,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: context.colors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        body: MultiBlocProvider(
+          providers: [
+            BlocProvider<CategoriesCubit>(
+              create: (ctx) =>
+                  sl<CategoriesCubit>()..loadCategories(page: 1, size: 100),
+            ),
+          ],
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              children: [
+                // Image management — only available while project is in draft
+                if (isDraft) ...[
+                  _ImageSection(
+                    project: widget.project,
+                    eventId: widget.eventId,
+                  ),
+                  SizedBox(height: AppSpacing.md),
+                ],
+
+                // Basic info card
+                _FormSectionCard(
+                  icon: Icons.info_outline_rounded,
+                  title: l10n.basicInfoCard,
+                  child: Column(
+                    children: [
+                      _buildField(
+                        context,
+                        controller: _titleController,
+                        label: l10n.projectTitle,
+                        hint: l10n.projectTitleHint,
+                        maxLines: 1,
+                      ),
+                      SizedBox(height: AppSpacing.sm),
+                      _buildField(
+                        context,
+                        controller: _descriptionController,
+                        label: l10n.descriptionLabel,
+                        hint: l10n.descriptionHint,
+                        maxLines: 4,
+                      ),
+                      SizedBox(height: AppSpacing.sm),
+                      _buildField(
+                        context,
+                        controller: _techStackController,
+                        label: l10n.techStackLabel,
+                        hint: l10n.techStackHint,
+                        maxLines: 2,
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: AppSpacing.md),
+
+                // Tech links card
+                _FormSectionCard(
+                  icon: Icons.link_rounded,
+                  title: l10n.techLinksCard,
+                  child: Column(
+                    children: [
+                      _buildField(
+                        context,
+                        controller: _repoUrlController,
+                        label: l10n.repositoryUrl,
+                        hint: l10n.repositoryUrlHint,
+                        maxLines: 1,
+                        keyboardType: TextInputType.url,
+                      ),
+                      SizedBox(height: AppSpacing.sm),
+                      _buildField(
+                        context,
+                        controller: _demoUrlController,
+                        label: l10n.demoUrl,
+                        hint: l10n.demoUrlHint,
+                        maxLines: 1,
+                        keyboardType: TextInputType.url,
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: AppSpacing.md),
+
+                // Category management — only available while project is in draft
+                if (isDraft) ...[
+                  _FormSectionCard(
+                    icon: Icons.category_outlined,
+                    title: l10n.categoriesCard,
+                    child: _CategorySection(
+                      project: widget.project,
+                      eventId: widget.eventId,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.md),
+                ],
+
+                GradientButton(
+                  onPressed: _isSaving ? null : _save,
+                  text: l10n.saveProject,
+                ),
+
+                SizedBox(height: AppSpacing.xl),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildField(
+    BuildContext context, {
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    int maxLines = 1,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTypography.labelMedium.copyWith(
+            color: context.colors.textPrimary.withValues(alpha: 0.7),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        SizedBox(height: AppSpacing.xs),
+        TextFormField(
+          controller: controller,
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+          style: AppTypography.bodyMedium.copyWith(
+            color: context.colors.textPrimary,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: AppTypography.bodyMedium.copyWith(
+              color: context.colors.textPrimary.withValues(alpha: 0.4),
+            ),
+            filled: true,
+            fillColor: context.colors.textPrimary.withValues(alpha: 0.05),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.sm,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

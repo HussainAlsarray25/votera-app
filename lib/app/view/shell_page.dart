@@ -134,8 +134,8 @@ class ShellPage extends StatelessWidget {
   }
 }
 
-/// Notification icon button with unread badge. Use in app bars to navigate
-/// to the notifications page.
+/// Notification icon button with a glowing red dot when there are unread
+/// notifications. Use in app bars to navigate to the notifications page.
 class NotificationIconButton extends StatelessWidget {
   const NotificationIconButton({super.key});
 
@@ -146,11 +146,75 @@ class NotificationIconButton extends StatelessWidget {
         return IconButton(
           onPressed: () => context.push('/notifications'),
           icon: state.count > 0
-              ? Badge.count(
-                  count: state.count,
-                  child: const Icon(Icons.notifications_outlined),
+              ? Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Icon(Icons.notifications_outlined),
+                    Positioned(
+                      top: -1,
+                      right: -1,
+                      child: _UnreadDot(),
+                    ),
+                  ],
                 )
               : const Icon(Icons.notifications_outlined),
+        );
+      },
+    );
+  }
+}
+
+class _UnreadDot extends StatefulWidget {
+  @override
+  State<_UnreadDot> createState() => _UnreadDotState();
+}
+
+class _UnreadDotState extends State<_UnreadDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _glow;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    _glow = Tween<double>(begin: 2, end: 7).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const dotSize = 8.0;
+    final dotColor = context.colors.error;
+
+    return AnimatedBuilder(
+      animation: _glow,
+      builder: (context, _) {
+        return Container(
+          width: dotSize,
+          height: dotSize,
+          decoration: BoxDecoration(
+            color: dotColor,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: dotColor.withValues(alpha: 0.7),
+                blurRadius: _glow.value,
+                spreadRadius: _glow.value * 0.3,
+              ),
+            ],
+          ),
         );
       },
     );

@@ -16,6 +16,7 @@ import 'package:votera/features/teams/presentation/cubit/teams_cubit.dart';
 import 'package:votera/features/teams/presentation/widgets/create_edit_team_sheet.dart';
 import 'package:votera/features/teams/presentation/widgets/team_member_tile.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_dialog.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
 
 /// Full team detail page, navigated to from both the My Team tab and Browse tab.
@@ -269,15 +270,8 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 ),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    // Stat pills — member count and creation date.
+                    // Stat pills — member count, creation date, and handle.
                     _StatsRow(team: team, isRoyal: isRoyal),
-                    SizedBox(height: AppSpacing.sm),
-                    // Team handle / ID chip.
-                    if (team.handle != null || team.id.isNotEmpty)
-                      _HandleChip(
-                        handle: team.handle ?? team.id,
-                        isRoyal: isRoyal,
-                      ),
                     SizedBox(height: AppSpacing.md),
                     // About section.
                     if (team.description != null &&
@@ -411,7 +405,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   Future<void> _inviteMember(BuildContext context) async {
     if (_team == null) return;
     final l10n = AppLocalizations.of(context)!;
-    final inviteeHandle = await _showInputDialog(
+    final inviteeHandle = await showAppInputDialog(
       context,
       title: l10n.inviteMember,
       hint: l10n.enterUserIdToInvite,
@@ -426,7 +420,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   Future<void> _requestToJoin(BuildContext context) async {
     if (_team == null) return;
     final l10n = AppLocalizations.of(context)!;
-    final message = await _showInputDialog(
+    final message = await showAppInputDialog(
       context,
       title: l10n.requestToJoin,
       hint: l10n.joinRequestMessageHint,
@@ -445,7 +439,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   Future<void> _removeMember(BuildContext context, String memberId) async {
     if (_team == null) return;
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await _showConfirmDialog(
+    final confirmed = await showAppConfirmDialog(
       context,
       title: l10n.removeMember,
       message: l10n.removeMemberConfirm,
@@ -494,7 +488,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
     // When the leader is the only member, leaving = deleting the team.
     if (_isLeader && isSolo) {
-      final confirmed = await _showConfirmDialog(
+      final confirmed = await showAppConfirmDialog(
         context,
         title: l10n.leaveAndDelete,
         message: l10n.leaveAndDeleteDesc(_team!.name),
@@ -507,7 +501,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
       return;
     }
 
-    final confirmed = await _showConfirmDialog(
+    final confirmed = await showAppConfirmDialog(
       context,
       title: l10n.leaveTeam,
       message: l10n.leaveTeamConfirm,
@@ -541,7 +535,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   Future<void> _deleteImage(BuildContext context) async {
     if (_team == null) return;
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await _showConfirmDialog(
+    final confirmed = await showAppConfirmDialog(
       context,
       title: l10n.deleteTeamImage,
       message: l10n.deleteTeamImageConfirm,
@@ -555,7 +549,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   Future<void> _deleteTeam(BuildContext context) async {
     if (_team == null) return;
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await _showConfirmDialog(
+    final confirmed = await showAppConfirmDialog(
       context,
       title: l10n.deleteTeam,
       message: l10n.deleteTeamDesc(_team!.name),
@@ -1004,7 +998,7 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-// Horizontal row of stat pills — member count and creation date.
+// Horizontal row of stat pills — member count, creation date, and handle.
 class _StatsRow extends StatelessWidget {
   const _StatsRow({required this.team, required this.isRoyal});
 
@@ -1016,6 +1010,7 @@ class _StatsRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final accentColor =
         isRoyal ? const Color(0xFFB8860B) : context.colors.primary;
+    final handle = team.handle ?? (team.id.isNotEmpty ? team.id : null);
 
     return Wrap(
       spacing: AppSpacing.sm,
@@ -1032,6 +1027,8 @@ class _StatsRow extends StatelessWidget {
             label: _formatDate(team.createdAt!),
             color: context.colors.textHint,
           ),
+        if (handle != null)
+          _HandleChip(handle: handle, isRoyal: isRoyal),
       ],
     );
   }
@@ -1119,7 +1116,7 @@ class _HandleChip extends StatelessWidget {
     return GestureDetector(
       onTap: () => _copy(context),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         decoration: BoxDecoration(
           color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -1139,7 +1136,7 @@ class _HandleChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.tag_rounded, size: AppSizes.iconSm, color: textColor),
+            Icon(Icons.tag_rounded, size: 14.r, color: textColor),
             SizedBox(width: 6.w),
             Text(
               handle,
@@ -1150,8 +1147,7 @@ class _HandleChip extends StatelessWidget {
               ),
             ),
             SizedBox(width: 8.w),
-            Icon(Icons.copy_rounded,
-                size: AppSizes.iconSm, color: context.colors.textHint),
+            Icon(Icons.copy_rounded, size: 14.r, color: context.colors.textHint),
           ],
         ),
       ),
@@ -1389,75 +1385,6 @@ class _JoinRequestTile extends StatelessWidget {
       ),
     );
   }
-}
-
-// =============================================================================
-// Dialog helpers
-// =============================================================================
-
-Future<bool?> _showConfirmDialog(
-  BuildContext context, {
-  required String title,
-  required String message,
-  required String confirmLabel,
-  bool isDestructive = false,
-}) {
-  final colors = Theme.of(context).extension<AppColorScheme>()!;
-  return showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      backgroundColor: colors.surface,
-      title: Text(title),
-      content: Text(message),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: Text(AppLocalizations.of(context)!.cancel),
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(true),
-          style: TextButton.styleFrom(
-            foregroundColor:
-                isDestructive ? colors.error : colors.secondary,
-          ),
-          child: Text(confirmLabel),
-        ),
-      ],
-    ),
-  );
-}
-
-Future<String?> _showInputDialog(
-  BuildContext context, {
-  required String title,
-  required String hint,
-  required String confirmLabel,
-}) {
-  final controller = TextEditingController();
-  final colors = Theme.of(context).extension<AppColorScheme>()!;
-  return showDialog<String>(
-    context: context,
-    builder: (context) => AlertDialog(
-      backgroundColor: colors.surface,
-      title: Text(title),
-      content: TextField(
-        controller: controller,
-        autofocus: true,
-        decoration: InputDecoration(hintText: hint),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppLocalizations.of(context)!.cancel),
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(controller.text.trim()),
-          style: TextButton.styleFrom(foregroundColor: colors.secondary),
-          child: Text(confirmLabel),
-        ),
-      ],
-    ),
-  );
 }
 
 Future<String?> _showMemberPickerSheet(

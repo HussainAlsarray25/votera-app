@@ -29,6 +29,15 @@ class UnreadCountCubit extends Cubit<UnreadCountState> {
     }
   }
 
+  /// Sync the count from a freshly loaded notifications list.
+  /// Called when the notification page loads so the badge stays accurate
+  /// even if the dedicated unread-count endpoint returns stale data.
+  void syncCount(int count) {
+    if (state.count != count) {
+      emit(UnreadCountState(count: count));
+    }
+  }
+
   /// Reset to zero when all notifications are marked as read.
   void clear() {
     emit(const UnreadCountState(count: 0));

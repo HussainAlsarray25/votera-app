@@ -67,7 +67,16 @@ class _NotificationView extends StatelessWidget {
         ],
       ),
       body: CenteredContent(
-        child: BlocBuilder<NotificationCubit, NotificationState>(
+        child: BlocConsumer<NotificationCubit, NotificationState>(
+          listener: (context, state) {
+            if (state is NotificationLoaded) {
+              // Sync the badge count from the actual list so it stays accurate
+              // even when the dedicated unread-count endpoint returns stale data.
+              final unread =
+                  state.notifications.where((n) => !n.isRead).length;
+              context.read<UnreadCountCubit>().syncCount(unread);
+            }
+          },
           builder: (context, state) {
             if (state is NotificationLoading) {
               return const Center(child: AppLoadingIndicator());
