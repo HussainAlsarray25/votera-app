@@ -1218,4 +1218,39 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get eventArchivedDesc =>
       'This event has been archived and is no longer active.';
+
+  @override
+  String get projectImages => 'Project Images';
+
+  @override
+  String get coverImage => 'Cover Image';
+
+  @override
+  String get addCoverImage => 'Add Cover Image';
+
+  @override
+  String get changeCoverImage => 'Change';
+
+  @override
+  String get extraImages => 'Extra Images';
+
+  @override
+  String get addExtraImage => 'Add Image';
+
+  @override
+  String get removeImage => 'Remove';
+
+  @override
+  String get confirmRemoveCoverTitle => 'Remove Cover Image?';
+
+  @override
+  String get confirmRemoveCoverDesc =>
+      'The cover image will be permanently deleted.';
+
+  @override
+  String get confirmRemoveImageTitle => 'Remove Image?';
+
+  @override
+  String get confirmRemoveImageDesc =>
+      'This image will be permanently deleted.';
 }

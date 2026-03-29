@@ -429,5 +429,17 @@
   "eventNotStartedTitle": "لم يبدأ الحدث بعد",
   "eventNotStartedDesc": "لم يُفتح باب التقديم لهذا الحدث بعد. تحقق لاحقاً.",
   "eventArchivedTitle": "تم أرشفة الحدث",
-  "eventArchivedDesc": "تم أرشفة هذا الحدث وهو لم يعد نشطاً."
+  "eventArchivedDesc": "تم أرشفة هذا الحدث وهو لم يعد نشطاً.",
+
+  "projectImages": "صور المشروع",
+  "coverImage": "صورة الغلاف",
+  "addCoverImage": "إضافة صورة غلاف",
+  "changeCoverImage": "تغيير",
+  "extraImages": "صور إضافية",
+  "addExtraImage": "إضافة صورة",
+  "removeImage": "حذف",
+  "confirmRemoveCoverTitle": "حذف صورة الغلاف؟",
+  "confirmRemoveCoverDesc": "سيتم حذف صورة الغلاف نهائياً.",
+  "confirmRemoveImageTitle": "حذف الصورة؟",
+  "confirmRemoveImageDesc": "سيتم حذف هذه الصورة نهائياً."
 }

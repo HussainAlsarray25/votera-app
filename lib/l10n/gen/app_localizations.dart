@@ -2341,6 +2341,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This event has been archived and is no longer active.'**
   String get eventArchivedDesc;
+
+  /// No description provided for @projectImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Images'**
+  String get projectImages;
+
+  /// No description provided for @coverImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover Image'**
+  String get coverImage;
+
+  /// No description provided for @addCoverImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Cover Image'**
+  String get addCoverImage;
+
+  /// No description provided for @changeCoverImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get changeCoverImage;
+
+  /// No description provided for @extraImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra Images'**
+  String get extraImages;
+
+  /// No description provided for @addExtraImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Image'**
+  String get addExtraImage;
+
+  /// No description provided for @removeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeImage;
+
+  /// No description provided for @confirmRemoveCoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Cover Image?'**
+  String get confirmRemoveCoverTitle;
+
+  /// No description provided for @confirmRemoveCoverDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The cover image will be permanently deleted.'**
+  String get confirmRemoveCoverDesc;
+
+  /// No description provided for @confirmRemoveImageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Image?'**
+  String get confirmRemoveImageTitle;
+
+  /// No description provided for @confirmRemoveImageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This image will be permanently deleted.'**
+  String get confirmRemoveImageDesc;
 }
 
 class _AppLocalizationsDelegate

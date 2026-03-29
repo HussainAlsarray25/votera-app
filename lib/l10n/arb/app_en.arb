@@ -535,5 +535,17 @@
   "eventNotStartedTitle": "Event Not Started Yet",
   "eventNotStartedDesc": "This event hasn't opened for submissions yet. Check back soon.",
   "eventArchivedTitle": "Event Archived",
-  "eventArchivedDesc": "This event has been archived and is no longer active."
+  "eventArchivedDesc": "This event has been archived and is no longer active.",
+
+  "projectImages": "Project Images",
+  "coverImage": "Cover Image",
+  "addCoverImage": "Add Cover Image",
+  "changeCoverImage": "Change",
+  "extraImages": "Extra Images",
+  "addExtraImage": "Add Image",
+  "removeImage": "Remove",
+  "confirmRemoveCoverTitle": "Remove Cover Image?",
+  "confirmRemoveCoverDesc": "The cover image will be permanently deleted.",
+  "confirmRemoveImageTitle": "Remove Image?",
+  "confirmRemoveImageDesc": "This image will be permanently deleted."
 }

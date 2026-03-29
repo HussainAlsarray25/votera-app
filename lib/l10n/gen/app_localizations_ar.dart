@@ -1200,4 +1200,37 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get eventArchivedDesc => 'تم أرشفة هذا الحدث وهو لم يعد نشطاً.';
+
+  @override
+  String get projectImages => 'صور المشروع';
+
+  @override
+  String get coverImage => 'صورة الغلاف';
+
+  @override
+  String get addCoverImage => 'إضافة صورة غلاف';
+
+  @override
+  String get changeCoverImage => 'تغيير';
+
+  @override
+  String get extraImages => 'صور إضافية';
+
+  @override
+  String get addExtraImage => 'إضافة صورة';
+
+  @override
+  String get removeImage => 'حذف';
+
+  @override
+  String get confirmRemoveCoverTitle => 'حذف صورة الغلاف؟';
+
+  @override
+  String get confirmRemoveCoverDesc => 'سيتم حذف صورة الغلاف نهائياً.';
+
+  @override
+  String get confirmRemoveImageTitle => 'حذف الصورة؟';
+
+  @override
+  String get confirmRemoveImageDesc => 'سيتم حذف هذه الصورة نهائياً.';
 }

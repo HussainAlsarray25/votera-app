@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -5,8 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/features/events/domain/entities/event_entity.dart';
+import 'package:votera/features/projects/domain/entities/extra_image_entity.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 import 'package:votera/features/teams/domain/entities/team_entity.dart';
+import 'package:votera/shared/widgets/cached_image.dart';
 import 'package:votera/shared/widgets/empty_state.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
@@ -142,6 +145,12 @@ class _MyProjectViewState extends State<_MyProjectView> {
   // to pick (only relevant when the user belongs to more than one team).
   TeamEntity? _selectedTeam;
 
+  // Locally cached cover URL set from [ProjectCoverUploaded].
+  // Used as a fallback when the backend's GET response returns null for
+  // cover_url even though an upload just succeeded. Cleared when the cover
+  // is deleted or when a reload returns a real URL from the server.
+  String? _coverUrlOverride;
+
   void _selectTeam(TeamEntity team) {
     setState(() => _selectedTeam = team);
     context.read<ProjectsCubit>().loadMyProject(
@@ -228,6 +237,16 @@ class _MyProjectViewState extends State<_MyProjectView> {
           listenWhen: (_, current) => current is ProjectSaved,
           listener: (ctx, _) => _loadMyProject(),
         ),
+        // After any image upload or deletion, reload the project so the
+        // cover and extra images list reflect the new state immediately.
+        BlocListener<ProjectsCubit, ProjectsState>(
+          listenWhen: (_, current) =>
+              current is ProjectCoverUploaded ||
+              current is ProjectCoverDeleted ||
+              current is ProjectExtraImageUploaded ||
+              current is ProjectExtraImageDeleted,
+          listener: (ctx, _) => _loadMyProject(),
+        ),
       ],
       child: BlocBuilder<TeamsCubit, TeamsState>(
         builder: (context, teamState) {
@@ -258,7 +277,11 @@ class _MyProjectViewState extends State<_MyProjectView> {
             builder: (context, projectState) {
               if (projectState is ProjectsInitial ||
                   projectState is ProjectsLoading ||
-                  projectState is ProjectSaved) {
+                  projectState is ProjectSaved ||
+                  projectState is ProjectCoverUploaded ||
+                  projectState is ProjectCoverDeleted ||
+                  projectState is ProjectExtraImageUploaded ||
+                  projectState is ProjectExtraImageDeleted) {
                 return const Center(child: AppLoadingIndicator());
               }
 
@@ -633,6 +656,11 @@ class _ProjectView extends StatelessWidget {
               onViewDetails: () =>
                   context.push('/project/$eventId/${project.id}'),
             ),
+            // Image management is only available while the project is a draft.
+            if (project.status == ProjectStatus.draft) ...[
+              SizedBox(height: AppSpacing.lg),
+              _ImageSection(project: project, eventId: eventId),
+            ],
             SizedBox(height: AppSpacing.lg),
             _ProjectActionsRow(project: project, eventId: eventId),
           ],
@@ -1447,6 +1475,510 @@ class _TeamTile extends StatelessWidget {
         style: AppTypography.labelMedium.copyWith(
           color: context.colors.primary,
           fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Image management section — cover and extra images for draft projects
+// =============================================================================
+
+/// Derives an image MIME type from a file name extension.
+/// Falls back to octet-stream for unrecognized extensions.
+String _contentTypeFromFileName(String name) {
+  final ext = name.split('.').last.toLowerCase();
+  return switch (ext) {
+    'jpg' || 'jpeg' => 'image/jpeg',
+    'png' => 'image/png',
+    'gif' => 'image/gif',
+    'webp' => 'image/webp',
+    _ => 'application/octet-stream',
+  };
+}
+
+/// Displays the cover image and up to six extra images for a draft project,
+/// with controls to add or remove each image.
+///
+/// Visible only while the project is in [ProjectStatus.draft] since the API
+/// only accepts media changes before submission.
+class _ImageSection extends StatefulWidget {
+  const _ImageSection({
+    required this.project,
+    required this.eventId,
+  });
+
+  final ProjectEntity project;
+  final String eventId;
+
+  @override
+  State<_ImageSection> createState() => _ImageSectionState();
+}
+
+class _ImageSectionState extends State<_ImageSection> {
+  // Maximum extra images allowed by the API.
+  static const int _maxExtraImages = 6;
+
+  // -- Cover image actions --
+
+  Future<void> _pickAndUploadCover() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty || !mounted) return;
+    final file = result.files.first;
+    if (file.bytes == null) return;
+
+    if (!mounted) return;
+    context.read<ProjectsCubit>().uploadCover(
+          eventId: widget.eventId,
+          projectId: widget.project.id,
+          bytes: file.bytes!,
+          contentType: _contentTypeFromFileName(file.name),
+        );
+  }
+
+  Future<void> _confirmAndRemoveCover() async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: Text(l10n.confirmRemoveCoverTitle),
+        content: Text(l10n.confirmRemoveCoverDesc),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
+            child: Text(
+              l10n.removeImage,
+              style: TextStyle(color: context.colors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    context.read<ProjectsCubit>().removeCover(
+          eventId: widget.eventId,
+          projectId: widget.project.id,
+        );
+  }
+
+  // -- Extra image actions --
+
+  Future<void> _pickAndUploadExtraImage() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty || !mounted) return;
+    final file = result.files.first;
+    if (file.bytes == null) return;
+
+    if (!mounted) return;
+    context.read<ProjectsCubit>().uploadExtraImage(
+          eventId: widget.eventId,
+          projectId: widget.project.id,
+          bytes: file.bytes!,
+          contentType: _contentTypeFromFileName(file.name),
+        );
+  }
+
+  Future<void> _confirmAndRemoveExtraImage(ExtraImageEntity image) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: Text(l10n.confirmRemoveImageTitle),
+        content: Text(l10n.confirmRemoveImageDesc),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
+            child: Text(
+              l10n.removeImage,
+              style: TextStyle(color: context.colors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    context.read<ProjectsCubit>().removeExtraImage(
+          eventId: widget.eventId,
+          projectId: widget.project.id,
+          imageId: image.id,
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final project = widget.project;
+    final extraImages = project.images;
+    final canAddMore = extraImages.length < _maxExtraImages;
+
+    return Container(
+      padding: AppSpacing.cardPadding,
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: context.colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.projectImages,
+            style: AppTypography.labelLarge.copyWith(
+              color: context.colors.textPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          SizedBox(height: AppSpacing.lg),
+
+          // -- Cover image --
+          Text(
+            l10n.coverImage,
+            style: AppTypography.labelMedium.copyWith(
+              color: context.colors.textSecondary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.sm),
+          _CoverImageSlot(
+            coverUrl: project.coverUrl,
+            onUpload: _pickAndUploadCover,
+            onRemove: _confirmAndRemoveCover,
+            onReplace: _pickAndUploadCover,
+          ),
+
+          SizedBox(height: AppSpacing.lg),
+
+          // -- Extra images --
+          Row(
+            children: [
+              Text(
+                l10n.extraImages,
+                style: AppTypography.labelMedium.copyWith(
+                  color: context.colors.textSecondary,
+                ),
+              ),
+              SizedBox(width: AppSpacing.xs),
+              Text(
+                '(${extraImages.length}/$_maxExtraImages)',
+                style: AppTypography.caption.copyWith(
+                  color: context.colors.textHint,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.sm),
+          _ExtraImagesRow(
+            images: extraImages,
+            canAddMore: canAddMore,
+            onAdd: _pickAndUploadExtraImage,
+            onRemove: _confirmAndRemoveExtraImage,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// -- Cover image slot --
+
+class _CoverImageSlot extends StatelessWidget {
+  const _CoverImageSlot({
+    required this.coverUrl,
+    required this.onUpload,
+    required this.onRemove,
+    required this.onReplace,
+  });
+
+  final String? coverUrl;
+  final VoidCallback onUpload;
+  final VoidCallback onRemove;
+  final VoidCallback onReplace;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (coverUrl == null || coverUrl!.isEmpty) {
+      // Empty state — tap to upload.
+      return GestureDetector(
+        onTap: onUpload,
+        child: Container(
+          height: 160.r,
+          decoration: BoxDecoration(
+            color: context.colors.background,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            border: Border.all(
+              color: context.colors.border,
+              width: 1.5,
+              strokeAlign: BorderSide.strokeAlignInside,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.add_photo_alternate_outlined,
+                size: AppSizes.iconXl,
+                color: context.colors.textHint,
+              ),
+              SizedBox(height: AppSpacing.sm),
+              Text(
+                l10n.addCoverImage,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: context.colors.textHint,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Has a cover — show the image with change and remove controls.
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: Stack(
+        children: [
+          CachedImage(
+            url: coverUrl!,
+            width: double.infinity,
+            height: 160.r,
+            fit: BoxFit.cover,
+          ),
+          // Gradient scrim for button readability.
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 60.r,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.7),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Action buttons over the scrim.
+          Positioned(
+            bottom: AppSpacing.sm,
+            right: AppSpacing.sm,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _ImageActionButton(
+                  label: l10n.changeCoverImage,
+                  icon: Icons.edit_outlined,
+                  onTap: onReplace,
+                ),
+                SizedBox(width: AppSpacing.xs),
+                _ImageActionButton(
+                  label: l10n.removeImage,
+                  icon: Icons.delete_outline,
+                  onTap: onRemove,
+                  isDestructive: true,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// -- Extra images horizontal row --
+
+class _ExtraImagesRow extends StatelessWidget {
+  const _ExtraImagesRow({
+    required this.images,
+    required this.canAddMore,
+    required this.onAdd,
+    required this.onRemove,
+  });
+
+  final List<ExtraImageEntity> images;
+  final bool canAddMore;
+  final VoidCallback onAdd;
+  final ValueChanged<ExtraImageEntity> onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final tileSize = 90.r;
+
+    return SizedBox(
+      height: tileSize,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          // Existing images.
+          ...images.map(
+            (image) => Padding(
+              padding: EdgeInsets.only(right: AppSpacing.sm),
+              child: _ExtraImageTile(
+                image: image,
+                size: tileSize,
+                onRemove: () => onRemove(image),
+              ),
+            ),
+          ),
+          // Add button — only when the limit hasn't been reached.
+          if (canAddMore)
+            GestureDetector(
+              onTap: onAdd,
+              child: Container(
+                width: tileSize,
+                height: tileSize,
+                decoration: BoxDecoration(
+                  color: context.colors.background,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  border: Border.all(
+                    color: context.colors.border,
+                    width: 1.5,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add_rounded,
+                      size: AppSizes.iconMd,
+                      color: context.colors.textHint,
+                    ),
+                    SizedBox(height: 2.r),
+                    Text(
+                      l10n.addExtraImage,
+                      style: AppTypography.caption.copyWith(
+                        color: context.colors.textHint,
+                        fontSize: 10,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// -- Single extra image tile with remove button --
+
+class _ExtraImageTile extends StatelessWidget {
+  const _ExtraImageTile({
+    required this.image,
+    required this.size,
+    required this.onRemove,
+  });
+
+  final ExtraImageEntity image;
+  final double size;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          child: CachedImage(
+            url: image.url,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+          ),
+        ),
+        // Remove button in the top-right corner.
+        Positioned(
+          top: 4.r,
+          right: 4.r,
+          child: GestureDetector(
+            onTap: onRemove,
+            child: Container(
+              width: 22.r,
+              height: 22.r,
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.6),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.close_rounded,
+                size: 14.r,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// -- Small overlay button used on the cover image --
+
+class _ImageActionButton extends StatelessWidget {
+  const _ImageActionButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    this.isDestructive = false,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool isDestructive;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isDestructive ? context.colors.error : Colors.white;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 12.r, color: color),
+            SizedBox(width: 4.r),
+            Text(
+              label,
+              style: AppTypography.caption.copyWith(
+                color: color,
+                fontSize: 11,
+              ),
+            ),
+          ],
         ),
       ),
     );
