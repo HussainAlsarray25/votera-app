@@ -65,13 +65,14 @@ class MyProjectBody extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
-        // Team is loaded first; the project is loaded after the team state resolves.
         BlocProvider<TeamsCubit>(
           create: (_) => sl<TeamsCubit>()..loadMyTeam(),
         ),
-        // ProjectsCubit starts idle — the TeamLoaded listener triggers loadMyProject.
+        // Load the project immediately — the API does not require a team_id.
+        // This lets us auto-identify the correct team from project.teamId,
+        // avoiding the team picker for users who already have a project.
         BlocProvider<ProjectsCubit>(
-          create: (_) => sl<ProjectsCubit>(),
+          create: (_) => sl<ProjectsCubit>()..loadMyProject(eventId: eventId),
         ),
       ],
       child: _MyProjectView(eventId: eventId),
@@ -446,6 +447,10 @@ class _NoTeamPrompt extends StatelessWidget {
                   ),
                   SizedBox(height: AppSpacing.xl),
                   BlocBuilder<TeamsCubit, TeamsState>(
+                    // Only rebuild when the loading state flips — the button
+                    // only cares about whether a request is in flight.
+                    buildWhen: (prev, curr) =>
+                        (prev is TeamsLoading) != (curr is TeamsLoading),
                     builder: (ctx, state) => GradientButton(
                       text: AppLocalizations.of(context)!.createATeam,
                       isLoading: state is TeamsLoading,
@@ -784,6 +789,7 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
                           runSpacing: AppSpacing.sm,
                           children: _selectedCategories.map((cat) {
                             return _RemovableCategoryChip(
+                              key: ValueKey(cat.id),
                               category: cat,
                               onRemove: () => setState(() =>
                                   _selectedCategories.removeWhere(
@@ -1638,24 +1644,11 @@ class _TeamPicker extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Team avatar — image or initial letter fallback.
-          Container(
-            width: 40.r,
-            height: 40.r,
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: selected.imageUrl != null
-                ? ClipOval(
-                    child: Image.network(
-                      selected.imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          _teamInitial(context, selected),
-                    ),
-                  )
-                : _teamInitial(context, selected),
+          // Team avatar — cached image or initial letter fallback.
+          CachedAvatar(
+            radius: 20.r,
+            url: selected.imageUrl,
+            initial: selected.name,
           ),
           SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -1820,23 +1813,11 @@ class _TeamTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Team avatar or fallback initial circle
-            Container(
-              width: 36.r,
-              height: 36.r,
-              decoration: BoxDecoration(
-                color: primary.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: team.imageUrl != null
-                  ? ClipOval(
-                      child: Image.network(
-                        team.imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _initialIcon(context),
-                      ),
-                    )
-                  : _initialIcon(context),
+            // Team avatar — cached image or initial letter fallback.
+            CachedAvatar(
+              radius: 18.r,
+              url: team.imageUrl,
+              initial: team.name,
             ),
             SizedBox(width: AppSpacing.sm),
             Expanded(
@@ -1928,6 +1909,7 @@ class _CategorySection extends StatelessWidget {
               children: project.categories
                   .map(
                     (cat) => _RemovableCategoryChip(
+                      key: ValueKey(cat.id),
                       category: cat,
                       onRemove: () => context
                           .read<ProjectsCubit>()
@@ -2061,6 +2043,7 @@ class _RemovableCategoryChip extends StatelessWidget {
   const _RemovableCategoryChip({
     required this.category,
     required this.onRemove,
+    super.key,
   });
 
   final CategoryEntity category;

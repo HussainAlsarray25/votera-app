@@ -23,11 +23,16 @@ class ProjectDetailsPage extends StatelessWidget {
   const ProjectDetailsPage({
     required this.eventId,
     required this.projectId,
+    this.coverUrl,
     super.key,
   });
 
   final String eventId;
   final String projectId;
+
+  /// Cover image URL passed from the project card for immediate Hero display.
+  /// Used as a placeholder while the full project details load from the API.
+  final String? coverUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +58,7 @@ class ProjectDetailsPage extends StatelessWidget {
       child: _ProjectDetailsView(
         eventId: eventId,
         projectId: projectId,
+        coverUrl: coverUrl,
       ),
     );
   }
@@ -62,10 +68,12 @@ class _ProjectDetailsView extends StatelessWidget {
   const _ProjectDetailsView({
     required this.eventId,
     required this.projectId,
+    this.coverUrl,
   });
 
   final String eventId;
   final String projectId;
+  final String? coverUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +124,7 @@ class _ProjectDetailsView extends StatelessWidget {
                     ProjectHeaderSection(
                       eventId: eventId,
                       projectId: projectId,
+                      coverUrl: coverUrl,
                     ),
                     SliverToBoxAdapter(
                       child: _buildBody(

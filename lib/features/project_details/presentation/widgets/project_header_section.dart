@@ -17,11 +17,17 @@ class ProjectHeaderSection extends StatelessWidget {
   const ProjectHeaderSection({
     required this.eventId,
     required this.projectId,
+    this.coverUrl,
     super.key,
   });
 
   final String eventId;
   final String projectId;
+
+  /// Cover image URL passed from the project card.
+  /// Shown immediately so the Hero animation has a destination before
+  /// the API call resolves with the full project details.
+  final String? coverUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -51,37 +57,32 @@ class ProjectHeaderSection extends StatelessWidget {
   }
 
   Widget _buildBackground(ProjectEntity? project) {
-    final coverUrl = project?.coverUrl;
-    final hasCover = coverUrl != null && coverUrl.isNotEmpty;
+    // Prefer the loaded project cover; fall back to the URL passed from the
+    // card so the Hero destination is visible before the API responds.
+    final resolvedUrl =
+        (project?.coverUrl?.isNotEmpty == true) ? project!.coverUrl! : coverUrl;
+    final hasCover = resolvedUrl != null && resolvedUrl.isNotEmpty;
 
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Background: cover photo when available, gradient otherwise
-        if (hasCover)
-          CachedImage(url: coverUrl!, fit: BoxFit.cover)
-        else ...[
-          // Gradient hero background (fallback when no cover)
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primaryDark,
-                  AppColors.secondary,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-          ),
-
-          // Subtle dot-grid pattern overlay
+        // Background: Hero-wrapped cover photo or gradient fallback.
+        // The tag matches the one in ProjectEntityCard so Flutter animates
+        // the image from the card thumbnail into this full-bleed header.
+        Hero(
+          tag: 'project-cover-$projectId',
+          // transitionOnUserGestures allows the Hero to run on iOS back swipe.
+          transitionOnUserGestures: true,
+          child: hasCover
+              ? CachedImage(url: resolvedUrl!, fit: BoxFit.cover)
+              : _buildGradientFallback(),
+        ),
+        // Decorative overlays — only shown on the gradient fallback.
+        if (!hasCover) ...[
           Opacity(
             opacity: 0.07,
             child: CustomPaint(painter: _DotGridPainter()),
           ),
-
-          // Decorative floating icon
           Positioned(
             right: 24,
             top: 70,
@@ -121,6 +122,18 @@ class ProjectHeaderSection extends StatelessWidget {
             child: _buildProjectInfo(project),
           ),
       ],
+    );
+  }
+
+  Widget _buildGradientFallback() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.primaryDark, AppColors.secondary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
     );
   }
 

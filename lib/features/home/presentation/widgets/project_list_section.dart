@@ -36,6 +36,7 @@ class ProjectListSection extends StatelessWidget {
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             return ProjectEntityCard(
+              key: ValueKey(projects[index].id),
               project: projects[index],
               eventId: eventId,
             );
