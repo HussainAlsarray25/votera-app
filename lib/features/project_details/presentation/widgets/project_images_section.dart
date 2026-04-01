@@ -42,15 +42,13 @@ class ProjectImagesSection extends StatelessWidget {
             ),
             SizedBox(height: AppSpacing.sm),
 
-            // Cover image
-            if (hasCover) ...[
-              _CoverTile(url: project.coverUrl!),
-              if (hasExtras) SizedBox(height: AppSpacing.sm),
-            ],
-
-            // Extra images row
-            if (hasExtras)
-              _ExtraImagesRow(images: project.images),
+            // All images in one horizontal scrollable row.
+            // Cover is always first so the user sees it in context with
+            // the extra images without needing to scroll past a large tile.
+            _GalleryRow(
+              coverUrl: hasCover ? project.coverUrl : null,
+              images: project.images,
+            ),
           ],
         );
       },
@@ -82,25 +80,53 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-// -- Cover image tile --
+// -- Single gallery tile (cover or extra image) --
 
-class _CoverTile extends StatelessWidget {
-  const _CoverTile({required this.url});
+class _GalleryTile extends StatelessWidget {
+  const _GalleryTile({required this.url, this.isCover = false});
 
   final String url;
+
+  // When true a small "Cover" badge is shown so the user can tell which
+  // image is the project cover at a glance.
+  final bool isCover;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => _openFullScreen(context, url),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        child: CachedImage(
-          url: url,
-          width: double.infinity,
-          height: 220,
-          fit: BoxFit.cover,
-        ),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            child: CachedImage(
+              url: url,
+              width: 110,
+              height: 110,
+              fit: BoxFit.cover,
+            ),
+          ),
+          if (isCover)
+            Positioned(
+              bottom: 4,
+              left: 4,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  AppLocalizations.of(context)!.coverImage,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -117,57 +143,33 @@ class _CoverTile extends StatelessWidget {
   }
 }
 
-// -- Extra images horizontal row --
+// -- Unified gallery row: cover first, then extra images --
 
-class _ExtraImagesRow extends StatelessWidget {
-  const _ExtraImagesRow({required this.images});
+class _GalleryRow extends StatelessWidget {
+  const _GalleryRow({
+    required this.images,
+    this.coverUrl,
+  });
 
+  final String? coverUrl;
   final List<ExtraImageEntity> images;
 
   @override
   Widget build(BuildContext context) {
+    // Build a flat list: cover tile (if any) followed by extra image tiles.
+    final tiles = <Widget>[
+      if (coverUrl != null)
+        _GalleryTile(url: coverUrl!, isCover: true),
+      ...images.map((img) => _GalleryTile(url: img.url)),
+    ];
+
     return SizedBox(
       height: 110,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: images.length,
+        itemCount: tiles.length,
         separatorBuilder: (_, __) => SizedBox(width: AppSpacing.sm),
-        itemBuilder: (context, index) {
-          return _ExtraImageTile(image: images[index]);
-        },
-      ),
-    );
-  }
-}
-
-class _ExtraImageTile extends StatelessWidget {
-  const _ExtraImageTile({required this.image});
-
-  final ExtraImageEntity image;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _openFullScreen(context, image.url),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-        child: CachedImage(
-          url: image.url,
-          width: 110,
-          height: 110,
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
-  }
-
-  void _openFullScreen(BuildContext context, String imageUrl) {
-    Navigator.of(context).push(
-      PageRouteBuilder<void>(
-        opaque: false,
-        barrierDismissible: true,
-        barrierColor: Colors.black87,
-        pageBuilder: (_, __, ___) => _FullScreenImage(url: imageUrl),
+        itemBuilder: (_, index) => tiles[index],
       ),
     );
   }

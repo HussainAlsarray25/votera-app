@@ -465,5 +465,8 @@
   "confirmRemoveImageDesc": "سيتم حذف هذه الصورة نهائياً.",
   "deleteProject": "حذف المشروع",
   "confirmDeleteProjectTitle": "حذف المشروع؟",
-  "confirmDeleteProjectDesc": "سيتم حذف مشروعك وجميع صوره نهائياً. لا يمكن التراجع عن هذا الإجراء."
+  "confirmDeleteProjectDesc": "سيتم حذف مشروعك وجميع صوره نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+
+  "forceUpdateTitle": "تحديث مطلوب",
+  "forceUpdateButton": "تحميل التحديث"
 }

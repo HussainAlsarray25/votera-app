@@ -116,11 +116,13 @@ class AppConfirmDialog extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                _CancelButton(label: effectiveCancelLabel),
+                Flexible(child: _CancelButton(label: effectiveCancelLabel)),
                 SizedBox(width: AppSpacing.sm),
-                _ConfirmButton(
-                  label: confirmLabel,
-                  isDestructive: isDestructive,
+                Flexible(
+                  child: _ConfirmButton(
+                    label: confirmLabel,
+                    isDestructive: isDestructive,
+                  ),
                 ),
               ],
             ),

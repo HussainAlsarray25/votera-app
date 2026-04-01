@@ -2545,6 +2545,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This will permanently delete your project and all its images. This action cannot be undone.'**
   String get confirmDeleteProjectDesc;
+
+  /// No description provided for @forceUpdateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Required'**
+  String get forceUpdateTitle;
+
+  /// No description provided for @forceUpdateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Update'**
+  String get forceUpdateButton;
 }
 
 class _AppLocalizationsDelegate

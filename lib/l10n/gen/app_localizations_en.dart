@@ -1326,4 +1326,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get confirmDeleteProjectDesc =>
       'This will permanently delete your project and all its images. This action cannot be undone.';
+
+  @override
+  String get forceUpdateTitle => 'Update Required';
+
+  @override
+  String get forceUpdateButton => 'Download Update';
 }

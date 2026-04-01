@@ -1303,4 +1303,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get confirmDeleteProjectDesc =>
       'سيتم حذف مشروعك وجميع صوره نهائياً. لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get forceUpdateTitle => 'تحديث مطلوب';
+
+  @override
+  String get forceUpdateButton => 'تحميل التحديث';
 }

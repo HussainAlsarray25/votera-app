@@ -571,5 +571,8 @@
   "confirmRemoveImageDesc": "This image will be permanently deleted.",
   "deleteProject": "Delete Project",
   "confirmDeleteProjectTitle": "Delete Project?",
-  "confirmDeleteProjectDesc": "This will permanently delete your project and all its images. This action cannot be undone."
+  "confirmDeleteProjectDesc": "This will permanently delete your project and all its images. This action cannot be undone.",
+
+  "forceUpdateTitle": "Update Required",
+  "forceUpdateButton": "Download Update"
 }

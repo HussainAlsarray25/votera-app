@@ -145,9 +145,13 @@ class _MyProjectView extends StatefulWidget {
 }
 
 class _MyProjectViewState extends State<_MyProjectView> {
-  // The team chosen by the user. Null means we are still waiting for the user
-  // to pick (only relevant when the user belongs to more than one team).
+  // The team identified for this event. Set automatically from project.teamId
+  // when the project loads, or via the team picker for first-time submissions.
   TeamEntity? _selectedTeam;
+
+  // All teams the current user belongs to, stored here so listeners and the
+  // build method can access them without re-reading from the cubit state.
+  List<TeamEntity> _loadedTeams = [];
 
   // Key used to call into the create form state and upload a pending cover
   // after the project has been saved and its ID is available.
@@ -162,10 +166,9 @@ class _MyProjectViewState extends State<_MyProjectView> {
   }
 
   void _loadMyProject() {
-    if (_selectedTeam == null) return;
     context.read<ProjectsCubit>().loadMyProject(
           eventId: widget.eventId,
-          teamId: _selectedTeam!.id,
+          teamId: _selectedTeam?.id,
         );
   }
 
@@ -173,17 +176,17 @@ class _MyProjectViewState extends State<_MyProjectView> {
   /// Used after image/category operations so the project view stays visible
   /// while the data refreshes in the background.
   void _silentReloadMyProject() {
-    if (_selectedTeam == null) return;
     context.read<ProjectsCubit>().reloadMyProjectSilent(
           eventId: widget.eventId,
-          teamId: _selectedTeam!.id,
+          teamId: _selectedTeam?.id,
         );
   }
 
   Future<void> _refresh() async {
-    // Reloading the team will trigger the TeamLoaded listener, which in turn
-    // reloads the project. This covers all refresh scenarios.
     context.read<TeamsCubit>().loadMyTeam();
+    // Also reload the project independently — the API does not require a
+    // team_id, so this works even before a team has been selected.
+    _loadMyProject();
   }
 
   void _showSnackBar(BuildContext context, String message) {
@@ -201,9 +204,9 @@ class _MyProjectViewState extends State<_MyProjectView> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        // When the team list resolves, auto-select if there is only one team
-        // and immediately load the project. For multiple teams we wait for the
-        // user to pick — the picker calls _selectTeam which triggers the load.
+        // When the team list resolves, store it and try to identify the
+        // correct team. We no longer trigger project loading here because
+        // the project is already loading in parallel via ProjectsCubit.
         BlocListener<TeamsCubit, TeamsState>(
           listenWhen: (_, current) =>
               current is MyTeamsLoaded || current is TeamLoaded,
@@ -214,21 +217,51 @@ class _MyProjectViewState extends State<_MyProjectView> {
 
             if (teams.isEmpty) return;
 
-            if (teams.length == 1) {
-              // Single team — select it automatically and load project.
-              setState(() => _selectedTeam = teams.first);
-              ctx.read<ProjectsCubit>().loadMyProject(
-                    eventId: widget.eventId,
-                    teamId: teams.first.id,
-                  );
-            } else if (_selectedTeam != null) {
-              // Multiple teams, user already picked one — reload project.
-              ctx.read<ProjectsCubit>().loadMyProject(
-                    eventId: widget.eventId,
-                    teamId: _selectedTeam!.id,
-                  );
+            // Use List.from to ensure the runtime type is List<TeamEntity>,
+            // not List<TeamModel>, which would break firstWhere's type inference.
+            setState(() => _loadedTeams = List<TeamEntity>.from(teams));
+
+            if (_selectedTeam != null) return; // Already identified, nothing to do.
+
+            // If the project has already loaded, use its teamId to match the
+            // correct team without requiring any user interaction.
+            final projectState = ctx.read<ProjectsCubit>().state;
+            if (projectState is MyProjectLoaded) {
+              final match = teams.firstWhere(
+                (t) => t.id == projectState.project.teamId,
+                orElse: () => teams.first,
+              );
+              setState(() => _selectedTeam = match);
+              return;
             }
-            // else: multiple teams, no selection yet — show the picker below.
+
+            // Project not loaded yet. For a single team, auto-select now so
+            // the create form is ready when the 404 response arrives.
+            if (teams.length == 1) {
+              setState(() => _selectedTeam = teams.first);
+            }
+            // Multiple teams and no project yet — wait for project response.
+            // If the project exists its teamId will identify the team.
+            // If it does not exist (404) the team picker will be shown.
+          },
+        ),
+        // When the project loads and _selectedTeam is not yet set, use
+        // project.teamId to find and auto-select the matching team. This
+        // handles the case where the project response arrives before the
+        // team list — the team listener will also check this on arrival.
+        BlocListener<ProjectsCubit, ProjectsState>(
+          listenWhen: (_, current) =>
+              current is MyProjectLoaded,
+          listener: (ctx, state) {
+            if (state is! MyProjectLoaded) return;
+            if (_selectedTeam != null) return; // Already set.
+            if (_loadedTeams.isEmpty) return; // Teams not loaded yet; team listener will handle it.
+
+            final match = _loadedTeams.firstWhere(
+              (t) => t.id == state.project.teamId,
+              orElse: () => _loadedTeams.first,
+            );
+            setState(() => _selectedTeam = match);
           },
         ),
         // Team action errors (e.g. create team rejected) → snackbar.
@@ -291,17 +324,9 @@ class _MyProjectViewState extends State<_MyProjectView> {
             return _NoTeamPrompt(onRefresh: _refresh);
           }
 
-          // Multiple teams but user hasn't chosen one yet — show full-screen
-          // team picker before attempting any project API calls.
-          final teams = teamState is MyTeamsLoaded ? teamState.teams : <TeamEntity>[];
-          if (teams.length > 1 && _selectedTeam == null) {
-            return _TeamSelectionGate(
-              teams: teams,
-              onTeamSelected: _selectTeam,
-            );
-          }
-
-          // Team confirmed. Now check the project state.
+          // Teams are loaded. Now check the project state to decide what to show.
+          // The project is already loading in parallel, so we do not need to
+          // gate on team selection before initiating any API calls.
           return BlocBuilder<ProjectsCubit, ProjectsState>(
             // States handled silently by BlocListeners — exclude them from
             // the builder so the current view stays visible:
@@ -336,10 +361,21 @@ class _MyProjectViewState extends State<_MyProjectView> {
               }
 
               if (projectState is MyProjectNotFound) {
+                // No project yet. If the user is in multiple teams and has not
+                // chosen one, show the team picker before the submission form.
+                // This only applies to first-time submissions — returning users
+                // have their team identified from the project response above.
+                if (_loadedTeams.length > 1 && _selectedTeam == null) {
+                  return _TeamSelectionGate(
+                    teams: _loadedTeams,
+                    onTeamSelected: _selectTeam,
+                  );
+                }
+
                 return _CreateProjectForm(
                   key: _createFormKey,
                   eventId: widget.eventId,
-                  teams: teams,
+                  teams: _loadedTeams,
                   initialTeam: _selectedTeam,
                   onRefresh: _refresh,
                 );

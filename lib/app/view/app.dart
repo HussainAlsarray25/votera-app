@@ -6,6 +6,8 @@ import 'package:votera/core/design_system/utils/real_viewport.dart';
 import 'package:votera/core/di/injection_container.dart' as di;
 import 'package:votera/core/router/app_router.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/features/force_update/presentation/cubit/force_update_cubit.dart';
+import 'package:votera/features/force_update/presentation/widgets/force_update_guard.dart';
 import 'package:votera/features/notification/presentation/cubit/push_notification_cubit.dart';
 import 'package:votera/features/notification/presentation/cubit/unread_count_cubit.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
@@ -21,6 +23,10 @@ class App extends StatelessWidget {
     final appRouter = di.sl<AppRouter>();
     return MultiBlocProvider(
       providers: [
+        BlocProvider<ForceUpdateCubit>(
+          // Trigger the version check immediately on app start.
+          create: (_) => di.sl<ForceUpdateCubit>()..check(),
+        ),
         BlocProvider.value(value: di.sl<AuthCubit>()),
         BlocProvider<ProfileCubit>(
           create: (_) => di.sl<ProfileCubit>(),
@@ -90,7 +96,9 @@ class App extends StatelessWidget {
                                     .clamp(0.8, 1.2),
                               ),
                             ),
-                            child: child ?? const SizedBox.shrink(),
+                            child: ForceUpdateGuard(
+                              child: child ?? const SizedBox.shrink(),
+                            ),
                           );
                         },
                       );

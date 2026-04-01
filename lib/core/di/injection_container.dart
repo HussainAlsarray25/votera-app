@@ -34,6 +34,7 @@ import 'package:votera/features/ratings/di/ratings_injection.dart';
 import 'package:votera/features/rankings/di/rankings_injection.dart';
 import 'package:votera/features/participant_forms/di/forms_injection.dart';
 import 'package:votera/features/teams/di/teams_injection.dart';
+import 'package:votera/features/force_update/di/force_update_injection.dart';
 import 'package:votera/features/settings/di/settings_injection.dart';
 import 'package:votera/features/voting/di/voting_injection.dart';
 
@@ -111,6 +112,8 @@ void _initCore() {
 }
 
 void _initFeatures() {
+  initForceUpdateFeature(sl);
+
   initAuthFeature(sl);
   initProfileFeature(sl);
   initNotificationFeature(sl);
