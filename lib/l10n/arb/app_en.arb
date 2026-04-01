@@ -132,6 +132,7 @@
   "noEventsYet": "No events yet",
   "noEventsDesc": "There are no exhibitions or events available right now. Check back later for updates.",
   "retry": "Retry",
+  "somethingWentWrong": "Something went wrong",
 
   "exhibition": "Exhibition",
   "projects": "Projects",

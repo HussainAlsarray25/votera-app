@@ -10,6 +10,7 @@ import 'package:votera/features/exhibitions/presentation/widgets/exhibition_card
 import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
 import 'package:votera/shared/widgets/empty_state.dart';
+import 'package:votera/shared/widgets/failure_state.dart';
 
 /// Main home page showing a list of exhibitions/events.
 /// Loads real event data from the API via EventsCubit.
@@ -108,7 +109,15 @@ class _EventsListSliver extends StatelessWidget {
 
         if (state is EventsError) {
           return SliverToBoxAdapter(
-            child: _buildErrorState(context, state.message),
+            child: Padding(
+              padding: EdgeInsets.only(top: 80.r),
+              child: Center(
+                child: FailureState(
+                  message: state.message,
+                  onRetry: () => context.read<EventsCubit>().loadEvents(),
+                ),
+              ),
+            ),
           );
         }
 
@@ -189,26 +198,4 @@ class _EventsListSliver extends StatelessWidget {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, String message) {
-    return Padding(
-      padding: EdgeInsets.only(top: 80.r),
-      child: Column(
-        children: [
-          Icon(Icons.error_outline, size: AppSizes.iconXxl, color: context.colors.error),
-          SizedBox(height: AppSpacing.md),
-          Text(
-            message,
-            style: AppTypography.bodyMedium.copyWith(
-              color: context.colors.textSecondary,
-            ),
-          ),
-          SizedBox(height: AppSpacing.md),
-          TextButton(
-            onPressed: () => context.read<EventsCubit>().loadEvents(),
-            child: Text(AppLocalizations.of(context)!.retry),
-          ),
-        ],
-      ),
-    );
-  }
 }

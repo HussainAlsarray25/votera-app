@@ -18,6 +18,7 @@ import 'package:votera/features/teams/presentation/widgets/invitation_card.dart'
 import 'package:votera/features/teams/presentation/widgets/team_card.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
 import 'package:votera/shared/widgets/empty_state.dart';
+import 'package:votera/shared/widgets/failure_state.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
 /// Main teams page with two tabs: My Team and Browse.
@@ -205,6 +206,11 @@ class _MyTeamTabState extends State<_MyTeamTab> {
   bool _isFirstLoad = true;
   bool _isInvitationLoading = false;
 
+  // Tracks whether the last load attempt ended with an error so we can
+  // show FailureState instead of the empty-teams view.
+  bool _hasError = false;
+  String _errorMessage = '';
+
   @override
   void initState() {
     super.initState();
@@ -213,6 +219,8 @@ class _MyTeamTabState extends State<_MyTeamTab> {
       _teams = teamState.teams;
       _isFirstLoad = false;
     } else if (teamState is TeamsError) {
+      _hasError = true;
+      _errorMessage = teamState.message;
       _isFirstLoad = false;
     }
 
@@ -240,6 +248,8 @@ class _MyTeamTabState extends State<_MyTeamTab> {
         setState(() {
           _teams = state.teams;
           _isFirstLoad = false;
+          _hasError = false;
+          _errorMessage = '';
         });
 
       case TeamLoaded():
@@ -250,6 +260,8 @@ class _MyTeamTabState extends State<_MyTeamTab> {
         setState(() {
           _teams = [];
           _isFirstLoad = false;
+          _hasError = true;
+          _errorMessage = state.message;
         });
 
       case TeamsActionFailed():
@@ -329,6 +341,15 @@ class _MyTeamTabState extends State<_MyTeamTab> {
   Widget _buildListView(BuildContext context) {
     if (_isFirstLoad) {
       return const Center(child: AppLoadingIndicator());
+    }
+
+    if (_hasError) {
+      return Center(
+        child: FailureState(
+          message: _errorMessage,
+          onRetry: _refresh,
+        ),
+      );
     }
 
     return RefreshIndicator(
@@ -1137,17 +1158,12 @@ class _BrowseTabState extends State<_BrowseTab> {
   }
 
   Widget _buildError(BuildContext context, String message) {
-    final l10n = AppLocalizations.of(context)!;
-    final filterLabel = _filterLabel(context);
     final query = _searchController.text.trim();
     return Center(
-      child: EmptyState(
+      child: FailureState(
         icon: Icons.wifi_off_rounded,
-        title: l10n.noTeamsFound,
-        subtitle: query.isEmpty
-            ? message
-            : '$message\n"$query" — $filterLabel',
-        showRefreshHint: false,
+        message: query.isEmpty ? message : '$message — "$query"',
+        onRetry: () => _triggerSearch(query),
       ),
     );
   }

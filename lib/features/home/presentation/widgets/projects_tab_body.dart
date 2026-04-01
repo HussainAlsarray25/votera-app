@@ -11,6 +11,7 @@ import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart'
 import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
 import 'package:votera/shared/widgets/empty_state.dart';
+import 'package:votera/shared/widgets/failure_state.dart';
 
 /// Reusable body for the Projects tab.
 /// Loads projects, wires up search (sent to the API via title param).
@@ -117,7 +118,14 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
         }
 
         if (state is ProjectsError) {
-          return _buildErrorState(context, state.message);
+          return Center(
+            child: FailureState(
+              message: state.message,
+              onRetry: () => context
+                  .read<ProjectsCubit>()
+                  .loadProjects(eventId: widget.eventId),
+            ),
+          );
         }
 
         // While a search or refresh is loading, keep the previous content
@@ -250,28 +258,4 @@ class _ProjectsTabBodyState extends State<ProjectsTabBody> {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, String message) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.error_outline, size: AppSizes.iconXxl, color: context.colors.error),
-          SizedBox(height: AppSpacing.md),
-          Text(
-            message,
-            style: AppTypography.bodyMedium.copyWith(
-              color: context.colors.textSecondary,
-            ),
-          ),
-          SizedBox(height: AppSpacing.md),
-          TextButton(
-            onPressed: () => context
-                .read<ProjectsCubit>()
-                .loadProjects(eventId: widget.eventId),
-            child: Text(AppLocalizations.of(context)!.retry),
-          ),
-        ],
-      ),
-    );
-  }
 }

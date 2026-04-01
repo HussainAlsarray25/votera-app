@@ -13,6 +13,7 @@ import 'package:votera/features/rankings/presentation/widgets/rankings_podium_se
 import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
 import 'package:votera/shared/widgets/empty_state.dart';
+import 'package:votera/shared/widgets/failure_state.dart';
 
 /// Reusable body content for the Rankings display.
 /// Shows two tabs — Community and Supervisor — each filtered via the
@@ -143,7 +144,12 @@ class _RankingsTabState extends State<_RankingsTab>
         }
 
         if (state is RankingsError) {
-          return _buildErrorState(state.message);
+          return Center(
+            child: FailureState(
+              message: state.message,
+              onRetry: _refresh,
+            ),
+          );
         }
 
         if (state is RankingsLoaded) {
@@ -222,30 +228,4 @@ class _RankingsTabState extends State<_RankingsTab>
     );
   }
 
-  Widget _buildErrorState(String message) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: AppSizes.iconXxl,
-            color: context.colors.error,
-          ),
-          SizedBox(height: AppSpacing.md),
-          Text(
-            message,
-            style: AppTypography.bodyMedium.copyWith(
-              color: context.colors.textSecondary,
-            ),
-          ),
-          SizedBox(height: AppSpacing.md),
-          TextButton(
-            onPressed: _refresh,
-            child: Text(AppLocalizations.of(context)!.retry),
-          ),
-        ],
-      ),
-    );
-  }
 }

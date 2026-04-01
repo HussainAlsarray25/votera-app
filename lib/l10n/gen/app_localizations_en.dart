@@ -340,6 +340,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retry => 'Retry';
 
   @override
+  String get somethingWentWrong => 'Something went wrong';
+
+  @override
   String get exhibition => 'Exhibition';
 
   @override

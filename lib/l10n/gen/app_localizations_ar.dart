@@ -337,6 +337,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get retry => 'إعادة المحاولة';
 
   @override
+  String get somethingWentWrong => 'حدث خطأ ما';
+
+  @override
   String get exhibition => 'المعرض';
 
   @override

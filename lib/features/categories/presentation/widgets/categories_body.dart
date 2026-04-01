@@ -8,6 +8,7 @@ import 'package:votera/features/categories/presentation/cubit/categories_cubit.d
 import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
 import 'package:votera/shared/widgets/empty_state.dart';
+import 'package:votera/shared/widgets/failure_state.dart';
 
 /// Rotating color palette for category cards.
 const _categoryGradients = [
@@ -91,7 +92,12 @@ class _CategoriesBodyState extends State<CategoriesBody> {
         }
 
         if (state is CategoriesError) {
-          return _buildErrorState(context, state.message);
+          return Center(
+            child: FailureState(
+              message: state.message,
+              onRetry: _refresh,
+            ),
+          );
         }
 
         if (state is CategoriesLoaded) {
@@ -147,30 +153,6 @@ class _CategoriesBodyState extends State<CategoriesBody> {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, String message) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.error_outline, size: AppSizes.iconXxl, color: context.colors.error),
-          SizedBox(height: AppSpacing.md),
-          Text(
-            message,
-            style: AppTypography.bodyMedium.copyWith(
-              color: context.colors.textSecondary,
-            ),
-          ),
-          SizedBox(height: AppSpacing.md),
-          TextButton(
-            onPressed: () => context
-                .read<CategoriesCubit>()
-                .loadCategories(page: 1, size: 50),
-            child: Text(AppLocalizations.of(context)!.retry),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _CategoryCard extends StatelessWidget {
