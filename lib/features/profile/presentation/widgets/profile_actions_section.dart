@@ -7,6 +7,7 @@ import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/features/settings/presentation/cubit/locale_cubit.dart';
 import 'package:votera/features/settings/presentation/cubit/theme_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 
 /// Settings and account actions at the bottom of the profile page.
 class ProfileActionsSection extends StatelessWidget {
@@ -19,11 +20,10 @@ class ProfileActionsSection extends StatelessWidget {
         if (state is AuthInitial) {
           context.go('/auth');
         } else if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: context.colors.error,
-            ),
+          showAppSnackBar(
+            context,
+            state.message,
+            type: AppSnackBarType.error,
           );
         }
       },

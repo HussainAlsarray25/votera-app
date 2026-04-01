@@ -170,6 +170,24 @@ abstract class AppLocalizations {
   /// **'Dark Mode'**
   String get darkMode;
 
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfile;
+
+  /// No description provided for @profileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully'**
+  String get profileUpdated;
+
+  /// No description provided for @fullNameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name must be at most 100 characters'**
+  String get fullNameTooLong;
+
   /// No description provided for @helpSupport.
   ///
   /// In en, this message translates to:

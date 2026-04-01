@@ -45,6 +45,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get darkMode => 'الوضع الداكن';
 
   @override
+  String get editProfile => 'تعديل الملف الشخصي';
+
+  @override
+  String get profileUpdated => 'تم تحديث الملف الشخصي بنجاح';
+
+  @override
+  String get fullNameTooLong => 'يجب ألا يتجاوز الاسم الكامل 100 حرف';
+
+  @override
   String get helpSupport => 'المساعدة والدعم';
 
   @override

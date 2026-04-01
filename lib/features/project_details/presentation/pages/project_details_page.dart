@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/features/comments/presentation/cubit/comments_cubit.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_comments_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_header_section.dart';
@@ -147,23 +148,18 @@ class _ProjectDetailsView extends StatelessWidget {
 
   void _handleVotingState(BuildContext context, VotingState state) {
     if (state is OutsideVotingArea) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(state.message)));
+      showAppSnackBar(context, state.message);
     } else if (state is LocationUnavailable) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(state.message),
-            action: state.isDeniedForever
-                ? SnackBarAction(
-                    label: AppLocalizations.of(context)!.settings,
-                    onPressed: Geolocator.openAppSettings,
-                  )
-                : null,
-          ),
-        );
+      showAppSnackBar(
+        context,
+        state.message,
+        action: state.isDeniedForever
+            ? SnackBarAction(
+                label: AppLocalizations.of(context)!.settings,
+                onPressed: Geolocator.openAppSettings,
+              )
+            : null,
+      );
     }
   }
 

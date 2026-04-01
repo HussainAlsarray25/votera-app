@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/features/teams/domain/entities/join_request_entity.dart';
 import 'package:votera/features/teams/domain/entities/team_entity.dart';
@@ -1097,15 +1098,11 @@ class _HandleChip extends StatelessWidget {
 
   void _copy(BuildContext context) {
     Clipboard.setData(ClipboardData(text: handle));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.copiedToClipboard),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        ),
-      ),
+    showAppSnackBar(
+      context,
+      AppLocalizations.of(context)!.copiedToClipboard,
+      type: AppSnackBarType.success,
+      duration: const Duration(seconds: 2),
     );
   }
 
@@ -1481,13 +1478,5 @@ Future<String?> _showMemberPickerSheet(
 }
 
 void _showSnackBar(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(message),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      ),
-    ),
-  );
+  showAppSnackBar(context, message);
 }

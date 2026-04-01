@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/features/categories/domain/entities/category_entity.dart';
 import 'package:votera/features/categories/presentation/cubit/categories_cubit.dart';
 import 'package:votera/features/events/domain/entities/event_entity.dart';
@@ -190,14 +191,7 @@ class _MyProjectViewState extends State<_MyProjectView> {
   }
 
   void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    showAppSnackBar(context, message);
   }
 
   @override
@@ -3192,9 +3186,7 @@ class _EditProjectPageState extends State<EditProjectPage> {
           Navigator.of(context).pop(state.project);
         } else if (state is ProjectActionFailed) {
           setState(() => _isSaving = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          showAppSnackBar(context, state.message, type: AppSnackBarType.error);
         }
       },
       child: Scaffold(

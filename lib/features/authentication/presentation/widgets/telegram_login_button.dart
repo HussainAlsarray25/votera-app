@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 
 // Telegram brand color
 const _telegramBlue = Color(0xFF2CA5E0);
@@ -64,11 +65,10 @@ class _TelegramLoginButtonState extends State<TelegramLoginButton>
               _openTelegramLink(state.link);
             }
             if (state is AuthError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: context.colors.error,
-                ),
+              showAppSnackBar(
+                context,
+                state.message,
+                type: AppSnackBarType.error,
               );
             }
           },

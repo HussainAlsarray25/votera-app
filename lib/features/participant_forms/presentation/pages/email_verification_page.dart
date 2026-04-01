@@ -7,6 +7,7 @@ import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/participant_forms/presentation/cubit/forms_cubit.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -93,19 +94,17 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             // Force-refresh clears the stale cached role before fetching,
             // so the Teams tab and other role-gated UI update immediately.
             context.read<ProfileCubit>().forceRefresh();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context)!.accountVerified),
-                backgroundColor: context.colors.success,
-              ),
+            showAppSnackBar(
+              context,
+              AppLocalizations.of(context)!.accountVerified,
+              type: AppSnackBarType.success,
             );
             context.go('/profile');
           } else if (state is FormsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: context.colors.error,
-              ),
+            showAppSnackBar(
+              context,
+              state.message,
+              type: AppSnackBarType.error,
             );
           }
         },

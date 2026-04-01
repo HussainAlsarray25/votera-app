@@ -8,6 +8,7 @@ import 'package:votera/app/view/shell_page.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/features/teams/domain/entities/invitation_entity.dart';
 import 'package:votera/features/teams/domain/entities/team_entity.dart';
@@ -1256,13 +1257,5 @@ class _FilterChipsBar extends StatelessWidget {
 
 
 void _showSnackBar(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(message),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      ),
-    ),
-  );
+  showAppSnackBar(context, message);
 }

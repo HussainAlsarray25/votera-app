@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -58,11 +59,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               extra: {'email': _emailController.text.trim()},
             );
           } else if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: context.colors.error,
-              ),
+            showAppSnackBar(
+              context,
+              state.message,
+              type: AppSnackBarType.error,
             );
           }
         },

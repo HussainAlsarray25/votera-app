@@ -41,8 +41,10 @@ class ProfileCubit extends Cubit<ProfileState> {
       },
     );
 
-    // Only show a loading spinner if there was no cached data to display.
-    if (state is! ProfileLoaded) emit(ProfileLoading());
+    // Only show a loading spinner if there is no profile data on screen at all.
+    // When called after an avatar upload the state is ProfileAvatarUploading,
+    // which already holds a profile — spinning would blank out the screen.
+    if (_currentProfile == null) emit(ProfileLoading());
 
     // Phase 2: fetch fresh data from the backend.
     final result = await getUserProfile(NoParams());
@@ -75,12 +77,22 @@ class ProfileCubit extends Cubit<ProfileState> {
   }
 
   Future<void> updateProfile({String? fullName}) async {
-    emit(ProfileLoading());
+    // Keep the current profile visible while the request is in flight so the
+    // screen does not blank out or show a skeleton during a simple name change.
+    final current = _currentProfile;
+    if (current != null) {
+      emit(ProfileUpdating(profile: current));
+    } else {
+      emit(ProfileLoading());
+    }
+
     final result = await updateUserProfile(
       UpdateProfileParams(fullName: fullName),
     );
     result.fold(
-      (failure) => emit(ProfileError(message: failure.message)),
+      // Carry the previous profile in the error state so the UI keeps
+      // showing data instead of going blank after a failed update.
+      (failure) => emit(ProfileError(message: failure.message, profile: current)),
       (profile) => emit(ProfileLoaded(profile: profile)),
     );
   }
@@ -111,12 +123,13 @@ class ProfileCubit extends Cubit<ProfileState> {
     );
   }
 
-  /// Returns the current [UserProfile] regardless of which loaded
-  /// state we are in.
+  /// Returns the current [UserProfile] regardless of which loaded state we are in.
   UserProfile? get _currentProfile {
     final s = state;
     if (s is ProfileLoaded) return s.profile;
+    if (s is ProfileUpdating) return s.profile;
     if (s is ProfileAvatarUploading) return s.profile;
+    if (s is ProfileError) return s.profile;
     return null;
   }
 }

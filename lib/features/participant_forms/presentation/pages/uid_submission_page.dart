@@ -6,6 +6,7 @@ import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/participant_forms/domain/entities/participant_request.dart';
 import 'package:votera/features/participant_forms/presentation/cubit/forms_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -54,12 +55,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
   void _handleSubmit() {
     if (_formKey.currentState?.validate() ?? false) {
       if (_documentUrl == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.uploadIdDesc),
-            backgroundColor: context.colors.warning,
-          ),
-        );
+        showAppSnackBar(context, AppLocalizations.of(context)!.uploadIdDesc);
         return;
       }
       context.read<FormsCubit>().submitUid(
@@ -95,11 +91,10 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
               _documentFileName = state.fileName;
             });
           } else if (state is FormsUidSubmitted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context)!.requestPending),
-                backgroundColor: context.colors.success,
-              ),
+            showAppSnackBar(
+              context,
+              AppLocalizations.of(context)!.requestPending,
+              type: AppSnackBarType.success,
             );
             // Reload the requests list.
             context.read<FormsCubit>().loadMyUidRequests();
@@ -110,11 +105,10 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
               _documentFileName = null;
             });
           } else if (state is FormsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: context.colors.error,
-              ),
+            showAppSnackBar(
+              context,
+              state.message,
+              type: AppSnackBarType.error,
             );
           }
         },

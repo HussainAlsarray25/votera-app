@@ -7,6 +7,7 @@ import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/comments/presentation/cubit/comments_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/animated_star_rating.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 
 /// Lets the user rate a project and optionally attach a written review.
 /// Submits both together via [CommentsCubit.addComment], which accepts a
@@ -34,12 +35,7 @@ class _ProjectRatingSectionState extends State<ProjectRatingSection> {
   Future<void> _submit(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     if (_selectedRating == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.selectStarFirst),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showAppSnackBar(context, l10n.selectStarFirst);
       return;
     }
 

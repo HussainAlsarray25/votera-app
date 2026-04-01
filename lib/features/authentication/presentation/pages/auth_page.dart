@@ -7,6 +7,7 @@ import 'package:votera/features/authentication/presentation/widgets/login_sectio
 import 'package:votera/features/authentication/presentation/widgets/register_section.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 
 /// The authentication page handles both login and registration.
 /// Mobile: plain scaffold with the form filling the screen.
@@ -70,11 +71,10 @@ class _AuthPageState extends State<AuthPage> {
             'isRegistration': true,
           });
         } else if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: context.colors.error,
-            ),
+          showAppSnackBar(
+            context,
+            state.message,
+            type: AppSnackBarType.error,
           );
         }
       },

@@ -7,6 +7,7 @@ import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/participant_forms/presentation/cubit/forms_cubit.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -92,20 +93,17 @@ class _SupervisorEmailVerificationPageState
             // Force-refresh clears the stale cached role before fetching,
             // so the profile and all role-gated UI update immediately.
             context.read<ProfileCubit>().forceRefresh();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                    AppLocalizations.of(context)!.supervisorAccountVerified),
-                backgroundColor: context.colors.primary,
-              ),
+            showAppSnackBar(
+              context,
+              AppLocalizations.of(context)!.supervisorAccountVerified,
+              type: AppSnackBarType.success,
             );
             context.go('/profile');
           } else if (state is FormsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: context.colors.error,
-              ),
+            showAppSnackBar(
+              context,
+              state.message,
+              type: AppSnackBarType.error,
             );
           }
         },

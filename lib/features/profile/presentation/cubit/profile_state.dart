@@ -20,6 +20,17 @@ class ProfileLoaded extends ProfileState {
   List<Object?> get props => [profile];
 }
 
+/// Emitted while a profile field update (e.g. name) is in flight.
+/// Keeps the last known profile so the UI never goes blank during the save.
+class ProfileUpdating extends ProfileState {
+  const ProfileUpdating({required this.profile});
+
+  final UserProfile profile;
+
+  @override
+  List<Object?> get props => [profile];
+}
+
 class ProfileAvatarUploading extends ProfileState {
   const ProfileAvatarUploading({required this.profile});
 
@@ -32,10 +43,12 @@ class ProfileAvatarUploading extends ProfileState {
 }
 
 class ProfileError extends ProfileState {
-  const ProfileError({required this.message});
+  const ProfileError({required this.message, this.profile});
 
   final String message;
+  // Preserved profile so the UI can keep displaying data after a failed update.
+  final UserProfile? profile;
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, profile];
 }

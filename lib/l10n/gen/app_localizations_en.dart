@@ -46,6 +46,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get darkMode => 'Dark Mode';
 
   @override
+  String get editProfile => 'Edit Profile';
+
+  @override
+  String get profileUpdated => 'Profile updated successfully';
+
+  @override
+  String get fullNameTooLong => 'Full name must be at most 100 characters';
+
+  @override
   String get helpSupport => 'Help & Support';
 
   @override
