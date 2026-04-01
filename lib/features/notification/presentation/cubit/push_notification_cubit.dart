@@ -108,7 +108,14 @@ class PushNotificationCubit extends Cubit<PushNotificationState> {
       (_) => emit(const PushNotificationUnregistered()),
     );
 
-    await pushService.deleteToken();
+    try {
+      await pushService.deleteToken();
+    } catch (e) {
+      // deleteToken can fail when Google Play Services is unavailable
+      // (e.g. SERVICE_NOT_AVAILABLE). The backend token has already been
+      // removed, so this is safe to ignore.
+      if (kDebugMode) print('Failed to delete FCM token: $e');
+    }
   }
 
   @override
