@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.votera"
+    namespace = "com.example.votera"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
