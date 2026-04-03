@@ -54,6 +54,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fullNameTooLong => 'يجب ألا يتجاوز الاسم الكامل 100 حرف';
 
   @override
+  String get aboutUs => 'عن التطبيق';
+
+  @override
+  String get version => 'الإصدار';
+
+  @override
   String get helpSupport => 'المساعدة والدعم';
 
   @override

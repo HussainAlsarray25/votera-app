@@ -19,6 +19,8 @@
   "editProfile": "تعديل الملف الشخصي",
   "profileUpdated": "تم تحديث الملف الشخصي بنجاح",
   "fullNameTooLong": "يجب ألا يتجاوز الاسم الكامل 100 حرف",
+  "aboutUs": "عن التطبيق",
+  "version": "الإصدار",
   "helpSupport": "المساعدة والدعم",
   "signOut": "تسجيل الخروج",
   "verifyAccount": "توثيق الحساب",

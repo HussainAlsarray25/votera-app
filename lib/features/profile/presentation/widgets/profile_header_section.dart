@@ -12,7 +12,6 @@ import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
-import 'package:votera/shared/widgets/verified_badge.dart';
 
 // Official Telegram brand color used for the Telegram-verified card.
 const _telegramBlue = Color(0xFF2CA5E0);
@@ -289,8 +288,6 @@ class ProfileHeaderSection extends StatelessWidget {
                 color: context.colors.textPrimary,
               ),
             ),
-            SizedBox(width: 6.w),
-            const VerifiedBadge(size: 20),
             SizedBox(width: 6.w),
             // Pencil icon to open the edit name bottom sheet.
             GestureDetector(

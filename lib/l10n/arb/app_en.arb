@@ -19,6 +19,8 @@
   "editProfile": "Edit Profile",
   "profileUpdated": "Profile updated successfully",
   "fullNameTooLong": "Full name must be at most 100 characters",
+  "aboutUs": "About Us",
+  "version": "Version",
   "helpSupport": "Help & Support",
   "signOut": "Log Out",
   "verifyAccount": "Verify Account",

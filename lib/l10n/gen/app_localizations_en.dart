@@ -55,6 +55,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullNameTooLong => 'Full name must be at most 100 characters';
 
   @override
+  String get aboutUs => 'About Us';
+
+  @override
+  String get version => 'Version';
+
+  @override
   String get helpSupport => 'Help & Support';
 
   @override

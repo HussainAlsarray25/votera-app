@@ -188,6 +188,18 @@ abstract class AppLocalizations {
   /// **'Full name must be at most 100 characters'**
   String get fullNameTooLong;
 
+  /// No description provided for @aboutUs.
+  ///
+  /// In en, this message translates to:
+  /// **'About Us'**
+  String get aboutUs;
+
+  /// No description provided for @version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get version;
+
   /// No description provided for @helpSupport.
   ///
   /// In en, this message translates to:

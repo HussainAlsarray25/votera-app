@@ -53,6 +53,13 @@ class ProfileActionsSection extends StatelessWidget {
                       Divider(height: 1, color: context.colors.divider),
                       _buildActionTile(
                         context: context,
+                        icon: Icons.info_outline_rounded,
+                        label: l10n.aboutUs,
+                        onTap: () => context.push('/about-us'),
+                      ),
+                      Divider(height: 1, color: context.colors.divider),
+                      _buildActionTile(
+                        context: context,
                         icon: Icons.help_outline,
                         label: l10n.helpSupport,
                         onTap: () {},

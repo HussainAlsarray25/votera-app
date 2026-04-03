@@ -18,6 +18,7 @@ import 'package:votera/features/exhibitions/presentation/pages/exhibition_detail
 import 'package:votera/features/exhibitions/presentation/pages/exhibitions_page.dart';
 import 'package:votera/features/notification/presentation/pages/notification_page.dart';
 import 'package:votera/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:votera/features/profile/presentation/pages/about_us_page.dart';
 import 'package:votera/features/profile/presentation/pages/profile_page.dart';
 import 'package:votera/features/project_details/presentation/pages/project_details_page.dart';
 import 'package:votera/features/splash/presentation/pages/splash_page.dart';
@@ -118,6 +119,10 @@ class AppRouter {
       GoRoute(
         path: '/notifications',
         builder: (context, state) => const NotificationPage(),
+      ),
+      GoRoute(
+        path: '/about-us',
+        builder: (context, state) => const AboutUsPage(),
       ),
       GoRoute(
         path: '/teams/:id',
