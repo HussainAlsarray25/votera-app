@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:votera/core/di/injection_container.dart' as di;
 import 'package:votera/core/router/app_router.dart';
 import 'package:votera/core/services/firebase_push_service.dart';
@@ -36,7 +37,9 @@ class AppBlocObserver extends BlocObserver {
 }
 
 Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
-
+  // Use clean URLs on web (removes the # from all routes).
+  // Must be called before any Flutter binding is initialized.
+  usePathUrlStrategy();
 
   await runZonedGuarded(
     () async {
