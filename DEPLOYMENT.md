@@ -341,7 +341,7 @@ broken behaviour on web if not addressed before going live.
 | Firebase Web credentials are wrong | `lib/firebase_options.dart` lines 44–50 | The `_web` block uses the Android `appId` (`1:...:android:...`). Register a Web app in Firebase Console → Project Settings → Add app → Web. Then run `flutterfire configure` or paste the web-specific values manually. |
 | VAPID key not set for FCM on web | `lib/core/services/firebase_push_service.dart` line 49 | After registering the Firebase web app, get the VAPID key from Firebase Console → Cloud Messaging → Web Push certificates. Pass it as `_messaging.getToken(vapidKey: 'YOUR_KEY')`. |
 | Firebase FCM service worker missing | `web/` directory | Create `web/firebase-messaging-sw.js` so the browser can receive background push notifications. Without it, foreground FCM works but background messages are silently dropped. |
-| Backend CORS does not include web domain | `D:\8th course\votera-app\.env` line 37 | `FRONTEND_URL` is set to `https://votera.space`. Update it to `https://app.votera.space` (or extend it to allow both, depending on how the backend reads this variable). Restart the backend container after changing it. |
+| Backend CORS | Not an issue | The CORS middleware (`backend/pkg/middleware/cors.go`) is hardcoded to `Access-Control-Allow-Origin: *`. All origins are allowed. `FRONTEND_URL` is read into config but has no callsites — it is unused. No backend changes needed. |
 | DNS record missing | DNS provider | `app.votera.space` must have an A record pointing to the server's public IP. Without this, no traffic reaches the server. |
 
 ### Informational — works but with caveats
