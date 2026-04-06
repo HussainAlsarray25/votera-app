@@ -1,0 +1,19 @@
+services:
+  votera-web:
+    # Image is built by CI and pushed to GitHub Container Registry.
+    # On the server: docker compose pull && docker compose up -d
+    image: ghcr.io/${GHCR_OWNER:-your-github-username}/votera-app:latest
+    container_name: votera-web
+    restart: unless-stopped
+
+    # No port mapping — traffic arrives from the main nginx via the shared
+    # Docker network. votera-web is reachable as http://votera-web:80
+    # inside that network.
+    networks:
+      - votera_network
+
+networks:
+  # Attach to the same network the main nginx and all other services use.
+  # This network is owned by the main docker-compose in D:\8th course\votera-app.
+  votera_network:
+    external: true
