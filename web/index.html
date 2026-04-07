@@ -53,8 +53,16 @@
     <div id="loading-msg">Loading…</div>
   </div>
   <script>
-    // Remove the loading screen as soon as Flutter adds its canvas/glass-pane
-    // to the DOM — this confirms Flutter's Dart code ran and rendered.
+    function showError(text) {
+      var msg = document.getElementById('loading-msg');
+      if (msg) { msg.style.color = '#ff6b6b'; msg.textContent = 'Error: ' + text; }
+    }
+
+    // Show any unhandled JS / Promise error in the loading screen.
+    window.addEventListener('error', function(e) { showError(e.message); });
+    window.addEventListener('unhandledrejection', function(e) { showError(String(e.reason)); });
+
+    // Remove the loading screen when Flutter's canvas appears in the DOM.
     var observer = new MutationObserver(function(mutations) {
       for (var m of mutations) {
         for (var node of m.addedNodes) {
@@ -69,12 +77,12 @@
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // If Flutter never renders after 12 seconds, update the message.
-    // "JS engine running" = JS loaded fine but Dart never mounted.
+    // After 10 seconds without Flutter mounting, show a timeout message.
     setTimeout(function() {
       var msg = document.getElementById('loading-msg');
-      if (msg) msg.textContent = 'Still loading… JS engine running, Dart not yet rendered.';
-    }, 12000);
+      if (msg && msg.textContent === 'Loading\u2026')
+        msg.textContent = 'JS engine running — Dart not yet rendered. Check console.';
+    }, 10000);
   </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
