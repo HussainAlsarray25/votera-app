@@ -283,7 +283,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     // server can validate the format before saving.
     final response = await apiClient.post<Map<String, dynamic>>(
       ProjectEndpoints.coverImage(eventId, projectId),
-      data: Stream.fromIterable([bytes]),
+      data: bytes,
       options: Options(
         contentType: contentType,
         headers: {'Content-Length': bytes.length},
@@ -312,7 +312,7 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     // Same raw-bytes pattern as cover upload.
     final response = await apiClient.post<Map<String, dynamic>>(
       ProjectEndpoints.extraImages(eventId, projectId),
-      data: Stream.fromIterable([bytes]),
+      data: bytes,
       options: Options(
         contentType: contentType,
         headers: {'Content-Length': bytes.length},

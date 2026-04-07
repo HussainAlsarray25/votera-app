@@ -220,13 +220,13 @@ class ProfileHeaderSection extends StatelessWidget {
   }
 
   /// Opens a file picker, lets the user choose an image, then triggers the
-  /// avatar upload via the cubit.
+  /// avatar upload via the cubit. Ensures bytes are loaded from picker.
   Future<void> _pickAndUploadAvatar(BuildContext context) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
       allowMultiple: false,
-      // withData loads file bytes into memory — required on web where
-      // file.path is unavailable.
+      // withData=true loads file bytes into memory for all platforms,
+      // including web where file.path is unavailable.
       withData: true,
     );
 
@@ -234,9 +234,18 @@ class ProfileHeaderSection extends StatelessWidget {
 
     final file = result.files.first;
 
-    // On web, file.path is null and the data lives in file.bytes.
-    // On mobile/desktop, file.path is available. The cubit handles both cases.
-    if (file.path == null && file.bytes == null) return;
+    // Bytes must be loaded by the picker for all platforms.
+    // If bytes are null/empty, the picker failed to load the file.
+    if (file.bytes == null || file.bytes!.isEmpty) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not load image. Please try another file.'),
+          ),
+        );
+      }
+      return;
+    }
 
     if (context.mounted) {
       context.read<ProfileCubit>().uploadAvatar(file);

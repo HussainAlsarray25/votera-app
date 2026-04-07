@@ -67,7 +67,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
     final response = await apiClient.post<Map<String, dynamic>>(
       ProfileEndpoints.avatar,
-      data: Stream.fromIterable([bytes]),
+      data: bytes,
       options: Options(
         contentType: contentType,
         headers: {'Content-Length': bytes.length},
@@ -75,9 +75,9 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     );
 
     final body = response.data!;
-    // Response: { success: true, data: { "url": "https://..." } }
+    // Response: { success: true, message: "...", data: { "url": "https://..." } }
     final dataMap = (body['data'] as Map<String, dynamic>?) ?? {};
-    final url = dataMap.values.whereType<String>().firstOrNull ?? '';
+    final url = (dataMap['url'] as String?) ?? '';
     return url;
   }
 }
