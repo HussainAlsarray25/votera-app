@@ -1,12 +1,9 @@
 {{flutter_js}}
 {{flutter_build_config}}
 
-// All iOS browsers (Safari, Chrome, Firefox) use WebKit. Explicitly select
-// the canvaskit renderer on iOS to avoid skwasm's WASM threading requirements,
-// which need COOP/COEP headers that break Firebase auth popups.
-// Desktop and Android receive no renderer config — Flutter auto-detects best.
+// Detect iOS — all iOS browsers (Safari, Chrome, Firefox) use WebKit.
+// iPadOS 13+ reports itself as Macintosh, so check touch support as well.
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-  // iPadOS 13+ reports itself as Macintosh — detect by touch support.
   (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 
 _flutter.loader.load({
@@ -16,13 +13,21 @@ _flutter.loader.load({
   onEntrypointLoaded: async function (engineInitializer) {
     try {
       const appRunner = await engineInitializer.initializeEngine(
-        isIOS ? { renderer: 'canvaskit' } : {},
+        isIOS
+          ? {
+              renderer: 'canvaskit',
+              // iOS Safari WebGL does not support the WEBGL_polygon_mode
+              // extension that CanvasKit requires. Forcing CPU-only rendering
+              // bypasses WebGL entirely, eliminating the extension error and
+              // the associated white screen crash on all iPhone/iPad browsers.
+              canvasKitForceCpuOnly: true,
+            }
+          : {},
       );
       await appRunner.runApp();
     } catch (e) {
-      // Fallback: if renderer config fails (e.g. option removed in a future
-      // Flutter version), retry with default engine settings so the app still
-      // loads rather than staying on a blank white screen.
+      // Fallback: if the engine config fails for any reason, retry with
+      // defaults so the app still loads rather than showing a white screen.
       console.warn('Engine init with config failed, retrying with defaults:', e);
       const appRunner = await engineInitializer.initializeEngine({});
       await appRunner.runApp();
