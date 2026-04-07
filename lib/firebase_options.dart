@@ -40,10 +40,12 @@ class DefaultFirebaseOptions {
     iosBundleId: 'votera.space',
   );
 
-  // TODO: Replace with actual web Firebase app values.
+  // Web Firebase app values — appId must come from the Firebase Console web app,
+  // not from the Android or iOS app. Run "flutterfire configure" or copy the
+  // config snippet from: Firebase Console > Project settings > Your apps > Web app.
   static const FirebaseOptions _web = FirebaseOptions(
     apiKey: 'AIzaSyDosjBQham5NhekGVSWRrS-37YOIkUWn4s',
-    appId: '1:783622128925:android:306a88b3892b55a9260df4',
+    appId: '1:783622128925:web:REPLACE_WITH_WEB_APP_ID',
     messagingSenderId: '783622128925',
     projectId: 'votera-platform',
     storageBucket: 'votera-platform.firebasestorage.app',

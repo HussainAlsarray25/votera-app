@@ -136,6 +136,11 @@ void _handleDeepLink(Uri uri, AppRouter appRouter) {
 }
 
 Future<void> _setupSystemPreferences() async {
+  // SystemChrome APIs are mobile-only. Calling them on web throws a
+  // MissingPluginException that gets swallowed by runZonedGuarded, which
+  // prevents runApp() from ever being reached — causing a white screen on iOS.
+  if (kIsWeb) return;
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
