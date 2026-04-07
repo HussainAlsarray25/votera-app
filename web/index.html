@@ -37,6 +37,45 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <!-- Diagnostic loading screen visible before Flutter mounts.
+       If this disappears: Flutter Dart code ran successfully.
+       If this stays forever: Flutter engine loaded but Dart never mounted. -->
+  <div id="loading" style="
+    position:fixed; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    background:#0f1117; color:#ffffff; font-family:sans-serif;
+    font-size:16px; z-index:9999;">
+    <div style="
+      width:56px; height:56px; border-radius:14px;
+      background:#6C63FF; display:flex; align-items:center;
+      justify-content:center; font-size:28px; font-weight:800;
+      margin-bottom:20px;">V</div>
+    <div id="loading-msg">Loading…</div>
+  </div>
+  <script>
+    // Remove the loading screen as soon as Flutter adds its canvas/glass-pane
+    // to the DOM — this confirms Flutter's Dart code ran and rendered.
+    var observer = new MutationObserver(function(mutations) {
+      for (var m of mutations) {
+        for (var node of m.addedNodes) {
+          if (node.nodeName === 'CANVAS' || node.nodeName === 'FLT-GLASS-PANE') {
+            var loading = document.getElementById('loading');
+            if (loading) loading.remove();
+            observer.disconnect();
+            return;
+          }
+        }
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // If Flutter never renders after 12 seconds, update the message.
+    // "JS engine running" = JS loaded fine but Dart never mounted.
+    setTimeout(function() {
+      var msg = document.getElementById('loading-msg');
+      if (msg) msg.textContent = 'Still loading… JS engine running, Dart not yet rendered.';
+    }, 12000);
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
