@@ -153,8 +153,6 @@ class AppRouter {
         builder: (context, state) {
           final eventId = state.pathParameters['eventId'] ?? '';
           final projectId = state.pathParameters['projectId'] ?? '';
-          // coverUrl is passed as route extra by ProjectEntityCard so the
-          // header can display the image immediately via Hero animation.
           final coverUrl = state.extra as String?;
           return ProjectDetailsPage(
             eventId: eventId,

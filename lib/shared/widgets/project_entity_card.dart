@@ -54,8 +54,6 @@ class ProjectEntityCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => context.push(
         '/project/$eventId/${project.id}',
-        // Pass the visible image URL so the detail page can display it
-        // immediately via Hero before the API response arrives.
         extra: imageUrl,
       ),
       child: Container(
@@ -78,17 +76,13 @@ class ProjectEntityCard extends StatelessWidget {
               // -- Layer 1: background (image or gradient) wrapped in Hero --
               // The Hero tag matches the one in ProjectHeaderSection so Flutter
               // animates the image from the card into the detail page header.
-              Hero(
-                tag: 'project-cover-${project.id}',
-                transitionOnUserGestures: true,
-                child: hasImage
-                    ? CachedImage(
-                        url: imageUrl,
-                        width: double.infinity,
-                        errorIcon: Icons.code,
-                      )
-                    : _buildGradientBackground(accent),
-              ),
+              hasImage
+                  ? CachedImage(
+                      url: imageUrl,
+                      width: double.infinity,
+                      errorIcon: Icons.code,
+                    )
+                  : _buildGradientBackground(accent),
 
               // -- Layer 2: watermark initial (gradient cards only) --
               if (!hasImage) _buildWatermark(),

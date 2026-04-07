@@ -25,8 +25,7 @@ class ProjectHeaderSection extends StatelessWidget {
   final String projectId;
 
   /// Cover image URL passed from the project card.
-  /// Shown immediately so the Hero animation has a destination before
-  /// the API call resolves with the full project details.
+  /// Shown immediately while the full project details load from the API.
   final String? coverUrl;
 
   @override
@@ -69,14 +68,9 @@ class ProjectHeaderSection extends StatelessWidget {
         // Background: Hero-wrapped cover photo or gradient fallback.
         // The tag matches the one in ProjectEntityCard so Flutter animates
         // the image from the card thumbnail into this full-bleed header.
-        Hero(
-          tag: 'project-cover-$projectId',
-          // transitionOnUserGestures allows the Hero to run on iOS back swipe.
-          transitionOnUserGestures: true,
-          child: hasCover
-              ? CachedImage(url: resolvedUrl!, fit: BoxFit.cover)
-              : _buildGradientFallback(),
-        ),
+        hasCover
+            ? CachedImage(url: resolvedUrl!, fit: BoxFit.cover)
+            : _buildGradientFallback(),
         // Decorative overlays — only shown on the gradient fallback.
         if (!hasCover) ...[
           Opacity(

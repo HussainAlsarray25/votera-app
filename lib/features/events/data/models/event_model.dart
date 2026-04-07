@@ -25,12 +25,14 @@ class EventModel extends EventEntity {
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     return EventModel(
-      id: json['id'] as String,
-      title: json['title'] as String,
+      // Some API responses omit or null-out fields; guard each cast to
+      // prevent a type-cast failure from crashing the whole screen.
+      id: json['id']?.toString() ?? '',
+      title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       status: eventStatusFromString(json['status'] as String?) ??
           EventStatus.draft,
-      organizerId: json['organizer_id'] as String,
+      organizerId: json['organizer_id']?.toString() ?? '',
       startAt: _parseDate(json['start_at']),
       endAt: _parseDate(json['end_at']),
       votingStart: _parseDate(json['voting_start']),
@@ -41,8 +43,8 @@ class EventModel extends EventEntity {
       maxTeamSize: json['max_team_size'] as int?,
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: _parseDate(json['created_at']) ?? DateTime.now(),
+      updatedAt: _parseDate(json['updated_at']) ?? DateTime.now(),
     );
   }
 

@@ -31,8 +31,8 @@ class ProjectDetailsPage extends StatelessWidget {
   final String eventId;
   final String projectId;
 
-  /// Cover image URL passed from the project card for immediate Hero display.
-  /// Used as a placeholder while the full project details load from the API.
+  /// Cover image URL passed from the project card, shown immediately while
+  /// the full project details load from the API.
   final String? coverUrl;
 
   @override
@@ -160,6 +160,11 @@ class _ProjectDetailsView extends StatelessWidget {
               )
             : null,
       );
+    } else if (state is VotingError) {
+      showAppSnackBar(context, state.message);
+      // Reload the user's votes so the button returns to the correct
+      // voted/unvoted state after the error (e.g. 409 conflict).
+      context.read<VotingCubit>().loadMyVotes(eventId: eventId);
     }
   }
 
