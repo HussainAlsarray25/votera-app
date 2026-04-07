@@ -112,6 +112,13 @@ Future<void> _setupErrorHandling() async {
 /// Handles both cold-start links (app was closed) and warm links (app was
 /// in the background when the link was tapped).
 Future<void> _setupDeepLinks() async {
+  // app_links is mobile-only. On web, deep links are handled by go_router
+  // reading the URL path directly — no native plugin needed.
+  // Calling AppLinks() on web throws MissingPluginException inside
+  // runZonedGuarded, which silently swallows it and prevents runApp()
+  // from ever being called — the confirmed cause of the iOS white screen.
+  if (kIsWeb) return;
+
   final appLinks = AppLinks();
   final appRouter = di.sl<AppRouter>();
 
