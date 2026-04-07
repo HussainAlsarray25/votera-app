@@ -1,36 +1,31 @@
 {{flutter_js}}
 {{flutter_build_config}}
 
-// iPhone has a hard ~256MB WebGL memory limit. CanvasKit (which uses WebGL)
-// frequently exceeds this on content-heavy screens and causes a silent GPU
-// context loss that produces a blank white screen. The HTML renderer avoids
-// WebGL entirely and is the only reliable option for iPhone browsers.
-// iPad and macOS Safari have much higher memory ceilings so they can use
-// CanvasKit safely without any performance degradation.
-const userAgent = navigator.userAgent;
-const isIPhone = /iPhone|iPod/.test(userAgent) && !window.MSStream;
-const isIPad = /iPad/.test(userAgent) ||
+// All iOS browsers (Safari, Chrome, Firefox) use WebKit. Explicitly select
+// the canvaskit renderer on iOS to avoid skwasm's WASM threading requirements,
+// which need COOP/COEP headers that break Firebase auth popups.
+// Desktop and Android receive no renderer config — Flutter auto-detects best.
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
   // iPadOS 13+ reports itself as Macintosh — detect by touch support.
-  (/Macintosh/.test(userAgent) && navigator.maxTouchPoints > 1);
+  (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 
 _flutter.loader.load({
   serviceWorkerSettings: {
     serviceWorkerVersion: {{flutter_service_worker_version}},
   },
   onEntrypointLoaded: async function (engineInitializer) {
-    let engineConfig = {};
-
-    if (isIPhone) {
-      // HTML renderer: no WebGL, low memory footprint — required for iPhone.
-      engineConfig = { renderer: 'html' };
-    } else if (isIPad) {
-      // CanvasKit on iPad: more memory available, better visual quality.
-      engineConfig = { renderer: 'canvaskit' };
+    try {
+      const appRunner = await engineInitializer.initializeEngine(
+        isIOS ? { renderer: 'canvaskit' } : {},
+      );
+      await appRunner.runApp();
+    } catch (e) {
+      // Fallback: if renderer config fails (e.g. option removed in a future
+      // Flutter version), retry with default engine settings so the app still
+      // loads rather than staying on a blank white screen.
+      console.warn('Engine init with config failed, retrying with defaults:', e);
+      const appRunner = await engineInitializer.initializeEngine({});
+      await appRunner.runApp();
     }
-    // Desktop (macOS, Windows, Linux) and Android: use Flutter's default
-    // auto-detection — no config needed, full performance preserved.
-
-    const appRunner = await engineInitializer.initializeEngine(engineConfig);
-    await appRunner.runApp();
   },
 });

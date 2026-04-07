@@ -63,7 +63,16 @@ Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
       await di.init();
 
       // Initialize push service after DI is ready.
-      await di.sl<FirebasePushService>().initialize();
+      // Wrapped in try-catch because Firebase Messaging on web dynamically
+      // imports firebase-messaging.js from gstatic.com. On iOS Safari this
+      // request can be blocked by ITP or network restrictions, causing a throw
+      // inside runZonedGuarded which silently stops initialization and prevents
+      // runApp() from being reached — resulting in a permanent white screen.
+      try {
+        await di.sl<FirebasePushService>().initialize();
+      } catch (e, s) {
+        log('Push service init failed (non-fatal): $e', stackTrace: s);
+      }
 
       // Eagerly create PushNotificationCubit so it starts listening
       // to auth state changes immediately.
