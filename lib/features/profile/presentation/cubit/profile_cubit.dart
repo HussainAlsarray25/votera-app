@@ -107,10 +107,20 @@ class ProfileCubit extends Cubit<ProfileState> {
       emit(ProfileAvatarUploading(profile: currentProfile));
     }
 
+    if (file.bytes == null || file.bytes!.isEmpty) {
+      emit(
+        ProfileError(
+          message: 'Could not read selected image. Please try again.',
+          profile: currentProfile,
+        ),
+      );
+      return;
+    }
+
     final result = await uploadAvatarUseCase(
       UploadAvatarParams(
         filePath: file.path,
-        bytes: file.bytes != null ? List<int>.from(file.bytes!) : null,
+        bytes: List<int>.from(file.bytes!),
         fileName: file.name,
       ),
     );
