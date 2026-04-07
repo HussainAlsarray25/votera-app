@@ -58,9 +58,11 @@ class MyProjectBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // If the event is not in the open phase, skip all API calls and show a
-    // status-specific locked state immediately.
-    if (eventStatus != EventStatus.open) {
+    // Allow project management during both open and voting phases.
+    // All other phases (draft, closed, archived) show a locked state.
+    final canManageProject =
+        eventStatus == EventStatus.open || eventStatus == EventStatus.voting;
+    if (!canManageProject) {
       return _EventNotOpenState(status: eventStatus);
     }
 

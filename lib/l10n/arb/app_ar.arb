@@ -282,8 +282,10 @@
   "hoursAgo": "منذ {count} س",
   "daysAgo": "منذ {count} يوم",
 
-  "rankingsCommunityTab": "المجتمع",
+  "projectTeam": "الفريق",
   "rankingsSupervisorTab": "المشرف",
+  "rankingsStudentTab": "الطالب",
+  "rankingsVisitorTab": "الزائر",
 
   "noRankingsYet": "لا توجد تصنيفات بعد",
   "rankingsWillAppear": "ستظهر التصنيفات عند بدء التصويت.",

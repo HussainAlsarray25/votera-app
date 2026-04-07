@@ -60,12 +60,37 @@ class RankingsListItem extends StatelessWidget {
   }
 
   Widget _buildAvatar() {
+    final hasCover = entry.coverUrl != null && entry.coverUrl!.isNotEmpty;
     final initial =
         entry.title.isNotEmpty ? entry.title[0].toUpperCase() : '?';
 
     return Container(
       width: 44.r,
       height: 44.r,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: hasCover
+            ? null
+            : const LinearGradient(
+                colors: [Color(0xFF93C5FD), Color(0xFF3B82F6)],
+              ),
+      ),
+      child: hasCover
+          ? ClipOval(
+              child: Image.network(
+                entry.coverUrl!,
+                width: 44.r,
+                height: 44.r,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _buildInitial(initial),
+              ),
+            )
+          : _buildInitial(initial),
+    );
+  }
+
+  Widget _buildInitial(String initial) {
+    return Container(
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
@@ -102,7 +127,7 @@ class RankingsListItem extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(
-          '${entry.voteCount}',
+          '${entry.totalVotes}',
           style: AppTypography.labelLarge.copyWith(
             fontWeight: FontWeight.w800,
             color: context.colors.textPrimary,

@@ -6,13 +6,16 @@ import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/features/comments/presentation/cubit/comments_cubit.dart';
+import 'package:votera/features/project_details/presentation/cubit/project_team_cubit.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_comments_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_header_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_images_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_info_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_rating_section.dart';
+import 'package:votera/features/project_details/presentation/widgets/project_team_section.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
 import 'package:votera/features/ratings/presentation/cubit/ratings_cubit.dart';
+import 'package:votera/features/teams/domain/usecases/get_team.dart';
 import 'package:votera/features/voting/presentation/cubit/voting_cubit.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
 import 'package:votera/shared/widgets/vote_button.dart';
@@ -54,6 +57,9 @@ class ProjectDetailsPage extends StatelessWidget {
           create: (_) => sl<VotingCubit>()
             ..loadMyVotes(eventId: eventId)
             ..loadEventLocation(eventId: eventId),
+        ),
+        BlocProvider<ProjectTeamCubit>(
+          create: (_) => ProjectTeamCubit(getTeam: sl<GetTeam>()),
         ),
       ],
       child: _ProjectDetailsView(
@@ -178,6 +184,8 @@ class _ProjectDetailsView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ProjectInfoSection(projectId: projectId),
+          SizedBox(height: AppSpacing.lg),
+          const ProjectTeamSection(),
           SizedBox(height: AppSpacing.lg),
           const ProjectImagesSection(),
           SizedBox(height: AppSpacing.lg),

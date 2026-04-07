@@ -1604,17 +1604,29 @@ abstract class AppLocalizations {
   /// **'{count}d ago'**
   String daysAgo(int count);
 
-  /// No description provided for @rankingsCommunityTab.
+  /// No description provided for @projectTeam.
   ///
   /// In en, this message translates to:
-  /// **'Community'**
-  String get rankingsCommunityTab;
+  /// **'Team'**
+  String get projectTeam;
 
   /// No description provided for @rankingsSupervisorTab.
   ///
   /// In en, this message translates to:
   /// **'Supervisor'**
   String get rankingsSupervisorTab;
+
+  /// No description provided for @rankingsStudentTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get rankingsStudentTab;
+
+  /// No description provided for @rankingsVisitorTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Visitor'**
+  String get rankingsVisitorTab;
 
   /// No description provided for @noRankingsYet.
   ///

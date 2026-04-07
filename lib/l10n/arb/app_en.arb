@@ -378,8 +378,10 @@
     }
   },
 
-  "rankingsCommunityTab": "Community",
+  "projectTeam": "Team",
   "rankingsSupervisorTab": "Supervisor",
+  "rankingsStudentTab": "Student",
+  "rankingsVisitorTab": "Visitor",
 
   "noRankingsYet": "No rankings yet",
   "rankingsWillAppear": "Rankings will appear once voting begins.",

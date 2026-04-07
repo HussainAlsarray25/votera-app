@@ -824,10 +824,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get rankingsCommunityTab => 'Community';
+  String get projectTeam => 'Team';
 
   @override
   String get rankingsSupervisorTab => 'Supervisor';
+
+  @override
+  String get rankingsStudentTab => 'Student';
+
+  @override
+  String get rankingsVisitorTab => 'Visitor';
 
   @override
   String get noRankingsYet => 'No rankings yet';
