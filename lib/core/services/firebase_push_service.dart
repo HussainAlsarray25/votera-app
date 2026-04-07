@@ -23,8 +23,12 @@ class FirebasePushService {
 
   /// Initializes FCM and local notification channels.
   Future<void> initialize() async {
-    // Register the background handler.
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    // Background message handling is not supported on web — Firebase web uses
+    // a service worker instead. Calling this on web throws an UnimplementedError
+    // inside runZonedGuarded, which silently stops initialization (white screen).
+    if (!kIsWeb) {
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    }
 
     // Local notifications are not supported on web.
     if (!kIsWeb) {
