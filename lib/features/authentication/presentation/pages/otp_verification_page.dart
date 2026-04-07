@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
 /// Shown after registration (to verify the account OTP) or after login
@@ -92,28 +95,24 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
             context.read<ProfileCubit>().loadProfile();
             context.go('/home');
           } else if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: context.colors.error,
-              ),
+            showAppSnackBar(
+              context,
+              state.message,
+              type: AppSnackBarType.error,
             );
           }
         },
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: AppSpacing.pagePadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: AppSpacing.xl),
-                _buildHeader(),
-                const SizedBox(height: AppSpacing.xxl),
-                _buildOtpBoxes(),
-                const SizedBox(height: AppSpacing.xxl),
-                _buildSubmitButton(),
-              ],
-            ),
+        child: FormCardShell(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: AppSpacing.xl),
+              _buildHeader(),
+              SizedBox(height: AppSpacing.xxl),
+              _buildOtpBoxes(),
+              SizedBox(height: AppSpacing.xxl),
+              _buildSubmitButton(),
+            ],
           ),
         ),
       ),
@@ -122,9 +121,10 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
 
   // -- Section: Title and description --
   Widget _buildHeader() {
+    final l10n = AppLocalizations.of(context)!;
     final title = widget.isRegistration
-        ? 'Verify Your Account'
-        : 'Enter Verification Code';
+        ? l10n.verifyYourAccount
+        : l10n.enterVerificationCode;
 
     return Column(
       children: [
@@ -133,15 +133,15 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
           style: AppTypography.h1.copyWith(color: context.colors.textPrimary),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.sm),
         Text(
-          'We sent a 6-digit code to',
+          l10n.codeSentTo,
           style: AppTypography.bodyMedium.copyWith(
             color: context.colors.textSecondary,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.xs),
+        SizedBox(height: AppSpacing.xs),
         Text(
           widget.identifier,
           style: AppTypography.labelMedium.copyWith(
@@ -159,10 +159,10 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(_otpLength, (index) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
+          padding: EdgeInsets.symmetric(horizontal: 6.r),
           child: SizedBox(
-            width: 48,
-            height: 56,
+            width: 48.r,
+            height: 56.r,
             child: TextField(
               controller: _controllers[index],
               focusNode: _focusNodes[index],
@@ -171,7 +171,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 22.sp,
                 fontWeight: FontWeight.bold,
                 color: context.colors.textPrimary,
                 height: 1,
@@ -210,9 +210,10 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
   Widget _buildSubmitButton() {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
+        final l10n = AppLocalizations.of(context)!;
         final isLoading = state is AuthLoading;
         return GradientButton(
-          text: isLoading ? 'Verifying...' : 'Verify',
+          text: isLoading ? l10n.verifying : l10n.verify,
           onPressed: (isLoading || !_isComplete) ? null : _handleSubmit,
         );
       },

@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:votera/core/di/injection_container.dart' as di;
 import 'package:votera/core/router/app_router.dart';
 import 'package:votera/core/services/firebase_push_service.dart';
@@ -36,7 +37,9 @@ class AppBlocObserver extends BlocObserver {
 }
 
 Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
-
+  // Use clean URLs on web (removes the # from all routes).
+  // Must be called before any Flutter binding is initialized.
+  usePathUrlStrategy();
 
   await runZonedGuarded(
     () async {
@@ -116,17 +119,28 @@ Future<void> _setupDeepLinks() async {
 }
 
 /// Routes an incoming deep link URI to the correct app screen.
-/// Currently handles: votera://home
+/// Handles: votera://home, votera://project/{eventId}/{projectId}
 void _handleDeepLink(Uri uri, AppRouter appRouter) {
   if (uri.scheme != 'votera') return;
 
   switch (uri.host) {
     case 'home':
       appRouter.router.go('/home');
+    case 'project':
+      // Expected format: votera://project/{eventId}/{projectId}
+      final segments = uri.pathSegments;
+      if (segments.length == 2) {
+        appRouter.router.go('/project/${segments[0]}/${segments[1]}');
+      }
   }
 }
 
 Future<void> _setupSystemPreferences() async {
+  // SystemChrome APIs are mobile-only. Calling them on web throws a
+  // MissingPluginException that gets swallowed by runZonedGuarded, which
+  // prevents runApp() from ever being reached — causing a white screen on iOS.
+  if (kIsWeb) return;
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

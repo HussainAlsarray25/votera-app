@@ -1,0 +1,21 @@
+.dart_tool
+.flutter-plugins
+.flutter-plugins-dependencies
+.git
+.github
+.idea
+.vscode
+build
+coverage
+
+# Platform folders are not needed for web image build context.
+android
+ios
+macos
+linux
+windows
+
+*.iml
+*.log
+.env
+.env.*

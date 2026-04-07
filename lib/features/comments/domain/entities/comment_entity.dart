@@ -12,6 +12,8 @@ class CommentEntity extends Equatable {
     required this.projectId,
     required this.authorId,
     required this.text,
+    this.authorName,
+    this.authorAvatarUrl,
     this.score,
     this.createdAt,
     this.updatedAt,
@@ -21,6 +23,10 @@ class CommentEntity extends Equatable {
   final String projectId;
   final String authorId;
   final String text;
+  /// Display name of the comment author as returned by the API.
+  final String? authorName;
+  /// Profile picture URL of the comment author as returned by the API.
+  final String? authorAvatarUrl;
   final int? score;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -31,6 +37,8 @@ class CommentEntity extends Equatable {
         projectId,
         authorId,
         text,
+        authorName,
+        authorAvatarUrl,
         score,
         createdAt,
         updatedAt,

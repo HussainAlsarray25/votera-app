@@ -53,12 +53,20 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, String>> uploadAvatar(String filePath) async {
+  Future<Either<Failure, String>> uploadAvatar({
+    String? filePath,
+    List<int>? bytes,
+    String? fileName,
+  }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
     try {
-      final url = await remote.uploadAvatar(filePath);
+      final url = await remote.uploadAvatar(
+        filePath: filePath,
+        bytes: bytes,
+        fileName: fileName,
+      );
       // Reload profile so the cached copy gets the new avatarUrl too.
       final profileResult = await getUserProfile();
       return profileResult.fold(

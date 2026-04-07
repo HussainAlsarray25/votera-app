@@ -1,152 +1,218 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
-import 'package:votera/features/ratings/presentation/cubit/ratings_cubit.dart';
+import 'package:votera/features/comments/presentation/cubit/comments_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/animated_star_rating.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 
-/// Displays the community average rating and lets the user submit their own.
-/// Reads from and dispatches to [RatingsCubit].
-class ProjectRatingSection extends StatelessWidget {
+/// Lets the user rate a project and optionally attach a written review.
+/// Submits both together via [CommentsCubit.addComment], which accepts a
+/// score (1-5) alongside the comment text.
+class ProjectRatingSection extends StatefulWidget {
   const ProjectRatingSection({required this.projectId, super.key});
 
   final String projectId;
 
   @override
+  State<ProjectRatingSection> createState() => _ProjectRatingSectionState();
+}
+
+class _ProjectRatingSectionState extends State<ProjectRatingSection> {
+  int _selectedRating = 0;
+  final TextEditingController _commentController = TextEditingController();
+  bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (_selectedRating == 0) {
+      showAppSnackBar(context, l10n.selectStarFirst);
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    unawaited(
+      context.read<CommentsCubit>().addComment(
+            projectId: widget.projectId,
+            text: _commentController.text.trim(),
+            score: _selectedRating,
+          ),
+    );
+
+    if (mounted) {
+      setState(() {
+        _isSubmitting = false;
+        _selectedRating = 0;
+        _commentController.clear();
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.border),
-        boxShadow: AppShadows.card,
+        border: Border.all(color: context.colors.border),
+        boxShadow: AppShadows.card(Theme.of(context).brightness),
       ),
-      child: Column(
-        children: [
-          _buildAverageRating(context),
-          const Divider(height: 1, color: AppColors.divider),
-          _buildUserRating(context),
-        ],
-      ),
-    );
-  }
-
-  // -- Top half: community average --
-  Widget _buildAverageRating(BuildContext context) {
-    return BlocBuilder<RatingsCubit, RatingsState>(
-      builder: (context, state) {
-        final isLoading = state is RatingsLoading;
-        final averageScore =
-            state is RatingSummaryLoaded ? state.summary.averageScore : 0.0;
-        final totalRatings =
-            state is RatingSummaryLoaded ? state.summary.totalRatings : 0;
-
-        return Padding(
-          padding: AppSpacing.cardPadding,
-          child: Row(
-            children: [
-              // Large score number with gradient background
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.accent, Color(0xFFF59E0B)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                ),
-                child: Center(
-                  child: isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(
-                          averageScore.toStringAsFixed(1),
-                          style: AppTypography.h1.copyWith(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Community Rating',
-                      style: AppTypography.labelLarge.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    AnimatedStarRating(
-                      rating: isLoading ? 0 : averageScore.round(),
-                      size: 20,
-                      isInteractive: false,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      isLoading
-                          ? 'Loading...'
-                          : '$totalRatings ${totalRatings == 1 ? 'rating' : 'ratings'}',
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // -- Bottom half: user's own rating picker --
-  Widget _buildUserRating(BuildContext context) {
-    return Padding(
-      padding: AppSpacing.cardPadding,
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: AppSpacing.cardPadding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // -- Header row: gradient score badge + title + instruction --
+            Row(
               children: [
-                Text(
-                  'Rate this project',
-                  style: AppTypography.labelLarge.copyWith(
-                    color: AppColors.textPrimary,
+                // Gradient badge mirrors the old community-rating style.
+                // Shows the selected score, or a star icon when nothing is picked.
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 72.r,
+                  height: 72.r,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.accent, Color(0xFFF59E0B)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusMd),
+                  ),
+                  child: Center(
+                    child: _selectedRating == 0
+                        ? Icon(
+                            Icons.star_rounded,
+                            color: Colors.white,
+                            size: AppSizes.iconLg,
+                          )
+                        : Text(
+                            '$_selectedRating',
+                            style: AppTypography.h1.copyWith(
+                              color: Colors.white,
+                              fontSize: 28.sp,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Tap a star to share your rating',
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textSecondary,
+                SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.rateThisProject,
+                        style: AppTypography.labelLarge.copyWith(
+                          color: context.colors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: 6.h),
+                      // Animated star picker — same widget and animation as before.
+                      AnimatedStarRating(
+                        rating: _selectedRating,
+                        size: AppSizes.iconMd,
+                        onRatingChanged: (rating) {
+                          setState(() => _selectedRating = rating);
+                        },
+                      ),
+                      SizedBox(height: AppSpacing.xs),
+                      Text(
+                        l10n.tapStarToRate,
+                        style: AppTypography.caption.copyWith(
+                          color: context.colors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-          AnimatedStarRating(
-            size: 32,
-            onRatingChanged: (rating) {
-              context
-                  .read<RatingsCubit>()
-                  .rate(projectId: projectId, score: rating);
-            },
-          ),
-        ],
+
+            SizedBox(height: AppSpacing.md),
+            Divider(height: 1, color: context.colors.divider),
+            SizedBox(height: AppSpacing.md),
+
+            // -- Comment text field --
+            TextField(
+              controller: _commentController,
+              maxLines: 3,
+              textInputAction: TextInputAction.newline,
+              style: AppTypography.bodyMedium.copyWith(
+                color: context.colors.textPrimary,
+              ),
+              decoration: InputDecoration(
+                hintText: l10n.writeYourReview,
+                hintStyle: AppTypography.bodyMedium.copyWith(
+                  color: context.colors.textHint,
+                ),
+                filled: true,
+                fillColor: context.colors.background,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  borderSide: BorderSide(color: context.colors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  borderSide: BorderSide(color: context.colors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  borderSide: BorderSide(
+                    color: context.colors.accent,
+                    width: 1.5,
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(height: AppSpacing.md),
+
+            // -- Submit button --
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: _isSubmitting ? null : () => _submit(context),
+                style: FilledButton.styleFrom(
+                  backgroundColor: context.colors.accent,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusMd),
+                  ),
+                ),
+                child: _isSubmitting
+                    ? SizedBox(
+                        width: AppSizes.iconSm,
+                        height: AppSizes.iconSm,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(l10n.submit),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

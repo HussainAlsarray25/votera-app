@@ -11,15 +11,30 @@ class UploadAvatar extends UseCase<String, UploadAvatarParams> {
 
   @override
   Future<Either<Failure, String>> call(UploadAvatarParams params) {
-    return repository.uploadAvatar(params.filePath);
+    return repository.uploadAvatar(
+      filePath: params.filePath,
+      bytes: params.bytes,
+      fileName: params.fileName,
+    );
   }
 }
 
 class UploadAvatarParams extends Equatable {
-  const UploadAvatarParams({required this.filePath});
+  const UploadAvatarParams({
+    this.filePath,
+    this.bytes,
+    this.fileName,
+  });
 
-  final String filePath;
+  /// File path — available on mobile and desktop.
+  final String? filePath;
+
+  /// Raw file bytes — used on web where a path is not available.
+  final List<int>? bytes;
+
+  /// Original file name — required when uploading via bytes (web).
+  final String? fileName;
 
   @override
-  List<Object?> get props => [filePath];
+  List<Object?> get props => [filePath, bytes, fileName];
 }

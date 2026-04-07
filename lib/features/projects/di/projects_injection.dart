@@ -6,16 +6,19 @@ import 'package:votera/features/projects/data/repositories/project_repository_im
 import 'package:votera/features/projects/domain/repositories/project_repository.dart';
 import 'package:votera/features/projects/domain/usecases/add_project_category.dart';
 import 'package:votera/features/projects/domain/usecases/cancel_project.dart';
-import 'package:votera/features/projects/domain/usecases/delete_project_media.dart';
+import 'package:votera/features/projects/domain/usecases/delete_project.dart';
+import 'package:votera/features/projects/domain/usecases/delete_project_cover.dart';
+import 'package:votera/features/projects/domain/usecases/delete_project_extra_image.dart';
 import 'package:votera/features/projects/domain/usecases/finalize_project.dart';
 import 'package:votera/features/projects/domain/usecases/get_my_project.dart';
 import 'package:votera/features/projects/domain/usecases/get_project_by_id.dart';
 import 'package:votera/features/projects/domain/usecases/get_projects.dart';
-import 'package:votera/features/projects/domain/usecases/get_upload_url.dart';
 import 'package:votera/features/projects/domain/usecases/remove_project_category.dart';
 import 'package:votera/features/projects/domain/usecases/scan_project.dart';
 import 'package:votera/features/projects/domain/usecases/submit_project.dart';
 import 'package:votera/features/projects/domain/usecases/update_project.dart';
+import 'package:votera/features/projects/domain/usecases/upload_project_cover.dart';
+import 'package:votera/features/projects/domain/usecases/upload_project_extra_image.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
 
 void initProjectsFeature(GetIt sl) {
@@ -28,13 +31,16 @@ void initProjectsFeature(GetIt sl) {
         getMyProject: sl<GetMyProject>(),
         submitProject: sl<SubmitProject>(),
         updateProject: sl<UpdateProject>(),
-        getUploadUrl: sl<GetUploadUrl>(),
+        uploadProjectCover: sl<UploadProjectCover>(),
+        deleteProjectCover: sl<DeleteProjectCover>(),
+        uploadProjectExtraImage: sl<UploadProjectExtraImage>(),
+        deleteProjectExtraImage: sl<DeleteProjectExtraImage>(),
         scanProject: sl<ScanProject>(),
         addProjectCategory: sl<AddProjectCategory>(),
         removeProjectCategory: sl<RemoveProjectCategory>(),
         finalizeProject: sl<FinalizeProject>(),
         cancelProject: sl<CancelProject>(),
-        deleteProjectMedia: sl<DeleteProjectMedia>(),
+        deleteProject: sl<DeleteProject>(),
       ),
     )
     // Use cases
@@ -53,8 +59,17 @@ void initProjectsFeature(GetIt sl) {
     ..registerLazySingleton<UpdateProject>(
       () => UpdateProject(sl<ProjectRepository>()),
     )
-    ..registerLazySingleton<GetUploadUrl>(
-      () => GetUploadUrl(sl<ProjectRepository>()),
+    ..registerLazySingleton<UploadProjectCover>(
+      () => UploadProjectCover(sl<ProjectRepository>()),
+    )
+    ..registerLazySingleton<DeleteProjectCover>(
+      () => DeleteProjectCover(sl<ProjectRepository>()),
+    )
+    ..registerLazySingleton<UploadProjectExtraImage>(
+      () => UploadProjectExtraImage(sl<ProjectRepository>()),
+    )
+    ..registerLazySingleton<DeleteProjectExtraImage>(
+      () => DeleteProjectExtraImage(sl<ProjectRepository>()),
     )
     ..registerLazySingleton<ScanProject>(
       () => ScanProject(sl<ProjectRepository>()),
@@ -71,8 +86,8 @@ void initProjectsFeature(GetIt sl) {
     ..registerLazySingleton<CancelProject>(
       () => CancelProject(sl<ProjectRepository>()),
     )
-    ..registerLazySingleton<DeleteProjectMedia>(
-      () => DeleteProjectMedia(sl<ProjectRepository>()),
+    ..registerLazySingleton<DeleteProject>(
+      () => DeleteProject(sl<ProjectRepository>()),
     )
     // Repositories
     ..registerLazySingleton<ProjectRepository>(

@@ -16,21 +16,28 @@ class CommentsLoading extends CommentsState {
 }
 
 /// Emitted when the comment list has been successfully loaded or refreshed.
-/// Carries pagination metadata so the UI can decide whether to show a
-/// "load more" trigger.
+/// Carries full pagination metadata so the UI can render numbered page buttons.
 class CommentsLoaded extends CommentsState {
   const CommentsLoaded({
     required this.comments,
     required this.page,
-    required this.hasNextPage,
+    required this.total,
+    required this.pageSize,
   });
 
   final List<CommentEntity> comments;
   final int page;
-  final bool hasNextPage;
+
+  // Total number of comments across all pages.
+  final int total;
+
+  // Number of items per page — used to calculate total page count.
+  final int pageSize;
+
+  int get totalPages => pageSize > 0 ? (total / pageSize).ceil() : 1;
 
   @override
-  List<Object?> get props => [comments, page, hasNextPage];
+  List<Object?> get props => [comments, page, total, pageSize];
 }
 
 /// Emitted after a comment is successfully posted so the UI can

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 
 // Telegram brand color
 const _telegramBlue = Color(0xFF2CA5E0);
@@ -12,15 +16,46 @@ const _telegramBlue = Color(0xFF2CA5E0);
 /// Tapping it asks the cubit for a deep link, then the listener opens the
 /// Telegram app automatically. The button switches to a disabled "waiting"
 /// state while polling is in progress.
-class TelegramLoginButton extends StatelessWidget {
+///
+/// Also observes app lifecycle: when the user returns from Telegram, an
+/// immediate status check is fired so a completed auth is never missed.
+class TelegramLoginButton extends StatefulWidget {
   const TelegramLoginButton({super.key});
+
+  @override
+  State<TelegramLoginButton> createState() => _TelegramLoginButtonState();
+}
+
+class _TelegramLoginButtonState extends State<TelegramLoginButton>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // When the user comes back from Telegram, immediately check whether the
+    // backend already completed authentication so we do not wait for the next
+    // timer tick (or miss it entirely if the timer was cancelled).
+    if (state == AppLifecycleState.resumed && mounted) {
+      context.read<AuthCubit>().onAppResumedDuringTelegramLogin();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         _buildDivider(context),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         BlocConsumer<AuthCubit, AuthState>(
           listenWhen: (_, state) =>
               state is AuthTelegramAwaitingUser || state is AuthError,
@@ -30,11 +65,10 @@ class TelegramLoginButton extends StatelessWidget {
               _openTelegramLink(state.link);
             }
             if (state is AuthError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: context.colors.error,
-                ),
+              showAppSnackBar(
+                context,
+                state.message,
+                type: AppSnackBarType.error,
               );
             }
           },
@@ -47,11 +81,12 @@ class TelegramLoginButton extends StatelessWidget {
             final isWaiting = state is AuthTelegramAwaitingUser;
             final isLoading = state is AuthLoading;
 
+            final l10n = AppLocalizations.of(context)!;
             return _buildButton(
               context: context,
               label: isWaiting
-                  ? 'Waiting for Telegram...'
-                  : 'Continue with Telegram',
+                  ? l10n.waitingForTelegram
+                  : l10n.continueWithTelegram,
               isDisabled: isLoading || isWaiting,
               onTap: () => context.read<AuthCubit>().loginWithTelegram(),
             );
@@ -100,9 +135,9 @@ class TelegramLoginButton extends StatelessWidget {
       children: [
         const Expanded(child: Divider()),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Text(
-            'or continue with',
+            AppLocalizations.of(context)!.orContinueWith,
             style: AppTypography.bodySmall.copyWith(
               color: context.colors.textHint,
             ),
@@ -121,7 +156,7 @@ class TelegramLoginButton extends StatelessWidget {
   }) {
     return SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 52.h,
       child: OutlinedButton(
         onPressed: isDisabled ? null : onTap,
         style: OutlinedButton.styleFrom(
@@ -137,20 +172,21 @@ class TelegramLoginButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.send_rounded,
-              color: isDisabled
-                  ? _telegramBlue.withValues(alpha: 0.4)
-                  : _telegramBlue,
-              size: 20,
-            ),
-            const SizedBox(width: AppSpacing.sm),
             Text(
               label,
               style: AppTypography.labelMedium.copyWith(
                 color: isDisabled
                     ? _telegramBlue.withValues(alpha: 0.4)
                     : _telegramBlue,
+              ),
+            ),
+            SizedBox(width: AppSpacing.sm),
+            Opacity(
+              opacity: isDisabled ? 0.4 : 1.0,
+              child: SvgPicture.asset(
+                'assets/images/features/profile/telegram.svg',
+                width: AppSizes.iconLg,
+                height: AppSizes.iconLg,
               ),
             ),
           ],

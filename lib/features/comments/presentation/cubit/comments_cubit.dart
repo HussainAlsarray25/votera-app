@@ -25,11 +25,11 @@ class CommentsCubit extends Cubit<CommentsState> {
   final UpdateComment updateComment;
   final DeleteComment deleteComment;
 
-  /// Load the first page of comments for [projectId].
+  /// Load a specific page of comments for [projectId].
   Future<void> loadComments({
     required String projectId,
     int page = 1,
-    int size = 20,
+    int size = 10,
   }) async {
     emit(const CommentsLoading());
     final result = await getComments(
@@ -41,14 +41,17 @@ class CommentsCubit extends Cubit<CommentsState> {
         CommentsLoaded(
           comments: paginated.items,
           page: paginated.page,
-          hasNextPage: paginated.hasNextPage,
+          total: paginated.total,
+          pageSize: size,
         ),
       ),
     );
   }
 
-  /// Post a new comment on [projectId]. Emits [CommentPosted] on success
-  /// so the UI can prepend the new item without a full list reload.
+  /// Post a new comment on [projectId].
+  /// Emits [CommentPosted] immediately for instant UI feedback, then silently
+  /// reloads the comment list to get authoritative data from the server
+  /// (the POST response may return empty author name/avatar).
   Future<void> addComment({
     required String projectId,
     required String text,
@@ -59,7 +62,23 @@ class CommentsCubit extends Cubit<CommentsState> {
     );
     result.fold(
       (failure) => emit(CommentsError(message: failure.message)),
-      (comment) => emit(CommentPosted(comment: comment)),
+      (comment) async {
+        emit(CommentPosted(comment: comment));
+
+        // Reload silently — no loading spinner so the UI stays stable.
+        final refreshResult = await getComments(
+          GetCommentsParams(projectId: projectId, page: 1, size: 10),
+        );
+        refreshResult.fold(
+          (_) {},  // Ignore refresh errors; the comment is already visible.
+          (paginated) => emit(CommentsLoaded(
+            comments: paginated.items,
+            page: paginated.page,
+            total: paginated.total,
+            pageSize: 10,
+          )),
+        );
+      },
     );
   }
 

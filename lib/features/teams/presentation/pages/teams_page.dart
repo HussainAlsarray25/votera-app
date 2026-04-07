@@ -2,20 +2,23 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/app/view/shell_page.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/features/teams/domain/entities/invitation_entity.dart';
 import 'package:votera/features/teams/domain/entities/team_entity.dart';
-import 'package:votera/features/teams/domain/entities/team_member_entity.dart';
 import 'package:votera/features/teams/presentation/cubit/teams_cubit.dart';
 import 'package:votera/features/teams/presentation/widgets/create_edit_team_sheet.dart';
 import 'package:votera/features/teams/presentation/widgets/invitation_card.dart';
 import 'package:votera/features/teams/presentation/widgets/team_card.dart';
-import 'package:votera/features/teams/presentation/widgets/team_member_tile.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
+import 'package:votera/shared/widgets/empty_state.dart';
+import 'package:votera/shared/widgets/failure_state.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
 /// Main teams page with two tabs: My Team and Browse.
@@ -38,12 +41,15 @@ class _TeamsPageState extends State<TeamsPage>
   late final TeamsCubit _invitationCubit;
   late final TeamsCubit _searchCubit;
 
-  Timer? _searchDebounce;
+  // Tracks whether the FAB should be visible (My Team tab + no teams yet).
+  bool _hasTeams = true; // default true to avoid a flash on first load
+  int _tabIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_onTabChanged);
     _teamCubit = sl<TeamsCubit>();
     _invitationCubit = sl<TeamsCubit>();
     _searchCubit = sl<TeamsCubit>();
@@ -54,20 +60,27 @@ class _TeamsPageState extends State<TeamsPage>
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
-    _searchDebounce?.cancel();
     unawaited(_teamCubit.close());
     unawaited(_invitationCubit.close());
     unawaited(_searchCubit.close());
     super.dispose();
   }
 
-  void _onSearchChanged(String query) {
-    _searchDebounce?.cancel();
-    if (query.trim().isEmpty) return;
-    _searchDebounce = Timer(const Duration(milliseconds: 500), () {
-      unawaited(_searchCubit.search(query: query.trim()));
-    });
+  void _onTabChanged() {
+    if (_tabController.index != _tabIndex) {
+      setState(() => _tabIndex = _tabController.index);
+    }
+  }
+
+  void _onTeamCubitState(TeamsState state) {
+    if (state is MyTeamsLoaded) {
+      setState(() => _hasTeams = state.teams.isNotEmpty);
+    } else if (state is TeamsActionSuccess || state is TeamLoaded) {
+      // After creating a team, reload to update FAB visibility.
+      unawaited(_teamCubit.loadMyTeam());
+    }
   }
 
   String? get _currentUserId {
@@ -78,42 +91,64 @@ class _TeamsPageState extends State<TeamsPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.colors.background,
-      appBar: _buildAppBar(context),
-      body: CenteredContent(
-        child: Column(
-          children: [
-            _buildTabBar(context),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _MyTeamTab(
-                    teamCubit: _teamCubit,
-                    invitationCubit: _invitationCubit,
-                    currentUserId: _currentUserId,
-                    onSwitchToBrowse: () => _tabController.animateTo(1),
-                  ),
-                  _BrowseTab(
-                    searchCubit: _searchCubit,
-                    onSearchChanged: _onSearchChanged,
-                  ),
-                ],
+    final l10n = AppLocalizations.of(context)!;
+    final showFab = _tabIndex == 0 && _hasTeams;
+
+    return BlocListener<TeamsCubit, TeamsState>(
+      bloc: _teamCubit,
+      listener: (_, state) => _onTeamCubitState(state),
+      child: Scaffold(
+        backgroundColor: context.colors.background,
+        appBar: _buildAppBar(context),
+        floatingActionButton: showFab
+            ? FloatingActionButton.extended(
+                onPressed: () => _createTeam(context),
+                backgroundColor: context.colors.primary,
+                foregroundColor: context.colors.textOnPrimary,
+                icon: const Icon(Icons.add_rounded),
+                label: Text(l10n.createATeam),
+              )
+            : null,
+        body: CenteredContent(
+          child: Column(
+            children: [
+              _buildTabBar(context),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _MyTeamTab(
+                      teamCubit: _teamCubit,
+                      invitationCubit: _invitationCubit,
+                      currentUserId: _currentUserId,
+                      onSwitchToBrowse: () => _tabController.animateTo(1),
+                    ),
+                    _BrowseTab(searchCubit: _searchCubit),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
+  Future<void> _createTeam(BuildContext context) async {
+    final result = await showCreateEditTeamSheet(context);
+    if (result == null || !mounted) return;
+    unawaited(
+      _teamCubit.create(name: result.name, description: result.description),
+    );
+  }
+
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AppBar(
       backgroundColor: context.colors.surface,
       elevation: 0,
       title: Text(
-        'Teams',
+        l10n.teams,
         style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
       ),
       actions: const [NotificationIconButton()],
@@ -121,6 +156,7 @@ class _TeamsPageState extends State<TeamsPage>
   }
 
   Widget _buildTabBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ColoredBox(
       color: context.colors.surface,
       child: TabBar(
@@ -129,12 +165,12 @@ class _TeamsPageState extends State<TeamsPage>
         unselectedLabelStyle: AppTypography.bodyMedium,
         labelColor: context.colors.textPrimary,
         unselectedLabelColor: context.colors.textHint,
-        indicatorColor: context.colors.secondary,
+        indicatorColor: context.colors.primary,
         indicatorWeight: 3,
         dividerHeight: 0,
-        tabs: const [
-          Tab(text: 'My Team'),
-          Tab(text: 'Browse'),
+        tabs: [
+          Tab(text: l10n.myTeam),
+          Tab(text: l10n.browse),
         ],
       ),
     );
@@ -145,11 +181,8 @@ class _TeamsPageState extends State<TeamsPage>
 // My Team Tab
 // =============================================================================
 
-/// Displays the current user's team with members and pending invitations.
-///
-/// Caches [_team] and [_invitations] locally so the UI never goes blank during
-/// background refreshes (stale-while-revalidate pattern). Two separate cubit
-/// instances are listened to independently to prevent state collisions.
+/// Shows the list of the user's teams.
+/// Tapping a team enters the detail view for that team.
 class _MyTeamTab extends StatefulWidget {
   const _MyTeamTab({
     required this.teamCubit,
@@ -168,26 +201,27 @@ class _MyTeamTab extends StatefulWidget {
 }
 
 class _MyTeamTabState extends State<_MyTeamTab> {
-  TeamEntity? _team;
+  List<TeamEntity> _teams = [];
   List<InvitationEntity> _invitations = [];
-  bool _isFirstTeamLoad = true;
+  bool _isFirstLoad = true;
   bool _isInvitationLoading = false;
 
-  bool get _isLeader =>
-      _team != null && widget.currentUserId == _team!.leaderId;
+  // Tracks whether the last load attempt ended with an error so we can
+  // show FailureState instead of the empty-teams view.
+  bool _hasError = false;
+  String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    // When the widget is recreated after a tab switch, the cubit may already
-    // hold a resolved state. Restore cached values immediately so the UI
-    // doesn't show a loading spinner waiting for a re-emission that won't come.
     final teamState = widget.teamCubit.state;
-    if (teamState is TeamLoaded) {
-      _team = teamState.team;
-      _isFirstTeamLoad = false;
+    if (teamState is MyTeamsLoaded) {
+      _teams = teamState.teams;
+      _isFirstLoad = false;
     } else if (teamState is TeamsError) {
-      _isFirstTeamLoad = false;
+      _hasError = true;
+      _errorMessage = teamState.message;
+      _isFirstLoad = false;
     }
 
     final invState = widget.invitationCubit.state;
@@ -208,39 +242,38 @@ class _MyTeamTabState extends State<_MyTeamTab> {
   void _onTeamState(BuildContext context, TeamsState state) {
     switch (state) {
       case TeamsLoading():
-        // Only show the full-screen loader on the very first load.
-        // Subsequent loads show stale content while refreshing.
         break;
 
-      case TeamLoaded():
+      case MyTeamsLoaded():
         setState(() {
-          _team = state.team;
-          _isFirstTeamLoad = false;
+          _teams = state.teams;
+          _isFirstLoad = false;
+          _hasError = false;
+          _errorMessage = '';
         });
 
+      case TeamLoaded():
+        // Ignore — detail is shown on a separate page.
+        break;
+
       case TeamsError():
-        // A 404-style error means the user has no team. Clear the cache
-        // and show the empty state instead of an error banner.
         setState(() {
-          _team = null;
-          _isFirstTeamLoad = false;
+          _teams = [];
+          _isFirstLoad = false;
+          _hasError = true;
+          _errorMessage = state.message;
         });
 
       case TeamsActionFailed():
-        // A mutation was rejected by the backend (e.g. leaving as leader).
-        // The team still exists — reload it so the view is restored, then
-        // show the server message so the user knows what went wrong.
+        // A mutation was rejected — reload the list and show the error.
         unawaited(widget.teamCubit.loadMyTeam());
         _showSnackBar(context, state.message);
 
       case TeamsActionSuccess():
-        // Void actions (leave, delete, remove, transfer) succeeded.
-        // Reload to pick up the new team state.
         unawaited(widget.teamCubit.loadMyTeam());
 
       case InvitationSent():
-        setState(() => _isFirstTeamLoad = false);
-        _showSnackBar(context, 'Invitation sent successfully.');
+        _showSnackBar(context, AppLocalizations.of(context)!.invitationSentSuccess);
 
       default:
         break;
@@ -300,93 +333,87 @@ class _MyTeamTabState extends State<_MyTeamTab> {
           listener: _onInvitationState,
         ),
       ],
-      child: RefreshIndicator(
-        onRefresh: () async => _refresh(),
-        color: context.colors.secondary,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            if (_isFirstTeamLoad)
-              const SliverFillRemaining(
-                child: Center(child: AppLoadingIndicator()),
-              )
-            else if (_team == null)
-              SliverFillRemaining(
-                child: Center(
-                  child: _NoTeamView(
-                    invitations: _invitations,
-                    isInvitationLoading: _isInvitationLoading,
-                    onCreateTeam: () => _createTeam(context),
-                    onBrowse: widget.onSwitchToBrowse,
-                    onAcceptInvitation: (id) => widget.invitationCubit
-                        .respond(invitationId: id, accept: true),
-                    onDeclineInvitation: (id) => widget.invitationCubit
-                        .respond(invitationId: id, accept: false),
-                  ),
-                ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _TeamHeaderCard(team: _team!, isLeader: _isLeader),
-                    const SizedBox(height: AppSpacing.lg),
-                    _MembersSection(
-                      team: _team!,
-                      currentUserId: widget.currentUserId,
-                      isLeader: _isLeader,
-                      onRemoveMember: (memberId) =>
-                          _removeMember(context, memberId),
-                      onInviteMember: () => _inviteMember(context),
-                    ),
-                    if (_invitations.isNotEmpty || _isInvitationLoading) ...[
-                      const SizedBox(height: AppSpacing.lg),
-                      _InvitationsSection(
-                        invitations: _invitations,
-                        isLoading: _isInvitationLoading,
-                        onAccept: (id) => widget.invitationCubit
-                            .respond(invitationId: id, accept: true),
-                        onDecline: (id) => widget.invitationCubit
-                            .respond(invitationId: id, accept: false),
-                      ),
-                    ],
-                    if (_isLeader) ...[
-                      const SizedBox(height: AppSpacing.lg),
-                      _TeamSettingsSection(
-                        onEdit: () => _editTeam(context),
-                        onTransfer: () => _transferLeadership(context),
-                        onDelete: () => _deleteTeam(context),
-                        onLeave: () => _leaveTeam(context),
-                      ),
-                    ] else ...[
-                      const SizedBox(height: AppSpacing.lg),
-                      Divider(color: context.colors.border),
-                      const SizedBox(height: AppSpacing.sm),
-                      SizedBox(
-                        width: double.infinity,
-                        child: TextButton.icon(
-                          onPressed: () => _leaveTeam(context),
-                          icon: const Icon(
-                            Icons.exit_to_app_rounded,
-                            size: 18,
-                          ),
-                          label: const Text('Leave Team'),
-                          style: TextButton.styleFrom(
-                            foregroundColor: context.colors.error,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: AppSpacing.xxl),
-                  ]),
+      child: _buildListView(context),
+    );
+  }
+
+  /// List view — shows all teams or empty state.
+  Widget _buildListView(BuildContext context) {
+    if (_isFirstLoad) {
+      return const Center(child: AppLoadingIndicator());
+    }
+
+    if (_hasError) {
+      return Center(
+        child: FailureState(
+          message: _errorMessage,
+          onRetry: _refresh,
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async => _refresh(),
+      color: context.colors.secondary,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          if (_teams.isEmpty)
+            SliverFillRemaining(
+              child: Center(
+                child: _NoTeamView(
+                  invitations: _invitations,
+                  isInvitationLoading: _isInvitationLoading,
+                  onCreateTeam: () => _createTeam(context),
+                  onBrowse: widget.onSwitchToBrowse,
+                  onAcceptInvitation: (id) =>
+                      widget.invitationCubit.respond(invitationId: id, accept: true),
+                  onDeclineInvitation: (id) =>
+                      widget.invitationCubit.respond(invitationId: id, accept: false),
                 ),
               ),
+            )
+          else ...[
+            // Show pending invitations above the team list so the user can
+            // respond to them even when they already belong to a team.
+            if (_invitations.isNotEmpty)
+              SliverToBoxAdapter(
+                child: _PendingInvitationsSection(
+                  invitations: _invitations,
+                  isLoading: _isInvitationLoading,
+                  onAccept: (id) =>
+                      widget.invitationCubit.respond(invitationId: id, accept: true),
+                  onDecline: (id) =>
+                      widget.invitationCubit.respond(invitationId: id, accept: false),
+                ),
+              ),
+            SliverPadding(
+              padding: EdgeInsets.all(AppSpacing.md),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => Padding(
+                    padding: EdgeInsets.only(bottom: AppSpacing.md),
+                    child: _TeamListTile(
+                      team: _teams[index],
+                      onTap: () => _openTeam(_teams[index]),
+                    ),
+                  ),
+                  childCount: _teams.length,
+                ),
+              ),
+            ),
           ],
-        ),
+        ],
       ),
     );
+  }
+
+  void _openTeam(TeamEntity team) {
+    // Refresh the list when the user returns from the detail page so any
+    // delete, leave, or member-removal is immediately reflected here.
+    context.push('/teams/${team.id}').then((_) {
+      if (mounted) _refresh();
+    });
   }
 
   // -- Actions -----------------------------------------------------------------
@@ -401,750 +428,200 @@ class _MyTeamTabState extends State<_MyTeamTab> {
       ),
     );
   }
-
-  Future<void> _editTeam(BuildContext context) async {
-    if (_team == null) return;
-    final result = await showCreateEditTeamSheet(
-      context,
-      initialName: _team!.name,
-      initialDescription: _team!.description,
-    );
-    if (result == null || !mounted) return;
-    unawaited(
-      widget.teamCubit.update(
-        teamId: _team!.id,
-        name: result.name,
-        description: result.description,
-      ),
-    );
-  }
-
-  Future<void> _inviteMember(BuildContext context) async {
-    if (_team == null) return;
-    final inviteeId = await _showInputDialog(
-      context,
-      title: 'Invite Member',
-      hint: 'Enter user ID to invite',
-      confirmLabel: 'Send Invite',
-    );
-    if (inviteeId == null || !mounted) return;
-    unawaited(
-      widget.teamCubit.invite(teamId: _team!.id, inviteeId: inviteeId),
-    );
-  }
-
-  Future<void> _removeMember(BuildContext context, String memberId) async {
-    if (_team == null) return;
-    final confirmed = await _showConfirmDialog(
-      context,
-      title: 'Remove Member',
-      message: 'Are you sure you want to remove this member from your team?',
-      confirmLabel: 'Remove',
-      isDestructive: true,
-    );
-    if (confirmed != true || !mounted) return;
-    unawaited(
-      widget.teamCubit.remove(teamId: _team!.id, memberId: memberId),
-    );
-  }
-
-  Future<void> _transferLeadership(BuildContext context) async {
-    if (_team == null) return;
-
-    // Eligible candidates are all members except the current leader.
-    final candidates = _team!.members
-        .where((m) => m.userId != _team!.leaderId)
-        .toList();
-
-    if (candidates.isEmpty) {
-      _showSnackBar(context, 'No other members to transfer leadership to.');
-      return;
-    }
-
-    final newLeaderId = await _showMemberPickerSheet(
-      context,
-      title: 'Transfer Leadership',
-      subtitle: 'Select the member who will become the new team leader.',
-      members: candidates,
-    );
-    if (newLeaderId == null || !mounted) return;
-    unawaited(
-      widget.teamCubit.transfer(teamId: _team!.id, newLeaderId: newLeaderId),
-    );
-  }
-
-  Future<void> _leaveTeam(BuildContext context) async {
-    final isSolo = _team != null && _team!.members.length <= 1;
-    final hasOtherMembers = _team != null && _team!.members.length > 1;
-
-    // A leader cannot leave while other members are in the team —
-    // they must transfer leadership first.
-    if (_isLeader && hasOtherMembers) {
-      _showSnackBar(
-        context,
-        'Transfer leadership to another member before leaving.',
-      );
-      return;
-    }
-
-    // When the leader is the only member, leaving = deleting the team.
-    // Make this explicit so the user understands what will happen.
-    if (_isLeader && isSolo) {
-      final confirmed = await _showConfirmDialog(
-        context,
-        title: 'Leave & Delete Team',
-        message:
-            'You are the only member. Leaving will permanently delete "${_team!.name}". '
-            'This cannot be undone.',
-        confirmLabel: 'Leave & Delete',
-        isDestructive: true,
-      );
-      if (confirmed != true || !mounted) return;
-      unawaited(widget.teamCubit.delete(_team!.id));
-      return;
-    }
-
-    // Regular member leaving.
-    final confirmed = await _showConfirmDialog(
-      context,
-      title: 'Leave Team',
-      message:
-          'Are you sure you want to leave your team? You can join or create another team later.',
-      confirmLabel: 'Leave',
-      isDestructive: true,
-    );
-    if (confirmed != true || !mounted) return;
-    unawaited(widget.teamCubit.leave());
-  }
-
-  Future<void> _deleteTeam(BuildContext context) async {
-    if (_team == null) return;
-    final confirmed = await _showConfirmDialog(
-      context,
-      title: 'Delete Team',
-      message:
-          'This will permanently delete "${_team!.name}" and remove all members. This cannot be undone.',
-      confirmLabel: 'Delete Team',
-      isDestructive: true,
-    );
-    if (confirmed != true || !mounted) return;
-    unawaited(widget.teamCubit.delete(_team!.id));
-  }
 }
 
 // =============================================================================
-// Browse Tab
+// Team list tile — shown in the My Teams list view
 // =============================================================================
 
-class _BrowseTab extends StatefulWidget {
-  const _BrowseTab({
-    required this.searchCubit,
-    required this.onSearchChanged,
-  });
-
-  final TeamsCubit searchCubit;
-  final void Function(String) onSearchChanged;
-
-  @override
-  State<_BrowseTab> createState() => _BrowseTabState();
-}
-
-class _BrowseTabState extends State<_BrowseTab> {
-  final _searchController = TextEditingController();
-  String _query = '';
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _SearchBar(
-          controller: _searchController,
-          onChanged: (value) {
-            setState(() => _query = value);
-            widget.onSearchChanged(value);
-          },
-        ),
-        Expanded(
-          child: BlocBuilder<TeamsCubit, TeamsState>(
-            bloc: widget.searchCubit,
-            builder: (context, state) {
-              if (_query.trim().isEmpty) {
-                return _buildIdlePrompt(context);
-              }
-              if (state is TeamsLoading) {
-                return const Center(child: AppLoadingIndicator());
-              }
-              if (state is TeamsSearchResults) {
-                if (state.teams.isEmpty) return _buildNoResults(context);
-                return _buildResults(state.teams);
-              }
-              if (state is TeamsError) {
-                return _buildError(context, state.message);
-              }
-              // Query entered but debounce hasn't fired yet.
-              return const Center(child: AppLoadingIndicator(size: 40));
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildIdlePrompt(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: context.colors.secondary.withValues(alpha: 0.08),
-              ),
-              child: Icon(
-                Icons.search_rounded,
-                size: 36,
-                color: context.colors.secondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Find a Team',
-              style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Search by team name to discover and join existing teams.',
-              style: AppTypography.bodyMedium.copyWith(
-                color: context.colors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNoResults(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.group_off_rounded,
-              size: 52,
-              color: context.colors.textHint,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'No teams found',
-              style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'No teams matched "$_query". Try a different name.',
-              style: AppTypography.bodyMedium.copyWith(
-                color: context.colors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildResults(List<TeamEntity> teams) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      itemCount: teams.length,
-      itemBuilder: (context, index) {
-        final team = teams[index];
-        return TeamCard(
-          team: team,
-          index: index,
-          onTap: () => context.push('/teams/${team.id}'),
-        );
-      },
-    );
-  }
-
-  Widget _buildError(BuildContext context, String message) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: 48,
-              color: context.colors.error,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              message,
-              style: AppTypography.bodyMedium.copyWith(
-                color: context.colors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// =============================================================================
-// Reusable inner widgets
-// =============================================================================
-
-/// Gradient card at the top of the "My Team" tab showing the team name
-/// and description with the app's purple accent palette.
-class _TeamHeaderCard extends StatelessWidget {
-  const _TeamHeaderCard({required this.team, required this.isLeader});
+class _TeamListTile extends StatelessWidget {
+  const _TeamListTile({required this.team, required this.onTap});
 
   final TeamEntity team;
-  final bool isLeader;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-        boxShadow: [
-          BoxShadow(
-            color: context.colors.secondary.withValues(alpha: 0.2),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-        ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // Decorative background circles
-            const Positioned(
-              top: -20,
-              right: -16,
-              child: _DecorCircle(size: 100, opacity: 0.08),
-            ),
-            const Positioned(
-              top: 20,
-              right: 40,
-              child: _DecorCircle(size: 56, opacity: 0.1),
-            ),
-            const Positioned(
-              bottom: -12,
-              right: 80,
-              child: _DecorCircle(size: 32, opacity: 0.06),
-            ),
-            // Content
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius:
-                              BorderRadius.circular(AppSpacing.radiusMd),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.group_rounded,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                      const Spacer(),
-                      if (isLeader)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius:
-                                BorderRadius.circular(AppSpacing.radiusFull),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.workspace_premium_rounded,
-                                size: 13,
-                                color: context.colors.accentLight,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Leader',
-                                style: AppTypography.caption.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    team.name,
-                    style: AppTypography.h3.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      height: 1.2,
-                    ),
-                  ),
-                  if (team.description != null &&
-                      team.description!.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      team.description!,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: Colors.white.withValues(alpha: 0.85),
-                        height: 1.5,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.group_outlined,
-                        size: 14,
-                        color: Colors.white70,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        '${team.members.length} '
-                        '${team.members.length == 1 ? 'member' : 'members'}',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Members list section with an optional "Invite" button for leaders.
-class _MembersSection extends StatelessWidget {
-  const _MembersSection({
-    required this.team,
-    required this.currentUserId,
-    required this.isLeader,
-    required this.onRemoveMember,
-    required this.onInviteMember,
-  });
-
-  final TeamEntity team;
-  final String? currentUserId;
-  final bool isLeader;
-  final void Function(String memberId) onRemoveMember;
-  final VoidCallback onInviteMember;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              'Members (${team.members.length})',
-              style: AppTypography.labelLarge.copyWith(
-                color: context.colors.textPrimary,
-              ),
-            ),
-            const Spacer(),
-            if (isLeader)
-              _InviteButton(onTap: onInviteMember),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        ...team.members.asMap().entries.map((entry) {
-          final member = entry.value;
-          final isThisLeader = member.userId == team.leaderId;
-          final isCurrentUser = member.userId == currentUserId;
-
-          // Only the leader can remove non-leader members.
-          final canRemove = isLeader && !isThisLeader;
-
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: TeamMemberTile(
-              member: member,
-              isLeader: isThisLeader,
-              isCurrentUser: isCurrentUser,
-              onRemove: canRemove ? () => onRemoveMember(member.userId) : null,
-            ),
-          );
-        }),
-      ],
-    );
-  }
-}
-
-/// Pending invitations received by the current user.
-class _InvitationsSection extends StatelessWidget {
-  const _InvitationsSection({
-    required this.invitations,
-    required this.isLoading,
-    required this.onAccept,
-    required this.onDecline,
-  });
-
-  final List<InvitationEntity> invitations;
-  final bool isLoading;
-  final void Function(String id) onAccept;
-  final void Function(String id) onDecline;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Pending Invitations',
-          style: AppTypography.labelLarge.copyWith(
-            color: context.colors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        if (isLoading && invitations.isEmpty)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(AppSpacing.md),
-              child: AppLoadingIndicator(size: 40),
-            ),
-          )
-        else
-          ...invitations.map(
-            (invitation) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: InvitationCard(
-                invitation: invitation,
-                onAccept: () => onAccept(invitation.id),
-                onDecline: () => onDecline(invitation.id),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-/// Leader-only settings section with grouped action rows.
-class _TeamSettingsSection extends StatelessWidget {
-  const _TeamSettingsSection({
-    required this.onEdit,
-    required this.onTransfer,
-    required this.onDelete,
-    required this.onLeave,
-  });
-
-  final VoidCallback onEdit;
-  final VoidCallback onTransfer;
-  final VoidCallback onDelete;
-  final VoidCallback onLeave;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Team Settings',
-          style: AppTypography.labelLarge.copyWith(
-            color: context.colors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Container(
-          decoration: BoxDecoration(
-            color: context.colors.surface,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            border: Border.all(color: context.colors.border),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              _SettingsTile(
-                icon: Icons.edit_outlined,
-                iconColor: context.colors.secondary,
-                title: 'Edit Team Info',
-                subtitle: 'Change team name or description',
-                onTap: onEdit,
-              ),
-              Divider(height: 1, indent: 56, color: context.colors.border),
-              _SettingsTile(
-                icon: Icons.swap_horiz_rounded,
-                iconColor: context.colors.primary,
-                title: 'Transfer Leadership',
-                subtitle: 'Assign a new team leader',
-                onTap: onTransfer,
-              ),
-              Divider(height: 1, indent: 56, color: context.colors.border),
-              _SettingsTile(
-                icon: Icons.delete_outline_rounded,
-                iconColor: context.colors.error,
-                title: 'Delete Team',
-                subtitle: 'Permanently disband this team',
-                titleColor: context.colors.error,
-                onTap: onDelete,
-                showChevron: false,
-              ),
-              Divider(height: 1, indent: 56, color: context.colors.border),
-              _SettingsTile(
-                icon: Icons.exit_to_app_rounded,
-                iconColor: context.colors.error,
-                title: 'Leave Team',
-                subtitle: 'If you are the only member, the team will be deleted',
-                titleColor: context.colors.error,
-                onTap: onLeave,
-                showChevron: false,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SettingsTile extends StatelessWidget {
-  const _SettingsTile({
-    required this.icon,
-    required this.iconColor,
-    required this.title,
-    required this.onTap,
-    this.subtitle,
-    this.titleColor,
-    this.showChevron = true,
-  });
-
-  final IconData icon;
-  final Color iconColor;
-  final String title;
-  final String? subtitle;
-  final Color? titleColor;
   final VoidCallback onTap;
-  final bool showChevron;
+
+  // Kept in sync with team_card.dart.
+  static const _royalTeamName = 'Frogs Team';
+  bool get _isRoyal => team.name == _royalTeamName;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final hasDescription =
+        team.description != null && team.description!.isNotEmpty;
+
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.md,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: _isRoyal
+              ? const Color(0xFF1A0045).withValues(alpha: 0.06)
+              : context.colors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: _isRoyal
+                ? const Color(0xFFFFD700).withValues(alpha: 0.6)
+                : context.colors.border,
+            width: _isRoyal ? 1.5 : 1,
+          ),
+          boxShadow: _isRoyal
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFFFFD700).withValues(alpha: 0.12),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-              ),
-              child: Icon(icon, size: 18, color: iconColor),
+            // Header row: avatar, name, chevron.
+            Row(
+              children: [
+                // Royal team gets a dark-purple avatar with a crown instead of the initial.
+                Container(
+                  width: 52.r,
+                  height: 52.r,
+                  decoration: BoxDecoration(
+                    gradient: _isRoyal
+                        ? const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFF1A0045), Color(0xFF5B0092)],
+                          )
+                        : null,
+                    color: _isRoyal
+                        ? null
+                        : context.colors.primary.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                    border: _isRoyal
+                        ? Border.all(
+                            color:
+                                const Color(0xFFFFD700).withValues(alpha: 0.7),
+                            width: 1.5,
+                          )
+                        : null,
+                  ),
+                  child: Center(
+                    child: _isRoyal
+                        ? Text(
+                            '\u{1F451}',
+                            style: TextStyle(fontSize: 24.sp),
+                          )
+                        : Text(
+                            team.name.isNotEmpty
+                                ? team.name[0].toUpperCase()
+                                : '?',
+                            style: AppTypography.h3.copyWith(
+                              color: context.colors.primary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                  ),
+                ),
+                SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    team.name,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: _isRoyal
+                          ? const Color(0xFFB8860B)
+                          : context.colors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: _isRoyal
+                      ? const Color(0xFFFFD700)
+                      : context.colors.textHint,
+                ),
+              ],
             ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+
+            // Description snippet.
+            if (hasDescription) ...[
+              SizedBox(height: AppSpacing.sm),
+              Text(
+                team.description!,
+                style: AppTypography.bodySmall.copyWith(
+                  color: context.colors.textSecondary,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+
+            SizedBox(height: AppSpacing.sm),
+            Divider(
+              color: _isRoyal
+                  ? const Color(0xFFFFD700).withValues(alpha: 0.3)
+                  : context.colors.border,
+              height: 1,
+            ),
+            SizedBox(height: AppSpacing.sm),
+
+            // Footer row: member count and creation date.
+            Row(
+              children: [
+                Icon(
+                  Icons.group_outlined,
+                  size: AppSizes.iconXs,
+                  color: context.colors.textHint,
+                ),
+                SizedBox(width: AppSpacing.xs),
+                Text(
+                  l10n.memberCount(team.members.length),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: context.colors.textSecondary,
+                  ),
+                ),
+                if (team.createdAt != null) ...[
+                  SizedBox(width: AppSpacing.md),
+                  Icon(
+                    Icons.calendar_today_outlined,
+                    size: AppSizes.iconXs,
+                    color: context.colors.textHint,
+                  ),
+                  SizedBox(width: AppSpacing.xs),
                   Text(
-                    title,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: titleColor ?? context.colors.textPrimary,
-                      fontWeight: FontWeight.w600,
+                    _formatDate(team.createdAt!),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: context.colors.textSecondary,
                     ),
                   ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle!,
-                      style: AppTypography.caption.copyWith(
-                        color: context.colors.textHint,
-                      ),
-                    ),
-                  ],
                 ],
-              ),
+              ],
             ),
-            if (showChevron)
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: context.colors.textHint,
-              ),
           ],
         ),
       ),
     );
   }
+
+  String _formatDate(DateTime date) {
+    // Format as "Jan 2025" — concise enough for a card footer.
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${months[date.month - 1]} ${date.year}';
+  }
 }
 
-/// Empty state shown when the user has no team.
-///
-/// Shows pending invitations if any exist, then CTAs to create or browse.
+// =============================================================================
+// No-team empty state
+// =============================================================================
+
+/// Shown in the "My Team" tab when the user has no team.
+/// Displays pending invitations and CTAs to create or browse teams.
 class _NoTeamView extends StatelessWidget {
   const _NoTeamView({
     required this.invitations,
@@ -1166,27 +643,30 @@ class _NoTeamView extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.all(AppSpacing.md),
       child: Column(
         children: [
-          const SizedBox(height: AppSpacing.xl),
+          SizedBox(height: AppSpacing.xl),
           _buildEmptyIllustration(context),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.lg),
           Text(
-            'You are not in a team yet',
+            AppLocalizations.of(context)!.notInTeamYet,
             style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
           ),
-          const SizedBox(height: AppSpacing.xs),
+          SizedBox(height: AppSpacing.xs),
           Text(
-            'Create your own team or browse existing ones to join.',
+            AppLocalizations.of(context)!.createOrJoinTeam,
             style: AppTypography.bodyMedium.copyWith(
               color: context.colors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppSpacing.xl),
-          GradientButton(text: 'Create a Team', onPressed: onCreateTeam),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.xl),
+          GradientButton(
+            text: AppLocalizations.of(context)!.createATeam,
+            onPressed: onCreateTeam,
+          ),
+          SizedBox(height: AppSpacing.sm),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
@@ -1194,30 +674,30 @@ class _NoTeamView extends StatelessWidget {
               style: OutlinedButton.styleFrom(
                 foregroundColor: context.colors.secondary,
                 side: BorderSide(color: context.colors.secondary),
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: EdgeInsets.symmetric(vertical: 14.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
               ),
-              child: const Text('Browse Teams'),
+              child: Text(AppLocalizations.of(context)!.browseTeams),
             ),
           ),
           // Show pending invitations even when there's no team.
-          if (invitations.isNotEmpty || isInvitationLoading) ...[
-            const SizedBox(height: AppSpacing.xl),
+          if (invitations.isNotEmpty) ...[
+            SizedBox(height: AppSpacing.xl),
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: Text(
-                'Pending Invitations',
+                AppLocalizations.of(context)!.pendingInvitations,
                 style: AppTypography.labelLarge.copyWith(
                   color: context.colors.textPrimary,
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.sm),
             ...invitations.map(
               (inv) => Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                padding: EdgeInsets.only(bottom: AppSpacing.sm),
                 child: InvitationCard(
                   invitation: inv,
                   onAccept: () => onAcceptInvitation(inv.id),
@@ -1226,7 +706,7 @@ class _NoTeamView extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: AppSpacing.xxl),
+          SizedBox(height: AppSpacing.xxl),
         ],
       ),
     );
@@ -1234,8 +714,8 @@ class _NoTeamView extends StatelessWidget {
 
   Widget _buildEmptyIllustration(BuildContext context) {
     return Container(
-      width: 120,
-      height: 120,
+      width: 120.r,
+      height: 120.r,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
@@ -1249,8 +729,8 @@ class _NoTeamView extends StatelessWidget {
       ),
       child: Center(
         child: Container(
-          width: 80,
-          height: 80,
+          width: 80.r,
+          height: 80.r,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
@@ -1264,7 +744,7 @@ class _NoTeamView extends StatelessWidget {
           ),
           child: Icon(
             Icons.group_add_rounded,
-            size: 36,
+            size: AppSizes.iconXl,
             color: context.colors.secondary,
           ),
         ),
@@ -1274,323 +754,524 @@ class _NoTeamView extends StatelessWidget {
 }
 
 // =============================================================================
-// Small reusable widgets
+// Pending invitations section — shown above the team list
 // =============================================================================
 
-class _InviteButton extends StatelessWidget {
-  const _InviteButton({required this.onTap});
+/// Displayed at the top of the "My Team" tab when the user has pending
+/// invitations but already belongs to at least one team.
+///
+/// Without this section, users who are already in a team would have no way
+/// to see or respond to new invitations.
+class _PendingInvitationsSection extends StatelessWidget {
+  const _PendingInvitationsSection({
+    required this.invitations,
+    required this.isLoading,
+    required this.onAccept,
+    required this.onDecline,
+  });
 
-  final VoidCallback onTap;
+  final List<InvitationEntity> invitations;
+  final bool isLoading;
+  final void Function(String id) onAccept;
+  final void Function(String id) onDecline;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: 6,
-        ),
-        decoration: BoxDecoration(
-          gradient: context.colors.primaryGradient,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-          boxShadow: [
-            BoxShadow(
-              color: context.colors.secondary.withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.person_add_rounded, size: 14, color: Colors.white),
-            const SizedBox(width: 5),
-            Text(
-              'Invite',
-              style: AppTypography.caption.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
+    final l10n = AppLocalizations.of(context)!;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+        0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header with icon
+          Row(
+            children: [
+              Container(
+                width: 28.r,
+                height: 28.r,
+                decoration: BoxDecoration(
+                  color: context.colors.warning.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                ),
+                child: Icon(
+                  Icons.mail_outline_rounded,
+                  size: AppSizes.iconSm,
+                  color: context.colors.warning,
+                ),
+              ),
+              SizedBox(width: AppSpacing.sm),
+              Text(
+                l10n.pendingInvitations,
+                style: AppTypography.labelLarge.copyWith(
+                  color: context.colors.textPrimary,
+                ),
+              ),
+              SizedBox(width: AppSpacing.xs),
+              // Badge showing the count
+              if (invitations.isNotEmpty)
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 7.w,
+                    vertical: 2.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: context.colors.warning,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                  ),
+                  child: Text(
+                    '${invitations.length}',
+                    style: AppTypography.caption.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 10.sp,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.sm),
+          // Invitation cards
+          ...invitations.map(
+            (inv) => Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.sm),
+              child: InvitationCard(
+                invitation: inv,
+                isLoading: isLoading,
+                onAccept: () => onAccept(inv.id),
+                onDecline: () => onDecline(inv.id),
               ),
             ),
-          ],
-        ),
+          ),
+          Divider(
+            height: AppSpacing.xl,
+            thickness: 1,
+            color: context.colors.divider,
+          ),
+        ],
       ),
     );
   }
 }
 
-class _SearchBar extends StatelessWidget {
-  const _SearchBar({required this.controller, required this.onChanged});
+// =============================================================================
+// Browse Tab
+// =============================================================================
 
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
+/// The four filter modes available when browsing teams.
+enum _TeamFilter { name, teamHandle, memberName, userId }
+
+class _BrowseTab extends StatefulWidget {
+  const _BrowseTab({required this.searchCubit});
+
+  final TeamsCubit searchCubit;
+
+  @override
+  State<_BrowseTab> createState() => _BrowseTabState();
+}
+
+class _BrowseTabState extends State<_BrowseTab> {
+  final _searchController = TextEditingController();
+  final _focusNode = FocusNode();
+  _TeamFilter _selectedFilter = _TeamFilter.name;
+  bool _showFilters = false;
+  bool _hasText = false;
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      final hasText = _searchController.text.isNotEmpty;
+      if (hasText != _hasText) setState(() => _hasText = hasText);
+    });
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onQueryChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      _triggerSearch(value.trim());
+    });
+  }
+
+  void _onFilterChanged(_TeamFilter filter) {
+    setState(() => _selectedFilter = filter);
+    // Re-run the current query under the new filter.
+    _triggerSearch(_searchController.text.trim());
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _focusNode.unfocus();
+    _triggerSearch('');
+  }
+
+  void _triggerSearch(String query) {
+    if (query.isEmpty) {
+      widget.searchCubit.reset();
+      return;
+    }
+    switch (_selectedFilter) {
+      case _TeamFilter.name:
+        unawaited(widget.searchCubit.browseTeams(name: query));
+      case _TeamFilter.teamHandle:
+        unawaited(widget.searchCubit.browseTeams(teamHandle: query));
+      case _TeamFilter.memberName:
+        unawaited(widget.searchCubit.browseTeams(userName: query));
+      case _TeamFilter.userId:
+        unawaited(widget.searchCubit.browseTeams(userHandle: query));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Whether a non-default filter is active — used to badge the filter button.
+    final isFilterActive = _selectedFilter != _TeamFilter.name;
+
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      behavior: HitTestBehavior.translucent,
+      child: Column(
+      children: [
+        // Search field + filter button row (matches SearchBarSection style).
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.md,
+            AppSpacing.md,
+            AppSpacing.sm,
+          ),
+          child: Row(
+            children: [
+              Expanded(child: _buildSearchField(context)),
+              SizedBox(width: 10.w),
+              _buildFilterButton(context, isFilterActive),
+            ],
+          ),
+        ),
+        // Collapsible filter chips — visible only when the filter button is toggled.
+        if (_showFilters)
+          _FilterChipsBar(
+            selected: _selectedFilter,
+            onSelected: _onFilterChanged,
+          ),
+        // Results area.
+        Expanded(
+          child: BlocBuilder<TeamsCubit, TeamsState>(
+            bloc: widget.searchCubit,
+            builder: (context, state) {
+              if (state is TeamsInitial) {
+                return _buildSearchPrompt(context);
+              }
+              if (state is TeamsLoading) {
+                return const Center(child: AppLoadingIndicator());
+              }
+              if (state is TeamsSearchResults) {
+                if (state.teams.isEmpty) {
+                  return _buildNoResults(context);
+                }
+                return _buildResults(state.teams);
+              }
+              if (state is TeamsError) {
+                return _buildError(context, state.message);
+              }
+              return _buildSearchPrompt(context);
+            },
+          ),
+        ),
+      ],
+      ),
+    );
+  }
+
+  Widget _buildSearchField(BuildContext context) {
     return Container(
-      color: context.colors.surface,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.md,
-        AppSpacing.md,
-        AppSpacing.sm,
+      height: 48.h,
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: TextField(
-        controller: controller,
-        onChanged: onChanged,
-        style: AppTypography.bodyLarge.copyWith(
+        controller: _searchController,
+        focusNode: _focusNode,
+        onChanged: _onQueryChanged,
+        style: AppTypography.bodyMedium.copyWith(
           color: context.colors.textPrimary,
         ),
         decoration: InputDecoration(
-          hintText: 'Search teams by name...',
+          hintText: AppLocalizations.of(context)!.searchTeamsByName,
+          hintStyle: AppTypography.bodyMedium.copyWith(
+            color: context.colors.textHint,
+          ),
           prefixIcon: Icon(
             Icons.search_rounded,
             color: context.colors.textHint,
+            size: AppSizes.iconMd,
           ),
-          suffixIcon: controller.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear_rounded, size: 18),
-                  onPressed: () {
-                    controller.clear();
-                    onChanged('');
-                  },
+          suffixIcon: _hasText
+              ? GestureDetector(
+                  onTap: _clearSearch,
+                  child: Icon(
+                    Icons.close_rounded,
+                    color: context.colors.textHint,
+                    size: AppSizes.iconSm,
+                  ),
                 )
               : null,
-          filled: true,
-          fillColor: context.colors.background,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(vertical: 14.h),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(BuildContext context, bool isActive) {
+    return GestureDetector(
+      onTap: () => setState(() => _showFilters = !_showFilters),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 48.r,
+        height: 48.r,
+        decoration: BoxDecoration(
+          color: isActive || _showFilters
+              ? context.colors.primary
+              : context.colors.surface,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: (isActive || _showFilters
+                      ? context.colors.primary
+                      : Colors.black)
+                  .withValues(alpha: isActive || _showFilters ? 0.35 : 0.04),
+              blurRadius: isActive || _showFilters ? 14 : 8,
+              offset: Offset(0, isActive || _showFilters ? 4 : 2),
+            ),
+          ],
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(
+              Icons.tune_rounded,
+              color: isActive || _showFilters
+                  ? Colors.white
+                  : context.colors.textSecondary,
+              size: AppSizes.iconMd,
+            ),
+            // Dot badge when a non-default filter is active.
+            if (isActive)
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Container(
+                  width: 7,
+                  height: 7,
+                  decoration: BoxDecoration(
+                    color: isActive || _showFilters
+                        ? Colors.white
+                        : context.colors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Returns the human-readable label for the currently selected filter.
+  String _filterLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return switch (_selectedFilter) {
+      _TeamFilter.name => l10n.teamName,
+      _TeamFilter.teamHandle => l10n.teamHandle,
+      _TeamFilter.memberName => l10n.memberName,
+      _TeamFilter.userId => l10n.userId,
+    };
+  }
+
+  Widget _buildSearchPrompt(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Center(
+      child: EmptyState(
+        icon: Icons.group_outlined,
+        title: l10n.browse,
+        subtitle: l10n.searchTeamsByName,
+        showRefreshHint: false,
+      ),
+    );
+  }
+
+  Widget _buildNoResults(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final query = _searchController.text.trim();
+    final filterLabel = _filterLabel(context);
+    return Center(
+      child: EmptyState(
+        icon: Icons.group_off_rounded,
+        title: l10n.noTeamsFound,
+        subtitle: query.isEmpty
+            ? l10n.searchTeamsByName
+            : l10n.noTeamsMatchedQuery('"$query" — $filterLabel'),
+        showRefreshHint: false,
+      ),
+    );
+  }
+
+  Widget _buildResults(List<TeamEntity> teams) {
+    return ListView.builder(
+      padding: EdgeInsets.all(AppSpacing.md),
+      itemCount: teams.length,
+      itemBuilder: (context, index) {
+        final team = teams[index];
+        return Padding(
+          padding: EdgeInsets.only(bottom: AppSpacing.md),
+          child: TeamCard(
+            team: team,
+            index: index,
+            onTap: () => context.push('/teams/${team.id}'),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildError(BuildContext context, String message) {
+    final query = _searchController.text.trim();
+    return Center(
+      child: FailureState(
+        icon: Icons.wifi_off_rounded,
+        message: query.isEmpty ? message : '$message — "$query"',
+        onRetry: () => _triggerSearch(query),
       ),
     );
   }
 }
 
-/// Semi-transparent decorative circle used in the team header card.
-class _DecorCircle extends StatelessWidget {
-  const _DecorCircle({required this.size, required this.opacity});
 
-  final double size;
-  final double opacity;
+
+// =============================================================================
+// Small reusable widgets
+// =============================================================================
+
+// =============================================================================
+// Filter chips bar
+// =============================================================================
+
+class _FilterChipsBar extends StatelessWidget {
+  const _FilterChipsBar({
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final _TeamFilter selected;
+  final void Function(_TeamFilter) onSelected;
+
+  String _label(BuildContext context, _TeamFilter filter) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (filter) {
+      case _TeamFilter.name:
+        return l10n.teamName;
+      case _TeamFilter.teamHandle:
+        return l10n.teamHandle;
+      case _TeamFilter.memberName:
+        return l10n.memberName;
+      case _TeamFilter.userId:
+        return l10n.userId;
+    }
+  }
+
+  Widget _buildChip(
+    BuildContext context,
+    _TeamFilter filter, {
+    required bool isActive,
+  }) {
+    return GestureDetector(
+      onTap: () => onSelected(filter),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isActive ? context.colors.primary : context.colors.surface,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+          border: Border.all(
+            color: isActive ? context.colors.primary : context.colors.border,
+            width: 1.5,
+          ),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: context.colors.primary.withValues(alpha: 0.25),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : [],
+        ),
+        child: Text(
+          _label(context, filter),
+          style: AppTypography.bodySmall.copyWith(
+            fontWeight: FontWeight.w600,
+            color: isActive
+                ? context.colors.surface
+                : context.colors.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: opacity),
+    return SizedBox(
+      height: 56.h,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          AppSpacing.sm,
+          AppSpacing.md,
+          AppSpacing.sm,
+        ),
+        itemCount: _TeamFilter.values.length,
+        itemBuilder: (context, index) {
+          final filter = _TeamFilter.values[index];
+          return Padding(
+            padding: EdgeInsets.only(right: AppSpacing.sm),
+            child: _buildChip(
+              context,
+              filter,
+              isActive: filter == selected,
+            ),
+          );
+        },
       ),
     );
   }
 }
 
-// =============================================================================
-// Dialog helpers (file-private)
-// =============================================================================
-
-Future<bool?> _showConfirmDialog(
-  BuildContext context, {
-  required String title,
-  required String message,
-  required String confirmLabel,
-  bool isDestructive = false,
-}) {
-  return showDialog<bool>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(
-        title,
-        style: AppTypography.h3.copyWith(color: ctx.colors.textPrimary),
-      ),
-      content: Text(
-        message,
-        style: AppTypography.bodyMedium.copyWith(color: ctx.colors.textSecondary),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(ctx).pop(false),
-          child: Text(
-            'Cancel',
-            style: AppTypography.labelMedium.copyWith(
-              color: ctx.colors.textSecondary,
-            ),
-          ),
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(ctx).pop(true),
-          child: Text(
-            confirmLabel,
-            style: AppTypography.labelMedium.copyWith(
-              color: isDestructive ? ctx.colors.error : ctx.colors.primary,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-Future<String?> _showInputDialog(
-  BuildContext context, {
-  required String title,
-  required String hint,
-  required String confirmLabel,
-}) {
-  final controller = TextEditingController();
-
-  return showDialog<String>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(
-        title,
-        style: AppTypography.h3.copyWith(color: ctx.colors.textPrimary),
-      ),
-      content: TextField(
-        controller: controller,
-        autofocus: true,
-        decoration: InputDecoration(
-          hintText: hint,
-          border: const OutlineInputBorder(),
-        ),
-        style: AppTypography.bodyLarge.copyWith(color: ctx.colors.textPrimary),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(ctx).pop(),
-          child: Text(
-            'Cancel',
-            style: AppTypography.labelMedium.copyWith(
-              color: ctx.colors.textSecondary,
-            ),
-          ),
-        ),
-        TextButton(
-          onPressed: () {
-            final value = controller.text.trim();
-            if (value.isNotEmpty) Navigator.of(ctx).pop(value);
-          },
-          child: Text(
-            confirmLabel,
-            style: AppTypography.labelMedium.copyWith(
-              color: ctx.colors.primary,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-Future<String?> _showMemberPickerSheet(
-  BuildContext context, {
-  required String title,
-  required String subtitle,
-  required List<TeamMemberEntity> members,
-}) {
-  return showModalBottomSheet<String>(
-    context: context,
-    backgroundColor: Colors.transparent,
-    builder: (ctx) => Container(
-      decoration: BoxDecoration(
-        color: ctx.colors.surface,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.radiusXl),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(
-                top: AppSpacing.md,
-                bottom: AppSpacing.md,
-              ),
-              decoration: BoxDecoration(
-                color: ctx.colors.border,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTypography.h3.copyWith(
-                    color: ctx.colors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  subtitle,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: ctx.colors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Divider(height: 1, color: ctx.colors.border),
-          ...members.map(
-            (m) => ListTile(
-              leading: CircleAvatar(
-                backgroundColor: ctx.colors.secondary.withValues(alpha: 0.15),
-                child: Text(
-                  m.userId.length >= 2
-                      ? m.userId.substring(0, 2).toUpperCase()
-                      : m.userId.toUpperCase(),
-                  style: AppTypography.labelMedium.copyWith(
-                    color: ctx.colors.secondary,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-              title: Text(
-                m.userId,
-                style: AppTypography.labelMedium.copyWith(
-                  color: ctx.colors.textPrimary,
-                ),
-              ),
-              trailing: Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 14,
-                color: ctx.colors.textHint,
-              ),
-              onTap: () => Navigator.of(context).pop(m.userId),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-        ],
-      ),
-    ),
-  );
-}
 
 void _showSnackBar(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(message),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      ),
-    ),
-  );
+  showAppSnackBar(context, message);
 }

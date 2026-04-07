@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/rankings/domain/entities/leaderboard_entry_entity.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// A single ranked project row showing rank number, avatar, name,
 /// vote count, and a chevron indicator.
@@ -12,8 +14,8 @@ class RankingsListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      margin: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14.h),
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -28,15 +30,15 @@ class RankingsListItem extends StatelessWidget {
       child: Row(
         children: [
           _buildRankNumber(context),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           _buildAvatar(),
-          const SizedBox(width: 14),
+          SizedBox(width: 14.w),
           Expanded(child: _buildInfo(context)),
           _buildVoteCount(context),
-          const SizedBox(width: AppSpacing.sm),
+          SizedBox(width: AppSpacing.sm),
           Icon(
             Icons.chevron_right_rounded,
-            size: 20,
+            size: AppSizes.iconMd,
             color: context.colors.border,
           ),
         ],
@@ -46,7 +48,7 @@ class RankingsListItem extends StatelessWidget {
 
   Widget _buildRankNumber(BuildContext context) {
     return SizedBox(
-      width: 28,
+      width: 28.w,
       child: Text(
         '${entry.rank}',
         style: AppTypography.labelLarge.copyWith(
@@ -62,8 +64,8 @@ class RankingsListItem extends StatelessWidget {
         entry.title.isNotEmpty ? entry.title[0].toUpperCase() : '?';
 
     return Container(
-      width: 44,
-      height: 44,
+      width: 44.r,
+      height: 44.r,
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
@@ -73,8 +75,8 @@ class RankingsListItem extends StatelessWidget {
       child: Center(
         child: Text(
           initial,
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: AppSizes.iconSm,
             fontWeight: FontWeight.w700,
             color: Colors.white,
           ),
@@ -107,9 +109,9 @@ class RankingsListItem extends StatelessWidget {
           ),
         ),
         Text(
-          'VOTES',
+          AppLocalizations.of(context)!.votesLabel,
           style: TextStyle(
-            fontSize: 9,
+            fontSize: 9.sp,
             fontWeight: FontWeight.w700,
             color: context.colors.textHint,
             letterSpacing: 0.8,

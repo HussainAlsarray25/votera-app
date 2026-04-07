@@ -5,12 +5,16 @@ import 'package:votera/core/usecases/usecase.dart';
 import 'package:votera/features/teams/domain/repositories/team_repository.dart';
 
 class CancelInvitationParams extends Equatable {
-  const CancelInvitationParams({required this.invitationId});
+  const CancelInvitationParams({
+    required this.teamId,
+    required this.invitationId,
+  });
 
+  final String teamId;
   final String invitationId;
 
   @override
-  List<Object> get props => [invitationId];
+  List<Object> get props => [teamId, invitationId];
 }
 
 class CancelInvitation extends UseCase<void, CancelInvitationParams> {
@@ -20,6 +24,9 @@ class CancelInvitation extends UseCase<void, CancelInvitationParams> {
 
   @override
   Future<Either<Failure, void>> call(CancelInvitationParams params) {
-    return repository.cancelInvitation(invitationId: params.invitationId);
+    return repository.cancelInvitation(
+      teamId: params.teamId,
+      invitationId: params.invitationId,
+    );
   }
 }

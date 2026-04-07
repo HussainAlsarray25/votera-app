@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-/// Represents a single identifier (e.g. email or phone) attached to a user account.
+/// Represents a single identifier (e.g. email or phone)
+/// attached to a user account.
 class ProfileIdentifier extends Equatable {
   const ProfileIdentifier({
     required this.id,
@@ -24,6 +25,7 @@ class UserProfile extends Equatable {
     required this.fullName,
     required this.roles,
     required this.identifiers,
+    this.handle,
     this.avatarUrl,
   });
 
@@ -31,6 +33,9 @@ class UserProfile extends Equatable {
   final String fullName;
   final List<String> roles;
   final List<ProfileIdentifier> identifiers;
+  /// Short unique handle for the user (e.g. "u_4a2b3c"), used as a copyable
+  /// identifier on the profile page.
+  final String? handle;
   /// Remote URL of the user's profile picture, or null if not set.
   final String? avatarUrl;
 
@@ -39,7 +44,8 @@ class UserProfile extends Equatable {
       identifiers.where((i) => i.type == 'email').map((i) => i.value).firstOrNull;
 
   /// Returns true if the user has the given role.
-  /// Use this inline wherever a page or widget needs to be gated by role.
+  /// Use this inline wherever a page or widget needs to
+  /// be gated by role.
   bool hasRole(String role) => roles.contains(role);
 
   /// Returns true when the user's only role is 'visitor'.
@@ -48,5 +54,5 @@ class UserProfile extends Equatable {
   bool get isVisitorOnly => roles.every((r) => r == 'visitor');
 
   @override
-  List<Object?> get props => [id, fullName, roles, identifiers, avatarUrl];
+  List<Object?> get props => [id, fullName, roles, identifiers, handle, avatarUrl];
 }

@@ -5,11 +5,13 @@ import 'package:votera/core/design_system/design_system.dart';
 
 /// An interactive star rating widget with glow and bounce animation.
 /// Stars animate individually when the user taps a rating value.
+///
+/// Omit [size] to use the default responsive size (AppSizes.iconXl).
 class AnimatedStarRating extends StatefulWidget {
   const AnimatedStarRating({
     this.rating = 0,
     this.maxRating = 5,
-    this.size = 32,
+    this.size,
     this.onRatingChanged,
     this.isInteractive = true,
     super.key,
@@ -17,7 +19,8 @@ class AnimatedStarRating extends StatefulWidget {
 
   final int rating;
   final int maxRating;
-  final double size;
+  // Nullable so the widget can resolve the default via AppSizes at build time.
+  final double? size;
   final ValueChanged<int>? onRatingChanged;
   final bool isInteractive;
 
@@ -90,6 +93,9 @@ class _AnimatedStarRatingState extends State<AnimatedStarRating>
 
   @override
   Widget build(BuildContext context) {
+    // Resolve the effective size at build time so AppSizes can access ScreenUtil.
+    final effectiveSize = widget.size ?? AppSizes.iconXl;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(widget.maxRating, (index) {
@@ -109,7 +115,7 @@ class _AnimatedStarRatingState extends State<AnimatedStarRating>
               padding: const EdgeInsets.symmetric(horizontal: 2),
               child: Icon(
                 isFilled ? Icons.star_rounded : Icons.star_outline_rounded,
-                size: widget.size,
+                size: effectiveSize,
                 color: isFilled
                     ? context.colors.accent
                     : context.colors.textHint,

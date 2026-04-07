@@ -5,7 +5,7 @@ class TeamEndpoints {
 
   static const String teams = 'teams';
   static const String myTeam = 'teams/my';
-  static const String leaveTeam = 'teams/my/leave';
+  static String leaveTeam(String teamId) => 'teams/$teamId/leave';
   static const String myInvitations = 'teams/invitations';
 
   static String teamById(String teamId) => 'teams/$teamId';
@@ -22,8 +22,17 @@ class TeamEndpoints {
   static String transferLeadership(String teamId) =>
       'teams/$teamId/transfer-leadership';
 
-  static const String searchTeams = 'teams/search';
+  // DELETE /v1/teams/{id}/invitations/{inv_id}
+  static String cancelInvitation(String teamId, String invitationId) =>
+      'teams/$teamId/invitations/$invitationId';
 
-  static String cancelInvitation(String invitationId) =>
-      'teams/invitations/$invitationId/cancel';
+  // Join requests
+  static String joinRequests(String teamId) => 'teams/$teamId/join-requests';
+  static String joinRequestById(String teamId, String requestId) =>
+      'teams/$teamId/join-requests/$requestId';
+
+  // Team image
+  static String teamImageUploadUrl(String teamId) =>
+      'teams/$teamId/image/upload-url';
+  static String teamImage(String teamId) => 'teams/$teamId/image';
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:votera/core/network/api_client.dart';
 import 'package:votera/features/authentication/data/datasources/remote/auth_endpoints.dart';
 
@@ -156,6 +157,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<Map<String, dynamic>> requestTelegramLink() async {
     final response = await apiClient.post<Map<String, dynamic>>(
       AuthEndpoints.telegramRequestLink,
+      queryParameters: {'platform': kIsWeb ? 'web' : 'mobile'},
     );
     return response.data!;
   }

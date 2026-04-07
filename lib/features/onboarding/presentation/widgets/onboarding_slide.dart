@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/onboarding/presentation/pages/onboarding_page.dart';
 
@@ -17,9 +18,9 @@ class OnboardingSlide extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _buildAccentLine(context),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.lg),
           _buildTitle(context),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
           _buildDescription(context),
         ],
       ),
@@ -29,8 +30,8 @@ class OnboardingSlide extends StatelessWidget {
   // Small gradient bar as a decorative accent above the title
   Widget _buildAccentLine(BuildContext context) {
     return Container(
-      width: 48,
-      height: 4,
+      width: 48.r,
+      height: 4.r,
       decoration: BoxDecoration(
         gradient: context.colors.primaryGradient,
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -42,7 +43,7 @@ class OnboardingSlide extends StatelessWidget {
     return Text(
       data.title,
       style: AppTypography.h1.copyWith(
-        fontSize: 30,
+        fontSize: 30.sp,
         letterSpacing: -0.5,
         color: context.colors.textPrimary,
       ),

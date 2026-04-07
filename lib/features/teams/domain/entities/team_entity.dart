@@ -8,14 +8,20 @@ class TeamEntity extends Equatable {
     required this.name,
     required this.leaderId,
     required this.members,
+    this.handle,
     this.description,
+    this.imageUrl,
     this.createdAt,
     this.updatedAt,
   });
 
   final String id;
   final String name;
+  final String? handle;
   final String? description;
+
+  // Public URL of the team's avatar image, or null if none has been uploaded.
+  final String? imageUrl;
   final String leaderId;
   final List<TeamMemberEntity> members;
   final DateTime? createdAt;
@@ -25,7 +31,9 @@ class TeamEntity extends Equatable {
   List<Object?> get props => [
         id,
         name,
+        handle,
         description,
+        imageUrl,
         leaderId,
         members,
         createdAt,

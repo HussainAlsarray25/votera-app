@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/events/domain/entities/event_entity.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Gradient palette for the card header, cycled by list index.
 const _cardGradients = [
@@ -36,7 +38,7 @@ class ExhibitionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.only(bottom: 20.r),
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
@@ -90,7 +92,7 @@ class _GradientHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+      padding: EdgeInsets.fromLTRB(20.r, 18.r, 20.r, 20.r),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -108,7 +110,7 @@ class _GradientHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _StatusBadge(status: event.status),
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.sm),
               Text(
                 event.title,
                 style: AppTypography.h3.copyWith(
@@ -120,20 +122,23 @@ class _GradientHeader extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               if (event.startAt != null) ...[
-                const SizedBox(height: 8),
+                SizedBox(height: AppSpacing.xs),
                 Row(
                   children: [
                     Icon(
                       Icons.calendar_today_rounded,
-                      size: 13,
+                      size: AppSizes.iconXs,
                       color: Colors.white.withValues(alpha: 0.75),
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      _formatDateRange(),
-                      style: AppTypography.bodySmall.copyWith(
-                        color: Colors.white.withValues(alpha: 0.85),
-                        fontWeight: FontWeight.w500,
+                    SizedBox(width: AppSpacing.xs),
+                    Flexible(
+                      child: Text(
+                        _formatDateRange(),
+                        style: AppTypography.bodySmall.copyWith(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -149,20 +154,20 @@ class _GradientHeader extends StatelessWidget {
   /// Semi-transparent decorative circles positioned at the top-right corner.
   List<Widget> _buildDecorations() {
     return [
-      const Positioned(
-        top: -18,
-        right: -12,
-        child: _Circle(size: 72, opacity: 0.08),
+      Positioned(
+        top: -18.r,
+        right: -12.r,
+        child: _Circle(size: 72.r, opacity: 0.08),
       ),
-      const Positioned(
-        top: 10,
-        right: 28,
-        child: _Circle(size: 40, opacity: 0.1),
+      Positioned(
+        top: 10.r,
+        right: 28.r,
+        child: _Circle(size: 40.r, opacity: 0.1),
       ),
-      const Positioned(
-        bottom: -10,
-        right: 60,
-        child: _Circle(size: 24, opacity: 0.06),
+      Positioned(
+        bottom: -10.r,
+        right: 60.r,
+        child: _Circle(size: 24.r, opacity: 0.06),
       ),
     ];
   }
@@ -211,12 +216,12 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (label, dotColor) = _labelAndDot();
+    final (label, dotColor) = _labelAndDot(context);
     final isActive =
         status == EventStatus.open || status == EventStatus.voting;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 10.r, vertical: 4.r),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -229,19 +234,19 @@ class _StatusBadge extends StatelessWidget {
         children: [
           if (isActive) ...[
             Container(
-              width: 6,
-              height: 6,
+              width: 6.r,
+              height: 6.r,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: dotColor,
               ),
             ),
-            const SizedBox(width: 5),
+            SizedBox(width: 5.r),
           ],
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 11,
+            style: TextStyle(
+              fontSize: 11.sp,
               fontWeight: FontWeight.w700,
               color: Colors.white,
               letterSpacing: 0.3,
@@ -252,18 +257,19 @@ class _StatusBadge extends StatelessWidget {
     );
   }
 
-  (String, Color) _labelAndDot() {
+  (String, Color) _labelAndDot(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (status) {
       case EventStatus.open:
-        return ('Open', const Color(0xFFBBF7D0));
+        return (l10n.open, const Color(0xFFBBF7D0));
       case EventStatus.voting:
-        return ('Voting', const Color(0xFFFDE68A));
+        return (l10n.voting, const Color(0xFFFDE68A));
       case EventStatus.draft:
-        return ('Upcoming', Colors.white);
+        return (l10n.upcoming, Colors.white);
       case EventStatus.closed:
-        return ('Closed', Colors.white);
+        return (l10n.closed, Colors.white);
       case EventStatus.archived:
-        return ('Archived', Colors.white);
+        return (l10n.archived, Colors.white);
     }
   }
 }
@@ -279,7 +285,7 @@ class _CardBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -292,7 +298,7 @@ class _CardBody extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: AppSpacing.sm),
           _MetadataRow(event: event),
         ],
       ),
@@ -312,31 +318,42 @@ class _MetadataRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _buildPhaseChip(context),
-        if (_hasTeamInfo()) ...[
-          _dot(context),
-          _buildTeamChip(context),
-        ],
-        if (event.status == EventStatus.voting &&
-            event.maxCommunityVotes != null) ...[
-          _dot(context),
-          _iconLabel(
-            context,
-            Icons.how_to_vote_outlined,
-            '${event.maxCommunityVotes} votes',
+        // Left group: phase + optional metadata. Expanded so it never
+        // overflows into the arrow button on narrow grid cells.
+        Expanded(
+          child: Row(
+            children: [
+              _buildPhaseChip(context),
+              if (_hasTeamInfo()) ...[
+                _dot(context),
+                Flexible(child: _buildTeamChip(context)),
+              ],
+              if (event.status == EventStatus.voting &&
+                  event.maxCommunityVotes != null) ...[
+                _dot(context),
+                Flexible(
+                  child: _iconLabel(
+                    context,
+                    Icons.how_to_vote_outlined,
+                    AppLocalizations.of(context)!
+                        .maxVotes(event.maxCommunityVotes!),
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
-        const Spacer(),
+        ),
+        SizedBox(width: AppSpacing.sm),
         Container(
-          width: 28,
-          height: 28,
+          width: 28.r,
+          height: 28.r,
           decoration: BoxDecoration(
             color: context.colors.background,
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
           child: Icon(
             Icons.arrow_forward_rounded,
-            size: 16,
+            size: AppSizes.iconSm,
             color: context.colors.textSecondary,
           ),
         ),
@@ -349,13 +366,16 @@ class _MetadataRow extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: color),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: AppTypography.caption.copyWith(
-            color: color,
-            fontWeight: FontWeight.w600,
+        Icon(icon, size: AppSizes.iconXs, color: color),
+        SizedBox(width: AppSpacing.xs),
+        Flexible(
+          child: Text(
+            label,
+            style: AppTypography.caption.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -363,20 +383,23 @@ class _MetadataRow extends StatelessWidget {
   }
 
   Widget _buildTeamChip(BuildContext context) {
-    return _iconLabel(context, Icons.group_outlined, _teamLabel());
+    return _iconLabel(context, Icons.group_outlined, _teamLabel(context));
   }
 
   Widget _iconLabel(BuildContext context, IconData icon, String label) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: context.colors.textHint),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: AppTypography.caption.copyWith(
-            color: context.colors.textSecondary,
-            fontWeight: FontWeight.w500,
+        Icon(icon, size: AppSizes.iconXs, color: context.colors.textHint),
+        SizedBox(width: AppSpacing.xs),
+        Flexible(
+          child: Text(
+            label,
+            style: AppTypography.caption.copyWith(
+              color: context.colors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -386,10 +409,10 @@ class _MetadataRow extends StatelessWidget {
   /// Small separator dot between metadata items.
   Widget _dot(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       child: Container(
-        width: 3,
-        height: 3,
+        width: 3.r,
+        height: 3.r,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: context.colors.textHint,
@@ -401,46 +424,48 @@ class _MetadataRow extends StatelessWidget {
   bool _hasTeamInfo() =>
       event.minTeamSize != null || event.maxTeamSize != null;
 
-  String _teamLabel() {
+  String _teamLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final min = event.minTeamSize;
     final max = event.maxTeamSize;
-    if (min != null && max != null) return '$min-$max members';
-    if (min != null) return '$min+ members';
-    if (max != null) return 'Up to $max';
+    if (min != null && max != null) return l10n.teamSizeRange(min, max);
+    if (min != null) return l10n.teamSizeMin(min);
+    if (max != null) return l10n.teamSizeMax(max);
     return '';
   }
 
   /// Returns (icon, label, color) for the current event phase.
   (IconData, String, Color) _phaseInfo(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (event.status) {
       case EventStatus.open:
         return (
           Icons.edit_note_rounded,
-          'Submissions open',
+          l10n.submissionsOpen,
           const Color(0xFF16A34A),
         );
       case EventStatus.voting:
         return (
           Icons.how_to_vote_rounded,
-          'Vote now',
+          l10n.voteNow,
           const Color(0xFF7C3AED),
         );
       case EventStatus.draft:
         return (
           Icons.schedule_rounded,
-          'Coming soon',
+          l10n.comingSoon,
           context.colors.primary,
         );
       case EventStatus.closed:
         return (
           Icons.check_circle_outline_rounded,
-          'Ended',
+          l10n.ended,
           context.colors.textHint,
         );
       case EventStatus.archived:
         return (
           Icons.inventory_2_outlined,
-          'Archived',
+          l10n.archived,
           context.colors.textHint,
         );
     }

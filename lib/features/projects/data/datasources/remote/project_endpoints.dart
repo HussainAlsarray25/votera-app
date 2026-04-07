@@ -8,9 +8,6 @@ class ProjectEndpoints {
   static String projectById(String eventId, String projectId) =>
       'events/$eventId/projects/$projectId';
 
-  static String mediaUploadUrl(String eventId, String projectId) =>
-      'events/$eventId/projects/$projectId/media/upload-url';
-
   static String scan(String token) => 'scan/$token';
 
   static String projectCategory(
@@ -30,10 +27,15 @@ class ProjectEndpoints {
   // own project submission for the event.
   static String myProject(String eventId) => 'events/$eventId/projects/my';
 
-  static String projectMedia(
-    String eventId,
-    String projectId,
-    String mediaId,
-  ) =>
-      'events/$eventId/projects/$projectId/media/$mediaId';
+  // Cover image endpoints — only one cover per project, auto-replaced on
+  // re-upload.
+  static String coverImage(String eventId, String projectId) =>
+      'events/$eventId/projects/$projectId/cover';
+
+  // Extra image endpoints — max 6 extra images per project.
+  static String extraImages(String eventId, String projectId) =>
+      'events/$eventId/projects/$projectId/images';
+
+  static String extraImage(String eventId, String projectId, String imageId) =>
+      'events/$eventId/projects/$projectId/images/$imageId';
 }

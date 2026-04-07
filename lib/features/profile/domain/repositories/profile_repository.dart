@@ -7,7 +7,13 @@ abstract class ProfileRepository {
   Future<Either<Failure, UserProfile>> updateUserProfile({
     String? fullName,
   });
-  Future<Either<Failure, String>> uploadAvatar(String filePath);
+  /// [filePath] is used on mobile/desktop. [bytes] + [fileName] are used on web
+  /// where a file path is not available.
+  Future<Either<Failure, String>> uploadAvatar({
+    String? filePath,
+    List<int>? bytes,
+    String? fileName,
+  });
   Future<UserProfile?> getCachedProfile();
   Future<void> clearCache();
 }

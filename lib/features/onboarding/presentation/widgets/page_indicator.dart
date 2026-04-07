@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 
 /// Animated dot indicator that reflects the current page in a PageView.
@@ -22,9 +23,9 @@ class PageIndicator extends StatelessWidget {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: isActive ? 28 : 8,
-          height: 8,
+          margin: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+          width: isActive ? 28.r : 8.r,
+          height: 8.r,
           decoration: BoxDecoration(
             color: isActive ? context.colors.primary : context.colors.border,
             borderRadius: BorderRadius.circular(AppSpacing.radiusFull),

@@ -88,6 +88,10 @@ class PushNotificationCubit extends Cubit<PushNotificationState> {
     );
   }
 
+  /// Public entry point for pre-logout unregistration. Called by AuthCubit
+  /// via the pre-logout callback before auth tokens are cleared.
+  Future<void> unregisterToken() => _unregisterToken();
+
   Future<void> _unregisterToken() async {
     if (_currentToken == null) return;
 
@@ -104,7 +108,14 @@ class PushNotificationCubit extends Cubit<PushNotificationState> {
       (_) => emit(const PushNotificationUnregistered()),
     );
 
-    await pushService.deleteToken();
+    try {
+      await pushService.deleteToken();
+    } catch (e) {
+      // deleteToken can fail when Google Play Services is unavailable
+      // (e.g. SERVICE_NOT_AVAILABLE). The backend token has already been
+      // removed, so this is safe to ignore.
+      if (kDebugMode) print('Failed to delete FCM token: $e');
+    }
   }
 
   @override

@@ -4,32 +4,32 @@ import 'package:votera/core/error/failures.dart';
 import 'package:votera/core/usecases/usecase.dart';
 import 'package:votera/features/projects/domain/repositories/project_repository.dart';
 
-class DeleteProjectMediaParams extends Equatable {
-  const DeleteProjectMediaParams({
+class DeleteProjectParams extends Equatable {
+  const DeleteProjectParams({
     required this.eventId,
     required this.projectId,
-    required this.mediaId,
   });
 
   final String eventId;
   final String projectId;
-  final String mediaId;
 
   @override
-  List<Object> get props => [eventId, projectId, mediaId];
+  List<Object> get props => [eventId, projectId];
 }
 
-class DeleteProjectMedia extends UseCase<void, DeleteProjectMediaParams> {
-  DeleteProjectMedia(this.repository);
+/// Permanently deletes a draft project.
+/// Only allowed while the project is in draft status;
+/// the backend will reject attempts on submitted/accepted/rejected projects.
+class DeleteProject extends UseCase<void, DeleteProjectParams> {
+  DeleteProject(this.repository);
 
   final ProjectRepository repository;
 
   @override
-  Future<Either<Failure, void>> call(DeleteProjectMediaParams params) {
-    return repository.deleteProjectMedia(
+  Future<Either<Failure, void>> call(DeleteProjectParams params) {
+    return repository.deleteProject(
       eventId: params.eventId,
       projectId: params.projectId,
-      mediaId: params.mediaId,
     );
   }
 }

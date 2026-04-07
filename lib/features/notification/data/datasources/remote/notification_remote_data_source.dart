@@ -45,6 +45,12 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
     final response = await apiClient.get<Map<String, dynamic>>(
       NotificationEndpoints.unreadCount,
     );
+    // The API wraps the payload in a 'data' envelope.
+    // The count may be a bare int (data: 2) or a map (data: {count: 2}).
+    final data = response.data?['data'];
+    if (data is int) return data;
+    if (data is Map) return data['count'] as int? ?? 0;
+    // Fallback for servers that return count at the top level.
     return response.data?['count'] as int? ?? 0;
   }
 

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:votera/features/projects/domain/entities/project_media_entity.dart';
+import 'package:votera/features/categories/domain/entities/category_entity.dart';
+import 'package:votera/features/projects/domain/entities/extra_image_entity.dart';
 
 /// Lifecycle status of a project submission.
 enum ProjectStatus {
@@ -33,7 +34,9 @@ class ProjectEntity extends Equatable {
     required this.teamId,
     required this.title,
     required this.status,
-    required this.media,
+    required this.images,
+    required this.categories,
+    this.coverUrl,
     this.createdAt,
     this.updatedAt,
     this.description,
@@ -62,8 +65,14 @@ class ProjectEntity extends Equatable {
 
   final ProjectStatus status;
 
-  /// All media files attached to this project.
-  final List<ProjectMediaEntity> media;
+  /// The cover image URL, or null if no cover has been uploaded.
+  final String? coverUrl;
+
+  /// Extra images attached to this project (max 6).
+  final List<ExtraImageEntity> images;
+
+  /// Categories this project belongs to (max 3).
+  final List<CategoryEntity> categories;
 
   /// QR scan token for looking up this project.
   final String? barcodeToken;
@@ -82,7 +91,9 @@ class ProjectEntity extends Equatable {
         demoUrl,
         techStack,
         status,
-        media,
+        coverUrl,
+        images,
+        categories,
         barcodeToken,
         createdAt,
         updatedAt,

@@ -40,12 +40,13 @@ class DefaultFirebaseOptions {
     iosBundleId: 'votera.space',
   );
 
-  // TODO: Replace with actual web Firebase app values.
   static const FirebaseOptions _web = FirebaseOptions(
-    apiKey: 'AIzaSyDosjBQham5NhekGVSWRrS-37YOIkUWn4s',
-    appId: '1:783622128925:android:306a88b3892b55a9260df4',
+    apiKey: 'AIzaSyA1U-m3WaVjtXkWzs2SExx-zZCw5hlD6-U',
+    appId: '1:783622128925:web:f3c23cf82ec21b86260df4',
     messagingSenderId: '783622128925',
     projectId: 'votera-platform',
     storageBucket: 'votera-platform.firebasestorage.app',
+    authDomain: 'votera-platform.firebaseapp.com',
+    measurementId: 'G-YB8T0NM6LB',
   );
 }

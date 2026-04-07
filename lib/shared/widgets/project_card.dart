@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/animated_star_rating.dart';
+import 'package:votera/shared/widgets/cached_image.dart';
 import 'package:votera/shared/widgets/verified_badge.dart';
 
 /// A card that displays a project summary: image, title, author, rating,
@@ -72,7 +74,7 @@ class _ProjectCardState extends State<ProjectCard>
                   ? AppShadows.goldenGlow
                   : (_elevationAnimation.value > 0.5
                       ? AppShadows.cardHover
-                      : AppShadows.card),
+                      : AppShadows.card(Theme.of(context).brightness)),
               // Golden border for the winner
               border: widget.isWinner
                   ? Border.all(color: context.colors.accent, width: 2)
@@ -93,11 +95,11 @@ class _ProjectCardState extends State<ProjectCard>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildImage(context),
-                  const SizedBox(height: AppSpacing.md),
+                  SizedBox(height: AppSpacing.md),
                   _buildTitleRow(context),
-                  const SizedBox(height: AppSpacing.xs),
+                  SizedBox(height: AppSpacing.xs),
                   _buildAuthorRow(context),
-                  const SizedBox(height: AppSpacing.sm),
+                  SizedBox(height: AppSpacing.sm),
                   _buildFooter(context),
                 ],
               ),
@@ -112,24 +114,13 @@ class _ProjectCardState extends State<ProjectCard>
   Widget _buildImage(BuildContext context) {
     return Stack(
       children: [
-        ClipRRect(
+        CachedImage(
+          url: widget.imageUrl,
+          height: AppSizes.cardImageHeight,
+          width: double.infinity,
+          fit: BoxFit.cover,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          child: Container(
-            height: 160,
-            width: double.infinity,
-            color: context.colors.border,
-            child: Image.network(
-              widget.imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Center(
-                child: Icon(
-                  Icons.code,
-                  size: 48,
-                  color: context.colors.textHint,
-                ),
-              ),
-            ),
-          ),
+          errorIcon: Icons.code,
         ),
         if (widget.isTrending) _buildTrendingBadge(context),
         if (widget.isWinner) _buildWinnerBadge(),
@@ -139,21 +130,28 @@ class _ProjectCardState extends State<ProjectCard>
 
   Widget _buildTrendingBadge(BuildContext context) {
     return Positioned(
-      top: 8,
-      left: 8,
+      top: AppSpacing.sm,
+      left: AppSpacing.sm,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm + 2,
+          vertical: AppSpacing.xs,
+        ),
         decoration: BoxDecoration(
           color: context.colors.error,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.local_fire_department, size: 14, color: Colors.white),
-            SizedBox(width: 4),
+            Icon(
+              Icons.local_fire_department,
+              size: AppSizes.iconXs,
+              color: Colors.white,
+            ),
+            SizedBox(width: AppSpacing.xs),
             Text(
-              'Trending',
+              AppLocalizations.of(context)!.trending,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 11,
@@ -168,28 +166,37 @@ class _ProjectCardState extends State<ProjectCard>
 
   Widget _buildWinnerBadge() {
     return Positioned(
-      top: 8,
-      right: 8,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          gradient: AppColorScheme.goldGradient,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.emoji_events, size: 14, color: Colors.white),
-            SizedBox(width: 4),
-            Text(
-              'Winner',
-              style: TextStyle(
+      top: AppSpacing.sm,
+      right: AppSpacing.sm,
+      child: Builder(
+        builder: (context) => Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm + 2,
+            vertical: AppSpacing.xs,
+          ),
+          decoration: BoxDecoration(
+            gradient: AppColorScheme.goldGradient,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.emoji_events,
+                size: AppSizes.iconXs,
                 color: Colors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
               ),
-            ),
-          ],
+              SizedBox(width: AppSpacing.xs),
+              Text(
+                AppLocalizations.of(context)!.winner,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -218,8 +225,8 @@ class _ProjectCardState extends State<ProjectCard>
           ),
         ),
         if (widget.isVerifiedAuthor) ...[
-          const SizedBox(width: 4),
-          const VerifiedBadge(size: 14),
+          SizedBox(width: AppSpacing.xs),
+          const VerifiedBadge(),
         ],
       ],
     );
@@ -231,18 +238,18 @@ class _ProjectCardState extends State<ProjectCard>
       children: [
         AnimatedStarRating(
           rating: widget.rating,
-          size: 18,
+          size: AppSizes.iconSm,
           isInteractive: false,
         ),
         const Spacer(),
         Icon(
           Icons.how_to_vote_outlined,
-          size: 16,
+          size: AppSizes.iconSm,
           color: context.colors.primary,
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: AppSpacing.xs),
         Text(
-          '${widget.voteCount} votes',
+          AppLocalizations.of(context)!.voteCount(widget.voteCount),
           style: AppTypography.caption.copyWith(color: context.colors.primary),
         ),
       ],

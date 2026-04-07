@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 
 /// A shimmer placeholder that mimics loading content.
@@ -85,30 +86,30 @@ class ShimmerCard extends StatelessWidget {
           children: [
             // Image placeholder
             Container(
-              height: 140,
+              height: AppSizes.shimmerImageHeight,
               decoration: BoxDecoration(
                 color: context.colors.border,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            SizedBox(height: AppSpacing.md),
             // Title placeholder
             Container(
-              height: 16,
-              width: 180,
+              height: AppSpacing.md,
+              width: 180.w,
               decoration: BoxDecoration(
                 color: context.colors.border,
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(AppSpacing.xs),
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.sm),
             // Subtitle placeholder
             Container(
-              height: 12,
-              width: 120,
+              height: AppSpacing.sm + 4,
+              width: 120.w,
               decoration: BoxDecoration(
                 color: context.colors.border,
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(AppSpacing.xs),
               ),
             ),
           ],

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart' as di;
 import 'package:votera/features/notification/domain/entities/notification_entity.dart';
 import 'package:votera/features/notification/presentation/cubit/notification_cubit.dart';
 import 'package:votera/features/notification/presentation/cubit/unread_count_cubit.dart';
 import 'package:votera/features/notification/presentation/widgets/notification_list_tile.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
 
 class NotificationPage extends StatelessWidget {
@@ -25,6 +27,7 @@ class _NotificationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: context.colors.background,
       appBar: AppBar(
@@ -32,7 +35,7 @@ class _NotificationView extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          'Notifications',
+          l10n.notifications,
           style: AppTypography.h3.copyWith(
             fontWeight: FontWeight.w700,
             color: context.colors.textPrimary,
@@ -53,7 +56,7 @@ class _NotificationView extends StatelessWidget {
                   context.read<UnreadCountCubit>().clear();
                 },
                 child: Text(
-                  'Mark all read',
+                  l10n.markAllRead,
                   style: AppTypography.labelMedium.copyWith(
                     color: context.colors.primary,
                   ),
@@ -64,7 +67,16 @@ class _NotificationView extends StatelessWidget {
         ],
       ),
       body: CenteredContent(
-        child: BlocBuilder<NotificationCubit, NotificationState>(
+        child: BlocConsumer<NotificationCubit, NotificationState>(
+          listener: (context, state) {
+            if (state is NotificationLoaded) {
+              // Sync the badge count from the actual list so it stays accurate
+              // even when the dedicated unread-count endpoint returns stale data.
+              final unread =
+                  state.notifications.where((n) => !n.isRead).length;
+              context.read<UnreadCountCubit>().syncCount(unread);
+            }
+          },
           builder: (context, state) {
             if (state is NotificationLoading) {
               return const Center(child: AppLoadingIndicator());
@@ -79,10 +91,10 @@ class _NotificationView extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.error_outline,
-                        size: 48,
+                        size: AppSizes.iconXxl,
                         color: context.colors.error,
                       ),
-                      const SizedBox(height: AppSpacing.md),
+                      SizedBox(height: AppSpacing.md),
                       Text(
                         state.message,
                         textAlign: TextAlign.center,
@@ -90,11 +102,11 @@ class _NotificationView extends StatelessWidget {
                           color: context.colors.textSecondary,
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.md),
+                      SizedBox(height: AppSpacing.md),
                       TextButton(
                         onPressed: () =>
                             context.read<NotificationCubit>().loadNotifications(),
-                        child: const Text('Retry'),
+                        child: Text(AppLocalizations.of(context)!.retry),
                       ),
                     ],
                   ),
@@ -123,36 +135,36 @@ class _NotificationView extends StatelessWidget {
   Widget _buildEmpty(BuildContext context) {
     return ListView(
       children: [
-        const SizedBox(height: 120),
+        SizedBox(height: 120.r),
         Center(
           child: Padding(
             padding: AppSpacing.pagePadding,
             child: Column(
               children: [
                 Container(
-                  width: 72,
-                  height: 72,
+                  width: 72.r,
+                  height: 72.r,
                   decoration: BoxDecoration(
                     color: context.colors.primary.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.notifications_none_outlined,
-                    size: 36,
+                    size: AppSizes.iconXl,
                     color: context.colors.primary,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.md),
+                SizedBox(height: AppSpacing.md),
                 Text(
-                  'No notifications yet',
+                  AppLocalizations.of(context)!.noNotificationsYet,
                   style: AppTypography.h3.copyWith(
                     fontWeight: FontWeight.w700,
                     color: context.colors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.xs),
+                SizedBox(height: AppSpacing.xs),
                 Text(
-                  'Updates about events, votes, and results will appear here.',
+                  AppLocalizations.of(context)!.noNotificationsDesc,
                   style: AppTypography.bodyMedium.copyWith(
                     color: context.colors.textSecondary,
                   ),
@@ -195,20 +207,20 @@ class _NotificationView extends StatelessWidget {
       ),
       children: [
         if (todayItems.isNotEmpty) ...[
-          _SectionHeader(label: 'Today'),
-          const SizedBox(height: AppSpacing.sm),
+          _SectionHeader(label: AppLocalizations.of(context)!.today),
+          SizedBox(height: AppSpacing.sm),
           ..._buildTiles(context, todayItems),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.lg),
         ],
         if (yesterdayItems.isNotEmpty) ...[
-          _SectionHeader(label: 'Yesterday'),
-          const SizedBox(height: AppSpacing.sm),
+          _SectionHeader(label: AppLocalizations.of(context)!.yesterday),
+          SizedBox(height: AppSpacing.sm),
           ..._buildTiles(context, yesterdayItems),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.lg),
         ],
         if (earlierItems.isNotEmpty) ...[
-          _SectionHeader(label: 'Earlier'),
-          const SizedBox(height: AppSpacing.sm),
+          _SectionHeader(label: AppLocalizations.of(context)!.earlier),
+          SizedBox(height: AppSpacing.sm),
           ..._buildTiles(context, earlierItems),
         ],
       ],
@@ -232,7 +244,7 @@ class _NotificationView extends StatelessWidget {
             }
           },
         ),
-        if (i < items.length - 1) const SizedBox(height: AppSpacing.sm),
+        if (i < items.length - 1) SizedBox(height: AppSpacing.sm),
       ],
     ];
   }

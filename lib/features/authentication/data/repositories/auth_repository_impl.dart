@@ -187,9 +187,10 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, TelegramAuthStatus>> getTelegramStatus(
       String token) async {
-    if (!await networkInfo.isConnected) {
-      return const Left(NetworkFailure(message: 'No internet connection'));
-    }
+    // No connectivity pre-check here. On a slow (but connected) network the
+    // check itself can return false, causing every poll to be silently skipped
+    // while the backend has already issued tokens. The cubit handles Left
+    // results gracefully (ignores and retries on the next tick).
     try {
       final result = await remoteDataSource.getTelegramStatus(token);
       final data = result['data'] as Map<String, dynamic>;
@@ -203,6 +204,38 @@ class AuthRepositoryImpl implements AuthRepository {
         return const Right(TelegramAuthStatus(isComplete: false, isExpired: true));
       }
       return const Right(TelegramAuthStatus(isComplete: false));
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> savePendingTelegramSession(
+      String token, String link) async {
+    try {
+      await tokenService.savePendingTelegramSession(token, link);
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, PendingTelegramSession?>>
+      loadPendingTelegramSession() async {
+    try {
+      final session = await tokenService.loadPendingTelegramSession();
+      return Right(session);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> clearPendingTelegramSession() async {
+    try {
+      await tokenService.clearPendingTelegramSession();
+      return const Right(null);
     } on Exception catch (e) {
       return Left(ServerFailure(message: extractErrorMessage(e)));
     }

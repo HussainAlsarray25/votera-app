@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/rankings/domain/entities/leaderboard_entry_entity.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Podium display for the top 3 ranked projects.
 /// Layout order: 2nd (left) - 1st (center, tallest) - 3rd (right).
@@ -12,9 +14,9 @@ class RankingsPodiumSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 200,
+      height: 200.h,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -23,8 +25,8 @@ class RankingsPodiumSection extends StatelessWidget {
               child: _PodiumItem(
                 entry: topThree.length > 1 ? topThree[1] : null,
                 rank: 2,
-                avatarSize: 68,
-                bottomPadding: 16,
+                avatarSize: 68.r,
+                bottomPadding: 16.h,
               ),
             ),
             // 1st place (center, tallest)
@@ -32,7 +34,7 @@ class RankingsPodiumSection extends StatelessWidget {
               child: _PodiumItem(
                 entry: topThree.isNotEmpty ? topThree[0] : null,
                 rank: 1,
-                avatarSize: 82,
+                avatarSize: 82.r,
                 bottomPadding: 0,
               ),
             ),
@@ -41,8 +43,8 @@ class RankingsPodiumSection extends StatelessWidget {
               child: _PodiumItem(
                 entry: topThree.length > 2 ? topThree[2] : null,
                 rank: 3,
-                avatarSize: 62,
-                bottomPadding: 28,
+                avatarSize: 62.r,
+                bottomPadding: 28.h,
               ),
             ),
           ],
@@ -88,14 +90,14 @@ class _PodiumItem extends StatelessWidget {
         children: [
           // Crown only for 1st place; spacer for others to keep alignment
           if (rank == 1)
-            const Text('\u{1F451}', style: TextStyle(fontSize: 28))
+            Text('\u{1F451}', style: TextStyle(fontSize: 28.sp))
           else
-            const SizedBox(height: 28),
-          const SizedBox(height: 4),
+            SizedBox(height: 28.h),
+          SizedBox(height: AppSpacing.xs),
           _buildAvatar(crownColor, borderColor, gradientColors),
-          const SizedBox(height: 10),
+          SizedBox(height: 10.h),
           _buildTitle(context),
-          const SizedBox(height: 2),
+          SizedBox(height: 2.h),
           _buildVotes(context),
         ],
       ),
@@ -117,8 +119,8 @@ class _PodiumItem extends StatelessWidget {
       children: [
         // Outer ring
         Container(
-          width: avatarSize + 8,
-          height: avatarSize + 8,
+          width: avatarSize + 8.r,
+          height: avatarSize + 8.r,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
@@ -162,8 +164,8 @@ class _PodiumItem extends StatelessWidget {
         Positioned(
           bottom: -4,
           child: Container(
-            width: 24,
-            height: 24,
+            width: AppSizes.iconLg,
+            height: AppSizes.iconLg,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: crownColor,
@@ -179,8 +181,8 @@ class _PodiumItem extends StatelessWidget {
             child: Center(
               child: Text(
                 '$rank',
-                style: const TextStyle(
-                  fontSize: 11,
+                style: TextStyle(
+                  fontSize: AppSizes.iconXs,
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
                 ),
@@ -211,9 +213,9 @@ class _PodiumItem extends StatelessWidget {
 
   Widget _buildVotes(BuildContext context) {
     return Text(
-      '${entry!.voteCount} Votes',
+      AppLocalizations.of(context)!.votesWithCount(entry!.voteCount),
       style: TextStyle(
-        fontSize: 12,
+        fontSize: 12.sp,
         fontWeight: rank == 1 ? FontWeight.w700 : FontWeight.w500,
         color: rank == 1 ? context.colors.primary : context.colors.textSecondary,
       ),

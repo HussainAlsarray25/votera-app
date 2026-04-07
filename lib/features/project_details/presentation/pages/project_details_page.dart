@@ -3,9 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/features/comments/presentation/cubit/comments_cubit.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_comments_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_header_section.dart';
+import 'package:votera/features/project_details/presentation/widgets/project_images_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_info_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_rating_section.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
@@ -21,11 +24,16 @@ class ProjectDetailsPage extends StatelessWidget {
   const ProjectDetailsPage({
     required this.eventId,
     required this.projectId,
+    this.coverUrl,
     super.key,
   });
 
   final String eventId;
   final String projectId;
+
+  /// Cover image URL passed from the project card for immediate Hero display.
+  /// Used as a placeholder while the full project details load from the API.
+  final String? coverUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +53,13 @@ class ProjectDetailsPage extends StatelessWidget {
         BlocProvider<VotingCubit>(
           create: (_) => sl<VotingCubit>()
             ..loadMyVotes(eventId: eventId)
-            ..prefetchVotingArea(eventId: eventId),
+            ..loadEventLocation(eventId: eventId),
         ),
       ],
       child: _ProjectDetailsView(
         eventId: eventId,
         projectId: projectId,
+        coverUrl: coverUrl,
       ),
     );
   }
@@ -60,10 +69,12 @@ class _ProjectDetailsView extends StatelessWidget {
   const _ProjectDetailsView({
     required this.eventId,
     required this.projectId,
+    this.coverUrl,
   });
 
   final String eventId;
   final String projectId;
+  final String? coverUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -88,12 +99,12 @@ class _ProjectDetailsView extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.error_outline,
-                        size: 48,
+                        size: AppSizes.iconXxl,
                         color: context.colors.error,
                       ),
-                      const SizedBox(height: AppSpacing.md),
+                      SizedBox(height: AppSpacing.md),
                       Text(state.message, style: AppTypography.bodyMedium.copyWith(color: context.colors.textPrimary)),
-                      const SizedBox(height: AppSpacing.md),
+                      SizedBox(height: AppSpacing.md),
                       TextButton(
                         onPressed: () => context
                             .read<ProjectsCubit>()
@@ -101,7 +112,7 @@ class _ProjectDetailsView extends StatelessWidget {
                               eventId: eventId,
                               projectId: projectId,
                             ),
-                        child: const Text('Retry'),
+                        child: Text(AppLocalizations.of(context)!.retry),
                       ),
                     ],
                   ),
@@ -111,7 +122,11 @@ class _ProjectDetailsView extends StatelessWidget {
               if (state is ProjectDetailLoaded) {
                 return CustomScrollView(
                   slivers: [
-                    const ProjectHeaderSection(),
+                    ProjectHeaderSection(
+                      eventId: eventId,
+                      projectId: projectId,
+                      coverUrl: coverUrl,
+                    ),
                     SliverToBoxAdapter(
                       child: _buildBody(
                         context,
@@ -133,29 +148,24 @@ class _ProjectDetailsView extends StatelessWidget {
 
   void _handleVotingState(BuildContext context, VotingState state) {
     if (state is OutsideVotingArea) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(state.message)));
+      showAppSnackBar(context, state.message);
     } else if (state is LocationUnavailable) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(state.message),
-            action: state.isDeniedForever
-                ? const SnackBarAction(
-                    label: 'Settings',
-                    onPressed: Geolocator.openAppSettings,
-                  )
-                : null,
-          ),
-        );
+      showAppSnackBar(
+        context,
+        state.message,
+        action: state.isDeniedForever
+            ? SnackBarAction(
+                label: AppLocalizations.of(context)!.settings,
+                onPressed: Geolocator.openAppSettings,
+              )
+            : null,
+      );
     }
   }
 
   Widget _buildBody(BuildContext context, {required bool showInlineVote}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.lg,
       ),
@@ -163,31 +173,33 @@ class _ProjectDetailsView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ProjectInfoSection(projectId: projectId),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.lg),
+          const ProjectImagesSection(),
+          SizedBox(height: AppSpacing.lg),
           ProjectRatingSection(projectId: projectId),
           if (showInlineVote) ...[
-            const SizedBox(height: AppSpacing.lg),
+            SizedBox(height: AppSpacing.lg),
             _buildVoteButton(context),
           ],
-          const SizedBox(height: AppSpacing.xl),
-          _buildSectionDivider('Community Feedback'),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.xl),
+          _buildSectionDivider(context, AppLocalizations.of(context)!.communityFeedback),
+          SizedBox(height: AppSpacing.md),
           ProjectCommentsSection(projectId: projectId),
-          const SizedBox(height: 100),
+          SizedBox(height: AppSpacing.lg),
         ],
       ),
     );
   }
 
-  Widget _buildSectionDivider(String label) {
+  Widget _buildSectionDivider(BuildContext context, String label) {
     return Row(
       children: [
         Text(
           label,
-          style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
+          style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
         ),
-        const SizedBox(width: AppSpacing.md),
-        const Expanded(child: Divider(color: AppColors.border)),
+        SizedBox(width: AppSpacing.md),
+        Expanded(child: Divider(color: context.colors.border)),
       ],
     );
   }
@@ -216,7 +228,7 @@ class _ProjectDetailsView extends StatelessWidget {
 
   Widget? _buildBottomBar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: context.colors.surface,
         boxShadow: [

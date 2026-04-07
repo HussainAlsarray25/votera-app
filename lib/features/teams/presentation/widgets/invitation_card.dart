@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/teams/domain/entities/invitation_entity.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Card shown to the current user for a pending team invitation.
 ///
@@ -68,51 +70,51 @@ class _InvitationHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.all(AppSpacing.md),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Icon
           Container(
-            width: 44,
-            height: 44,
+            width: 44.r,
+            height: 44.r,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [context.colors.secondary, const Color(0xFFEC4899)],
+                colors: [context.colors.secondary, context.colors.primary],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.mail_outline_rounded,
               color: Colors.white,
-              size: 22,
+              size: AppSizes.iconMd,
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Team Invitation',
+                  AppLocalizations.of(context)!.teamInvitation,
                   style: AppTypography.labelMedium.copyWith(
                     color: context.colors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 Text(
-                  'Team: ${invitation.teamId}',
+                  invitation.teamName ?? invitation.teamId,
                   style: AppTypography.bodySmall.copyWith(
                     color: context.colors.textSecondary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 Text(
-                  'Invited by: ${invitation.invitedBy}',
+                  AppLocalizations.of(context)!.invitedBy(invitation.invitedBy),
                   style: AppTypography.caption.copyWith(
                     color: context.colors.textSecondary,
                   ),
@@ -135,17 +137,17 @@ class _PendingBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
       decoration: BoxDecoration(
         color: context.colors.warning.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
       ),
       child: Text(
-        'Pending',
+        AppLocalizations.of(context)!.pending,
         style: AppTypography.caption.copyWith(
           color: context.colors.warning,
           fontWeight: FontWeight.w700,
-          fontSize: 10,
+          fontSize: 10.sp,
         ),
       ),
     );
@@ -168,21 +170,21 @@ class _InvitationActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: EdgeInsets.all(AppSpacing.sm),
       child: Row(
         children: [
           Expanded(
             child: _ActionButton(
-              label: 'Decline',
+              label: AppLocalizations.of(context)!.decline,
               icon: Icons.close_rounded,
               color: context.colors.error,
               onPressed: isLoading ? null : onDecline,
             ),
           ),
-          const SizedBox(width: AppSpacing.sm),
+          SizedBox(width: AppSpacing.sm),
           Expanded(
             child: _ActionButton(
-              label: 'Accept',
+              label: AppLocalizations.of(context)!.accept,
               icon: Icons.check_rounded,
               color: context.colors.success,
               filled: true,
@@ -219,17 +221,17 @@ class _ActionButton extends StatelessWidget {
         onTap: onPressed,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: EdgeInsets.symmetric(vertical: 10.h),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 16, color: filled ? Colors.white : color),
-              const SizedBox(width: 6),
+              Icon(icon, size: AppSizes.iconSm, color: filled ? Colors.white : color),
+              SizedBox(width: 6.w),
               Text(
                 label,
                 style: AppTypography.labelMedium.copyWith(
                   color: filled ? Colors.white : color,
-                  fontSize: 13,
+                  fontSize: 13.sp,
                 ),
               ),
             ],

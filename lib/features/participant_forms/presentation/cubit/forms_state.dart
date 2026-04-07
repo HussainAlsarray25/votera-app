@@ -53,6 +53,19 @@ class FormsDocumentUploaded extends FormsState {
 /// UID card request submitted and is pending admin review.
 class FormsUidSubmitted extends FormsState {}
 
+/// OTP sent to supervisor email; UI should show OTP input.
+class FormsSupEmailOtpSent extends FormsState {
+  const FormsSupEmailOtpSent({required this.email});
+
+  final String email;
+
+  @override
+  List<Object?> get props => [email];
+}
+
+/// Supervisor email verified — supervisor role granted by backend.
+class FormsSupervisorEmailVerified extends FormsState {}
+
 class FormsError extends FormsState {
   const FormsError({required this.message});
 

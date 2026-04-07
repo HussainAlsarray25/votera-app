@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:votera/core/domain/services/auth_token_provider.dart';
 
+/// Possible outcomes of a token refresh attempt.
+enum _RefreshResult { success, invalidToken, serverError }
+
 class AuthInterceptor extends Interceptor {
   AuthInterceptor({
     required this.dio,
@@ -12,11 +15,11 @@ class AuthInterceptor extends Interceptor {
   final Dio dio;
   final AuthTokenProvider authTokenProvider;
 
-  // Prevents multiple concurrent refresh calls when several requests
-  // receive 401 at the same time. Only the first caller does the actual
-  // refresh; the rest await the same Completer.
+  // Guards against multiple concurrent refresh calls when several requests
+  // receive 401 simultaneously. The first caller performs the actual refresh;
+  // subsequent callers wait on the same Completer.
   bool _isRefreshing = false;
-  Completer<bool>? _refreshCompleter;
+  Completer<_RefreshResult>? _refreshCompleter;
 
   @override
   Future<void> onRequest(
@@ -41,26 +44,31 @@ class AuthInterceptor extends Interceptor {
   ) async {
     if (err.response?.statusCode == 401 &&
         !_isAuthRequest(err.requestOptions)) {
-      final currentRefreshToken = await authTokenProvider.getRefreshToken();
-      final didRefresh = await _refreshToken();
+      final result = await _refreshToken();
 
-      if (didRefresh) {
-        final newToken = await authTokenProvider.getAccessToken();
-        final retryOptions = err.requestOptions;
-        retryOptions.headers['Authorization'] = 'Bearer $newToken';
+      switch (result) {
+        case _RefreshResult.success:
+          // Retry the original request with the new access token.
+          final newToken = await authTokenProvider.getAccessToken();
+          final retryOptions = err.requestOptions;
+          retryOptions.headers['Authorization'] = 'Bearer $newToken';
+          try {
+            final response = await dio.fetch<dynamic>(retryOptions);
+            return handler.resolve(response);
+          } on DioException {
+            return handler.reject(err);
+          }
 
-        try {
-          final response = await dio.fetch<dynamic>(retryOptions);
-          return handler.resolve(response);
-        } on DioException {
+        case _RefreshResult.invalidToken:
+          // The refresh token is definitively rejected — clear state and
+          // propagate so the app can redirect to login.
+          await authTokenProvider.clearTokens();
           return handler.reject(err);
-        }
-      } else {
-        if (currentRefreshToken == null || currentRefreshToken.isEmpty) {
+
+        case _RefreshResult.serverError:
+          // Transient server error (5xx, network timeout). Keep existing
+          // tokens intact so the user is not logged out on a momentary blip.
           return handler.reject(err);
-        }
-        await authTokenProvider.clearTokens();
-        return handler.reject(err);
       }
     }
 
@@ -71,46 +79,55 @@ class AuthInterceptor extends Interceptor {
     return options.path.contains('auth/');
   }
 
-  Future<bool> _refreshToken() async {
+  Future<_RefreshResult> _refreshToken() async {
     // Queue behind any ongoing refresh rather than firing a second one.
     if (_isRefreshing) {
       return _refreshCompleter!.future;
     }
 
     _isRefreshing = true;
-    _refreshCompleter = Completer<bool>();
+    _refreshCompleter = Completer<_RefreshResult>();
 
-    var success = false;
+    var result = _RefreshResult.serverError;
     try {
       final refreshToken = await authTokenProvider.getRefreshToken();
-      if (refreshToken != null && refreshToken.isNotEmpty) {
-        final response = await dio.post<Map<String, dynamic>>(
-          'auth/refresh',
-          data: {'refresh_token': refreshToken},
-        );
 
-        if (response.statusCode == 200 && response.data != null) {
-          final data = response.data!['data'] as Map<String, dynamic>?;
-          final newAccessToken = data?['access_token']?.toString();
-          final newRefreshToken = data?['refresh_token']?.toString();
+      if (refreshToken == null || refreshToken.isEmpty) {
+        result = _RefreshResult.invalidToken;
+        return result;
+      }
 
-          if (newAccessToken != null && newRefreshToken != null) {
-            await authTokenProvider.saveTokens(
-              accessToken: newAccessToken,
-              refreshToken: newRefreshToken,
-            );
-            success = true;
-          }
+      final response = await dio.post<Map<String, dynamic>>(
+        'auth/refresh',
+        data: {'refresh_token': refreshToken},
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data!['data'] as Map<String, dynamic>?;
+        final newAccessToken = data?['access_token']?.toString();
+        final newRefreshToken = data?['refresh_token']?.toString();
+
+        if (newAccessToken != null && newRefreshToken != null) {
+          await authTokenProvider.saveTokens(
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+          );
+          result = _RefreshResult.success;
         }
       }
-    } on DioException {
-      success = false;
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      // A 401 from the refresh endpoint means the refresh token is invalid.
+      // Any other error (5xx, timeout, network) is treated as transient.
+      result = (status == 401)
+          ? _RefreshResult.invalidToken
+          : _RefreshResult.serverError;
     } finally {
       _isRefreshing = false;
-      _refreshCompleter!.complete(success);
+      _refreshCompleter!.complete(result);
       _refreshCompleter = null;
     }
 
-    return success;
+    return result;
   }
 }

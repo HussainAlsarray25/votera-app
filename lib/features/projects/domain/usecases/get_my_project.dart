@@ -12,15 +12,21 @@ class GetMyProject extends UseCase<ProjectEntity, GetMyProjectParams> {
 
   @override
   Future<Either<Failure, ProjectEntity>> call(GetMyProjectParams params) {
-    return repository.getMyProject(eventId: params.eventId);
+    return repository.getMyProject(
+      eventId: params.eventId,
+      teamId: params.teamId,
+    );
   }
 }
 
 class GetMyProjectParams extends Equatable {
-  const GetMyProjectParams({required this.eventId});
+  const GetMyProjectParams({required this.eventId, this.teamId});
 
   final String eventId;
 
+  /// Required when the user belongs to multiple teams.
+  final String? teamId;
+
   @override
-  List<Object?> get props => [eventId];
+  List<Object?> get props => [eventId, teamId];
 }

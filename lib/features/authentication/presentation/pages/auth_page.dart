@@ -6,6 +6,8 @@ import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dar
 import 'package:votera/features/authentication/presentation/widgets/login_section.dart';
 import 'package:votera/features/authentication/presentation/widgets/register_section.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 
 /// The authentication page handles both login and registration.
 /// Mobile: plain scaffold with the form filling the screen.
@@ -69,17 +71,18 @@ class _AuthPageState extends State<AuthPage> {
             'isRegistration': true,
           });
         } else if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: context.colors.error,
-            ),
+          showAppSnackBar(
+            context,
+            state.message,
+            type: AppSnackBarType.error,
           );
         }
       },
       child: AppBreakpoints.isDesktop(context)
           ? _buildDesktopLayout(formContent)
-          : _buildMobileLayout(formContent),
+          : AppBreakpoints.isTablet(context)
+              ? _buildTabletLayout(formContent)
+              : _buildMobileLayout(formContent),
     );
 
     return body;
@@ -98,10 +101,7 @@ class _AuthPageState extends State<AuthPage> {
                   constraints: const BoxConstraints(
                     maxWidth: AppBreakpoints.formPanelMax,
                   ),
-                  child: SingleChildScrollView(
-                    padding: AppSpacing.pagePadding,
-                    child: formContent,
-                  ),
+                  child: formContent,
                 ),
               ),
             ),
@@ -113,6 +113,7 @@ class _AuthPageState extends State<AuthPage> {
 
   // -- Section: Desktop branding panel --
   Widget _buildBrandingPanel() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         gradient: context.colors.primaryGradient,
@@ -126,24 +127,55 @@ class _AuthPageState extends State<AuthPage> {
               size: 96,
               color: Colors.white,
             ),
-            const SizedBox(height: AppSpacing.lg),
+            SizedBox(height: AppSpacing.lg),
             Text(
-              'Votera',
+              l10n.appTitle,
               style: AppTypography.h1.copyWith(
                 color: Colors.white,
                 fontSize: 40,
                 letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.sm),
             Text(
-              'Discover, vote, and celebrate\ninnovative projects.',
+              l10n.appTagline,
               style: AppTypography.bodyLarge.copyWith(
                 color: Colors.white70,
               ),
               textAlign: TextAlign.center,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // -- Section: Tablet layout — centered card, no branding panel --
+  Widget _buildTabletLayout(Widget formContent) {
+    return Scaffold(
+      backgroundColor: context.colors.background,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              vertical: AppSpacing.xxl,
+              horizontal: AppSpacing.xl,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppBreakpoints.formPanelMax + 40,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: context.colors.surface,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+                  border: Border.all(color: context.colors.border),
+                  boxShadow: AppShadows.card(Theme.of(context).brightness),
+                ),
+                child: formContent,
+              ),
+            ),
+          ),
         ),
       ),
     );

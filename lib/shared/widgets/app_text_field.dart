@@ -40,7 +40,7 @@ class AppTextField extends StatelessWidget {
             color: context.colors.textPrimary,
           ),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.sm),
         TextFormField(
           controller: controller,
           obscureText: obscureText,
@@ -48,6 +48,9 @@ class AppTextField extends StatelessWidget {
           validator: validator,
           onChanged: onChanged,
           maxLines: maxLines,
+          // Disable system autofill so the OS does not inject saved
+          // credentials or show a clear button that was not requested.
+          autofillHints: const [],
           style: AppTypography.bodyLarge.copyWith(
             color: context.colors.textPrimary,
           ),

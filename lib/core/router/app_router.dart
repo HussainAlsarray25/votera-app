@@ -5,23 +5,27 @@ import 'package:votera/app/view/shell_page.dart';
 import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/core/domain/services/auth_token_provider.dart';
 import 'package:votera/features/authentication/presentation/pages/auth_page.dart';
+import 'package:votera/features/authentication/presentation/pages/confirm_reset_page.dart';
 import 'package:votera/features/authentication/presentation/pages/forgot_password_page.dart';
 import 'package:votera/features/authentication/presentation/pages/otp_verification_page.dart';
 import 'package:votera/features/authentication/presentation/pages/user_info_page.dart';
 import 'package:votera/features/participant_forms/presentation/cubit/forms_cubit.dart';
 import 'package:votera/features/participant_forms/presentation/pages/email_verification_page.dart';
+import 'package:votera/features/participant_forms/presentation/pages/supervisor_email_verification_page.dart';
 import 'package:votera/features/participant_forms/presentation/pages/uid_submission_page.dart';
 import 'package:votera/features/participant_forms/presentation/pages/verify_account_page.dart';
 import 'package:votera/features/exhibitions/presentation/pages/exhibition_detail_page.dart';
 import 'package:votera/features/exhibitions/presentation/pages/exhibitions_page.dart';
 import 'package:votera/features/notification/presentation/pages/notification_page.dart';
 import 'package:votera/features/onboarding/presentation/pages/onboarding_page.dart';
-import 'package:votera/features/profile/presentation/pages/comments_page.dart';
+import 'package:votera/features/profile/presentation/pages/about_us_page.dart';
 import 'package:votera/features/profile/presentation/pages/profile_page.dart';
 import 'package:votera/features/project_details/presentation/pages/project_details_page.dart';
 import 'package:votera/features/splash/presentation/pages/splash_page.dart';
+import 'package:votera/features/categories/presentation/pages/category_projects_page.dart';
+import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
+import 'package:votera/features/events/domain/entities/event_entity.dart';
 import 'package:votera/features/teams/presentation/pages/team_detail_page.dart';
-import 'package:votera/features/settings/presentation/pages/settings_page.dart';
 import 'package:votera/features/teams/presentation/pages/teams_page.dart';
 
 class AppRouter {
@@ -62,6 +66,15 @@ class AppRouter {
         builder: (context, state) => const ForgotPasswordPage(),
       ),
       GoRoute(
+        path: '/confirm-reset',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          return ConfirmResetPage(
+            email: extra['email'] as String? ?? '',
+          );
+        },
+      ),
+      GoRoute(
         path: '/verify-account',
         builder: (context, state) => const VerifyAccountPage(),
       ),
@@ -70,6 +83,13 @@ class AppRouter {
         builder: (context, state) => BlocProvider(
           create: (_) => sl<FormsCubit>(),
           child: const EmailVerificationPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/verify-account/supervisor-email',
+        builder: (context, state) => BlocProvider(
+          create: (_) => sl<FormsCubit>(),
+          child: const SupervisorEmailVerificationPage(),
         ),
       ),
       GoRoute(
@@ -94,15 +114,15 @@ class AppRouter {
             path: '/profile',
             builder: (context, state) => const ProfilePage(),
           ),
-          GoRoute(
-            path: '/settings',
-            builder: (context, state) => const SettingsPage(),
-          ),
         ],
       ),
       GoRoute(
         path: '/notifications',
         builder: (context, state) => const NotificationPage(),
+      ),
+      GoRoute(
+        path: '/about-us',
+        builder: (context, state) => const AboutUsPage(),
       ),
       GoRoute(
         path: '/teams/:id',
@@ -115,21 +135,51 @@ class AppRouter {
         path: '/exhibition/:id',
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return ExhibitionDetailPage(exhibitionId: id);
+          // EventStatus is passed as extra when navigating from the exhibitions
+          // list (where the full EventEntity is already available). For deep
+          // links where extra is absent, default to open so the normal flow
+          // is preserved.
+          final eventStatus = state.extra is EventStatus
+              ? state.extra as EventStatus
+              : EventStatus.open;
+          return ExhibitionDetailPage(
+            exhibitionId: id,
+            eventStatus: eventStatus,
+          );
         },
-      ),
-      GoRoute(
-        path: '/comments',
-        builder: (context, state) => const CommentsPage(),
       ),
       GoRoute(
         path: '/project/:eventId/:projectId',
         builder: (context, state) {
           final eventId = state.pathParameters['eventId'] ?? '';
           final projectId = state.pathParameters['projectId'] ?? '';
+          // coverUrl is passed as route extra by ProjectEntityCard so the
+          // header can display the image immediately via Hero animation.
+          final coverUrl = state.extra as String?;
           return ProjectDetailsPage(
             eventId: eventId,
             projectId: projectId,
+            coverUrl: coverUrl,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/exhibition/:eventId/category/:categoryId',
+        builder: (context, state) {
+          final eventId = state.pathParameters['eventId'] ?? '';
+          final categoryId = state.pathParameters['categoryId'] ?? '';
+          final categoryName = state.extra as String? ?? '';
+          return BlocProvider(
+            create: (_) => sl<ProjectsCubit>()
+              ..loadProjects(
+                eventId: eventId,
+                categoryId: categoryId,
+              ),
+            child: CategoryProjectsPage(
+              eventId: eventId,
+              categoryId: categoryId,
+              categoryName: categoryName,
+            ),
           );
         },
       ),
@@ -143,7 +193,7 @@ class AppRouter {
     final location = state.matchedLocation;
 
     // Allow splash, onboarding, auth, user-info, otp, and forgot-password without authentication.
-    const publicRoutes = {'/', '/onboarding', '/auth', '/user-info', '/otp', '/forgot-password'};
+    const publicRoutes = {'/', '/onboarding', '/auth', '/user-info', '/otp', '/forgot-password', '/confirm-reset'};
     if (publicRoutes.contains(location)) return null;
 
     final authProvider = sl<AuthTokenProvider>();

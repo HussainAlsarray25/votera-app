@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/notification/domain/entities/notification_entity.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// A single notification row showing title, body, time, and read status.
 class NotificationListTile extends StatelessWidget {
@@ -16,12 +18,13 @@ class NotificationListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUnread = !notification.isRead;
+    final timeLabel = _formatTime(context, notification.createdAt);
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       child: Container(
-        padding: const EdgeInsets.symmetric(
+        padding: EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.md,
         ),
@@ -48,8 +51,8 @@ class NotificationListTile extends StatelessWidget {
           children: [
             // Icon container
             Container(
-              width: 44,
-              height: 44,
+              width: AppSizes.avatarMd,
+              height: AppSizes.avatarMd,
               decoration: BoxDecoration(
                 color: isUnread
                     ? context.colors.primary.withValues(alpha: 0.12)
@@ -63,13 +66,13 @@ class NotificationListTile extends StatelessWidget {
               ),
               child: Icon(
                 Icons.notifications_outlined,
-                size: 20,
+                size: AppSizes.iconMd,
                 color: isUnread
                     ? context.colors.primary
                     : context.colors.textHint,
               ),
             ),
-            const SizedBox(width: AppSpacing.md),
+            SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,9 +91,9 @@ class NotificationListTile extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.sm),
+                      SizedBox(width: AppSpacing.sm),
                       Text(
-                        _formatTime(notification.createdAt),
+                        timeLabel,
                         style: AppTypography.caption.copyWith(
                           color: context.colors.textHint,
                         ),
@@ -98,7 +101,7 @@ class NotificationListTile extends StatelessWidget {
                     ],
                   ),
                   if (notification.body.isNotEmpty) ...[
-                    const SizedBox(height: AppSpacing.xs),
+                    SizedBox(height: AppSpacing.xs),
                     Text(
                       notification.body,
                       style: AppTypography.bodySmall.copyWith(
@@ -114,10 +117,10 @@ class NotificationListTile extends StatelessWidget {
             // Unread dot
             if (isUnread)
               Padding(
-                padding: const EdgeInsets.only(top: 6, left: AppSpacing.xs),
+                padding: EdgeInsets.only(top: 6.r, left: AppSpacing.xs),
                 child: Container(
-                  width: 8,
-                  height: 8,
+                  width: 8.r,
+                  height: 8.r,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: context.colors.primary,
@@ -130,14 +133,15 @@ class NotificationListTile extends StatelessWidget {
     );
   }
 
-  String _formatTime(DateTime dateTime) {
+  String _formatTime(BuildContext context, DateTime dateTime) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final diff = now.difference(dateTime);
 
-    if (diff.inMinutes < 1) return 'Just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    if (diff.inMinutes < 1) return l10n.justNow;
+    if (diff.inMinutes < 60) return l10n.minutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.hoursAgo(diff.inHours);
+    if (diff.inDays < 7) return l10n.daysAgo(diff.inDays);
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 }

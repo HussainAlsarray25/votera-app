@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// Shows the project description, tech stack chips, and links (repo/demo).
 /// Reads from the ProjectsCubit state provided by the parent page.
@@ -16,43 +18,47 @@ class ProjectInfoSection extends StatelessWidget {
     return BlocBuilder<ProjectsCubit, ProjectsState>(
       builder: (context, state) {
         if (state is ProjectDetailLoaded) {
-          return _buildContent(state.project);
+          return _buildContent(context, state.project);
         }
         return const SizedBox.shrink();
       },
     );
   }
 
-  Widget _buildContent(ProjectEntity project) {
+  Widget _buildContent(BuildContext context, ProjectEntity project) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (project.description != null && project.description!.isNotEmpty)
-          _buildDescription(project.description!),
+          _buildDescription(context, l10n, project.description!),
         if (project.techStack != null && project.techStack!.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.lg),
-          _buildTechStack(project.techStack!),
+          SizedBox(height: AppSpacing.lg),
+          _buildTechStack(context, l10n, project.techStack!),
         ],
         if (_hasLinks(project)) ...[
-          const SizedBox(height: AppSpacing.lg),
-          _buildLinks(project),
+          SizedBox(height: AppSpacing.lg),
+          _buildLinks(context, l10n, project),
         ],
       ],
     );
   }
 
-  Widget _buildDescription(String description) {
+  Widget _buildDescription(BuildContext context, AppLocalizations l10n, String description) {
     return _SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionLabel(label: 'About this Project', icon: Icons.info_outline_rounded),
-          const SizedBox(height: AppSpacing.sm),
+          _SectionLabel(
+            label: l10n.aboutProject,
+            icon: Icons.info_outline_rounded,
+          ),
+          SizedBox(height: AppSpacing.sm),
           Text(
             description,
             style: AppTypography.bodyMedium.copyWith(
               height: 1.75,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
         ],
@@ -60,8 +66,7 @@ class ProjectInfoSection extends StatelessWidget {
     );
   }
 
-  Widget _buildTechStack(String techStack) {
-    // Split by comma, semicolon, or space-separated list
+  Widget _buildTechStack(BuildContext context, AppLocalizations l10n, String techStack) {
     final chips = techStack
         .split(RegExp(r'[,;]+'))
         .map((s) => s.trim())
@@ -72,57 +77,65 @@ class ProjectInfoSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionLabel(label: 'Tech Stack', icon: Icons.layers_outlined),
-          const SizedBox(height: AppSpacing.sm),
+          _SectionLabel(
+            label: l10n.techStack,
+            icon: Icons.layers_outlined,
+          ),
+          SizedBox(height: AppSpacing.sm),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: chips.map(_buildTechChip).toList(),
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: chips
+                .map((label) => _buildTechChip(context, label))
+                .toList(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTechChip(String label) {
+  Widget _buildTechChip(BuildContext context, String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
+        color: context.colors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
         border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.2),
+          color: context.colors.primary.withValues(alpha: 0.2),
         ),
       ),
       child: Text(
         label,
         style: AppTypography.caption.copyWith(
-          color: AppColors.primary,
+          color: context.colors.primary,
           fontWeight: FontWeight.w600,
         ),
       ),
     );
   }
 
-  Widget _buildLinks(ProjectEntity project) {
+  Widget _buildLinks(BuildContext context, AppLocalizations l10n, ProjectEntity project) {
     return _SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionLabel(label: 'Project Links', icon: Icons.link_rounded),
-          const SizedBox(height: AppSpacing.sm),
+          _SectionLabel(
+            label: l10n.projectLinks,
+            icon: Icons.link_rounded,
+          ),
+          SizedBox(height: AppSpacing.sm),
           if (project.repoUrl != null && project.repoUrl!.isNotEmpty)
             _LinkRow(
               icon: Icons.code_rounded,
-              label: 'Source Code',
+              label: l10n.sourceCode,
               url: project.repoUrl!,
             ),
           if (project.demoUrl != null && project.demoUrl!.isNotEmpty) ...[
             if (project.repoUrl != null && project.repoUrl!.isNotEmpty)
-              const SizedBox(height: AppSpacing.sm),
+              SizedBox(height: AppSpacing.sm),
             _LinkRow(
               icon: Icons.open_in_new_rounded,
-              label: 'Live Demo',
+              label: l10n.liveDemo,
               url: project.demoUrl!,
             ),
           ],
@@ -149,10 +162,10 @@ class _SectionCard extends StatelessWidget {
       width: double.infinity,
       padding: AppSpacing.cardPadding,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.border),
-        boxShadow: AppShadows.card,
+        border: Border.all(color: context.colors.border),
+        boxShadow: AppShadows.card(Theme.of(context).brightness),
       ),
       child: child,
     );
@@ -170,11 +183,12 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: AppColors.primary),
-        const SizedBox(width: 6),
+        Icon(icon, size: AppSizes.iconSm, color: context.colors.primary),
+        SizedBox(width: 6.w),
         Text(
           label,
-          style: AppTypography.labelLarge.copyWith(color: AppColors.textPrimary),
+          style: AppTypography.labelLarge
+              .copyWith(color: context.colors.textPrimary),
         ),
       ],
     );
@@ -196,23 +210,20 @@ class _LinkRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.background,
+      color: context.colors.background,
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        onTap: () {
-          // URL launching is handled by the caller in a real integration.
-          // Keeping this widget free of url_launcher to stay dependency-light.
-        },
+        onTap: () {},
         child: Padding(
-          padding: const EdgeInsets.symmetric(
+          padding: EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
             vertical: AppSpacing.sm,
           ),
           child: Row(
             children: [
-              Icon(icon, size: 18, color: AppColors.primary),
-              const SizedBox(width: AppSpacing.sm),
+              Icon(icon, size: AppSizes.iconSm, color: context.colors.primary),
+              SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,7 +232,7 @@ class _LinkRow extends StatelessWidget {
                     Text(
                       url,
                       style: AppTypography.caption.copyWith(
-                        color: AppColors.textHint,
+                        color: context.colors.textHint,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -229,10 +240,10 @@ class _LinkRow extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
-                size: 18,
-                color: AppColors.textHint,
+                size: AppSizes.iconSm,
+                color: context.colors.textHint,
               ),
             ],
           ),

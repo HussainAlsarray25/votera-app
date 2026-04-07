@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/participant_forms/presentation/cubit/forms_cubit.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
+import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/shared/widgets/app_text_field.dart';
 import 'package:votera/shared/widgets/gradient_button.dart';
 
@@ -35,12 +38,6 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill email from profile if available.
-    final profileState = context.read<ProfileCubit>().state;
-    if (profileState is ProfileLoaded) {
-      final email = profileState.profile.email;
-      if (email != null) _emailController.text = email;
-    }
   }
 
   @override
@@ -85,7 +82,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
         elevation: 0,
         leading: BackButton(color: context.colors.textPrimary),
         title: Text(
-          'Institutional Email',
+          AppLocalizations.of(context)!.institutionalEmail,
           style: AppTypography.labelLarge.copyWith(
             color: context.colors.textPrimary,
           ),
@@ -97,35 +94,30 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             // Force-refresh clears the stale cached role before fetching,
             // so the Teams tab and other role-gated UI update immediately.
             context.read<ProfileCubit>().forceRefresh();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Account verified! Participant role granted.'),
-                backgroundColor: context.colors.success,
-              ),
+            showAppSnackBar(
+              context,
+              AppLocalizations.of(context)!.accountVerified,
+              type: AppSnackBarType.success,
             );
             context.go('/profile');
           } else if (state is FormsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: context.colors.error,
-              ),
+            showAppSnackBar(
+              context,
+              state.message,
+              type: AppSnackBarType.error,
             );
           }
         },
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: AppSpacing.pagePadding,
-            child: BlocBuilder<FormsCubit, FormsState>(
-              builder: (context, state) {
-                return AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: state is FormsEmailOtpSent
-                      ? _buildOtpStep(state.email)
-                      : _buildEmailStep(),
-                );
-              },
-            ),
+        child: FormCardShell(
+          child: BlocBuilder<FormsCubit, FormsState>(
+            builder: (context, state) {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: state is FormsEmailOtpSent
+                    ? _buildOtpStep(state.email)
+                    : _buildEmailStep(),
+              );
+            },
           ),
         ),
       ),
@@ -134,47 +126,53 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   // -- Step 1: Email input --
   Widget _buildEmailStep() {
+    final l10n = AppLocalizations.of(context)!;
     return Form(
       key: _formKey,
       child: Column(
         key: const ValueKey('email-step'),
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: AppSpacing.xl),
+          SizedBox(height: AppSpacing.xl),
           Text(
-            'Enter Your Institutional Email',
+            l10n.enterInstitutionalEmail,
             style: AppTypography.h1.copyWith(
               color: context.colors.textPrimary,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.sm),
           Text(
-            'We will send a 6-digit verification code to your university email.',
+            l10n.institutionalEmailDesc,
             style: AppTypography.bodyMedium.copyWith(
               color: context.colors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppSpacing.xxl),
+          SizedBox(height: AppSpacing.xxl),
           AppTextField(
-            label: 'Institutional Email',
+            label: l10n.institutionalEmail,
             controller: _emailController,
-            hint: 'your.name@university.edu',
+            hint: l10n.institutionalEmailHint,
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             validator: (value) {
-              if (value == null || value.isEmpty) return 'Email is required';
-              if (!value.contains('@')) return 'Enter a valid email';
+              if (value == null || value.isEmpty) return l10n.emailRequired;
+              if (!value.contains('@')) return l10n.emailInvalid;
+              // Restrict to the student subdomain to prevent supervisors from
+              // accidentally using the student flow.
+              if (!value.toLowerCase().endsWith('@student.uokufa.edu.iq')) {
+                return l10n.studentEmailDomainError;
+              }
               return null;
             },
           ),
-          const SizedBox(height: AppSpacing.xl),
+          SizedBox(height: AppSpacing.xl),
           BlocBuilder<FormsCubit, FormsState>(
             builder: (context, state) {
               final isLoading = state is FormsLoading;
               return GradientButton(
-                text: isLoading ? 'Sending...' : 'Send OTP',
+                text: isLoading ? l10n.sending : l10n.sendOtp,
                 onPressed: isLoading ? null : _handleSendOtp,
               );
             },
@@ -186,27 +184,28 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   // -- Step 2: OTP input --
   Widget _buildOtpStep(String email) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       key: const ValueKey('otp-step'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: AppSpacing.xl),
+        SizedBox(height: AppSpacing.xl),
         Text(
-          'Enter Verification Code',
+          l10n.enterVerificationCode,
           style: AppTypography.h1.copyWith(
             color: context.colors.textPrimary,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.sm),
         Text(
-          'We sent a 6-digit code to',
+          l10n.codeSentTo,
           style: AppTypography.bodyMedium.copyWith(
             color: context.colors.textSecondary,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.xs),
+        SizedBox(height: AppSpacing.xs),
         Text(
           email,
           style: AppTypography.labelMedium.copyWith(
@@ -214,14 +213,14 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.xxl),
+        SizedBox(height: AppSpacing.xxl),
         _buildOtpBoxes(),
-        const SizedBox(height: AppSpacing.xxl),
+        SizedBox(height: AppSpacing.xxl),
         BlocBuilder<FormsCubit, FormsState>(
           builder: (context, state) {
             final isLoading = state is FormsLoading;
             return GradientButton(
-              text: isLoading ? 'Verifying...' : 'Verify',
+              text: isLoading ? l10n.verifying : l10n.verify,
               onPressed: (isLoading || !_isOtpComplete) ? null : _handleVerifyOtp,
             );
           },
@@ -235,10 +234,10 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(_otpLength, (index) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           child: SizedBox(
-            width: 48,
-            height: 56,
+            width: 48.w,
+            height: 56.h,
             child: TextField(
               controller: _otpControllers[index],
               focusNode: _otpFocusNodes[index],
@@ -247,7 +246,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 22.sp,
                 fontWeight: FontWeight.bold,
                 color: context.colors.textPrimary,
                 height: 1,

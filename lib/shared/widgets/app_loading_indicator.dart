@@ -7,16 +7,17 @@ import 'package:votera/core/design_system/design_system.dart';
 /// An animated loading indicator with orbiting dots and a gradient "V" logo.
 /// Use as a drop-in replacement for CircularProgressIndicator.
 ///
-/// [size] controls the overall diameter (default 80).
+/// Omit [size] to use the default responsive size (80.r via AppSizes).
 /// [message] optionally shows a label below the indicator.
 class AppLoadingIndicator extends StatefulWidget {
   const AppLoadingIndicator({
     super.key,
-    this.size = 80,
+    this.size,
     this.message,
   });
 
-  final double size;
+  // Nullable so the widget resolves the default via ScreenUtil at build time.
+  final double? size;
   final String? message;
 
   @override
@@ -45,12 +46,14 @@ class _AppLoadingIndicatorState extends State<AppLoadingIndicator>
 
   @override
   Widget build(BuildContext context) {
+    final effectiveSize = widget.size ?? AppSizes.avatarLg * 1.4;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          width: widget.size,
-          height: widget.size,
+          width: effectiveSize,
+          height: effectiveSize,
           child: AnimatedBuilder(
             animation: _controller,
             builder: (context, child) {
@@ -64,12 +67,12 @@ class _AppLoadingIndicatorState extends State<AppLoadingIndicator>
               );
             },
             child: Center(
-              child: _buildLogo(context),
+              child: _buildLogo(context, effectiveSize),
             ),
           ),
         ),
         if (widget.message != null) ...[
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
           Text(
             widget.message!,
             style: AppTypography.bodySmall.copyWith(
@@ -81,8 +84,8 @@ class _AppLoadingIndicatorState extends State<AppLoadingIndicator>
     );
   }
 
-  Widget _buildLogo(BuildContext context) {
-    final logoSize = widget.size * 0.35;
+  Widget _buildLogo(BuildContext context, double size) {
+    final logoSize = size * 0.35;
     return ShaderMask(
       shaderCallback: (bounds) {
         return context.colors.primaryGradient.createShader(bounds);

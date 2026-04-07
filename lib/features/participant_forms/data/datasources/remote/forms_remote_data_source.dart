@@ -28,6 +28,12 @@ abstract class FormsRemoteDataSource {
     required String stage,
     required String documentUrl,
   });
+
+  /// POST /forms/supervisors/email — sends OTP to the provided supervisor email.
+  Future<void> requestSupervisorEmailOtp(String supervisorEmail);
+
+  /// POST /forms/supervisors/email/verify — verifies OTP and grants supervisor role.
+  Future<void> verifySupervisorEmailOtp(String supervisorEmail, String code);
 }
 
 class FormsRemoteDataSourceImpl implements FormsRemoteDataSource {
@@ -112,5 +118,21 @@ class FormsRemoteDataSourceImpl implements FormsRemoteDataSource {
       },
     );
     return response.data!;
+  }
+
+  @override
+  Future<void> requestSupervisorEmailOtp(String supervisorEmail) async {
+    await apiClient.post<Map<String, dynamic>>(
+      FormsEndpoints.requestSupervisorEmailOtp,
+      data: {'supervisor_email': supervisorEmail},
+    );
+  }
+
+  @override
+  Future<void> verifySupervisorEmailOtp(String supervisorEmail, String code) async {
+    await apiClient.post<Map<String, dynamic>>(
+      FormsEndpoints.verifySupervisorEmailOtp,
+      data: {'supervisor_email': supervisorEmail, 'code': code},
+    );
   }
 }

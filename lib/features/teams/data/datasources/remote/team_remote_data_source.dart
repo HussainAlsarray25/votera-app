@@ -1,26 +1,80 @@
+import 'package:dio/dio.dart';
 import 'package:votera/core/network/api_client.dart';
+import 'package:votera/core/network/paginated_response.dart';
 import 'package:votera/features/teams/data/datasources/remote/team_endpoints.dart';
 import 'package:votera/features/teams/data/models/invitation_model.dart';
+import 'package:votera/features/teams/data/models/join_request_model.dart';
 import 'package:votera/features/teams/data/models/team_model.dart';
 
 abstract class TeamRemoteDataSource {
   Future<TeamModel> createTeam({required String name, String? description});
   Future<TeamModel> getTeam(String teamId);
-  Future<TeamModel> getMyTeam();
+  Future<List<TeamModel>> getMyTeams();
   Future<TeamModel> updateTeam({required String teamId, String? name, String? description});
   Future<void> deleteTeam(String teamId);
-  Future<InvitationModel> inviteMember({required String teamId, required String inviteeId});
+
+  /// Invite a user by handle. [message] is optional (max 500 chars).
+  Future<InvitationModel> inviteMember({
+    required String teamId,
+    required String inviteeHandle,
+    String? message,
+  });
+
+  // GET /v1/teams/invitations — returns all pending invitations for the current user.
   Future<List<InvitationModel>> getMyInvitations();
   Future<void> respondToInvitation({required String invitationId, required bool accept});
-  Future<void> leaveTeam();
+  Future<void> leaveTeam(String teamId);
   Future<void> removeMember({required String teamId, required String memberId});
   Future<void> transferLeadership({required String teamId, required String newLeaderId});
 
-  /// GET /v1/teams/search?q={query}
-  Future<List<TeamModel>> searchTeams({required String query});
+  /// GET /v1/teams with optional filter params and pagination.
+  Future<PaginatedResponse<TeamModel>> listTeams({
+    String? name,
+    String? teamHandle,
+    String? teamId,
+    String? userId,
+    String? userHandle,
+    String? userName,
+    int? page,
+    int? size,
+  });
 
-  /// POST /v1/teams/invitations/{id}/cancel
-  Future<void> cancelInvitation({required String invitationId});
+  /// DELETE /v1/teams/{teamId}/invitations/{invitationId} — leader only.
+  Future<void> cancelInvitation({
+    required String teamId,
+    required String invitationId,
+  });
+
+  // -- Join Requests -----------------------------------------------------------
+
+  Future<JoinRequestModel> sendJoinRequest({
+    required String teamId,
+    String? message,
+  });
+
+  Future<List<JoinRequestModel>> getJoinRequests({required String teamId});
+
+  Future<void> respondJoinRequest({
+    required String teamId,
+    required String requestId,
+    required bool approve,
+  });
+
+  // -- Team Image --------------------------------------------------------------
+
+  Future<Map<String, String>> getTeamImageUploadUrl({
+    required String teamId,
+    required String fileName,
+  });
+
+  /// PUT raw bytes directly to a presigned S3 URL — no auth headers required.
+  Future<void> uploadFileToUrl({
+    required String url,
+    required List<int> bytes,
+    required String contentType,
+  });
+
+  Future<void> deleteTeamImage({required String teamId});
 }
 
 class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
@@ -48,11 +102,15 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
   }
 
   @override
-  Future<TeamModel> getMyTeam() async {
+  Future<List<TeamModel>> getMyTeams() async {
+    // GET /teams/my returns an array of teams.
     final response = await apiClient.get<Map<String, dynamic>>(
       TeamEndpoints.myTeam,
     );
-    return TeamModel.fromJson(response.data!);
+    final items = response.data!['data'] as List<dynamic>? ?? [];
+    return items
+        .map((e) => TeamModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -79,21 +137,26 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
   @override
   Future<InvitationModel> inviteMember({
     required String teamId,
-    required String inviteeId,
+    required String inviteeHandle,
+    String? message,
   }) async {
+    final body = <String, dynamic>{'invitee_handle': inviteeHandle};
+    if (message != null && message.isNotEmpty) body['message'] = message;
     final response = await apiClient.post<Map<String, dynamic>>(
       TeamEndpoints.teamInvitations(teamId),
-      data: {'invitee_id': inviteeId},
+      data: body,
     );
     return InvitationModel.fromJson(response.data!);
   }
 
   @override
   Future<List<InvitationModel>> getMyInvitations() async {
-    final response = await apiClient.get<List<dynamic>>(
+    // The API wraps the list in the standard envelope: {success, data: [...]}.
+    final response = await apiClient.get<Map<String, dynamic>>(
       TeamEndpoints.myInvitations,
     );
-    return (response.data ?? [])
+    final items = response.data!['data'] as List<dynamic>? ?? [];
+    return items
         .map((e) => InvitationModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }
@@ -110,8 +173,8 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
   }
 
   @override
-  Future<void> leaveTeam() async {
-    await apiClient.post<void>(TeamEndpoints.leaveTeam);
+  Future<void> leaveTeam(String teamId) async {
+    await apiClient.post<void>(TeamEndpoints.leaveTeam(teamId));
   }
 
   @override
@@ -134,20 +197,131 @@ class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
   }
 
   @override
-  Future<List<TeamModel>> searchTeams({required String query}) async {
-    final response = await apiClient.get<List<dynamic>>(
-      TeamEndpoints.searchTeams,
-      queryParameters: {'q': query},
+  Future<PaginatedResponse<TeamModel>> listTeams({
+    String? name,
+    String? teamHandle,
+    String? teamId,
+    String? userId,
+    String? userHandle,
+    String? userName,
+    int? page,
+    int? size,
+  }) async {
+    final query = <String, dynamic>{};
+    if (name != null) query['name'] = name;
+    if (teamHandle != null) query['team_handle'] = teamHandle;
+    if (teamId != null) query['team_id'] = teamId;
+    if (userId != null) query['user_id'] = userId;
+    if (userHandle != null) query['user_handle'] = userHandle;
+    if (userName != null) query['user_name'] = userName;
+    if (page != null) query['page'] = page;
+    if (size != null) query['size'] = size;
+
+    final response = await apiClient.get<Map<String, dynamic>>(
+      TeamEndpoints.teams,
+      queryParameters: query.isEmpty ? null : query,
     );
-    return (response.data ?? [])
-        .map((e) => TeamModel.fromJson(e as Map<String, dynamic>))
+    return PaginatedResponse.fromJson(
+      response.data!,
+      TeamModel.fromJson,
+    );
+  }
+
+  @override
+  Future<void> cancelInvitation({
+    required String teamId,
+    required String invitationId,
+  }) async {
+    // DELETE /v1/teams/{teamId}/invitations/{invitationId}
+    await apiClient.delete<void>(
+      TeamEndpoints.cancelInvitation(teamId, invitationId),
+    );
+  }
+
+  // -- Join Requests -----------------------------------------------------------
+
+  @override
+  Future<JoinRequestModel> sendJoinRequest({
+    required String teamId,
+    String? message,
+  }) async {
+    final body = <String, dynamic>{};
+    if (message != null && message.isNotEmpty) body['message'] = message;
+    final response = await apiClient.post<Map<String, dynamic>>(
+      TeamEndpoints.joinRequests(teamId),
+      data: body.isEmpty ? null : body,
+    );
+    return JoinRequestModel.fromJson(response.data!['data'] as Map<String, dynamic>);
+  }
+
+  @override
+  Future<List<JoinRequestModel>> getJoinRequests({
+    required String teamId,
+  }) async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      TeamEndpoints.joinRequests(teamId),
+    );
+    final items = response.data!['data'] as List<dynamic>? ?? [];
+    return items
+        .map((e) => JoinRequestModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 
   @override
-  Future<void> cancelInvitation({required String invitationId}) async {
-    await apiClient.post<void>(
-      TeamEndpoints.cancelInvitation(invitationId),
+  Future<void> respondJoinRequest({
+    required String teamId,
+    required String requestId,
+    required bool approve,
+  }) async {
+    await apiClient.put<void>(
+      TeamEndpoints.joinRequestById(teamId, requestId),
+      data: {'approve': approve},
     );
+  }
+
+  // -- Team Image --------------------------------------------------------------
+
+  @override
+  Future<Map<String, String>> getTeamImageUploadUrl({
+    required String teamId,
+    required String fileName,
+  }) async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      TeamEndpoints.teamImageUploadUrl(teamId),
+      data: {'file_name': fileName},
+    );
+    final data = response.data!['data'] as Map<String, dynamic>;
+    return {
+      'upload_url': data['upload_url']?.toString() ?? '',
+      'public_url': data['public_url']?.toString() ?? '',
+    };
+  }
+
+  @override
+  Future<void> uploadFileToUrl({
+    required String url,
+    required List<int> bytes,
+    required String contentType,
+  }) async {
+    // S3 presigned PUT does not accept the API auth headers, so use a
+    // plain Dio instance without any interceptors.
+    final dio = Dio();
+    await dio.put<void>(
+      url,
+      data: Stream.fromIterable([bytes]),
+      options: Options(
+        headers: {
+          'Content-Type': contentType,
+          'Content-Length': bytes.length,
+        },
+        sendTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 30),
+      ),
+    );
+  }
+
+  @override
+  Future<void> deleteTeamImage({required String teamId}) async {
+    await apiClient.delete<void>(TeamEndpoints.teamImage(teamId));
   }
 }

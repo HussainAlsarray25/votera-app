@@ -1,79 +1,76 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
-/// Entry point for account verification. Shows two method cards:
-/// institutional email (immediate) and university ID card (admin review).
+/// Entry point for account verification. Shows two method cards — one for
+/// students (participant email OTP) and one for professors/supervisors
+/// (supervisor email OTP) — so the user picks the path that matches their role.
 class VerifyAccountPage extends StatelessWidget {
   const VerifyAccountPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: BackButton(color: context.colors.textPrimary),
         title: Text(
-          'Verify Account',
+          l10n.verifyAccount,
           style: AppTypography.labelLarge.copyWith(
             color: context.colors.textPrimary,
           ),
         ),
       ),
       backgroundColor: context.colors.background,
-      body: SafeArea(
-        child: CenteredContent(
-          child: Padding(
-            padding: AppSpacing.pagePadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: AppSpacing.lg),
-                _buildHeader(context),
-                const SizedBox(height: AppSpacing.xxl),
-                _buildMethodCard(
-                  context: context,
-                  icon: Icons.email_outlined,
-                  title: 'Institutional Email',
-                  subtitle: 'Verify with your university email address.\n'
-                      'You will receive a 6-digit OTP instantly.',
-                  badge: 'Instant',
-                  badgeColor: context.colors.success,
-                  onTap: () => context.push('/verify-account/email'),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _buildMethodCard(
-                  context: context,
-                  icon: Icons.badge_outlined,
-                  title: 'University ID Card',
-                  subtitle: 'Upload a photo of your university ID card.\n'
-                      'An admin will review your request.',
-                  badge: 'Requires Review',
-                  badgeColor: context.colors.warning,
-                  onTap: () => context.push('/verify-account/uid'),
-                ),
-              ],
+      body: FormCardShell(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(height: AppSpacing.lg),
+            _buildHeader(context, l10n),
+            SizedBox(height: AppSpacing.xxl),
+            _buildMethodCard(
+              context: context,
+              icon: Icons.school_outlined,
+              title: l10n.student,
+              subtitle: l10n.studentEmailExample,
+              badge: l10n.instant,
+              badgeColor: context.colors.success,
+              onTap: () => context.push('/verify-account/email'),
             ),
-          ),
+            SizedBox(height: AppSpacing.md),
+            _buildMethodCard(
+              context: context,
+              icon: Icons.person_outlined,
+              title: l10n.professor,
+              subtitle: l10n.teacherEmailExample,
+              badge: l10n.instant,
+              badgeColor: context.colors.primary,
+              onTap: () => context.push('/verify-account/supervisor-email'),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
     return Column(
       children: [
         Text(
-          'Choose Verification Method',
+          l10n.chooseVerificationMethod,
           style: AppTypography.h1.copyWith(
             color: context.colors.textPrimary,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.sm),
         Text(
-          'Verifying your account unlocks full access to all features.',
+          l10n.verificationUnlocks,
           style: AppTypography.bodyMedium.copyWith(
             color: context.colors.textSecondary,
           ),
@@ -96,24 +93,24 @@ class VerifyAccountPage extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          boxShadow: AppShadows.card,
+          boxShadow: AppShadows.card(Theme.of(context).brightness),
         ),
         child: Row(
           children: [
             Container(
-              width: 52,
-              height: 52,
+              width: 52.r,
+              height: 52.r,
               decoration: BoxDecoration(
-                color: context.colors.primary.withValues(alpha: 0.1),
+                color: badgeColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
-              child: Icon(icon, color: context.colors.primary, size: 28),
+              child: Icon(icon, color: badgeColor, size: AppSizes.iconLg),
             ),
-            const SizedBox(width: AppSpacing.md),
+            SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,13 +126,13 @@ class VerifyAccountPage extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.sm),
+                      SizedBox(width: AppSpacing.sm),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: badgeColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(20.r),
                         ),
                         child: Text(
                           badge,
@@ -147,7 +144,7 @@ class VerifyAccountPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: AppSpacing.xs),
                   Text(
                     subtitle,
                     style: AppTypography.bodySmall.copyWith(

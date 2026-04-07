@@ -31,16 +31,27 @@ dependencies:
   pretty_dio_logger: ^1.4.0
   shared_preferences: ^2.2.2
   app_links: ^6.3.4
+  share_plus: ^12.0.1
   url_launcher: ^6.3.1
   file_picker: ^8.1.7
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   bloc_test: ^10.0.0
   build_runner: ^2.7.1
+  flutter_launcher_icons: ^0.14.3
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.4
   very_good_analysis: ^10.0.0
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_image/votera_image.png"
+  web:
+    generate: true
+    image_path: "assets/images/app_image/votera_image.png"
 
 flutter:
   generate: true

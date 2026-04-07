@@ -1,35 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:votera/core/design_system/design_system.dart';
 
-/// A reusable button with a gradient background and optional loading state.
+/// A reusable button with a solid primary color background and optional loading state.
 /// Used for primary actions throughout the app (login, vote, submit).
+///
+/// Omit [height] to use the default responsive height (AppSizes.buttonHeight).
 class GradientButton extends StatelessWidget {
   const GradientButton({
     required this.text,
     required this.onPressed,
     this.isLoading = false,
-    this.gradient,
-    this.height = 52,
+    this.height,
     super.key,
   });
 
   final String text;
   final VoidCallback? onPressed;
   final bool isLoading;
-  final LinearGradient? gradient;
-  final double height;
+  // Nullable so the widget resolves the default via AppSizes at build time.
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
-    // Fall back to the theme's primary gradient if no custom gradient is provided.
-    final effectiveGradient = gradient ?? context.colors.primaryGradient;
+    final effectiveHeight = height ?? AppSizes.buttonHeight;
 
     return Container(
       width: double.infinity,
-      height: height,
+      height: effectiveHeight,
       decoration: BoxDecoration(
-        gradient: onPressed != null ? effectiveGradient : null,
-        color: onPressed == null ? context.colors.border : null,
+        color: onPressed != null ? context.colors.primary : context.colors.border,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         boxShadow: onPressed != null ? AppShadows.button : null,
       ),
@@ -41,8 +40,8 @@ class GradientButton extends StatelessWidget {
           child: Center(
             child: isLoading
                 ? SizedBox(
-                    height: 24,
-                    width: 24,
+                    height: AppSizes.iconLg,
+                    width: AppSizes.iconLg,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
                       valueColor: AlwaysStoppedAnimation<Color>(

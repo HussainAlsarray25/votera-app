@@ -8,14 +8,27 @@ import 'package:flutter/material.dart';
 class AppShadows {
   AppShadows._();
 
-  // Standard card elevation — deeper black for visibility on dark surfaces.
-  static List<BoxShadow> get card => [
+  // Card elevation — adapts to theme brightness.
+  // Dark mode uses a strong black shadow for visibility on dark surfaces.
+  // Light mode uses a subtle shadow so it doesn't look too heavy on white.
+  static List<BoxShadow> card(Brightness brightness) {
+    if (brightness == Brightness.dark) {
+      return [
         BoxShadow(
           color: Colors.black.withValues(alpha: 0.4),
           blurRadius: 16,
           offset: const Offset(0, 4),
         ),
       ];
+    }
+    return [
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.08),
+        blurRadius: 8,
+        offset: const Offset(0, 2),
+      ),
+    ];
+  }
 
   // Hover/focus state — subtle green glow to indicate interactivity.
   static List<BoxShadow> get cardHover => [

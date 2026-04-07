@@ -51,8 +51,8 @@ class _NotificationToastState extends State<NotificationToast> {
 
   Widget _buildContent(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      margin: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -64,14 +64,18 @@ class _NotificationToastState extends State<NotificationToast> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
               color: context.colors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
             ),
-            child: Icon(widget.icon, color: context.colors.primary, size: 20),
+            child: Icon(
+              widget.icon,
+              color: context.colors.primary,
+              size: AppSizes.iconMd,
+            ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

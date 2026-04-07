@@ -17,7 +17,10 @@ class AppConfig {
 
   static const AppConfig instance = AppConfig(
     apiBaseUrl: '$_host/${ApiVersion.current}/',
-    connectivityUrl: 'https://clients3.google.com/generate_204',
+    // Using the app's own API host avoids relying on Google, which may be
+    // blocked or unreliable in some regions (e.g. Iraq). If this endpoint
+    // is reachable, the API itself is reachable.
+    connectivityUrl: 'https://api.votera.space',
     appName: 'Votera',
     enableLogging: true,
   );

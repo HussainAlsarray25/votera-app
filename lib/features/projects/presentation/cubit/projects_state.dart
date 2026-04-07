@@ -21,6 +21,7 @@ class ProjectsLoaded extends ProjectsState {
     required this.projects,
     required this.hasNextPage,
     required this.currentPage,
+    required this.total,
   });
 
   final List<ProjectEntity> projects;
@@ -30,8 +31,14 @@ class ProjectsLoaded extends ProjectsState {
 
   final int currentPage;
 
+  /// Total number of projects across all pages.
+  final int total;
+
+  /// Computes total page count for a given page size.
+  int totalPages(int size) => size > 0 ? (total / size).ceil() : 1;
+
   @override
-  List<Object?> get props => [projects, hasNextPage, currentPage];
+  List<Object?> get props => [projects, hasNextPage, currentPage, total];
 }
 
 /// Emitted when a single project has been fetched or created/updated.
@@ -54,14 +61,42 @@ class ProjectSaved extends ProjectsState {
   List<Object?> get props => [project];
 }
 
-/// Emitted when the upload URL has been retrieved successfully.
-class UploadUrlReady extends ProjectsState {
-  const UploadUrlReady({required this.uploadUrl});
+/// Emitted after a cover image is uploaded successfully.
+/// [uploadResponse] contains the image ID and public URL.
+class ProjectCoverUploaded extends ProjectsState {
+  const ProjectCoverUploaded({required this.uploadResponse});
 
-  final UploadUrlEntity uploadUrl;
+  final MediaUploadResponseEntity uploadResponse;
 
   @override
-  List<Object?> get props => [uploadUrl];
+  List<Object?> get props => [uploadResponse];
+}
+
+/// Emitted after the project cover image is deleted.
+class ProjectCoverDeleted extends ProjectsState {
+  const ProjectCoverDeleted();
+}
+
+/// Emitted after an extra image is uploaded successfully.
+/// [uploadResponse] contains the image ID and public URL.
+class ProjectExtraImageUploaded extends ProjectsState {
+  const ProjectExtraImageUploaded({required this.uploadResponse});
+
+  final MediaUploadResponseEntity uploadResponse;
+
+  @override
+  List<Object?> get props => [uploadResponse];
+}
+
+/// Emitted after a specific extra image is deleted.
+/// [imageId] identifies which image was removed so the UI can update its list.
+class ProjectExtraImageDeleted extends ProjectsState {
+  const ProjectExtraImageDeleted({required this.imageId});
+
+  final String imageId;
+
+  @override
+  List<Object?> get props => [imageId];
 }
 
 /// Emitted after a project category is added or removed.
@@ -69,9 +104,9 @@ class ProjectCategoryUpdated extends ProjectsState {
   const ProjectCategoryUpdated();
 }
 
-/// Emitted after a media attachment is deleted from a project.
-class ProjectMediaDeleted extends ProjectsState {
-  const ProjectMediaDeleted();
+/// Emitted after a draft project is permanently deleted.
+class ProjectDeleted extends ProjectsState {
+  const ProjectDeleted();
 }
 
 /// Emitted when the current user's own project for an event has been loaded.

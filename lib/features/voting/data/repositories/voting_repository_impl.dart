@@ -5,10 +5,8 @@ import 'package:votera/core/network/network_info.dart';
 import 'package:votera/features/voting/data/datasources/remote/voting_remote_data_source.dart';
 import 'package:votera/features/voting/data/models/tally_model.dart';
 import 'package:votera/features/voting/data/models/vote_model.dart';
-import 'package:votera/features/voting/data/models/voting_area_model.dart';
 import 'package:votera/features/voting/domain/entities/tally_entity.dart';
 import 'package:votera/features/voting/domain/entities/vote_entity.dart';
-import 'package:votera/features/voting/domain/entities/voting_area_entity.dart';
 import 'package:votera/features/voting/domain/repositories/voting_repository.dart';
 
 class VotingRepositoryImpl implements VotingRepository {
@@ -102,18 +100,4 @@ class VotingRepositoryImpl implements VotingRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, VotingAreaEntity>> getVotingArea({
-    required String eventId,
-  }) async {
-    if (!await networkInfo.isConnected) {
-      return const Left(NetworkFailure(message: 'No internet connection'));
-    }
-    try {
-      final result = await remoteDataSource.getVotingArea(eventId: eventId);
-      return Right(VotingAreaModel.fromJson(result));
-    } on Exception catch (e) {
-      return Left(ServerFailure(message: extractErrorMessage(e)));
-    }
-  }
 }

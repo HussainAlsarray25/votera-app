@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/design_system.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 /// A horizontal list of projects the current user has voted for.
 class ProfileVotedProjectsSection extends StatelessWidget {
@@ -13,19 +15,19 @@ class ProfileVotedProjectsSection extends StatelessWidget {
         Padding(
           padding: AppSpacing.pagePadding,
           child: Text(
-            'Your Votes',
+            AppLocalizations.of(context)!.yourVotes,
             style: AppTypography.h3.copyWith(color: context.colors.textPrimary),
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         SizedBox(
-          height: 100,
+          height: 100.h,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: AppSpacing.pagePadding,
             itemCount: 4,
-            separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
-            itemBuilder: (context, index) => _buildVotedCard(context, index),
+            separatorBuilder: (_, __) => SizedBox(width: AppSpacing.sm),
+            itemBuilder: _buildVotedCard,
           ),
         ),
       ],
@@ -42,8 +44,8 @@ class ProfileVotedProjectsSection extends StatelessWidget {
     ];
 
     return Container(
-      width: 140,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      width: 140.w,
+      padding: EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: colors[index].withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -53,7 +55,7 @@ class ProfileVotedProjectsSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.code, color: colors[index], size: 22),
+          Icon(Icons.code, color: colors[index], size: AppSizes.iconMd),
           const Spacer(),
           Text(
             names[index],
@@ -62,7 +64,7 @@ class ProfileVotedProjectsSection extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           Text(
-            'Voted',
+            AppLocalizations.of(context)!.voted,
             style: AppTypography.caption.copyWith(
               color: context.colors.textHint,
             ),

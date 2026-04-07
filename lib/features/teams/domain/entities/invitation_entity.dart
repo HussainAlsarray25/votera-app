@@ -29,12 +29,16 @@ class InvitationEntity extends Equatable {
     required this.inviteeId,
     required this.invitedBy,
     required this.status,
+    this.teamName,
     this.createdAt,
     this.respondedAt,
   });
 
   final String id;
   final String teamId;
+
+  // Human-readable team name returned by the API alongside the team ID.
+  final String? teamName;
   final String inviteeId;
   final String invitedBy;
   final InvitationStatus status;
@@ -45,6 +49,7 @@ class InvitationEntity extends Equatable {
   List<Object?> get props => [
         id,
         teamId,
+        teamName,
         inviteeId,
         invitedBy,
         status,

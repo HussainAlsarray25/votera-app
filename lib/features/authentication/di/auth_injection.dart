@@ -7,13 +7,16 @@ import 'package:votera/features/authentication/data/repositories/auth_repository
 import 'package:votera/features/authentication/data/services/token_service.dart';
 import 'package:votera/features/authentication/domain/repositories/auth_repository.dart';
 import 'package:votera/features/authentication/domain/usecases/change_password.dart';
+import 'package:votera/features/authentication/domain/usecases/clear_pending_telegram_session.dart';
 import 'package:votera/features/authentication/domain/usecases/confirm_reset_password.dart';
 import 'package:votera/features/authentication/domain/usecases/get_telegram_status.dart';
+import 'package:votera/features/authentication/domain/usecases/load_pending_telegram_session.dart';
 import 'package:votera/features/authentication/domain/usecases/login_user.dart';
 import 'package:votera/features/authentication/domain/usecases/logout_user.dart';
 import 'package:votera/features/authentication/domain/usecases/register_user.dart';
 import 'package:votera/features/authentication/domain/usecases/request_telegram_link.dart';
 import 'package:votera/features/authentication/domain/usecases/reset_password.dart';
+import 'package:votera/features/authentication/domain/usecases/save_pending_telegram_session.dart';
 import 'package:votera/features/authentication/domain/usecases/verify_login.dart';
 import 'package:votera/features/authentication/domain/usecases/verify_registration.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
@@ -34,6 +37,9 @@ void initAuthFeature(GetIt sl) {
         confirmResetPassword: sl<ConfirmResetPassword>(),
         requestTelegramLink: sl<RequestTelegramLink>(),
         getTelegramStatus: sl<GetTelegramStatus>(),
+        savePendingTelegramSession: sl<SavePendingTelegramSession>(),
+        loadPendingTelegramSession: sl<LoadPendingTelegramSession>(),
+        clearPendingTelegramSession: sl<ClearPendingTelegramSession>(),
       ),
     )
     // Use cases
@@ -66,6 +72,15 @@ void initAuthFeature(GetIt sl) {
     )
     ..registerLazySingleton<GetTelegramStatus>(
       () => GetTelegramStatus(sl<AuthRepository>()),
+    )
+    ..registerLazySingleton<SavePendingTelegramSession>(
+      () => SavePendingTelegramSession(sl<AuthRepository>()),
+    )
+    ..registerLazySingleton<LoadPendingTelegramSession>(
+      () => LoadPendingTelegramSession(sl<AuthRepository>()),
+    )
+    ..registerLazySingleton<ClearPendingTelegramSession>(
+      () => ClearPendingTelegramSession(sl<AuthRepository>()),
     )
     // Repositories
     ..registerLazySingleton<AuthRepository>(

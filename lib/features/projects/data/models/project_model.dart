@@ -1,4 +1,5 @@
-import 'package:votera/features/projects/data/models/project_media_model.dart';
+import 'package:votera/features/categories/data/models/category_model.dart';
+import 'package:votera/features/projects/data/models/extra_image_model.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 
 /// Data model for [ProjectEntity]. Handles JSON deserialization
@@ -10,7 +11,9 @@ class ProjectModel extends ProjectEntity {
     required super.teamId,
     required super.title,
     required super.status,
-    required super.media,
+    required super.images,
+    required super.categories,
+    super.coverUrl,
     super.createdAt,
     super.updatedAt,
     super.description,
@@ -22,12 +25,14 @@ class ProjectModel extends ProjectEntity {
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
     // Unwrap the API envelope { success, message, data: {...} } when present.
-    // Single-object endpoints return the envelope directly; list endpoints
-    // (via PaginatedResponse) pass the inner item already unwrapped.
-    final payload =
-        json['data'] is Map<String, dynamic> ? json['data'] as Map<String, dynamic> : json;
+    // Single-object endpoints return the envelope directly; list endpoints (via
+    // PaginatedResponse) pass the inner item already unwrapped.
+    final payload = json['data'] is Map<String, dynamic>
+        ? json['data'] as Map<String, dynamic>
+        : json;
 
-    final rawMedia = payload['media'] as List<dynamic>? ?? [];
+    final rawImages = payload['images'] as List<dynamic>? ?? [];
+    final rawCategories = payload['categories'] as List<dynamic>? ?? [];
 
     return ProjectModel(
       id: payload['id']?.toString() ?? '',
@@ -40,8 +45,12 @@ class ProjectModel extends ProjectEntity {
       techStack: payload['tech_stack'] as String?,
       barcodeToken: payload['barcode_token'] as String?,
       status: projectStatusFromString(payload['status'] as String?),
-      media: rawMedia
-          .map((e) => ProjectMediaModel.fromJson(e as Map<String, dynamic>))
+      coverUrl: payload['cover_url'] as String?,
+      images: rawImages
+          .map((e) => ExtraImageModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      categories: rawCategories
+          .map((e) => CategoryModel.fromJson(e as Map<String, dynamic>))
           .toList(),
       createdAt: payload['created_at'] != null
           ? DateTime.tryParse(payload['created_at'].toString())

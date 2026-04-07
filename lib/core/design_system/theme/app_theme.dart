@@ -14,7 +14,7 @@ class AppTheme {
 
   static ThemeData get lightTheme => _build(AppColorScheme.light, Brightness.light);
 
-  static ThemeData _build(AppColorScheme colors, Brightness brightness) {
+static ThemeData _build(AppColorScheme colors, Brightness brightness) {
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
@@ -43,6 +43,12 @@ class AppTheme {
         backgroundColor: colors.surface,
         foregroundColor: colors.textPrimary,
         surfaceTintColor: Colors.transparent,
+        titleTextStyle: TextStyle(
+          color: colors.textPrimary,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
+        iconTheme: IconThemeData(color: colors.textPrimary),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
@@ -55,7 +61,7 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: colors.surface,
-        contentPadding: const EdgeInsets.symmetric(
+        contentPadding: EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.md,
         ),
@@ -108,6 +114,25 @@ class AppTheme {
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelTextStyle: TextStyle(color: colors.textHint),
+      ),
+      iconTheme: IconThemeData(color: colors.textSecondary),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: colors.primary,
+        foregroundColor: colors.textOnPrimary,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: colors.cardBackground,
+        selectedColor: colors.primary,
+        labelStyle: TextStyle(color: colors.textPrimary),
+        secondaryLabelStyle: TextStyle(color: colors.textOnPrimary),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+      ),
+      dividerTheme: DividerThemeData(
+        color: colors.divider,
+        thickness: 1,
       ),
     );
   }

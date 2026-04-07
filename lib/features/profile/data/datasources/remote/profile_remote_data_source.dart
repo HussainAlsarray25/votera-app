@@ -5,9 +5,13 @@ import 'package:votera/features/profile/data/datasources/remote/profile_endpoint
 abstract class ProfileRemoteDataSource {
   Future<Map<String, dynamic>> getUserProfile();
   Future<Map<String, dynamic>> updateUserProfile({String? fullName});
-  /// Uploads [filePath] as the user's profile picture.
-  /// Returns the new avatar URL on success.
-  Future<String> uploadAvatar(String filePath);
+  /// Uploads a profile picture. Use [filePath] on mobile/desktop and
+  /// [bytes] + [fileName] on web where a file path is not available.
+  Future<String> uploadAvatar({
+    String? filePath,
+    List<int>? bytes,
+    String? fileName,
+  });
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -17,7 +21,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>> getUserProfile() async {
-    final response = await apiClient.get<Map<String, dynamic>>(ProfileEndpoints.me);
+    final response =
+        await apiClient.get<Map<String, dynamic>>(ProfileEndpoints.me);
     // Identity module wraps response in {success, data}
     final body = response.data!;
     if (body.containsKey('data')) {
@@ -45,10 +50,23 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<String> uploadAvatar(String filePath) async {
-    final formData = FormData.fromMap({
-      'avatar': await MultipartFile.fromFile(filePath),
-    });
+  Future<String> uploadAvatar({
+    String? filePath,
+    List<int>? bytes,
+    String? fileName,
+  }) async {
+    final MultipartFile avatarFile;
+    if (filePath != null) {
+      // Mobile / desktop — read directly from the file system path.
+      avatarFile = await MultipartFile.fromFile(filePath, filename: fileName);
+    } else if (bytes != null) {
+      // Web — file path is unavailable, use the in-memory bytes instead.
+      avatarFile = MultipartFile.fromBytes(bytes, filename: fileName ?? 'avatar');
+    } else {
+      throw ArgumentError('Either filePath or bytes must be provided');
+    }
+
+    final formData = FormData.fromMap({'avatar': avatarFile});
 
     final response = await apiClient.post<Map<String, dynamic>>(
       ProfileEndpoints.avatar,

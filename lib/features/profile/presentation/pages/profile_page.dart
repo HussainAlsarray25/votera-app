@@ -4,7 +4,7 @@ import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:votera/features/profile/presentation/widgets/profile_actions_section.dart';
 import 'package:votera/features/profile/presentation/widgets/profile_header_section.dart';
-import 'package:votera/features/profile/presentation/widgets/profile_stats_section.dart';
+import 'package:votera/features/profile/presentation/widgets/profile_verification_section.dart';
 
 /// User profile screen showing personal info, voting stats,
 /// and account actions.
@@ -23,7 +23,7 @@ class _ProfilePageState extends State<ProfilePage> {
     // Load profile data if not already loaded
     final profileState = context.read<ProfileCubit>().state;
     if (profileState is! ProfileLoaded) {
-      context.read<ProfileCubit>().loadProfile();
+      context.read<ProfileCubit>().loadProfile().ignore();
     }
   }
 
@@ -42,15 +42,15 @@ class _ProfilePageState extends State<ProfilePage> {
         child: RefreshIndicator(
           onRefresh: () => context.read<ProfileCubit>().forceRefresh(),
           color: context.colors.primary,
-          child: const SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
-                ProfileHeaderSection(),
+                const ProfileHeaderSection(),
                 SizedBox(height: AppSpacing.lg),
-                ProfileStatsSection(),
+                const ProfileActionsSection(),
                 SizedBox(height: AppSpacing.lg),
-                ProfileActionsSection(),
+                const ProfileVerificationSection(),
                 SizedBox(height: AppSpacing.xxl),
               ],
             ),
@@ -70,27 +70,27 @@ class _ProfilePageState extends State<ProfilePage> {
             color: context.colors.primary,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: const Row(
+              padding: EdgeInsets.all(AppSpacing.lg),
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Left column: header + stats
                   SizedBox(
                     width: 360,
-                    child: Column(
+                    child: const Column(
                       children: [
                         ProfileHeaderSection(),
-                        SizedBox(height: AppSpacing.lg),
-                        ProfileStatsSection(),
                       ],
                     ),
                   ),
                   SizedBox(width: AppSpacing.lg),
-                  // Right column: actions
+                  // Right column: actions + verification cards
                   Expanded(
                     child: Column(
                       children: [
-                        ProfileActionsSection(),
+                        const ProfileActionsSection(),
+                        SizedBox(height: AppSpacing.lg),
+                        const ProfileVerificationSection(),
                         SizedBox(height: AppSpacing.xxl),
                       ],
                     ),

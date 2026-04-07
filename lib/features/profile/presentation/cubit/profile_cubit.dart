@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/usecases/usecase.dart';
 import 'package:votera/features/profile/domain/entities/user_profile.dart';
@@ -40,8 +41,10 @@ class ProfileCubit extends Cubit<ProfileState> {
       },
     );
 
-    // Only show a loading spinner if there was no cached data to display.
-    if (state is! ProfileLoaded) emit(ProfileLoading());
+    // Only show a loading spinner if there is no profile data on screen at all.
+    // When called after an avatar upload the state is ProfileAvatarUploading,
+    // which already holds a profile — spinning would blank out the screen.
+    if (_currentProfile == null) emit(ProfileLoading());
 
     // Phase 2: fetch fresh data from the backend.
     final result = await getUserProfile(NoParams());
@@ -61,7 +64,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   /// is not shown to the next user session.
   void reset() {
     // Fire-and-forget — the result does not affect the reset flow.
-    clearProfileCache(NoParams());
+    clearProfileCache(NoParams()).ignore();
     emit(ProfileInitial());
   }
 
@@ -74,26 +77,43 @@ class ProfileCubit extends Cubit<ProfileState> {
   }
 
   Future<void> updateProfile({String? fullName}) async {
-    emit(ProfileLoading());
+    // Keep the current profile visible while the request is in flight so the
+    // screen does not blank out or show a skeleton during a simple name change.
+    final current = _currentProfile;
+    if (current != null) {
+      emit(ProfileUpdating(profile: current));
+    } else {
+      emit(ProfileLoading());
+    }
+
     final result = await updateUserProfile(
       UpdateProfileParams(fullName: fullName),
     );
     result.fold(
-      (failure) => emit(ProfileError(message: failure.message)),
+      // Carry the previous profile in the error state so the UI keeps
+      // showing data instead of going blank after a failed update.
+      (failure) => emit(ProfileError(message: failure.message, profile: current)),
       (profile) => emit(ProfileLoaded(profile: profile)),
     );
   }
 
-  /// Uploads [filePath] as the new profile picture.
+  /// Uploads the picked [file] as the new profile picture.
+  /// On mobile/desktop uses the file path; on web falls back to bytes.
   /// Emits [ProfileAvatarUploading] while uploading, then [ProfileLoaded]
   /// with the refreshed profile on success, or [ProfileError] on failure.
-  Future<void> uploadAvatar(String filePath) async {
+  Future<void> uploadAvatar(PlatformFile file) async {
     final currentProfile = _currentProfile;
     if (currentProfile != null) {
       emit(ProfileAvatarUploading(profile: currentProfile));
     }
 
-    final result = await uploadAvatarUseCase(UploadAvatarParams(filePath: filePath));
+    final result = await uploadAvatarUseCase(
+      UploadAvatarParams(
+        filePath: file.path,
+        bytes: file.bytes != null ? List<int>.from(file.bytes!) : null,
+        fileName: file.name,
+      ),
+    );
     result.fold(
       (failure) => emit(ProfileError(message: failure.message)),
       (_) async {
@@ -107,7 +127,9 @@ class ProfileCubit extends Cubit<ProfileState> {
   UserProfile? get _currentProfile {
     final s = state;
     if (s is ProfileLoaded) return s.profile;
+    if (s is ProfileUpdating) return s.profile;
     if (s is ProfileAvatarUploading) return s.profile;
+    if (s is ProfileError) return s.profile;
     return null;
   }
 }

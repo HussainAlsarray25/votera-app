@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:votera/core/design_system/theme/app_theme.dart';
+import 'package:votera/core/design_system/utils/real_viewport.dart';
 import 'package:votera/core/di/injection_container.dart' as di;
 import 'package:votera/core/router/app_router.dart';
 import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/features/force_update/presentation/cubit/force_update_cubit.dart';
+import 'package:votera/features/force_update/presentation/widgets/force_update_guard.dart';
 import 'package:votera/features/notification/presentation/cubit/push_notification_cubit.dart';
 import 'package:votera/features/notification/presentation/cubit/unread_count_cubit.dart';
 import 'package:votera/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:votera/features/settings/presentation/cubit/locale_cubit.dart';
 import 'package:votera/features/settings/presentation/cubit/theme_cubit.dart';
+import 'package:votera/l10n/gen/app_localizations.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -18,6 +23,10 @@ class App extends StatelessWidget {
     final appRouter = di.sl<AppRouter>();
     return MultiBlocProvider(
       providers: [
+        BlocProvider<ForceUpdateCubit>(
+          // Trigger the version check immediately on app start.
+          create: (_) => di.sl<ForceUpdateCubit>()..check(),
+        ),
         BlocProvider.value(value: di.sl<AuthCubit>()),
         BlocProvider<ProfileCubit>(
           create: (_) => di.sl<ProfileCubit>(),
@@ -27,36 +36,74 @@ class App extends StatelessWidget {
           create: (_) => di.sl<UnreadCountCubit>()..loadUnreadCount(),
         ),
         BlocProvider.value(value: di.sl<ThemeCubit>()),
+        BlocProvider.value(value: di.sl<LocaleCubit>()),
       ],
       child: _AuthStateListener(
-        child: BlocBuilder<ThemeCubit, ThemeMode>(
-          builder: (context, themeMode) {
-            return ScreenUtilInit(
-              designSize: const Size(375, 812),
-              minTextAdapt: true,
-              splitScreenMode: true,
-              useInheritedMediaQuery: true,
-              builder: (context, child) {
-                return MaterialApp.router(
-                  title: 'Votera',
-                  theme: AppTheme.lightTheme,
-                  darkTheme: AppTheme.darkTheme,
-                  themeMode: themeMode,
-                  debugShowCheckedModeBanner: false,
-                  routerConfig: appRouter.router,
-                  builder: (context, child) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(
-                        textScaler: TextScaler.linear(
-                          MediaQuery.of(context)
-                              .textScaler
-                              .scale(1)
-                              .clamp(0.8, 1.2),
-                        ),
-                      ),
-                      child: child ?? const SizedBox.shrink(),
-                    );
-                  },
+        child: BlocBuilder<LocaleCubit, Locale>(
+          builder: (context, locale) {
+            return BlocBuilder<ThemeCubit, ThemeMode>(
+              builder: (context, themeMode) {
+                // Store the real screen size so that AppBreakpoints and layout
+                // widgets (CenteredContent, FormCardShell, NavigationRail) can
+                // read the true viewport width for layout decisions.
+                //
+                // ScreenUtil 5.9.x reads the FlutterView directly via
+                // View.maybeOf(context), bypassing MediaQuery entirely, so
+                // MediaQuery clamping has no effect on token scaling.
+                // Instead we disable ScreenUtil's scaling via enableScaleWH
+                // and enableScaleText callbacks (both return false) so that
+                // all .r/.w/.h/.sp calls return raw design values (1× scale).
+                // AppBreakpoints reads from RealViewport, not MediaQuery, so
+                // breakpoint checks remain correct on all viewport sizes.
+                final rawMq = MediaQuery.of(context);
+
+                return RealViewport(
+                  size: rawMq.size,
+                  child: ScreenUtilInit(
+                    designSize: const Size(375, 812),
+                    // Disable ScreenUtil's adaptive scaling so tokens always
+                    // return their 1× design values regardless of viewport
+                    // width. Layout responsiveness is handled entirely by
+                    // AppBreakpoints + RealViewport, not by token scaling.
+                    enableScaleWH: () => false,
+                    enableScaleText: () => false,
+                    splitScreenMode: false,
+                    minTextAdapt: false,
+                    useInheritedMediaQuery: false,
+                    builder: (context, child) {
+                      return MaterialApp.router(
+                        title: 'Votera',
+                        theme: AppTheme.lightTheme,
+                        darkTheme: AppTheme.darkTheme,
+                        themeMode: themeMode,
+                        locale: locale,
+                        localizationsDelegates:
+                            AppLocalizations.localizationsDelegates,
+                        supportedLocales: AppLocalizations.supportedLocales,
+                        debugShowCheckedModeBanner: false,
+                        routerConfig: appRouter.router,
+                        builder: (context, child) {
+                          // Clamp system text scale so that device accessibility
+                          // font settings don't cause UI overflow. This is the
+                          // only MediaQuery adjustment needed since ScreenUtil
+                          // scaling is now fully disabled.
+                          return MediaQuery(
+                            data: MediaQuery.of(context).copyWith(
+                              textScaler: TextScaler.linear(
+                                MediaQuery.of(context)
+                                    .textScaler
+                                    .scale(1)
+                                    .clamp(0.8, 1.2),
+                              ),
+                            ),
+                            child: ForceUpdateGuard(
+                              child: child ?? const SizedBox.shrink(),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 );
               },
             );
@@ -70,10 +117,32 @@ class App extends StatelessWidget {
 /// Listens to auth state changes and manages session data.
 /// On login: loads fresh profile and unread notification count.
 /// On logout: resets all user-scoped cubits so stale data is cleared.
-class _AuthStateListener extends StatelessWidget {
+///
+/// Also triggers checkAuthStatus() on the first frame so that the profile
+/// is loaded on every app start, regardless of which route is entered first.
+/// Without this, GoRouter's redirect can bypass the SplashPage and the
+/// profile would never load (leaving Teams and MyProject tabs empty).
+class _AuthStateListener extends StatefulWidget {
   const _AuthStateListener({required this.child});
 
   final Widget child;
+
+  @override
+  State<_AuthStateListener> createState() => _AuthStateListenerState();
+}
+
+class _AuthStateListenerState extends State<_AuthStateListener> {
+  @override
+  void initState() {
+    super.initState();
+    // Defer until the first frame so the BlocListener is fully subscribed
+    // before the state change fires.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<AuthCubit>().checkAuthStatus();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +156,7 @@ class _AuthStateListener extends StatelessWidget {
           context.read<UnreadCountCubit>().reset();
         }
       },
-      child: child,
+      child: widget.child,
     );
   }
 }

@@ -1,4 +1,38 @@
+import 'dart:math' as math;
+
 import 'package:votera/core/domain/services/location_service.dart';
+
+/// Earth's mean radius in metres, used for Haversine calculations.
+const double _earthRadiusMetres = 6371000;
+
+/// Returns true if [point] is within [radiusMetres] of [centre].
+///
+/// Uses the Haversine formula to compute the great-circle distance between
+/// the two coordinates. If [centre] is null the check is skipped and the
+/// function returns true (no restriction configured).
+bool isWithinRadius(
+  GeoPosition point,
+  GeoPosition? centre, {
+  double radiusMetres = 500,
+}) {
+  if (centre == null) return true;
+
+  final dLat = _toRadians(point.latitude - centre.latitude);
+  final dLng = _toRadians(point.longitude - centre.longitude);
+
+  final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+      math.cos(_toRadians(centre.latitude)) *
+          math.cos(_toRadians(point.latitude)) *
+          math.sin(dLng / 2) *
+          math.sin(dLng / 2);
+
+  final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+  final distance = _earthRadiusMetres * c;
+
+  return distance <= radiusMetres;
+}
+
+double _toRadians(double degrees) => degrees * math.pi / 180;
 
 /// Tolerance for floating-point comparisons in boundary checks.
 const double _epsilon = 1e-9;

@@ -103,4 +103,31 @@ class FormsRepositoryImpl implements FormsRepository {
       return Left(ServerFailure(message: extractErrorMessage(e)));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> requestSupervisorEmailOtp(String email) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      await remoteDataSource.requestSupervisorEmailOtp(email);
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> verifySupervisorEmailOtp(
+      String email, String code) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      await remoteDataSource.verifySupervisorEmailOtp(email, code);
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: extractErrorMessage(e)));
+    }
+  }
 }

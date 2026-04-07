@@ -17,6 +17,8 @@ import 'package:votera/core/services/location_service_impl.dart';
 import 'package:votera/features/authentication/data/services/token_service.dart';
 import 'package:votera/features/authentication/data/services/token_service_auth_provider.dart';
 import 'package:votera/features/authentication/di/auth_injection.dart';
+import 'package:votera/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:votera/features/notification/presentation/cubit/push_notification_cubit.dart';
 import 'package:votera/features/categories/di/categories_injection.dart';
 import 'package:votera/features/certifications/di/certifications_injection.dart';
 import 'package:votera/features/comments/di/comments_injection.dart';
@@ -32,6 +34,7 @@ import 'package:votera/features/ratings/di/ratings_injection.dart';
 import 'package:votera/features/rankings/di/rankings_injection.dart';
 import 'package:votera/features/participant_forms/di/forms_injection.dart';
 import 'package:votera/features/teams/di/teams_injection.dart';
+import 'package:votera/features/force_update/di/force_update_injection.dart';
 import 'package:votera/features/settings/di/settings_injection.dart';
 import 'package:votera/features/voting/di/voting_injection.dart';
 
@@ -72,7 +75,9 @@ Future<void> _initExternalDependencies(AppConfig config) async {
           baseUrl: config.apiBaseUrl,
           connectTimeout: const Duration(seconds: 30),
           receiveTimeout: const Duration(seconds: 30),
-          sendTimeout: const Duration(seconds: 30),
+          // sendTimeout only applies to requests with a body (POST/PUT/PATCH).
+          // On web, Dio warns if sendTimeout is set on bodyless requests (GET/HEAD),
+          // so it is omitted here and applied per-request when needed.
         );
 
       // Logger goes first so it captures both requests and error responses
@@ -107,9 +112,19 @@ void _initCore() {
 }
 
 void _initFeatures() {
+  initForceUpdateFeature(sl);
+
   initAuthFeature(sl);
   initProfileFeature(sl);
   initNotificationFeature(sl);
+
+  // Wire up the pre-logout callback after both singletons are registered.
+  // AuthCubit calls this before clearing tokens so the push token DELETE
+  // request still has a valid Authorization header.
+  sl<AuthCubit>().setPreLogoutCallback(
+    sl<PushNotificationCubit>().unregisterToken,
+  );
+
   initOnboardingFeature(sl);
   initHomeFeature(sl);
   initCategoriesFeature(sl);
