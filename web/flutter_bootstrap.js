@@ -1,22 +1,36 @@
 {{flutter_js}}
 {{flutter_build_config}}
 
-// Detect iOS devices. All iOS browsers (Safari, Chrome, Firefox) use WebKit,
-// which has strict memory limits and limited WASM threading support.
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+// iPhone has a hard ~256MB WebGL memory limit. CanvasKit (which uses WebGL)
+// frequently exceeds this on content-heavy screens and causes a silent GPU
+// context loss that produces a blank white screen. The HTML renderer avoids
+// WebGL entirely and is the only reliable option for iPhone browsers.
+// iPad and macOS Safari have much higher memory ceilings so they can use
+// CanvasKit safely without any performance degradation.
+const userAgent = navigator.userAgent;
+const isIPhone = /iPhone|iPod/.test(userAgent) && !window.MSStream;
+const isIPad = /iPad/.test(userAgent) ||
+  // iPadOS 13+ reports itself as Macintosh — detect by touch support.
+  (/Macintosh/.test(userAgent) && navigator.maxTouchPoints > 1);
 
 _flutter.loader.load({
   serviceWorkerSettings: {
     serviceWorkerVersion: {{flutter_service_worker_version}},
   },
   onEntrypointLoaded: async function (engineInitializer) {
-    const appRunner = await engineInitializer.initializeEngine(
-      // On iOS: force canvaskit (JS-based). This avoids skwasm's WASM
-      // threading which requires COOP/COEP headers that break Firebase auth.
-      // On desktop and Android: pass no config and let Flutter auto-detect
-      // the best renderer — no performance degradation on those platforms.
-      isIOS ? { renderer: 'canvaskit' } : {},
-    );
+    let engineConfig = {};
+
+    if (isIPhone) {
+      // HTML renderer: no WebGL, low memory footprint — required for iPhone.
+      engineConfig = { renderer: 'html' };
+    } else if (isIPad) {
+      // CanvasKit on iPad: more memory available, better visual quality.
+      engineConfig = { renderer: 'canvaskit' };
+    }
+    // Desktop (macOS, Windows, Linux) and Android: use Flutter's default
+    // auto-detection — no config needed, full performance preserved.
+
+    const appRunner = await engineInitializer.initializeEngine(engineConfig);
     await appRunner.runApp();
   },
 });
