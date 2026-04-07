@@ -9,7 +9,10 @@ RUN flutter pub get
 # Copy project and build web artifacts.
 COPY . .
 ARG FLUTTER_BASE_HREF=/
-RUN flutter build web --release --base-href ${FLUTTER_BASE_HREF} --no-wasm-dry-run
+# Use canvaskit renderer for broad browser compatibility, including iOS Safari.
+# canvaskit is JS-based (no WASM threads) so it does not require COOP/COEP headers,
+# which would otherwise break Firebase auth popups on all platforms.
+RUN flutter build web --release --base-href ${FLUTTER_BASE_HREF} --web-renderer canvaskit
 
 # At container start, export the compiled artifacts into the shared dist volume
 # so the separate nginx service can pick them up without re-building.
