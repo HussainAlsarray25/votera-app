@@ -75,6 +75,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       options: Options(
         contentType: contentType,
         headers: {'Content-Length': imageBytes.length},
+        sendTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 30),
       ),
     );
 
