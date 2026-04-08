@@ -104,12 +104,13 @@ class _PodiumItem extends StatelessWidget {
     );
   }
 
-  /// Circular avatar with gradient fill, ring border, and rank badge
+  /// Circular avatar with cover image (or gradient fallback) and rank badge.
   Widget _buildAvatar(
     Color crownColor,
     Color borderColor,
     List<Color> gradientColors,
   ) {
+    final hasCover = entry!.coverUrl != null && entry!.coverUrl!.isNotEmpty;
     final initial =
         entry!.title.isNotEmpty ? entry!.title[0].toUpperCase() : '?';
 
@@ -134,11 +135,13 @@ class _PodiumItem extends StatelessWidget {
               height: avatarSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: gradientColors,
-                ),
+                gradient: hasCover
+                    ? null
+                    : LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: gradientColors,
+                      ),
                 boxShadow: [
                   BoxShadow(
                     color: borderColor.withValues(alpha: 0.3),
@@ -147,16 +150,17 @@ class _PodiumItem extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Center(
-                child: Text(
-                  initial,
-                  style: TextStyle(
-                    fontSize: avatarSize * 0.38,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+              child: hasCover
+                  ? ClipOval(
+                      child: Image.network(
+                        entry!.coverUrl!,
+                        width: avatarSize,
+                        height: avatarSize,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _buildInitial(initial),
+                      ),
+                    )
+                  : _buildInitial(initial),
             ),
           ),
         ),
@@ -194,6 +198,19 @@ class _PodiumItem extends StatelessWidget {
     );
   }
 
+  Widget _buildInitial(String initial) {
+    return Center(
+      child: Text(
+        initial,
+        style: TextStyle(
+          fontSize: avatarSize * 0.38,
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
   Widget _buildTitle(BuildContext context) {
     final label = entry!.title.length > 14
         ? '${entry!.title.substring(0, 12)}...'
@@ -213,7 +230,7 @@ class _PodiumItem extends StatelessWidget {
 
   Widget _buildVotes(BuildContext context) {
     return Text(
-      AppLocalizations.of(context)!.votesWithCount(entry!.voteCount),
+      AppLocalizations.of(context)!.votesWithCount(entry!.totalVotes),
       style: TextStyle(
         fontSize: 12.sp,
         fontWeight: rank == 1 ? FontWeight.w700 : FontWeight.w500,

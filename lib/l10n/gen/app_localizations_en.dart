@@ -573,6 +573,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vote => 'Vote';
 
   @override
+  String get voteSuccess => 'Your vote has been submitted!';
+
+  @override
+  String get imageTooLarge =>
+      'Image is too large. Please choose one under 5 MB.';
+
+  @override
   String get voted => 'Voted';
 
   @override
@@ -824,10 +831,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get rankingsCommunityTab => 'Community';
+  String get projectTeam => 'Team';
 
   @override
   String get rankingsSupervisorTab => 'Supervisor';
+
+  @override
+  String get rankingsStudentTab => 'Student';
+
+  @override
+  String get rankingsVisitorTab => 'Visitor';
 
   @override
   String get noRankingsYet => 'No rankings yet';

@@ -5,28 +5,8 @@ import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/features/projects/domain/entities/project_entity.dart';
 import 'package:votera/shared/widgets/cached_image.dart';
 
-// ---------------------------------------------------------------------------
-// Accent palette — each project gets a consistent pair derived from its title
-// ---------------------------------------------------------------------------
-
-const _accentPalette = [
-  [Color(0xFF3ECF8E), Color(0xFF059669)],
-  [Color(0xFF6366F1), Color(0xFF4338CA)],
-  [Color(0xFFF59E0B), Color(0xFFD97706)],
-  [Color(0xFFEC4899), Color(0xFFBE185D)],
-  [Color(0xFF8B5CF6), Color(0xFF6D28D9)],
-  [Color(0xFF14B8A6), Color(0xFF0F766E)],
-];
-
-List<Color> _accentFor(String title) =>
-    _accentPalette[title.hashCode.abs() % _accentPalette.length];
-
-// ---------------------------------------------------------------------------
-// Card
-// ---------------------------------------------------------------------------
-
-/// Full-bleed project card. The gradient (or image) covers the entire surface;
-/// content floats at the bottom over a dark scrim.
+/// Full-bleed project card. The image (or a neutral dark fallback) covers the
+/// entire surface; content floats at the bottom over a dark scrim.
 ///
 /// Used in both the 2-column grid and the trending horizontal carousel.
 /// Pass [width] to constrain for horizontal layouts.
@@ -44,7 +24,6 @@ class ProjectEntityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = _accentFor(project.title);
     // Prefer the cover image; fall back to the first extra image if no cover.
     final imageUrl = (project.coverUrl ?? '').isNotEmpty
         ? project.coverUrl!
@@ -54,8 +33,6 @@ class ProjectEntityCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => context.push(
         '/project/$eventId/${project.id}',
-        // Pass the visible image URL so the detail page can display it
-        // immediately via Hero before the API response arrives.
         extra: imageUrl,
       ),
       child: Container(
@@ -64,9 +41,9 @@ class ProjectEntityCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           boxShadow: [
             BoxShadow(
-              color: accent.first.withValues(alpha: 0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -75,33 +52,24 @@ class ProjectEntityCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // -- Layer 1: background (image or gradient) wrapped in Hero --
-              // The Hero tag matches the one in ProjectHeaderSection so Flutter
-              // animates the image from the card into the detail page header.
-              Hero(
-                tag: 'project-cover-${project.id}',
-                transitionOnUserGestures: true,
-                child: hasImage
-                    ? CachedImage(
-                        url: imageUrl,
-                        width: double.infinity,
-                        errorIcon: Icons.code,
-                      )
-                    : _buildGradientBackground(accent),
-              ),
+              // -- Layer 1: background (image or neutral fallback) --
+              hasImage
+                  ? CachedImage(
+                      url: imageUrl,
+                      width: double.infinity,
+                      errorIcon: Icons.code,
+                    )
+                  : _buildFallbackBackground(context),
 
-              // -- Layer 2: watermark initial (gradient cards only) --
-              if (!hasImage) _buildWatermark(),
-
-              // -- Layer 3: dark scrim from bottom --
+              // -- Layer 2: dark scrim from bottom --
               _buildScrim(),
 
-              // -- Layer 4: content pinned to bottom --
+              // -- Layer 3: content pinned to bottom --
               Positioned(
                 left: 0,
                 right: 0,
                 bottom: 0,
-                child: _buildContent(context, accent),
+                child: _buildContent(context),
               ),
             ],
           ),
@@ -110,44 +78,12 @@ class ProjectEntityCard extends StatelessWidget {
     );
   }
 
-  Widget _buildGradientBackground(List<Color> accent) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            accent[0],
-            accent[1],
-            Color.lerp(accent[1], Colors.black, 0.4)!,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          stops: const [0.0, 0.55, 1.0],
-        ),
-      ),
-    );
+  // Neutral dark background for cards without an image.
+  Widget _buildFallbackBackground(BuildContext context) {
+    return ColoredBox(color: context.colors.cardBackground);
   }
 
-  // Large semi-transparent letter that bleeds off the top-right corner
-  Widget _buildWatermark() {
-    final initial =
-        project.title.isNotEmpty ? project.title[0].toUpperCase() : '?';
-    return Positioned(
-      top: -16,
-      right: -12,
-      child: Text(
-        initial,
-        style: TextStyle(
-          fontSize: 120.sp,
-          fontWeight: FontWeight.w900,
-          color: Colors.white.withValues(alpha: 0.1),
-          letterSpacing: -6,
-          height: 1,
-        ),
-      ),
-    );
-  }
-
-  // Gradient scrim: transparent at top → dark at bottom
+  // Gradient scrim: transparent at top → dark at bottom for text readability.
   Widget _buildScrim() {
     return Positioned.fill(
       child: DecoratedBox(
@@ -167,8 +103,8 @@ class ProjectEntityCard extends StatelessWidget {
     );
   }
 
-  // Title + description + bottom row, all on top of the scrim
-  Widget _buildContent(BuildContext context, List<Color> accent) {
+  // Title + description + bottom row, all on top of the scrim.
+  Widget _buildContent(BuildContext context) {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.sm + 4,
@@ -213,13 +149,13 @@ class ProjectEntityCard extends StatelessWidget {
             ),
           ],
           SizedBox(height: AppSpacing.sm),
-          _buildBottomRow(accent),
+          _buildBottomRow(),
         ],
       ),
     );
   }
 
-  Widget _buildBottomRow(List<Color> accent) {
+  Widget _buildBottomRow() {
     final hasTech =
         project.techStack != null && project.techStack!.isNotEmpty;
     final firstTag = hasTech
@@ -229,7 +165,6 @@ class ProjectEntityCard extends StatelessWidget {
     return Row(
       children: [
         if (firstTag != null) ...[
-          // Frosted tech pill
           Container(
             constraints: const BoxConstraints(maxWidth: 96),
             padding: EdgeInsets.symmetric(
@@ -256,7 +191,6 @@ class ProjectEntityCard extends StatelessWidget {
           ),
         ],
         const Spacer(),
-        // Accent arrow circle
         Container(
           width: AppSizes.iconLg + 2,
           height: AppSizes.iconLg + 2,

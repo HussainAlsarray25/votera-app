@@ -6,13 +6,16 @@ import 'package:votera/core/di/injection_container.dart';
 import 'package:votera/l10n/gen/app_localizations.dart';
 import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/features/comments/presentation/cubit/comments_cubit.dart';
+import 'package:votera/features/project_details/presentation/cubit/project_team_cubit.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_comments_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_header_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_images_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_info_section.dart';
 import 'package:votera/features/project_details/presentation/widgets/project_rating_section.dart';
+import 'package:votera/features/project_details/presentation/widgets/project_team_section.dart';
 import 'package:votera/features/projects/presentation/cubit/projects_cubit.dart';
 import 'package:votera/features/ratings/presentation/cubit/ratings_cubit.dart';
+import 'package:votera/features/teams/domain/usecases/get_team.dart';
 import 'package:votera/features/voting/presentation/cubit/voting_cubit.dart';
 import 'package:votera/shared/widgets/app_loading_indicator.dart';
 import 'package:votera/shared/widgets/vote_button.dart';
@@ -31,8 +34,8 @@ class ProjectDetailsPage extends StatelessWidget {
   final String eventId;
   final String projectId;
 
-  /// Cover image URL passed from the project card for immediate Hero display.
-  /// Used as a placeholder while the full project details load from the API.
+  /// Cover image URL passed from the project card, shown immediately while
+  /// the full project details load from the API.
   final String? coverUrl;
 
   @override
@@ -54,6 +57,9 @@ class ProjectDetailsPage extends StatelessWidget {
           create: (_) => sl<VotingCubit>()
             ..loadMyVotes(eventId: eventId)
             ..loadEventLocation(eventId: eventId),
+        ),
+        BlocProvider<ProjectTeamCubit>(
+          create: (_) => ProjectTeamCubit(getTeam: sl<GetTeam>()),
         ),
       ],
       child: _ProjectDetailsView(
@@ -147,7 +153,12 @@ class _ProjectDetailsView extends StatelessWidget {
   }
 
   void _handleVotingState(BuildContext context, VotingState state) {
-    if (state is OutsideVotingArea) {
+    if (state is VoteCast) {
+      showAppSnackBar(
+        context,
+        AppLocalizations.of(context)!.voteSuccess,
+      );
+    } else if (state is OutsideVotingArea) {
       showAppSnackBar(context, state.message);
     } else if (state is LocationUnavailable) {
       showAppSnackBar(
@@ -160,6 +171,11 @@ class _ProjectDetailsView extends StatelessWidget {
               )
             : null,
       );
+    } else if (state is VotingError) {
+      showAppSnackBar(context, state.message);
+      // Reload the user's votes so the button returns to the correct
+      // voted/unvoted state after the error (e.g. 409 conflict).
+      context.read<VotingCubit>().loadMyVotes(eventId: eventId);
     }
   }
 
@@ -173,6 +189,8 @@ class _ProjectDetailsView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ProjectInfoSection(projectId: projectId),
+          SizedBox(height: AppSpacing.lg),
+          const ProjectTeamSection(),
           SizedBox(height: AppSpacing.lg),
           const ProjectImagesSection(),
           SizedBox(height: AppSpacing.lg),

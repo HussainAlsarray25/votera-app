@@ -567,6 +567,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vote => 'تصويت';
 
   @override
+  String get voteSuccess => 'تم تسجيل تصويتك!';
+
+  @override
+  String get imageTooLarge =>
+      'الصورة كبيرة جداً. يرجى اختيار صورة أقل من 5 ميغابايت.';
+
+  @override
   String get voted => 'تم التصويت';
 
   @override
@@ -815,10 +822,16 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get rankingsCommunityTab => 'المجتمع';
+  String get projectTeam => 'الفريق';
 
   @override
   String get rankingsSupervisorTab => 'المشرف';
+
+  @override
+  String get rankingsStudentTab => 'الطالب';
+
+  @override
+  String get rankingsVisitorTab => 'الزائر';
 
   @override
   String get noRankingsYet => 'لا توجد تصنيفات بعد';

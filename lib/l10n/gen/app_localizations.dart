@@ -1178,6 +1178,18 @@ abstract class AppLocalizations {
   /// **'Vote'**
   String get vote;
 
+  /// No description provided for @voteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your vote has been submitted!'**
+  String get voteSuccess;
+
+  /// No description provided for @imageTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Image is too large. Please choose one under 5 MB.'**
+  String get imageTooLarge;
+
   /// No description provided for @voted.
   ///
   /// In en, this message translates to:
@@ -1604,17 +1616,29 @@ abstract class AppLocalizations {
   /// **'{count}d ago'**
   String daysAgo(int count);
 
-  /// No description provided for @rankingsCommunityTab.
+  /// No description provided for @projectTeam.
   ///
   /// In en, this message translates to:
-  /// **'Community'**
-  String get rankingsCommunityTab;
+  /// **'Team'**
+  String get projectTeam;
 
   /// No description provided for @rankingsSupervisorTab.
   ///
   /// In en, this message translates to:
   /// **'Supervisor'**
   String get rankingsSupervisorTab;
+
+  /// No description provided for @rankingsStudentTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get rankingsStudentTab;
+
+  /// No description provided for @rankingsVisitorTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Visitor'**
+  String get rankingsVisitorTab;
 
   /// No description provided for @noRankingsYet.
   ///

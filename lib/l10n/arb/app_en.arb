@@ -225,6 +225,8 @@
 
   "pullToRefresh": "Pull down to refresh",
   "vote": "Vote",
+  "voteSuccess": "Your vote has been submitted!",
+  "imageTooLarge": "Image is too large. Please choose one under 5 MB.",
   "voted": "Voted",
   "trending": "Trending",
   "winner": "Winner",
@@ -378,8 +380,10 @@
     }
   },
 
-  "rankingsCommunityTab": "Community",
+  "projectTeam": "Team",
   "rankingsSupervisorTab": "Supervisor",
+  "rankingsStudentTab": "Student",
+  "rankingsVisitorTab": "Visitor",
 
   "noRankingsYet": "No rankings yet",
   "rankingsWillAppear": "Rankings will appear once voting begins.",

@@ -205,6 +205,8 @@
 
   "pullToRefresh": "اسحب للأسفل للتحديث",
   "vote": "تصويت",
+  "voteSuccess": "تم تسجيل تصويتك!",
+  "imageTooLarge": "الصورة كبيرة جداً. يرجى اختيار صورة أقل من 5 ميغابايت.",
   "voted": "تم التصويت",
   "trending": "رائج",
   "winner": "فائز",
@@ -282,8 +284,10 @@
   "hoursAgo": "منذ {count} س",
   "daysAgo": "منذ {count} يوم",
 
-  "rankingsCommunityTab": "المجتمع",
+  "projectTeam": "الفريق",
   "rankingsSupervisorTab": "المشرف",
+  "rankingsStudentTab": "الطالب",
+  "rankingsVisitorTab": "الزائر",
 
   "noRankingsYet": "لا توجد تصنيفات بعد",
   "rankingsWillAppear": "ستظهر التصنيفات عند بدء التصويت.",
