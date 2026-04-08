@@ -125,8 +125,11 @@ class ProfileCubit extends Cubit<ProfileState> {
         fileName: file.name,
       ),
     );
-    result.fold(
-      (failure) => emit(ProfileError(message: failure.message)),
+    // fold returns the value of whichever branch runs. Both branches return
+    // Future<void> so we await the whole expression so loadProfile() is not
+    // fire-and-forget — an unawaited async fold branch throws uncaught errors.
+    await result.fold(
+      (failure) async => emit(ProfileError(message: failure.message)),
       (_) async {
         // Reload profile so the new avatarUrl is reflected.
         await loadProfile();

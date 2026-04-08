@@ -80,7 +80,12 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       ),
     );
 
-    final body = response.data!;
+    // Throw an Exception (not an Error) so the repository's on-Exception catch
+    // can convert it into a Left(Failure) instead of crashing the whole app.
+    final body = response.data;
+    if (body == null) {
+      throw Exception('Avatar upload returned an empty response');
+    }
     // Response: { success: true, message: "...", data: { "url": "https://..." } }
     final dataMap = (body['data'] as Map<String, dynamic>?) ?? {};
     final url = (dataMap['url'] as String?) ?? '';
