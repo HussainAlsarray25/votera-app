@@ -586,7 +586,19 @@ class _CreateProjectFormState extends State<_CreateProjectForm> {
       withData: true,
     );
     if (result == null || result.files.isEmpty) return;
-    setState(() => _pendingCover = result.files.first);
+    final file = result.files.first;
+
+    // Reject large files before storing them in state — old devices crash
+    // when a multi-megabyte Uint8List is held in memory during form fill.
+    const maxBytes = 5 * 1024 * 1024; // 5 MB
+    if (file.size > maxBytes) {
+      if (mounted) {
+        showAppSnackBar(context, AppLocalizations.of(context)!.imageTooLarge);
+      }
+      return;
+    }
+
+    setState(() => _pendingCover = file);
   }
 
   void _removePendingCover() => setState(() => _pendingCover = null);
@@ -2614,6 +2626,15 @@ class _ImageSectionState extends State<_ImageSection> {
     final file = result.files.first;
     if (file.bytes == null) return;
 
+    // Guard against large files crashing old devices with limited heap memory.
+    const maxBytes = 5 * 1024 * 1024; // 5 MB
+    if (file.size > maxBytes) {
+      if (mounted) {
+        showAppSnackBar(context, AppLocalizations.of(context)!.imageTooLarge);
+      }
+      return;
+    }
+
     if (!mounted) return;
     context.read<ProjectsCubit>().uploadCover(
           eventId: widget.eventId,
@@ -2649,6 +2670,15 @@ class _ImageSectionState extends State<_ImageSection> {
     if (result == null || result.files.isEmpty || !mounted) return;
     final file = result.files.first;
     if (file.bytes == null) return;
+
+    // Guard against large files crashing old devices with limited heap memory.
+    const maxBytes = 5 * 1024 * 1024; // 5 MB
+    if (file.size > maxBytes) {
+      if (mounted) {
+        showAppSnackBar(context, AppLocalizations.of(context)!.imageTooLarge);
+      }
+      return;
+    }
 
     if (!mounted) return;
     context.read<ProjectsCubit>().uploadExtraImage(

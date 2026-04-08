@@ -153,7 +153,12 @@ class _ProjectDetailsView extends StatelessWidget {
   }
 
   void _handleVotingState(BuildContext context, VotingState state) {
-    if (state is OutsideVotingArea) {
+    if (state is VoteCast) {
+      showAppSnackBar(
+        context,
+        AppLocalizations.of(context)!.voteSuccess,
+      );
+    } else if (state is OutsideVotingArea) {
       showAppSnackBar(context, state.message);
     } else if (state is LocationUnavailable) {
       showAppSnackBar(

@@ -1178,6 +1178,18 @@ abstract class AppLocalizations {
   /// **'Vote'**
   String get vote;
 
+  /// No description provided for @voteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your vote has been submitted!'**
+  String get voteSuccess;
+
+  /// No description provided for @imageTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Image is too large. Please choose one under 5 MB.'**
+  String get imageTooLarge;
+
   /// No description provided for @voted.
   ///
   /// In en, this message translates to:

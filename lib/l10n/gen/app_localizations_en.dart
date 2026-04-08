@@ -573,6 +573,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vote => 'Vote';
 
   @override
+  String get voteSuccess => 'Your vote has been submitted!';
+
+  @override
+  String get imageTooLarge =>
+      'Image is too large. Please choose one under 5 MB.';
+
+  @override
   String get voted => 'Voted';
 
   @override
