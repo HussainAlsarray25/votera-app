@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:votera/core/network/api_client.dart';
 import 'package:votera/core/utils/image_content_type.dart';
 import 'package:votera/features/profile/data/datasources/remote/profile_endpoints.dart';
+import 'dart:typed_data';
 
 abstract class ProfileRemoteDataSource {
   Future<Map<String, dynamic>> getUserProfile();
@@ -65,12 +66,15 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       fileName: fileName,
     );
 
+    // Convert to Uint8List for better platform compatibility (especially web).
+    final imageBytes = Uint8List.fromList(bytes);
+
     final response = await apiClient.post<Map<String, dynamic>>(
       ProfileEndpoints.avatar,
-      data: bytes,
+      data: imageBytes,
       options: Options(
         contentType: contentType,
-        headers: {'Content-Length': bytes.length},
+        headers: {'Content-Length': imageBytes.length},
       ),
     );
 

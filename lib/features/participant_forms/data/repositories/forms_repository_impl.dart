@@ -60,31 +60,13 @@ class FormsRepositoryImpl implements FormsRepository {
   }
 
   @override
-  Future<Either<Failure, String>> uploadUidDocument({
-    required String fileName,
-    required List<int> bytes,
-  }) async {
-    if (!await networkInfo.isConnected) {
-      return const Left(NetworkFailure(message: 'No internet connection'));
-    }
-    try {
-      final publicUrl = await remoteDataSource.uploadUidDocument(
-        fileName: fileName,
-        bytes: bytes,
-      );
-      return Right(publicUrl);
-    } on Exception catch (e) {
-      return Left(ServerFailure(message: extractErrorMessage(e)));
-    }
-  }
-
-  @override
   Future<Either<Failure, ParticipantRequest>> submitUidRequest({
     required String fullName,
     required String universityId,
     required String department,
     required String stage,
-    required String documentUrl,
+    required List<int> documentBytes,
+    required String documentFileName,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
@@ -95,7 +77,8 @@ class FormsRepositoryImpl implements FormsRepository {
         universityId: universityId,
         department: department,
         stage: stage,
-        documentUrl: documentUrl,
+        documentBytes: documentBytes,
+        documentFileName: documentFileName,
       );
       final data = response['data'] as Map<String, dynamic>;
       return Right(ParticipantRequestModel.fromJson(data));

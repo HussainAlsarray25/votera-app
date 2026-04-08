@@ -4,7 +4,6 @@ import 'package:votera/core/network/paginated_response.dart';
 import 'package:votera/features/teams/domain/entities/invitation_entity.dart';
 import 'package:votera/features/teams/domain/entities/join_request_entity.dart';
 import 'package:votera/features/teams/domain/entities/team_entity.dart';
-import 'package:votera/features/teams/domain/entities/team_image_upload_url_entity.dart';
 
 /// Contract for all team-related data operations.
 abstract class TeamRepository {
@@ -90,14 +89,7 @@ abstract class TeamRepository {
 
   // -- Team Image --------------------------------------------------------------
 
-  /// Get a presigned S3 upload URL for a team avatar. Leader only.
-  Future<Either<Failure, TeamImageUploadUrlEntity>> getTeamImageUploadUrl({
-    required String teamId,
-    required String fileName,
-  });
-
-  /// Upload a new team avatar. Internally gets a presigned S3 URL then PUTs
-  /// the file bytes directly to S3. Leader only.
+  /// Upload a new team avatar. Leader only.
   /// [bytes] must be provided (use file_picker with withData:true).
   Future<Either<Failure, void>> uploadTeamImage({
     required String teamId,

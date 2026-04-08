@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/usecases/usecase.dart';
 import 'package:votera/features/profile/domain/entities/user_profile.dart';
@@ -119,7 +120,7 @@ class ProfileCubit extends Cubit<ProfileState> {
 
     final result = await uploadAvatarUseCase(
       UploadAvatarParams(
-        filePath: file.path,
+        filePath: kIsWeb ? null : file.path,
         bytes: List<int>.from(file.bytes!),
         fileName: file.name,
       ),

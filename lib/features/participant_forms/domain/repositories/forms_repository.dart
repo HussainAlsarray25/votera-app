@@ -12,19 +12,15 @@ abstract class FormsRepository {
   /// Returns all UID card requests submitted by the current user.
   Future<Either<Failure, List<ParticipantRequest>>> getMyUidRequests();
 
-  /// Uploads a document to MinIO via a presigned URL and returns the public URL.
-  Future<Either<Failure, String>> uploadUidDocument({
-    required String fileName,
-    required List<int> bytes,
-  });
-
-  /// Submits a new UID card participant request for admin review.
+  /// Submits a new UID card participant request with document for admin review.
+  /// The document is uploaded as multipart form data along with the form fields.
   Future<Either<Failure, ParticipantRequest>> submitUidRequest({
     required String fullName,
     required String universityId,
     required String department,
     required String stage,
-    required String documentUrl,
+    required List<int> documentBytes,
+    required String documentFileName,
   });
 
   /// Sends a 6-digit OTP to the provided supervisor email.

@@ -3,6 +3,7 @@ import 'package:votera/core/network/api_client.dart';
 import 'package:votera/features/projects/data/datasources/remote/project_endpoints.dart';
 import 'package:votera/features/projects/data/models/media_upload_response_model.dart';
 import 'package:votera/features/projects/data/models/project_model.dart';
+import 'dart:typed_data';
 
 abstract class ProjectRemoteDataSource {
   /// GET /v1/events/{event_id}/projects?page&size&title&category_id
@@ -281,12 +282,14 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     // Send image bytes as the raw request body. The auth interceptor adds the
     // Bearer token; we override Content-Type to the image MIME type so the
     // server can validate the format before saving.
+    // Convert to Uint8List for better platform compatibility (especially web).
+    final imageBytes = Uint8List.fromList(bytes);
     final response = await apiClient.post<Map<String, dynamic>>(
       ProjectEndpoints.coverImage(eventId, projectId),
-      data: bytes,
+      data: imageBytes,
       options: Options(
         contentType: contentType,
-        headers: {'Content-Length': bytes.length},
+        headers: {'Content-Length': imageBytes.length},
       ),
     );
     return MediaUploadResponseModel.fromJson(response.data!);
@@ -310,12 +313,14 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     required String contentType,
   }) async {
     // Same raw-bytes pattern as cover upload.
+    // Convert to Uint8List for better platform compatibility (especially web).
+    final imageBytes = Uint8List.fromList(bytes);
     final response = await apiClient.post<Map<String, dynamic>>(
       ProjectEndpoints.extraImages(eventId, projectId),
-      data: bytes,
+      data: imageBytes,
       options: Options(
         contentType: contentType,
-        headers: {'Content-Length': bytes.length},
+        headers: {'Content-Length': imageBytes.length},
       ),
     );
     return MediaUploadResponseModel.fromJson(response.data!);

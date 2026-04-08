@@ -6,7 +6,6 @@ import 'package:votera/features/participant_forms/domain/usecases/get_my_uid_req
 import 'package:votera/features/participant_forms/domain/usecases/request_email_otp.dart';
 import 'package:votera/features/participant_forms/domain/usecases/request_supervisor_email_otp.dart';
 import 'package:votera/features/participant_forms/domain/usecases/submit_uid_request.dart';
-import 'package:votera/features/participant_forms/domain/usecases/upload_uid_document.dart';
 import 'package:votera/features/participant_forms/domain/usecases/verify_email_otp.dart';
 import 'package:votera/features/participant_forms/domain/usecases/verify_supervisor_email_otp.dart';
 
@@ -15,7 +14,7 @@ part 'forms_state.dart';
 /// Manages the participant-forms verification flows:
 ///   - Student email OTP: requestEmailOtp → verifyEmailOtp
 ///   - Supervisor email OTP: requestSupervisorEmailOtp → verifySupervisorEmailOtp
-///   - UID card: loadMyUidRequests → uploadDocument → submitUidRequest
+///   - UID card: loadMyUidRequests → submitUidRequest (with document in single step)
 class FormsCubit extends Cubit<FormsState> {
   FormsCubit({
     required this.requestEmailOtp,
@@ -23,7 +22,6 @@ class FormsCubit extends Cubit<FormsState> {
     required this.requestSupervisorEmailOtp,
     required this.verifySupervisorEmailOtp,
     required this.getMyUidRequests,
-    required this.uploadUidDocument,
     required this.submitUidRequest,
   }) : super(FormsInitial());
 
@@ -32,7 +30,6 @@ class FormsCubit extends Cubit<FormsState> {
   final RequestSupervisorEmailOtp requestSupervisorEmailOtp;
   final VerifySupervisorEmailOtp verifySupervisorEmailOtp;
   final GetMyUidRequests getMyUidRequests;
-  final UploadUidDocument uploadUidDocument;
   final SubmitUidRequest submitUidRequest;
 
   Future<void> sendEmailOtp(String email) async {
@@ -86,30 +83,15 @@ class FormsCubit extends Cubit<FormsState> {
     );
   }
 
-  /// Uploads a document to MinIO and emits [FormsDocumentUploaded] with the
-  /// public URL. The cubit stores the URL internally so [submitUid] can use it.
-  Future<void> uploadDocument({
-    required String fileName,
-    required List<int> bytes,
-  }) async {
-    emit(FormsLoading());
-    final result = await uploadUidDocument(
-      UploadUidDocumentParams(fileName: fileName, bytes: bytes),
-    );
-    result.fold(
-      (failure) => emit(FormsError(message: failure.message)),
-      (publicUrl) => emit(
-        FormsDocumentUploaded(publicUrl: publicUrl, fileName: fileName),
-      ),
-    );
-  }
-
+  /// Submits a UID card request with document in a single step.
+  /// The document is uploaded as multipart form data along with the form fields.
   Future<void> submitUid({
     required String fullName,
     required String universityId,
     required String department,
     required String stage,
-    required String documentUrl,
+    required List<int> documentBytes,
+    required String documentFileName,
   }) async {
     emit(FormsLoading());
     final result = await submitUidRequest(
@@ -118,7 +100,8 @@ class FormsCubit extends Cubit<FormsState> {
         universityId: universityId,
         department: department,
         stage: stage,
-        documentUrl: documentUrl,
+        documentBytes: documentBytes,
+        documentFileName: documentFileName,
       ),
     );
     result.fold(
