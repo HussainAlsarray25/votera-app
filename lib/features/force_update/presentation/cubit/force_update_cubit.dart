@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/usecases/usecase.dart';
 import 'package:votera/features/force_update/domain/usecases/check_force_update.dart';
@@ -14,6 +15,13 @@ class ForceUpdateCubit extends Cubit<ForceUpdateState> {
   final CheckForceUpdate checkForceUpdate;
 
   Future<void> check() async {
+    // Web apps are always served at the latest deployed version — there is
+    // no store update flow, so force-update checks are not applicable.
+    if (kIsWeb) {
+      emit(ForceUpdateNotRequired());
+      return;
+    }
+
     emit(ForceUpdateChecking());
     final result = await checkForceUpdate(NoParams());
     result.fold(
