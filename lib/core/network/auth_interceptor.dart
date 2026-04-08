@@ -26,8 +26,21 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    options.headers['Content-Type'] = 'application/json';
-    options.headers['Accept'] = 'application/json';
+    final hasContentType =
+        options.contentType != null ||
+        options.headers.keys.any(
+          (key) => key.toString().toLowerCase() == 'content-type',
+        );
+    if (!hasContentType) {
+      options.headers['Content-Type'] = 'application/json';
+    }
+
+    final hasAcceptHeader = options.headers.keys.any(
+      (key) => key.toString().toLowerCase() == 'accept',
+    );
+    if (!hasAcceptHeader) {
+      options.headers['Accept'] = 'application/json';
+    }
 
     final token = await authTokenProvider.getAccessToken();
     if (token != null) {

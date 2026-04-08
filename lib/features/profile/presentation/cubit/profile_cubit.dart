@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:votera/core/usecases/usecase.dart';
 import 'package:votera/features/profile/domain/entities/user_profile.dart';
@@ -107,15 +108,28 @@ class ProfileCubit extends Cubit<ProfileState> {
       emit(ProfileAvatarUploading(profile: currentProfile));
     }
 
+    if (file.bytes == null || file.bytes!.isEmpty) {
+      emit(
+        ProfileError(
+          message: 'Could not read selected image. Please try again.',
+          profile: currentProfile,
+        ),
+      );
+      return;
+    }
+
     final result = await uploadAvatarUseCase(
       UploadAvatarParams(
-        filePath: file.path,
-        bytes: file.bytes != null ? List<int>.from(file.bytes!) : null,
+        filePath: kIsWeb ? null : file.path,
+        bytes: List<int>.from(file.bytes!),
         fileName: file.name,
       ),
     );
-    result.fold(
-      (failure) => emit(ProfileError(message: failure.message)),
+    // fold returns the value of whichever branch runs. Both branches return
+    // Future<void> so we await the whole expression so loadProfile() is not
+    // fire-and-forget — an unawaited async fold branch throws uncaught errors.
+    await result.fold(
+      (failure) async => emit(ProfileError(message: failure.message)),
       (_) async {
         // Reload profile so the new avatarUrl is reflected.
         await loadProfile();

@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:votera/core/design_system/design_system.dart';
 import 'package:votera/core/di/injection_container.dart';
+import 'package:votera/core/utils/image_content_type.dart';
 import 'package:votera/shared/widgets/app_snack_bar.dart';
 import 'package:votera/features/categories/domain/entities/category_entity.dart';
 import 'package:votera/features/categories/presentation/cubit/categories_cubit.dart';
@@ -2569,14 +2570,7 @@ class _CategoryChip extends StatelessWidget {
 /// Derives an image MIME type from a file name extension.
 /// Falls back to octet-stream for unrecognized extensions.
 String _contentTypeFromFileName(String name) {
-  final ext = name.split('.').last.toLowerCase();
-  return switch (ext) {
-    'jpg' || 'jpeg' => 'image/jpeg',
-    'png' => 'image/png',
-    'gif' => 'image/gif',
-    'webp' => 'image/webp',
-    _ => 'application/octet-stream',
-  };
+  return resolveImageContentType(fileName: name);
 }
 
 /// Displays the cover image and up to six extra images for a draft project,

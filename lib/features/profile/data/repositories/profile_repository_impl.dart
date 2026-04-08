@@ -67,12 +67,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
         bytes: bytes,
         fileName: fileName,
       );
-      // Reload profile so the cached copy gets the new avatarUrl too.
-      final profileResult = await getUserProfile();
-      return profileResult.fold(
-        (_) => Right(url),
-        (_) => Right(url),
-      );
+      return Right(url);
     } on Exception catch (e) {
       return Left(ServerFailure(message: extractErrorMessage(e)));
     }

@@ -26,8 +26,8 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
   final _departmentController = TextEditingController();
   final _stageController = TextEditingController();
 
-  // Stored after a successful document upload.
-  String? _documentUrl;
+  // Stored after a successful document pick (not uploaded yet).
+  List<int>? _documentBytes;
   String? _documentFileName;
 
   @override
@@ -39,22 +39,24 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
     super.dispose();
   }
 
-  Future<void> _pickAndUploadDocument() async {
+  /// Picks a document and stores it locally in state.
+  /// The document is uploaded along with form fields when user submits.
+  Future<void> _pickDocument() async {
     final result = await FilePicker.platform.pickFiles(withData: true);
     if (result == null || result.files.isEmpty) return;
 
     final file = result.files.first;
     if (file.bytes == null) return;
 
-    context.read<FormsCubit>().uploadDocument(
-          fileName: file.name,
-          bytes: file.bytes!,
-        );
+    setState(() {
+      _documentBytes = file.bytes!;
+      _documentFileName = file.name;
+    });
   }
 
   void _handleSubmit() {
     if (_formKey.currentState?.validate() ?? false) {
-      if (_documentUrl == null) {
+      if (_documentBytes == null || _documentFileName == null) {
         showAppSnackBar(context, AppLocalizations.of(context)!.uploadIdDesc);
         return;
       }
@@ -63,7 +65,8 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
             universityId: _universityIdController.text.trim(),
             department: _departmentController.text.trim(),
             stage: _stageController.text.trim(),
-            documentUrl: _documentUrl!,
+            documentBytes: _documentBytes!,
+            documentFileName: _documentFileName!,
           );
     }
   }
@@ -85,12 +88,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
       backgroundColor: context.colors.background,
       body: BlocListener<FormsCubit, FormsState>(
         listener: (context, state) {
-          if (state is FormsDocumentUploaded) {
-            setState(() {
-              _documentUrl = state.publicUrl;
-              _documentFileName = state.fileName;
-            });
-          } else if (state is FormsUidSubmitted) {
+          if (state is FormsUidSubmitted) {
             showAppSnackBar(
               context,
               AppLocalizations.of(context)!.requestPending,
@@ -101,7 +99,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
             // Reset the form.
             _formKey.currentState?.reset();
             setState(() {
-              _documentUrl = null;
+              _documentBytes = null;
               _documentFileName = null;
             });
           } else if (state is FormsError) {
@@ -313,7 +311,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
 
   Widget _buildDocumentField(BuildContext context) {
     return InkWell(
-      onTap: _pickAndUploadDocument,
+      onTap: _pickDocument,
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       child: Container(
         padding: EdgeInsets.symmetric(
@@ -328,10 +326,10 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
         child: Row(
           children: [
             Icon(
-              _documentUrl != null
+              _documentBytes != null
                   ? Icons.check_circle_outline
                   : Icons.upload_file_outlined,
-              color: _documentUrl != null
+              color: _documentBytes != null
                   ? context.colors.success
                   : context.colors.textHint,
             ),
@@ -340,7 +338,7 @@ class _UidSubmissionPageState extends State<UidSubmissionPage> {
               child: Text(
                 _documentFileName ?? AppLocalizations.of(context)!.tapToUploadId,
                 style: AppTypography.bodyMedium.copyWith(
-                  color: _documentUrl != null
+                  color: _documentBytes != null
                       ? context.colors.textPrimary
                       : context.colors.textHint,
                 ),

@@ -7,7 +7,6 @@ import 'package:votera/features/teams/data/datasources/remote/team_remote_data_s
 import 'package:votera/features/teams/domain/entities/invitation_entity.dart';
 import 'package:votera/features/teams/domain/entities/join_request_entity.dart';
 import 'package:votera/features/teams/domain/entities/team_entity.dart';
-import 'package:votera/features/teams/domain/entities/team_image_upload_url_entity.dart';
 import 'package:votera/features/teams/domain/repositories/team_repository.dart';
 
 class TeamRepositoryImpl implements TeamRepository {
@@ -294,30 +293,6 @@ class TeamRepositoryImpl implements TeamRepository {
   // -- Team Image --------------------------------------------------------------
 
   @override
-  Future<Either<Failure, TeamImageUploadUrlEntity>> getTeamImageUploadUrl({
-    required String teamId,
-    required String fileName,
-  }) async {
-    if (!await networkInfo.isConnected) {
-      return const Left(NetworkFailure(message: 'No internet connection'));
-    }
-    try {
-      final urlData = await remote.getTeamImageUploadUrl(
-        teamId: teamId,
-        fileName: fileName,
-      );
-      return Right(
-        TeamImageUploadUrlEntity(
-          uploadUrl: urlData['upload_url']!,
-          publicUrl: urlData['public_url'] ?? '',
-        ),
-      );
-    } on Exception catch (e) {
-      return Left(ServerFailure(message: extractErrorMessage(e)));
-    }
-  }
-
-  @override
   Future<Either<Failure, void>> uploadTeamImage({
     required String teamId,
     required String fileName,
@@ -332,20 +307,11 @@ class TeamRepositoryImpl implements TeamRepository {
       );
     }
     try {
-      // Step 1: get the presigned S3 upload URL from the API.
-      final urlData = await remote.getTeamImageUploadUrl(
+      await remote.uploadTeamImage(
         teamId: teamId,
-        fileName: fileName,
-      );
-      final uploadUrl = urlData['upload_url']!;
-
-      // Step 2: PUT the bytes directly to S3 — no API auth headers required.
-      await remote.uploadFileToUrl(
-        url: uploadUrl,
         bytes: bytes,
         contentType: _contentTypeFromName(fileName),
       );
-
       return const Right(null);
     } on Exception catch (e) {
       return Left(ServerFailure(message: extractErrorMessage(e)));

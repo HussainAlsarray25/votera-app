@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:votera/core/network/api_client.dart';
+import 'package:votera/core/utils/image_content_type.dart';
 import 'package:votera/features/profile/data/datasources/remote/profile_endpoints.dart';
+import 'dart:typed_data';
 
 abstract class ProfileRemoteDataSource {
   Future<Map<String, dynamic>> getUserProfile();
@@ -55,28 +57,38 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     List<int>? bytes,
     String? fileName,
   }) async {
-    final MultipartFile avatarFile;
-    if (filePath != null) {
-      // Mobile / desktop — read directly from the file system path.
-      avatarFile = await MultipartFile.fromFile(filePath, filename: fileName);
-    } else if (bytes != null) {
-      // Web — file path is unavailable, use the in-memory bytes instead.
-      avatarFile = MultipartFile.fromBytes(bytes, filename: fileName ?? 'avatar');
-    } else {
-      throw ArgumentError('Either filePath or bytes must be provided');
+    if (bytes == null || bytes.isEmpty) {
+      throw ArgumentError('Avatar bytes must be provided');
     }
 
-    final formData = FormData.fromMap({'avatar': avatarFile});
+    final contentType = resolveImageContentType(
+      filePath: filePath,
+      fileName: fileName,
+    );
+
+    // Convert to Uint8List for better platform compatibility (especially web).
+    final imageBytes = Uint8List.fromList(bytes);
 
     final response = await apiClient.post<Map<String, dynamic>>(
       ProfileEndpoints.avatar,
-      data: formData,
+      data: imageBytes,
+      options: Options(
+        contentType: contentType,
+        headers: {'Content-Length': imageBytes.length},
+        sendTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 30),
+      ),
     );
 
-    final body = response.data!;
-    // Response: { success: true, data: { "url": "https://..." } }
+    // Throw an Exception (not an Error) so the repository's on-Exception catch
+    // can convert it into a Left(Failure) instead of crashing the whole app.
+    final body = response.data;
+    if (body == null) {
+      throw Exception('Avatar upload returned an empty response');
+    }
+    // Response: { success: true, message: "...", data: { "url": "https://..." } }
     final dataMap = (body['data'] as Map<String, dynamic>?) ?? {};
-    final url = dataMap.values.whereType<String>().firstOrNull ?? '';
+    final url = (dataMap['url'] as String?) ?? '';
     return url;
   }
 }

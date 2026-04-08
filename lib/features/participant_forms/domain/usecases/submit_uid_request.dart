@@ -19,7 +19,8 @@ class SubmitUidRequest
       universityId: params.universityId,
       department: params.department,
       stage: params.stage,
-      documentUrl: params.documentUrl,
+      documentBytes: params.documentBytes,
+      documentFileName: params.documentFileName,
     );
   }
 }
@@ -30,15 +31,24 @@ class SubmitUidRequestParams extends Equatable {
     required this.universityId,
     required this.department,
     required this.stage,
-    required this.documentUrl,
+    required this.documentBytes,
+    required this.documentFileName,
   });
 
   final String fullName;
   final String universityId;
   final String department;
   final String stage;
-  final String documentUrl;
+  final List<int> documentBytes;
+  final String documentFileName;
 
   @override
-  List<Object?> get props => [fullName, universityId, department, stage, documentUrl];
+  List<Object?> get props => [
+    fullName,
+    universityId,
+    department,
+    stage,
+    documentBytes,
+    documentFileName,
+  ];
 }

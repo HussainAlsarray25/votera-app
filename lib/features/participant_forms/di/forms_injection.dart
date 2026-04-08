@@ -8,7 +8,6 @@ import 'package:votera/features/participant_forms/domain/usecases/get_my_uid_req
 import 'package:votera/features/participant_forms/domain/usecases/request_email_otp.dart';
 import 'package:votera/features/participant_forms/domain/usecases/request_supervisor_email_otp.dart';
 import 'package:votera/features/participant_forms/domain/usecases/submit_uid_request.dart';
-import 'package:votera/features/participant_forms/domain/usecases/upload_uid_document.dart';
 import 'package:votera/features/participant_forms/domain/usecases/verify_email_otp.dart';
 import 'package:votera/features/participant_forms/domain/usecases/verify_supervisor_email_otp.dart';
 import 'package:votera/features/participant_forms/presentation/cubit/forms_cubit.dart';
@@ -23,7 +22,6 @@ void initFormsFeature(GetIt sl) {
         requestSupervisorEmailOtp: sl<RequestSupervisorEmailOtp>(),
         verifySupervisorEmailOtp: sl<VerifySupervisorEmailOtp>(),
         getMyUidRequests: sl<GetMyUidRequests>(),
-        uploadUidDocument: sl<UploadUidDocument>(),
         submitUidRequest: sl<SubmitUidRequest>(),
       ),
     )
@@ -42,9 +40,6 @@ void initFormsFeature(GetIt sl) {
     )
     ..registerLazySingleton<GetMyUidRequests>(
       () => GetMyUidRequests(sl<FormsRepository>()),
-    )
-    ..registerLazySingleton<UploadUidDocument>(
-      () => UploadUidDocument(sl<FormsRepository>()),
     )
     ..registerLazySingleton<SubmitUidRequest>(
       () => SubmitUidRequest(sl<FormsRepository>()),
